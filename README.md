@@ -1,0 +1,1 @@
+# Genshin_Scanner
