@@ -99,11 +99,20 @@ namespace GenshinGuide
                 // Scan Level and ascension
                 currentRuntimes = 0;
                 Navigation.SelectCharacterAttributes();
+                // Used to make remove numbers altered by the stars in background
+                List<int> LevelComparison = new List<int>();
                 do
                 {
                     level = ScanLevel(ref ascension);
                     Navigation.SystemRandomWait(Navigation.Speed.Normal);
                     currentRuntimes++;
+                    // check if level exists in Level comparison
+                    if (!LevelComparison.Contains(level))
+                    {
+                        LevelComparison.Add(level);
+                        level = -1;
+                    }
+
                 } while (level == -1 && currentRuntimes < maxRuntimes);
 
                 // Scan Experience
@@ -131,7 +140,7 @@ namespace GenshinGuide
         {
             int xOffset = 83;
             int yOffset = 22;
-            Bitmap bm = new Bitmap(158,23);
+            Bitmap bm = new Bitmap(170,23);
             Graphics g = Graphics.FromImage(bm);
             int screenLocation_X = Navigation.GetPosition().left + xOffset;
             int screenLocation_Y = Navigation.GetPosition().top + yOffset;
@@ -208,10 +217,14 @@ namespace GenshinGuide
                 int y = -1;
                 if(int.TryParse(temp[0],out x) && int.TryParse(temp[1], out y))
                 {
-                    level = Convert.ToInt32(temp[0]);
-                    if(level != y && level > 0 && level <= characterMaxLevel)
+                    // level must be within 1-100
+                    if (x > 0 && x < 101)
                     {
-                        ascension = true;
+                        level = Convert.ToInt32(temp[0]);
+                        if (level != y && level > 0 && level <= characterMaxLevel)
+                        {
+                            ascension = true;
+                        }
                     }
                 }
                 else

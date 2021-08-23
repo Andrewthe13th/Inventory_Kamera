@@ -17,6 +17,7 @@ namespace GenshinGuide
 
             // Get Max weapons from screen
             int weaponCount = ScanWeaponCount();
+            //Debug.Print("Max Weapons: " + weaponCount.ToString());
             //int weaponCount = 29;
             int currentweaponCount = 0;
             int scrollCount = 0;
@@ -27,7 +28,7 @@ namespace GenshinGuide
             Bitmap bm = new Bitmap(130, 130);
             Graphics g = Graphics.FromImage(bm);
             int maxColumns = 7;
-            int maxRows = 4;
+            int maxRows = 3;
             int currentColumn = 0;
 
             // offset used to move mouse to other weapons
@@ -54,6 +55,7 @@ namespace GenshinGuide
                 // Scan weapon
                 Weapon w = ScanWeapon(currentweaponCount);
                 currentweaponCount++;
+                //Debug.Print("Weapon Count: " + currentweaponCount.ToString());
                 currentColumn++;
 
                 // Add weapon to equipped list
@@ -94,6 +96,7 @@ namespace GenshinGuide
                             }
                         }
                     }
+                    Navigation.SystemRandomWait();
                 }
             };
 
@@ -120,6 +123,8 @@ namespace GenshinGuide
                     // Scan weapon
                     Weapon w = ScanWeapon(currentweaponCount);
                     currentweaponCount++;
+                    //Debug.Print("Weapon Count: " + currentweaponCount.ToString());
+                    //Debug.Print("Weapon Name: " + w.GetName());
 
                     // Add to weapon List Object
                     weapons.Add(w);
@@ -152,48 +157,13 @@ namespace GenshinGuide
             // Display Image
             UserInterface.SetImage(bm);
 
-            // Get Rarity (Check color)
-            int rarity = 0;
-            Color rarityColor = bm.GetPixel(12, 10);
-            //textBox.Text = rarityColor.A + " " + rarityColor.R + " " + rarityColor.G + " " + rarityColor.B;
-            Color fiveStar = Color.FromArgb(255, 188, 105, 50);
-            Color fourthStar = Color.FromArgb(255, 161, 86, 224);
-            Color thirdStar = Color.FromArgb(255, 81, 127, 203);
-            Color twoStar = Color.FromArgb(255, 42, 143, 114);
-            Color firstStar = Color.FromArgb(255, 114, 119, 138);
-
-            if (fiveStar == rarityColor)
-            {
-                rarity = 5;
-            }
-            else if (fourthStar == rarityColor)
-            {
-                rarity = 4;
-            }
-            else if (thirdStar == rarityColor)
-            {
-                rarity = 3;
-            }
-            else if (twoStar == rarityColor)
-            {
-                rarity = 2;
-            }
-            else if (firstStar == rarityColor)
-            {
-                rarity = 1;
-            }
-            else
-            { // Not found
-                rarity = 0;
-            }
-
             // All Weapons will be scanned 
             name = ScanWeaponName(screenLocation_X, screenLocation_Y, width, height);
             level = ScanWeaponLevel(screenLocation_X, screenLocation_Y, width, height, ref ascension);
             refinementLevel = ScanWeaponRefinement(screenLocation_X, screenLocation_Y, width, height);
             equippedCharacter = ScanWeaponEquippedCharacter(screenLocation_X, screenLocation_Y, width, height);
 
-            Weapon weapon = new Weapon(rarity,name,level,ascension,refinementLevel,equippedCharacter,id);
+            Weapon weapon = new Weapon(name,level,ascension,refinementLevel,equippedCharacter,id);
 
             return weapon;
         }
@@ -206,6 +176,12 @@ namespace GenshinGuide
             Bitmap bm = new Bitmap(160, 16);
             Graphics g = Graphics.FromImage(bm);
             g.CopyFromScreen(Navigation.GetPosition().left + Convert.ToInt32(weaponCountLocation_X), Navigation.GetPosition().top + Convert.ToInt32(weaponCountLocation_Y), 0, 0, bm.Size);
+
+            Scraper.SetGrayscale(ref bm);
+            Scraper.SetContrast(60.0, ref bm);
+            Scraper.SetInvert(ref bm);
+            bm = Scraper.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
+
             string text = Scraper.AnalyzeText(bm);
 
             UserInterface.Reset();
@@ -243,6 +219,7 @@ namespace GenshinGuide
             UserInterface.AddText(text);
             text = text.Trim();
             text = Regex.Replace(text, @"(?![A-Za-z\s]).", "");
+            //Debug.Print("Weapon Name: " + text);
 
             // Check in Dictionary
             name = Scraper.GetWeaponCode(text);

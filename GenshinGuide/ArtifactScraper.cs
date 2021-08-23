@@ -18,6 +18,7 @@ namespace GenshinGuide
 
             // Get Max artifacts from screen
             int artifactCount = ScanArtifactCount();
+            Debug.Print("Artifact Count: " + artifactCount);
             //int artifactCount = 29;
             int currentArtifactCount = 0;
             int scrollCount = 0;
@@ -141,11 +142,27 @@ namespace GenshinGuide
             Graphics g = Graphics.FromImage(bm);
             g.CopyFromScreen(Navigation.GetPosition().left + Convert.ToInt32(artifactCountLocation_X), Navigation.GetPosition().top + Convert.ToInt32(artifactCountLocation_Y), 0, 0, bm.Size);
             string text = Scraper.AnalyzeText(bm);
+            text = text.Trim();
 
-            //picTarget.Image = bm;
-            //txtOutput.Text = Scraper.AnalyzeText(bm);
+            int count = 0;
+            // Check for dash
+            if (Regex.IsMatch(text, "/")){
+                count = Int32.Parse(text.Split()[1].Split('/')[0]);
+            }
+            else
+            {
+                // divide by the number on the right if both numbers fused
+                count = Int32.Parse(text.Split()[1]) / 1000;
+            }
 
-            return Int32.Parse(text.Split()[1].Split('/')[0]);
+            // Check if larger than 1000
+            while(count > 1000)
+            {
+                count = count / 10;
+            }
+
+
+            return count;
         }
 
         private static Artifact ScanArtifact(int id)
@@ -153,7 +170,7 @@ namespace GenshinGuide
             // Init Variables
             int gearSlot = 0;
             int mainStat = 0;
-            decimal mainStatValue = 0;
+            //decimal mainStatValue = 0;
             int level = 0;
             Artifact.SubStats[] subStats = new Artifact.SubStats[4];
             int subStatsCount = 0;
@@ -184,20 +201,20 @@ namespace GenshinGuide
             Color twoStar = Color.FromArgb(255, 42, 143, 114);
             Color firstStar = Color.FromArgb(255, 114, 119, 138);
 
-            if (fiveStar == rarityColor || fourthStar == rarityColor)
+            if ( CompareColors(fiveStar,rarityColor) || CompareColors(fourthStar, rarityColor))
             {
-                rarity = (fiveStar == rarityColor) ? 5 : 4;
+                rarity = ( CompareColors(fiveStar, rarityColor) ) ? 5 : 4;
 
                 // Improved Scanning using multi threading
                 Thread thr1 = new Thread(() => gearSlot = ScanArtifactGearSlot(screenLocation_X, screenLocation_Y, width, height));
                 Thread thr2 = new Thread(() => mainStat = ScanArtifactMainStat(screenLocation_X, screenLocation_Y, width, height, gearSlot));
-                Thread thr3 = new Thread(() => mainStatValue = ScanArtifactMainStatValue(screenLocation_X, screenLocation_Y, width, height));
+                //Thread thr3 = new Thread(() => mainStatValue = ScanArtifactMainStatValue(screenLocation_X, screenLocation_Y, width, height));
                 Thread thr4 = new Thread(() => level = ScanArtifactLevel(screenLocation_X, screenLocation_Y, width, height));
                 Thread thr5 = new Thread(() => subStats = ScanArtifactSubStats(screenLocation_X, screenLocation_Y, width, height, ref subStatsCount, ref setName));
                 Thread thr6 = new Thread(() => equippedCharacter = ScanArtifactEquippedCharacter(screenLocation_X, screenLocation_Y, width, height));
 
                 thr1.Start();
-                thr3.Start();
+                //thr3.Start();
                 thr4.Start();
                 thr5.Start();
                 thr6.Start();
@@ -205,7 +222,7 @@ namespace GenshinGuide
                 thr1.Join();
                 thr2.Start();
 
-                thr3.Join();
+                //thr3.Join();
                 thr4.Join();
                 thr5.Join();
                 thr6.Join();
@@ -222,15 +239,15 @@ namespace GenshinGuide
 
             }
             // Don't fully scan 3 star artifacts and lower
-            else if (thirdStar == rarityColor)
+            else if (CompareColors(thirdStar, rarityColor))
             {
                 rarity = 3;
             }
-            else if (twoStar == rarityColor)
+            else if (CompareColors(twoStar, rarityColor))
             {
                 rarity = 2;
             }
-            else if (firstStar == rarityColor)
+            else if (CompareColors(firstStar, rarityColor))
             {
                 rarity = 1;
             }
@@ -240,10 +257,25 @@ namespace GenshinGuide
             }
 
 
-            Artifact a =  new Artifact(rarity, gearSlot, mainStat, mainStatValue, level, subStats, subStatsCount, setName, equippedCharacter, id);
+            Artifact a =  new Artifact(rarity, gearSlot, mainStat, level, subStats, subStatsCount, setName, equippedCharacter, id);
             //Artifact a = new Artifact("",0,"",0,0,null,0,"",null);
 
             return a;
+        }
+
+        private static bool CompareColors(Color a, Color b)
+        {
+            int[] diff = new int[3];
+            diff[0] = Math.Abs(a.R - b.R);
+            diff[1] = Math.Abs(a.G - b.G);
+            diff[2] = Math.Abs(a.B - b.B);
+
+            if(diff[0] < 10 && diff[1] < 10 && diff[2] < 10)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private static int ScanArtifactGearSlot(int artifactLocation_X, int artifactLocation_Y, int max_X, int max_Y , PictureBox pictureBox, TextBox textBox)
@@ -580,29 +612,40 @@ namespace GenshinGuide
             // Get Main Stat
             string mainStat = null;
             int yOffset = 100;
-            Bitmap bm = new Bitmap(max_X / 2 + max_X / 28, 20);
-            Graphics g = Graphics.FromImage(bm);
-            g.CopyFromScreen(artifactLocation_X, artifactLocation_Y + yOffset, 0, 0, bm.Size);
-            //Scraper.SetGrayscale(ref bm);
-            Scraper.SetContrast(50.0, ref bm);
-            //Scraper.SetGrayscale(ref bm);
-            Scraper.SetInvert(ref bm);
-            bm = Scraper.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
+            if(gearSlot == 0) // Flower HP
+            {
+                return Scraper.GetMainStatCode("HP_Flat");
+            }
+            else if (gearSlot == 1) // Plume ATK
+            {
+                return Scraper.GetMainStatCode("ATK_Flat");
+            }
+            else // scan time, cup, hat artifacts only
+            { 
+                Bitmap bm = new Bitmap(max_X / 2 + max_X / 28, 20);
+                Graphics g = Graphics.FromImage(bm);
+                g.CopyFromScreen(artifactLocation_X, artifactLocation_Y + yOffset, 0, 0, bm.Size);
+                //Scraper.SetGrayscale(ref bm);
+                Scraper.SetContrast(50.0, ref bm);
+                //Scraper.SetGrayscale(ref bm);
+                Scraper.SetInvert(ref bm);
+                bm = Scraper.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
 
-            mainStat = Scraper.AnalyzeText(bm);
-            mainStat = mainStat.Replace("\n", String.Empty);
-            mainStat.Trim();
+                mainStat = Scraper.AnalyzeText(bm);
+                mainStat = mainStat.Replace("\n", String.Empty);
+                mainStat.Trim();
 
-            // Check if Defense
-            if (mainStat == "DEF")
-                mainStat = "DEF%";
+                //// Check if Defense
+                //if (mainStat == "DEF")
+                //    mainStat = "DEF%";
 
-            // View Picture
-            UserInterface.Reset();
-            UserInterface.SetImage(bm);
-            UserInterface.AddText(mainStat);
+                // View Picture
+                UserInterface.Reset();
+                UserInterface.SetImage(bm);
+                UserInterface.AddText(mainStat);
 
-            return Scraper.GetMainStatCode(mainStat);
+                return Scraper.GetMainStatCode(mainStat);
+            }
         }
 
         private static decimal ScanArtifactMainStatValue(int artifactLocation_X, int artifactLocation_Y, int max_X, int max_Y)
@@ -735,10 +778,10 @@ namespace GenshinGuide
                 text = Scraper.AnalyzeText(bm).Trim();
                 text = text.Replace("\n", String.Empty);
 
-                // View Picture
-                UserInterface.Reset();
-                UserInterface.SetImage(bm);
-                UserInterface.AddText(text);
+                //// View Picture
+                //UserInterface.Reset();
+                //UserInterface.SetImage(bm);
+                //UserInterface.AddText(text);
 
                 // Check if Scanned Set Name
                 if (text.Contains(":") || i >= 4)
@@ -750,6 +793,11 @@ namespace GenshinGuide
                     //Scraper.SetContrast(80.0, ref bm);
                     bm = Scraper.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
                     text = Scraper.AnalyzeText(bm).Trim();
+
+                    // View Picture
+                    UserInterface.Reset();
+                    UserInterface.SetImage(bm);
+                    UserInterface.AddText(text);
 
                     if (text.Contains(':'))
                     {
@@ -769,8 +817,10 @@ namespace GenshinGuide
                 {
                     if (text.Contains("+"))
                     {
+                        text = Regex.Replace(text, @"(?![A-Za-z0-9+%\s/.]).", "");
                         string[] subStat = text.Split('+');
-                        subStat[1].Replace("\n", String.Empty);
+                        // get rid of 1 and I issues
+                        subStat[1] = subStat[1].Replace('I', '1');
 
                         // Percentage Based
                         if (subStat[1].Contains('%'))
@@ -788,6 +838,13 @@ namespace GenshinGuide
                             UserInterface.AddText(subStat[0] + " " + subStat[1]);
 
                             subStats[i].stat = Scraper.GetSubStatCode(subStat[0] + optional);
+
+                            // Check if subStat has space (when value is not detected with a deciminal)
+                            if (subStat[1].Contains(' ') && !subStat[1].Contains('.'))
+                            {
+                                subStat[1] = subStat[1].Replace(' ', '.');
+                            }
+
                             subStats[i].value = Convert.ToDecimal(subStat[1].Split('%')[0]);
                         }
                         else // flat stats

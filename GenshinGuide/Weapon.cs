@@ -9,7 +9,6 @@ namespace GenshinGuide
 {
     public class Weapon
     {
-        [JsonProperty] private int rarity;
         [JsonProperty] private int name;
         [JsonProperty] private int level;
         [JsonProperty] private bool ascension;
@@ -17,9 +16,8 @@ namespace GenshinGuide
         [JsonProperty] private int equippedCharacter;
         [JsonProperty] private int id;
 
-        public Weapon(int _rarity, int _name, int _level,bool _ascension, int _refinementLevel, int _equippedCharacter = 0, int _id = 0)
+        public Weapon(int _name, int _level,bool _ascension, int _refinementLevel, int _equippedCharacter = 0, int _id = 0)
         {
-            rarity = _rarity;
             name = _name;
             level = _level;
             ascension = _ascension;
@@ -31,6 +29,11 @@ namespace GenshinGuide
         public int GetEquippedCharacter()
         {
             return equippedCharacter;
+        }
+
+        public int GetName()
+        {
+            return name;
         }
 
 

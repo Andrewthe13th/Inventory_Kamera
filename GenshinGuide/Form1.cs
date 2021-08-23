@@ -67,7 +67,6 @@ namespace GenshinGuide
 
             th.Join();
 
-            int temp = 0;
             //// Get Screen Location and Size
             //Navigation.Initialize("GenshinImpact");
 
@@ -80,6 +79,9 @@ namespace GenshinGuide
 
             //// Make File
             //Scraper.CreateJsonFile(data);
+
+            //End Program
+            System.Windows.Forms.Application.Exit();
 
         }
 

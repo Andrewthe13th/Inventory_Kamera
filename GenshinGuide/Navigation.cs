@@ -61,7 +61,7 @@ namespace GenshinGuide
 
         public static void SelectArtifactInventory()
         {
-            Double artifactButtonLocation_X = (Double)area.right * ((Double)60 / (Double)160);
+            Double artifactButtonLocation_X = (Double)area.right * ((Double)57 / (Double)160);
             Double artifactButtonLocation_Y = (Double)area.bottom * ((Double)5 / (Double)90);
             SetCursorPos(position.left + Convert.ToInt32(artifactButtonLocation_X), position.top + Convert.ToInt32(artifactButtonLocation_Y));
             sim.Mouse.LeftButtonClick();
