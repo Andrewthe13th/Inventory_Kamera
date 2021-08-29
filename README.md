@@ -1,10 +1,10 @@
 # Genshin Scanner
 
-An OCR Scanner that scans your characters, weapons and artifacts in Genshin Impact. This produces a JSON file that can be easily formated to work with most genshin websites~
+An OCR Scanner that scans your characters, weapons and artifacts in Genshin Impact. This produces a JSON file that can be easily formated to work with most genshin websites.
 Currently it only supports ENGLISH words. 
 
 ## How to use
-1. [Download the program](https://github.com/Andrewthe13th/Genshin_Scanner/releases/download/v1.0/GenshinGuide.zip), unzip and then run.
+1. [Download the program](https://github.com/Andrewthe13th/Genshin_Scanner/releases/download/v0.1/GenshinGuide.zip), unzip and then run.
 2. Open Genshin Impact and Log In. 
 3. In Genshin Impact, go to Settings
 4. Under Graphics, set Display Mode to 1280x720 Windowed
@@ -17,7 +17,8 @@ Currently it only supports ENGLISH words.
 2. This scanner does no provide artificial in-game progress.
 3. This scanner does nothing to provide account selling/exchanging.
 4. Doesn't provide top up in primo gems. 
-Also this scanner has random length pauses which makes sure it doesn't scan too fast to prevent false positives. My account has been used to test this script and has yet to be banned or warned of the use of scripts. 
+Also this scanner has random length pauses which makes sure it doesn't scan too fast to prevent false positives.
+My account has been used to test this script and has yet to be banned or warned of the use of scripts. 
 
 # JSON Format
 ```
