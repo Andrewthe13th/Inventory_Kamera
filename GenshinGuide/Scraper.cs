@@ -451,31 +451,25 @@ namespace GenshinGuide
             string fileName = "\\genshinData_" + DateTime.Today.ToString("d") + ".json";
             fileName = fileName.Replace('/', '_');
             string filePath = path + fileName;
-            Debug.Print(filePath);
 
-            using (var tw = new StreamWriter(filePath, true))
+            // Override previous file if exists
+            if (File.Exists(filePath))
             {
-                tw.WriteLine(JSONresult.ToString());
-                tw.Close();
+                File.Delete(filePath);
+                using (var tw = new StreamWriter(filePath, true))
+                {
+                    tw.WriteLine(JSONresult.ToString());
+                    tw.Close();
+                }
             }
-
-            //if (File.Exists(path))
-            //{
-            //    File.Delete(path);
-            //    using (var tw = new StreamWriter(path, true))
-            //    {
-            //        tw.WriteLine(JSONresult.ToString());
-            //        tw.Close();
-            //    }
-            //}
-            //else if (!File.Exists(path))
-            //{
-            //    using (var tw = new StreamWriter(path, true))
-            //    {
-            //        tw.WriteLine(JSONresult.ToString());
-            //        tw.Close();
-            //    }
-            //}
+            else if (!File.Exists(filePath))
+            {
+                using (var tw = new StreamWriter(filePath, true))
+                {
+                    tw.WriteLine(JSONresult.ToString());
+                    tw.Close();
+                }
+            }
         }
 
         /// <summary> Take a screenshot to be used later with tesseract </summary>
