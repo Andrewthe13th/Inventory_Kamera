@@ -19,13 +19,13 @@ Currently it only supports ENGLISH words.
 4. Doesn't provide top up in primo gems. 
 Also this scanner has random length pauses which makes sure it doesn't scan too fast to prevent false positives. My account has been used to test this script and has yet to be banned or warned of the use of scripts. 
 
-### JSON Format
+# JSON Format
 ```
 characters: [{},{},{}...] //contains all characters with equipped weapon and artifacts
 inventory: {[],[]} //All weapons and artifacts
 ```
 
-# Character Object
+## Character Object
 ```
 name: digit // use CharacterList to get name  (ex: CharacterList[name])
 element: digit // use ElementNameList
@@ -48,7 +48,7 @@ talents: [
 ]
 ```
 
-# Weapon Object
+## Weapon Object
 ```
 name: digit // use example list to get name
 level: digit
@@ -58,7 +58,7 @@ equippedCharacter: digit // use CharacterList
 id: digit // order of weapon scanned
 ```
 
-# Artifact Object
+## Artifact Object
 ```
 gearSlot: digit // 0-4 (flower,feather,sands,goblet,circlet) use ArtifactSlotList
 rarity: digit // 5-1 stars
@@ -71,10 +71,10 @@ equippedCharacter: digit // use CharacterList
 id: digit // order of artifact scanned
 ```
 
-### Decoder List
-// Example for decoding JSON to english. To support other languages replace words with the corresponding language
-// example if name == 1: CharacterList[characters[0].name] = "Traveler"
-
+## Decoder List
+This list bellow are used for decoding the JSON to english. To support other languages replace words with the corresponding language.
+ex: (if name == 1) => CharacterList[characters[0].name] is "Traveler"
+```
 const CharacterList=[
     null,//0
     "Traveler",
@@ -337,7 +337,7 @@ const ElementNameList = [
     'Cryo',
     'Geo',
 ]
-
+```
 # License
 * This project is under the [MIT](LICENSE.md) license.
 * All rights reserved by © miHoYo Co., Ltd. This project is not affiliated nor endorsed by miHoYo. Genshin Impact™ and other properties belong to their respective owners.
