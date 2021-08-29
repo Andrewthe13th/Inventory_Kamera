@@ -19,6 +19,7 @@ namespace GenshinGuide
             InitializeComponent();
             ghk = new KeyHandler(Keys.Enter, this);
             ghk.Register();
+            comboBox1.SelectedItem = "ENG";
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -47,6 +48,9 @@ namespace GenshinGuide
                 // Make Json File
                 Scraper.CreateJsonFile(data);
 
+                // Open GenshinDataFolder
+                Process.Start("explorer.exe", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\GenshinData");
+
                 // End Thread and finish
                 threadCompletion = true;
             });
@@ -62,6 +66,7 @@ namespace GenshinGuide
                 {
                     th.Abort();
                     Navigation.Reset();
+                    GenshinData data = new GenshinData();
                 }
             }
 
@@ -117,6 +122,31 @@ namespace GenshinGuide
             if (m.Msg == Constants.WM_HOTKEY_MSG_ID)
                 HandleHotkey();
             base.WndProc(ref m);
+        }
+
+        private void checkedListBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label1_Click_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label8_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 

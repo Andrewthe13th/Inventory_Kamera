@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("GenshinGuide")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("A OCR scanner for Genshin Impact")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Andrew De La Fuente")]
 [assembly: AssemblyProduct("GenshinGuide")]
 [assembly: AssemblyCopyright("Copyright ©  2021")]
 [assembly: AssemblyTrademark("")]

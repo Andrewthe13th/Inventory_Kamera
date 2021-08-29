@@ -146,6 +146,11 @@ namespace GenshinGuide
             ["Kamisato"] = characterCount, //35
             ["Yoimiya"] = ++characterCount,
             ["Sayu"] = ++characterCount,
+            ["Raiden Shogun"] = ++characterCount,
+            ["Kujou Sara"] = ++characterCount,
+            ["Aloy"] = ++characterCount, // 40
+            ["Sangonomiya Kokomi"] = ++characterCount,
+            ["Sangonomiya "] = characterCount,
         };
         private static Dictionary<string, int> elementalCode = new Dictionary<string, int>
         {
@@ -271,7 +276,7 @@ namespace GenshinGuide
             ["Mitternachts Waltz"] = ++weaponCount, // 105
             ["Freedom-Sworn"] = ++weaponCount,
             ["Dodoco Tales"] = ++weaponCount,
-            // Inazuma Patch
+            // 2.0 Inazuma Patch
             ["Amenoma Kageuchi"] = ++weaponCount,
             ["Katsuragikiri Nagamasa"] = ++weaponCount,
             ["Kitain Cross Spear"] = ++weaponCount, // 110
@@ -279,11 +284,12 @@ namespace GenshinGuide
             ["Hakushin Ring"] = ++weaponCount,
             ["Mistsplitter Reforged"] = ++weaponCount,
             ["Thundering Pulse"] = ++weaponCount,
-            //["Dull Blade"] = ++weaponCount,
-            //["Dull Blade"] = ++weaponCount,
-            //["Dull Blade"] = ++weaponCount,
-            //["Dull Blade"] = ++weaponCount,
-            //["Dull Blade"] = ++weaponCount,
+            // 2.1
+            ["Predator"] = ++weaponCount, // 115
+            ["Luxurious SeaLord"] = ++weaponCount,
+            ["The Catch"] = ++weaponCount,
+            ["Engulfing Lightning"] = ++weaponCount,
+            ["Everlasting Moonglow"] = ++weaponCount,
 
         };
 
@@ -292,7 +298,10 @@ namespace GenshinGuide
 
         public static void AddTravelerToCharacterList(string traveler)
         {
-            characterCode.Add(traveler, 1);
+            if (!characterCode.ContainsKey(traveler))
+            {
+                characterCode.Add(traveler, 1);
+            }
         }
 
         /// <summary> Use Tesseract OCR to find words on picture to string </summary>
@@ -429,25 +438,44 @@ namespace GenshinGuide
         {
             // write to JSON file
             string JSONresult = JsonConvert.SerializeObject(data);
-            string path = @"C:\Users\delaf\Downloads\genshinImpact_Data.json";
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            path += "\\GenshinData";
+            //string path = @"C:\Users\delaf\Downloads\genshinImpact_Data.json";
 
-            if (File.Exists(path))
+            if (!Directory.Exists(path))
             {
-                File.Delete(path);
-                using (var tw = new StreamWriter(path, true))
-                {
-                    tw.WriteLine(JSONresult.ToString());
-                    tw.Close();
-                }
+                // Make Directory
+                Directory.CreateDirectory(path);
             }
-            else if (!File.Exists(path))
+            // Create file with timestamp in name
+            string fileName = "\\genshinData_" + DateTime.Today.ToString("d") + ".json";
+            fileName = fileName.Replace('/', '_');
+            string filePath = path + fileName;
+            Debug.Print(filePath);
+
+            using (var tw = new StreamWriter(filePath, true))
             {
-                using (var tw = new StreamWriter(path, true))
-                {
-                    tw.WriteLine(JSONresult.ToString());
-                    tw.Close();
-                }
+                tw.WriteLine(JSONresult.ToString());
+                tw.Close();
             }
+
+            //if (File.Exists(path))
+            //{
+            //    File.Delete(path);
+            //    using (var tw = new StreamWriter(path, true))
+            //    {
+            //        tw.WriteLine(JSONresult.ToString());
+            //        tw.Close();
+            //    }
+            //}
+            //else if (!File.Exists(path))
+            //{
+            //    using (var tw = new StreamWriter(path, true))
+            //    {
+            //        tw.WriteLine(JSONresult.ToString());
+            //        tw.Close();
+            //    }
+            //}
         }
 
         /// <summary> Take a screenshot to be used later with tesseract </summary>
