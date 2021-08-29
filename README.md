@@ -10,6 +10,8 @@ Currently it only supports ENGLISH words.
 4. Under Graphics, set Display Mode to 1280x720 Windowed
 5. Under Controls, set Control Type to Keyboard
 6. Exit Settings and leave the game in the Paimon Menu
+7. Go back to the scanner application, then click SCAN. (You can stop the scan anytime by pressing the 'ENTER' key)
+Note: You will not be able to use your computer while the scan is taking place due to require the use of mouse and keyboard inputs.
 
 ### Can this get me banned?
  According to [miHoYo's response](https://genshin.mihoyo.com/en/news/detail/5763), I would say no. 
