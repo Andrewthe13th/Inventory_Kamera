@@ -31,9 +31,9 @@ namespace GenshinGuide
             AssignTravelerName();
 
             // Get characters
-            Navigation.CharacterScreen();
-            characters = CharacterScraper.ScanCharacters();
-            Navigation.MainMenuScreen();
+            //Navigation.CharacterScreen();
+            //characters = CharacterScraper.ScanCharacters();
+            //Navigation.MainMenuScreen();
 
             // Get Weapons
             Navigation.InventoryScreen();
@@ -42,14 +42,14 @@ namespace GenshinGuide
             Navigation.MainMenuScreen();
 
             // Get Artifacts
-            Navigation.InventoryScreen();
-            Navigation.SelectArtifactInventory();
-            inventory.GetArtifacts(ref equippedArtifacts);
-            Navigation.MainMenuScreen();
+            //Navigation.InventoryScreen();
+            //Navigation.SelectArtifactInventory();
+            //inventory.GetArtifacts(ref equippedArtifacts);
+            //Navigation.MainMenuScreen();
 
             // Assign Artifacts to Characters
-            AssignArtifacts();
-            AssignWeapons();
+            //AssignArtifacts();
+            //AssignWeapons();
         }
 
         public void AssignArtifacts()

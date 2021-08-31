@@ -83,7 +83,7 @@ namespace GenshinGuide
             int yOffset = 100;
             Navigation.SetCursorPos(Navigation.GetPosition().left + xOffset, Navigation.GetPosition().top + yOffset);
             Navigation.sim.Mouse.LeftButtonClick();
-            Navigation.SystemRandomWait(Speed.UI);
+            Navigation.SystemRandomWait(Speed.Normal);
         }
 
         public static void SelectCharacterConstellation()
@@ -92,7 +92,7 @@ namespace GenshinGuide
             int yOffset = 235;
             Navigation.SetCursorPos(Navigation.GetPosition().left + xOffset, Navigation.GetPosition().top + yOffset);
             Navigation.sim.Mouse.LeftButtonClick();
-            Navigation.SystemRandomWait(Speed.Normal);
+            Navigation.SystemRandomWait(Speed.Fast);
         }
 
         public static void SelectCharacterTalents()
@@ -101,7 +101,7 @@ namespace GenshinGuide
             int yOffset = 290;
             Navigation.SetCursorPos(Navigation.GetPosition().left + xOffset, Navigation.GetPosition().top + yOffset);
             Navigation.sim.Mouse.LeftButtonClick();
-            Navigation.SystemRandomWait(Speed.Normal);
+            Navigation.SystemRandomWait(Speed.Fast);
         }
 
         public static void SelectNextCharacter()
@@ -110,31 +110,31 @@ namespace GenshinGuide
             int yOffset = 350;
             Navigation.SetCursorPos(Navigation.GetPosition().left + xOffset, Navigation.GetPosition().top + yOffset);
             Navigation.sim.Mouse.LeftButtonClick();
-            Navigation.SystemRandomWait(Speed.UI);
+            Navigation.SystemRandomWait();
         }
 
         public static void CharacterScreen()
         {
             Navigation.sim.Keyboard.KeyPress(WindowsInput.Native.VirtualKeyCode.ESCAPE);
-            Navigation.SystemRandomWait(Speed.Slow);
+            Navigation.SystemRandomWait(Speed.UI);
             Navigation.sim.Keyboard.KeyPress(WindowsInput.Native.VirtualKeyCode.VK_C);
-            Navigation.SystemRandomWait(Speed.Slow);
+            Navigation.SystemRandomWait(Speed.UI);
         }
 
         public static void InventoryScreen()
         {
             Navigation.sim.Keyboard.KeyPress(WindowsInput.Native.VirtualKeyCode.ESCAPE);
-            Navigation.SystemRandomWait(Speed.Slow);
+            Navigation.SystemRandomWait(Speed.UI);
             Navigation.sim.Keyboard.KeyPress(WindowsInput.Native.VirtualKeyCode.VK_B);
-            Navigation.SystemRandomWait(Speed.Slow);
+            Navigation.SystemRandomWait(Speed.UI);
         }
 
         public static void MainMenuScreen()
         {
             Navigation.sim.Keyboard.KeyPress(WindowsInput.Native.VirtualKeyCode.ESCAPE);
-            Navigation.SystemRandomWait(Speed.Slow);
+            Navigation.SystemRandomWait(Speed.UI);
             Navigation.sim.Keyboard.KeyPress(WindowsInput.Native.VirtualKeyCode.ESCAPE);
-            Navigation.SystemRandomWait(Speed.Slow);
+            Navigation.SystemRandomWait(Speed.UI);
         }
 
         #region Window size of Genshin Impact
@@ -209,9 +209,14 @@ namespace GenshinGuide
                 System.Threading.Thread.Sleep(value);
 
             }
+            else if (type == Speed.Instant)
+            {
+                int value = r.Next(20, 35);
+                System.Threading.Thread.Sleep(value);
+            }
             else if (type == Speed.Fast)
             {
-                int value = r.Next(15, 30);
+                int value = r.Next(125, 150);
                 System.Threading.Thread.Sleep(value);
             }
             else if (type == Speed.Slow)
@@ -230,6 +235,7 @@ namespace GenshinGuide
         {
             Slow,
             Normal,
+            Instant,
             Fast,
             UI
         }

@@ -19,16 +19,16 @@ namespace GenshinGuide
 
         public static string ScanMainCharacterName()
         {
-            int xOffset = 175;
+            int xOffset = 185;
             int yOffset = 26;
-            Bitmap bm = new Bitmap(240, 30);
+            Bitmap bm = new Bitmap(155, 30);
             Graphics g = Graphics.FromImage(bm);
             int screenLocation_X = Navigation.GetPosition().left + xOffset;
             int screenLocation_Y = Navigation.GetPosition().top + yOffset;
             g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
 
             //Image Operations
-            bm = Scraper.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
+            bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
             Scraper.SetGrayscale(ref bm);
             Scraper.SetInvert(ref bm);
             Scraper.SetContrast(20.0, ref bm);
@@ -61,7 +61,7 @@ namespace GenshinGuide
             {
                 characters.Add(character);
                 Navigation.SelectNextCharacter();
-                Navigation.SystemRandomWait();
+                Navigation.SystemRandomWait(Navigation.Speed.Fast);
             }
 
 
@@ -84,7 +84,7 @@ namespace GenshinGuide
             do
             {
                 ScanNameAndElement(ref name, ref element);
-                Navigation.SystemRandomWait(Navigation.Speed.Normal);
+                Navigation.SystemRandomWait(Navigation.Speed.Fast);
                 currentRuntimes++;
             } while ( (name <= 0 || element == -1) && (currentRuntimes < maxRuntimes) );
             
@@ -104,7 +104,7 @@ namespace GenshinGuide
                 do
                 {
                     level = ScanLevel(ref ascension);
-                    Navigation.SystemRandomWait(Navigation.Speed.Normal);
+                    Navigation.SystemRandomWait(Navigation.Speed.Fast);
                     currentRuntimes++;
                     // check if level exists in Level comparison
                     if (!LevelComparison.Contains(level))
@@ -140,21 +140,22 @@ namespace GenshinGuide
         {
             int xOffset = 83;
             int yOffset = 22;
-            Bitmap bm = new Bitmap(170,23);
+            Bitmap bm = new Bitmap(175,23);
             Graphics g = Graphics.FromImage(bm);
             int screenLocation_X = Navigation.GetPosition().left + xOffset;
             int screenLocation_Y = Navigation.GetPosition().top + yOffset;
             g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
 
             //Image Operations
-            bm = Scraper.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
+            bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
             Scraper.SetGrayscale(ref bm);
             Scraper.SetInvert(ref bm);
-            Scraper.SetContrast(20.0, ref bm);
+            Scraper.SetContrast(100.0, ref bm);
 
             UserInterface.Reset();
             UserInterface.SetImage(bm);
 
+            //string text = Scraper.AnalyzeElementAndCharName(bm);
             string text = Scraper.AnalyzeText(bm);
             text = text.Trim();
 
@@ -163,6 +164,7 @@ namespace GenshinGuide
                 text = Regex.Replace(text, @"[\/!@#$%^&*()\[\]\-_`~\\+={};:',.<>?‘]", "");
                 //text = Regex.Replace(text, @"(?![\0-9\s]).", "");
                 text = Regex.Replace(text, @"[\s]{2,}", " ");
+
                 string[] x = text.Split(new[] {' '}, 2);
 
                 if (x.Length != 2)
@@ -186,19 +188,19 @@ namespace GenshinGuide
         {
             int level = -1;
 
-            int xOffset = 1032;
+            int xOffset = 1035;
             int yOffset = 138;
-            Bitmap bm = new Bitmap(90, 24);
+            Bitmap bm = new Bitmap(80, 24);
             Graphics g = Graphics.FromImage(bm);
             int screenLocation_X = Navigation.GetPosition().left + xOffset;
             int screenLocation_Y = Navigation.GetPosition().top + yOffset;
             g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
 
             //Image Operations
-            bm = Scraper.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
+            bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
             Scraper.SetGrayscale(ref bm);
             Scraper.SetInvert(ref bm);
-            Scraper.SetContrast(20.0, ref bm);
+            Scraper.SetContrast(30.0, ref bm);
 
             UserInterface.Reset();
             UserInterface.SetImage(bm);
@@ -209,34 +211,55 @@ namespace GenshinGuide
             text = Regex.Replace(text, @"/", " ");
 
             UserInterface.AddText(text);
+            string[] temp = { text };
 
             if (Regex.IsMatch(text, " "))
             {
-                string[] temp = text.Split(' ');
-                int x = -1;
-                int y = -1;
-                if(int.TryParse(temp[0],out x) && int.TryParse(temp[1], out y))
+                temp = text.Split(' ');
+            }
+            else if(temp.Length == 1)
+            {
+                int numR = (int)((temp[0].Length/2) + 1);
+                string[] temp1 = new string[2];
+                temp1[0] = temp[0].Substring(0, numR - 1);
+                temp1[1] = temp[0].Substring(temp1.Length + 1, numR - 1);
+                temp = temp1;
+            }
+            
+            if(temp.Length == 3)
+            {
+                string[] temp1 = new string[2];
+                temp1[0] = temp[0];
+                temp1[1] = temp[2];
+                temp = temp1;
+            }
+            int x = -1;
+            int y = -1;
+            if(int.TryParse(temp[0],out x) && int.TryParse(temp[1], out y))
+            {
+                // level must be within 1-100
+                if (x > 0 && x < 101)
                 {
-                    // level must be within 1-100
-                    if (x > 0 && x < 101)
+                    level = Convert.ToInt32(temp[0]);
+                    if (level != y && level > 0 && level <= characterMaxLevel)
                     {
-                        level = Convert.ToInt32(temp[0]);
-                        if (level != y && level > 0 && level <= characterMaxLevel)
-                        {
-                            ascension = true;
-                        }
+                        ascension = true;
                     }
-                }
-                else
-                {
-                    Debug.Print("Error: Found " + temp[0] + " and " + temp[1] + " instead of level");
-                    //System.Environment.Exit(1);
                 }
             }
             else
             {
-                Debug.Print("Error: Found " + level + " instead of level");
-                //System.Environment.Exit(1);
+                if(temp.Length > 1)
+                {
+                    Debug.Print("Error: Found " + temp[0] + " and " + temp[1] + " instead of level");
+                    //System.Environment.Exit(1);
+                }
+                else
+                {
+                    Debug.Print("Error: Found " + temp[0] + " instead of level");
+                    //System.Environment.Exit(1);
+                }
+
             }
 
             return level;
@@ -301,7 +324,7 @@ namespace GenshinGuide
                 // Select Constellation
                 Navigation.SetCursorPos(Navigation.GetPosition().left + 1130, Navigation.GetPosition().top + 180 + (i * 75));
                 Navigation.sim.Mouse.LeftButtonClick();
-                Navigation.SystemRandomWait();
+                Navigation.SystemRandomWait(Navigation.Speed.Fast);
 
                 // Grab Color
                 g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
@@ -362,10 +385,18 @@ namespace GenshinGuide
 
                 Navigation.SetCursorPos(Navigation.GetPosition().left + 1130, Navigation.GetPosition().top + 110 + (i * 60));
                 Navigation.sim.Mouse.LeftButtonClick();
-                Navigation.SystemRandomWait(Navigation.Speed.UI);
+                if(i == 0)
+                {
+                    Navigation.SystemRandomWait(Navigation.Speed.Normal);
+                }
+                else
+                {
+                    Navigation.SystemRandomWait(Navigation.Speed.Instant);
+                }
+
                 g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
 
-                bm = Scraper.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
+                bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
                 Scraper.SetGrayscale(ref bm);
                 Scraper.SetInvert(ref bm);
                 Scraper.SetContrast(60.0, ref bm);
@@ -401,10 +432,10 @@ namespace GenshinGuide
                         Debug.Print("Error: " + x + " is not a valid Talent Number");
                         // Try Again
                         i--;
-                        //System.Environment.Exit(1);
+                        System.Environment.Exit(1);
                     }
-                    //Debug.Print("Error: " + x + " is not a valid Talent Number");
-                    //System.Environment.Exit(1);
+                    Debug.Print("Error: " + x + " is not a valid Talent Number");
+                    System.Environment.Exit(1);
                 }
             }
 

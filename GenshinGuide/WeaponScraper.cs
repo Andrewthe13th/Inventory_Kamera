@@ -50,7 +50,7 @@ namespace GenshinGuide
                 // Select weapon
                 Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(weaponLocation_X) + (xOffset * (currentweaponCount % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(weaponLocation_Y));
                 Navigation.sim.Mouse.LeftButtonClick();
-                Navigation.SystemRandomWait();
+                //Navigation.SystemRandomWait(Navigation.Speed.Instant);
 
                 // Scan weapon
                 Weapon w = ScanWeapon(currentweaponCount);
@@ -96,7 +96,7 @@ namespace GenshinGuide
                             }
                         }
                     }
-                    Navigation.SystemRandomWait();
+                    //Navigation.SystemRandomWait();
                 }
             };
 
@@ -118,7 +118,7 @@ namespace GenshinGuide
                     }
                     Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(weaponLocation_X) + (xOffset * (k % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(weaponLocation_Y) + (yOffset * (i % (maxRows + 1))));
                     Navigation.sim.Mouse.LeftButtonClick();
-                    Navigation.SystemRandomWait();
+                    //Navigation.SystemRandomWait(Navigation.Speed.Instant);
 
                     // Scan weapon
                     Weapon w = ScanWeapon(currentweaponCount);
@@ -139,9 +139,9 @@ namespace GenshinGuide
         {
             // Init Variables
             int name = 0;
-            int level = 0;
+            int level = 1;
             bool ascension = false;
-            int refinementLevel = 0;
+            int refinementLevel = 1;
             int equippedCharacter = 0;
 
             // Grab Image of Entire weapon on Right
@@ -157,11 +157,18 @@ namespace GenshinGuide
             // Display Image
             UserInterface.SetImage(bm);
 
+            //string text = Scraper.AnalyzeWeaponImage(bm);
+
+
             // All Weapons will be scanned 
             name = ScanWeaponName(screenLocation_X, screenLocation_Y, width, height);
-            level = ScanWeaponLevel(screenLocation_X, screenLocation_Y, width, height, ref ascension);
-            refinementLevel = ScanWeaponRefinement(screenLocation_X, screenLocation_Y, width, height);
-            equippedCharacter = ScanWeaponEquippedCharacter(screenLocation_X, screenLocation_Y, width, height);
+            // Skip weapons lower than 3 stars
+            if(name >= 10)
+            {
+                level = ScanWeaponLevel(screenLocation_X, screenLocation_Y, width, height, ref ascension);
+                refinementLevel = ScanWeaponRefinement(screenLocation_X, screenLocation_Y, width, height);
+                equippedCharacter = ScanWeaponEquippedCharacter(screenLocation_X, screenLocation_Y, width, height);
+            }
 
             Weapon weapon = new Weapon(name,level,ascension,refinementLevel,equippedCharacter,id);
 
@@ -180,13 +187,13 @@ namespace GenshinGuide
             Scraper.SetGrayscale(ref bm);
             Scraper.SetContrast(60.0, ref bm);
             Scraper.SetInvert(ref bm);
-            bm = Scraper.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
+            bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
 
             string text = Scraper.AnalyzeText(bm);
 
-            UserInterface.Reset();
-            UserInterface.SetImage(bm);
-            UserInterface.AddText(text);
+            //UserInterface.Reset();
+            //UserInterface.SetImage(bm);
+            //UserInterface.AddText(text);
 
             return Int32.Parse(text.Split()[1].Split('/')[0]);
         }
@@ -205,11 +212,12 @@ namespace GenshinGuide
             g = Graphics.FromImage(bm);
             g.CopyFromScreen(weaponLocation_X + xOffset, weaponLocation_Y + yOffset, 0, 0, bm.Size);
             Scraper.SetGrayscale(ref bm);
-            Scraper.SetContrast(60.0, ref bm);
+            Scraper.SetContrast(20.0, ref bm);
             Scraper.SetInvert(ref bm);
-            bm = Scraper.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
+            bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
 
             // Analyze
+            //string text = Scraper.AnalyzeText(bm);
             string text = Scraper.AnalyzeText(bm);
             text = text.Trim();
 
@@ -236,10 +244,11 @@ namespace GenshinGuide
             Graphics g = Graphics.FromImage(bm);
             g.CopyFromScreen(weaponLocation_X + xOffset, weaponLocation_Y + yOffset, 0, 0, bm.Size);
             //g.DrawRectangle(new Pen(bm.GetPixel(1, 20), 22), new Rectangle(0, 0, bm.Width, bm.Height));
+            bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
             Scraper.SetGrayscale(ref bm);
-            Scraper.SetContrast(60.0, ref bm);
             Scraper.SetInvert(ref bm);
-            bm = Scraper.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
+            Scraper.SetContrast(100.0, ref bm);
+            
 
             string text = Scraper.AnalyzeText(bm);
             text = Regex.Replace(text, @"(?![0-9\s/]).", "");
@@ -303,7 +312,7 @@ namespace GenshinGuide
             Scraper.SetGrayscale(ref bm);
             Scraper.SetContrast(60.0, ref bm);
             Scraper.SetInvert(ref bm);
-            bm = Scraper.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
+            bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
 
             string text = Scraper.AnalyzeText(bm);
             text = text.Trim();
@@ -330,7 +339,7 @@ namespace GenshinGuide
                 Scraper.SetGrayscale(ref bm);
                 //Scraper.SetContrast(60.0, ref bm);
                 //Scraper.SetInvert(ref bm);
-                bm = Scraper.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
+                bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
 
                 text = Scraper.AnalyzeText(bm);
                 text = text.Trim();
@@ -359,9 +368,9 @@ namespace GenshinGuide
             g.CopyFromScreen(weaponLocation_X + xOffset, weaponLocation_Y + yOffset, 0, 0, bm.Size);
             g.DrawRectangle(new Pen(bm.GetPixel(max_X - xOffset - 1, 10), 14), new Rectangle(0, 0, 13, bm.Height));
             Scraper.SetGrayscale(ref bm);
-            Scraper.SetContrast(60.0, ref bm);
+            Scraper.SetContrast(30.0, ref bm);
             //g.DrawRectangle(new Pen(Brushes.Red, 14), new Rectangle(0, 0, 13, bm.Height));
-            bm = Scraper.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
+            bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
 
             string equippedCharacter = Scraper.AnalyzeText(bm);
             equippedCharacter = equippedCharacter.Trim();
@@ -379,6 +388,7 @@ namespace GenshinGuide
                     string[] tempString = equippedCharacter.Split(':');
                     equippedCharacter = tempString[1].Replace("\n", String.Empty);
                     equippedCharacter = equippedCharacter.Trim();
+                    equippedCharacter = Regex.Replace(equippedCharacter, @"[\/!@#$%^&*()\[\]\-_`~\\+={};:',.<>?‘|]", "");
 
                     return Scraper.GetCharacterCode(equippedCharacter);
                 }

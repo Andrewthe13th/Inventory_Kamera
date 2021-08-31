@@ -899,6 +899,7 @@ namespace GenshinGuide
                     string[] tempString = equippedCharacter.Split(':');
                     equippedCharacter = tempString[1].Replace("\n", String.Empty);
                     equippedCharacter = equippedCharacter.Trim();
+                    equippedCharacter = Regex.Replace(equippedCharacter, @"[\/!@#$%^&*()\[\]\-_`~\\+={};:',.<>?‘|]", "");
 
                     return Scraper.GetCharacterCode(equippedCharacter);
                 }

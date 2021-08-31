@@ -112,7 +112,6 @@ namespace GenshinGuide
             ["Xiangling"] = ++characterCount,
             ["Beidou"] = ++characterCount,
             ["Xingqiu"] = ++characterCount,
-            ["Xinggiu"] = characterCount, // dup
             ["Ningguang"] = ++characterCount, // 10
             ["Fischl"] = ++characterCount,
             ["Bennett"] = ++characterCount,
@@ -122,11 +121,8 @@ namespace GenshinGuide
             ["Jean"] = ++characterCount,
             ["Diluc"] = ++characterCount,
             ["Qiqi"] = ++characterCount,
-            ["Qigi"] = characterCount, // dup
             ["Mona"] = ++characterCount,
             ["Keqing"] = ++characterCount, // 20
-            ["Keging"] = characterCount, // dup
-            ["Keqging"] = characterCount, // dup
             ["Venti"] = ++characterCount,
             ["Klee"] = ++characterCount,
             ["Diona"] = ++characterCount,
@@ -136,7 +132,7 @@ namespace GenshinGuide
             ["Albedo"] = ++characterCount,
             ["Ganyu"] = ++characterCount,
             ["Xiao"] = ++characterCount,
-            ["Hu Tao"] = ++characterCount, // 30
+            ["HuTao"] = ++characterCount, // 30
             ["Rosaria"] = ++characterCount,
             ["Yanfei"] = ++characterCount,
             ["Eula"] = ++characterCount,
@@ -293,8 +289,10 @@ namespace GenshinGuide
 
         };
 
+        private static TesseractEngine ocr_live = new TesseractEngine( (Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_eng", EngineMode.LstmOnly);
+
         //TODO: subStats Dictionaries
- 
+
 
         public static void AddTravelerToCharacterList(string traveler)
         {
@@ -305,10 +303,90 @@ namespace GenshinGuide
         }
 
         /// <summary> Use Tesseract OCR to find words on picture to string </summary>
+        public static string AnalyzeTextWithLiveTesseract(Bitmap img)
+        {
+            string text = "";
+            string dir = Directory.GetCurrentDirectory() + "\\tessdata";
+            using (var ocr = new TesseractEngine(dir, "genshin_eng", EngineMode.LstmOnly))
+            {
+                var page = ocr.Process(img, PageSegMode.SingleLine);
+                text = page.GetText();
+            }
+            return text;
+        }
+
         public static string AnalyzeText(Bitmap img)
         {
             string text = "";
-            using (var ocr = new TesseractEngine("B:/Projects/VisualStudio/GenshinGuide/GenshinGuide/GenshinGuide/bin/Debug/tessdata", "eng", EngineMode.TesseractAndLstm))
+
+            using(var PixImg = PixConverter.ToPix(img))
+            {
+                using(var page = ocr_live.Process(PixImg))
+                {
+                    text = page.GetText();
+                    using(var iter = page.GetIterator())
+                    {
+                        iter.Begin();
+                        do
+                        {
+                            do
+                            {
+                                do
+                                {
+                                    do
+                                    {
+                                        if (iter.IsAtBeginningOf(PageIteratorLevel.Block))
+                                        {
+                                            Console.WriteLine("<BLOCK>");
+                                        }
+
+                                        Console.Write(iter.GetText(PageIteratorLevel.Word));
+                                        Console.Write(" ");
+
+                                        if (iter.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word))
+                                        {
+                                            Console.WriteLine();
+                                        }
+                                    } while (iter.Next(PageIteratorLevel.TextLine, PageIteratorLevel.Word));
+
+                                    if (iter.IsAtFinalOf(PageIteratorLevel.Para, PageIteratorLevel.TextLine))
+                                    {
+                                        Console.WriteLine();
+                                    }
+                                } while (iter.Next(PageIteratorLevel.Para, PageIteratorLevel.TextLine));
+                            } while (iter.Next(PageIteratorLevel.Block, PageIteratorLevel.Para));
+                        } while (iter.Next(PageIteratorLevel.Block));
+                    }
+                }
+            }
+
+
+            //ocr_live.Dispose();
+            //Page page = ocr_live.Process(img, PageSegMode.SingleLine);
+            //text = page.GetText();
+            //page.Dispose();
+            //ocr_live.Dispose();
+
+            return text;
+        }
+
+        public static string AnalyzeWeaponImage(Bitmap img)
+        {
+            string text = "";
+            string dir = Directory.GetCurrentDirectory() + "\\tessdata";
+            using (var ocr = new TesseractEngine(dir, "genshin_eng", EngineMode.LstmOnly))
+            {
+                var page = ocr.Process(img, PageSegMode.SingleBlock);
+                text = page.GetText();
+            }
+            return text;
+        }
+
+        public static string AnalyzeElementAndCharName(Bitmap img)
+        {
+            string text = "";
+            string dir = Directory.GetCurrentDirectory() + "\\tessdata";
+            using (var ocr = new TesseractEngine(dir, "eng", EngineMode.Default,"ElementAndCharacterName"))
             {
                 var page = ocr.Process(img, PageSegMode.SingleLine);
                 text = page.GetText();
@@ -322,6 +400,7 @@ namespace GenshinGuide
             using (var ocr = new TesseractEngine("B:/Projects/VisualStudio/GenshinGuide/GenshinGuide/GenshinGuide/bin/Debug/tessdata", "eng", EngineMode.TesseractOnly))
             {
                 var page = ocr.Process(img, PageSegMode.SparseText);
+                ocr.SetVariable("tessedit_char_whitelist", "0123456789");
                 text = page.GetText();
             }
             return text;
