@@ -159,6 +159,7 @@ namespace GenshinGuide
 
             //string text = Scraper.AnalyzeWeaponImage(bm);
 
+            // TODO:: ADD multi threading support 
 
             // All Weapons will be scanned 
             name = ScanWeaponName(screenLocation_X, screenLocation_Y, width, height);
@@ -206,15 +207,41 @@ namespace GenshinGuide
             int xOffset = 10;
             int yOffset = 7;
             Bitmap bm = new Bitmap(max_X-2*xOffset, 25);
-            Graphics g = Graphics.FromImage(bm);
 
             // Setup Img
-            g = Graphics.FromImage(bm);
+            Graphics g = Graphics.FromImage(bm);
             g.CopyFromScreen(weaponLocation_X + xOffset, weaponLocation_Y + yOffset, 0, 0, bm.Size);
+            g.Dispose();
+            // View Picture
+            //UserInterface.Reset();
+            //UserInterface.SetImage(bm);
+
+            Scraper.SetGamma(0.2, 0.2, 0.2, ref bm);
             Scraper.SetGrayscale(ref bm);
-            Scraper.SetContrast(20.0, ref bm);
             Scraper.SetInvert(ref bm);
-            bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
+
+            //Scraper.SetGrayscale(ref bm);
+            //Scraper.SetInvert(ref bm);
+            //Scraper.SetContrast(80.0, ref bm);
+
+            // View Picture
+            UserInterface.Reset();
+            UserInterface.SetImage(bm);
+
+            //Scraper.SetGrayscale(ref bm);
+            //Scraper.SetInvert(ref bm);
+            //Scraper.SetGamma(0.2, 0.2, 0.2, ref bm);
+
+            //Scraper.SetGrayscale(ref bm);
+            //Scraper.SetInvert(ref bm);
+            //Scraper.SetContrast(20.0, ref bm);
+
+
+            //bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
+
+            // View Picture
+            //UserInterface.Reset();
+            //UserInterface.SetImage(bm);
 
             // Analyze
             //string text = Scraper.AnalyzeText(bm);
@@ -240,17 +267,23 @@ namespace GenshinGuide
             // Get Level
             int xOffset = 15;
             int yOffset = 206;
-            Bitmap bm = new Bitmap(150, 19);
+            Bitmap bm = new Bitmap(150, 19); // old was 100
             Graphics g = Graphics.FromImage(bm);
             g.CopyFromScreen(weaponLocation_X + xOffset, weaponLocation_Y + yOffset, 0, 0, bm.Size);
             //g.DrawRectangle(new Pen(bm.GetPixel(1, 20), 22), new Rectangle(0, 0, bm.Width, bm.Height));
             bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
+
             Scraper.SetGrayscale(ref bm);
             Scraper.SetInvert(ref bm);
             Scraper.SetContrast(100.0, ref bm);
-            
+
+            // View Picture
+            UserInterface.Reset();
+            UserInterface.SetImage(bm);
+
 
             string text = Scraper.AnalyzeText(bm);
+            //string text = Scraper.AnalyzeOneText(bm);
             text = Regex.Replace(text, @"(?![0-9\s/]).", "");
             text = text.Trim();
             text = Regex.Replace(text, @"(\s{1}.*)", "");

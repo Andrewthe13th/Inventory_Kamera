@@ -289,7 +289,7 @@ namespace GenshinGuide
 
         };
 
-        private static TesseractEngine ocr_live = new TesseractEngine( (Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_eng", EngineMode.LstmOnly);
+        private static TesseractEngine ocr_live = new TesseractEngine( (Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
 
         //TODO: subStats Dictionaries
 
@@ -315,57 +315,86 @@ namespace GenshinGuide
             return text;
         }
 
-        public static string AnalyzeText(Bitmap img)
+        public static string AnalyzeText(Bitmap bitmap)
         {
             string text = "";
-
-            using(var PixImg = PixConverter.ToPix(img))
-            {
-                using(var page = ocr_live.Process(PixImg))
+            
+                using (var page = ocr_live.Process(bitmap, PageSegMode.SingleBlock))
                 {
-                    text = page.GetText();
-                    using(var iter = page.GetIterator())
+                    using (var iter = page.GetIterator())
                     {
                         iter.Begin();
                         do
                         {
-                            do
-                            {
-                                do
-                                {
-                                    do
-                                    {
-                                        if (iter.IsAtBeginningOf(PageIteratorLevel.Block))
-                                        {
-                                            Console.WriteLine("<BLOCK>");
-                                        }
-
-                                        Console.Write(iter.GetText(PageIteratorLevel.Word));
-                                        Console.Write(" ");
-
-                                        if (iter.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word))
-                                        {
-                                            Console.WriteLine();
-                                        }
-                                    } while (iter.Next(PageIteratorLevel.TextLine, PageIteratorLevel.Word));
-
-                                    if (iter.IsAtFinalOf(PageIteratorLevel.Para, PageIteratorLevel.TextLine))
-                                    {
-                                        Console.WriteLine();
-                                    }
-                                } while (iter.Next(PageIteratorLevel.Para, PageIteratorLevel.TextLine));
-                            } while (iter.Next(PageIteratorLevel.Block, PageIteratorLevel.Para));
-                        } while (iter.Next(PageIteratorLevel.Block));
+                            text += iter.GetText(PageIteratorLevel.TextLine);
+                        }
+                        while (iter.Next(PageIteratorLevel.TextLine));
                     }
+                }
+
+            
+            return text;
+        }
+
+        public static string AnalyzeText_Line(Bitmap bitmap)
+        {
+            string text = "";
+
+            using (var page = ocr_live.Process(bitmap, PageSegMode.SingleLine))
+            {
+                using (var iter = page.GetIterator())
+                {
+                    iter.Begin();
+                    do
+                    {
+                        text += iter.GetText(PageIteratorLevel.TextLine);
+                    }
+                    while (iter.Next(PageIteratorLevel.TextLine));
                 }
             }
 
 
-            //ocr_live.Dispose();
-            //Page page = ocr_live.Process(img, PageSegMode.SingleLine);
-            //text = page.GetText();
-            //page.Dispose();
-            //ocr_live.Dispose();
+            return text;
+        }
+
+        public static string AnalyzeText_Sparse(Bitmap bitmap)
+        {
+            string text = "";
+
+            using (var page = ocr_live.Process(bitmap, PageSegMode.SparseText))
+            {
+                using (var iter = page.GetIterator())
+                {
+                    iter.Begin();
+                    do
+                    {
+                        text += iter.GetText(PageIteratorLevel.TextLine);
+                    }
+                    while (iter.Next(PageIteratorLevel.TextLine));
+                }
+            }
+
+
+            return text;
+        }
+
+        public static string AnalyzeOneText(Bitmap bitmap)
+        {
+            string text = "";
+
+            using (var page = ocr_live.Process(bitmap, PageSegMode.SingleWord))
+            {
+                using (var iter = page.GetIterator())
+                {
+                    iter.Begin();
+                    do
+                    {
+                        text += iter.GetText(PageIteratorLevel.TextLine);
+                    }
+                    while (iter.Next(PageIteratorLevel.TextLine));
+                }
+            }
+
 
             return text;
         }
@@ -656,6 +685,37 @@ namespace GenshinGuide
             bitmap = (Bitmap)bmap.Clone();
         }
 
+        public static void SetGamma(double red, double green, double blue, ref Bitmap bitmap)
+        {
+            Bitmap temp = (Bitmap)bitmap;
+            Bitmap bmap = (Bitmap)temp.Clone();
+            Color c;
+            byte[] redGamma = CreateGammaArray(red);
+            byte[] greenGamma = CreateGammaArray(green);
+            byte[] blueGamma = CreateGammaArray(blue);
+            for (int i = 0; i < bmap.Width; i++)
+            {
+                for (int j = 0; j < bmap.Height; j++)
+                {
+                    c = bmap.GetPixel(i, j);
+                    bmap.SetPixel(i, j, Color.FromArgb(redGamma[c.R],
+                       greenGamma[c.G], blueGamma[c.B]));
+                }
+            }
+            bitmap = (Bitmap)bmap.Clone();
+        }
+
+        private static byte[] CreateGammaArray(double color)
+        {
+            byte[] gammaArray = new byte[256];
+            for (int i = 0; i < 256; ++i)
+            {
+                gammaArray[i] = (byte)Math.Min(255,
+        (int)((255.0 * Math.Pow(i / 255.0, 1.0 / color)) + 0.5));
+            }
+            return gammaArray;
+        }
+
         public static void SetInvert(ref Bitmap bitmap)
         {
             Bitmap temp = (Bitmap)bitmap;
@@ -672,8 +732,89 @@ namespace GenshinGuide
             }
             bitmap = (Bitmap)bmap.Clone();
         }
+
+        public static void SetColorFilter(string colorFilterType, ref Bitmap bitmap)
+        {
+            Bitmap temp = (Bitmap)bitmap;
+            Bitmap bmap = (Bitmap)temp.Clone();
+            Color c;
+            for (int i = 0; i < bmap.Width; i++)
+            {
+                for (int j = 0; j < bmap.Height; j++)
+                {
+                    c = bmap.GetPixel(i, j);
+                    int nPixelR = 0;
+                    int nPixelG = 0;
+                    int nPixelB = 0;
+                    if (colorFilterType == "red")
+                    {
+                        nPixelR = c.R;
+                        nPixelG = c.G - 255;
+                        nPixelB = c.B - 255;
+                    }
+                    else if (colorFilterType == "green")
+                    {
+                        nPixelR = c.R - 255;
+                        nPixelG = c.G;
+                        nPixelB = c.B - 255;
+                    }
+                    else if (colorFilterType == "blue")
+                    {
+                        nPixelR = c.R - 255;
+                        nPixelG = c.G - 255;
+                        nPixelB = c.B;
+                    }
+                    nPixelR = Math.Max(nPixelR, 0);
+                    nPixelR = Math.Min(255, nPixelR);
+
+                    nPixelG = Math.Max(nPixelG, 0);
+                    nPixelG = Math.Min(255, nPixelG);
+
+                    nPixelB = Math.Max(nPixelB, 0);
+                    nPixelB = Math.Min(255, nPixelB);
+
+                    bmap.SetPixel(i, j, Color.FromArgb((byte)nPixelR,
+                      (byte)nPixelG, (byte)nPixelB));
+                }
+            }
+            bitmap = (Bitmap)bmap.Clone();
+        }
+
+        public static void SetBrightness(int brightness, ref Bitmap bitmap)
+        {
+            Bitmap temp = (Bitmap)bitmap;
+            Bitmap bmap = (Bitmap)temp.Clone();
+            if (brightness < -255) brightness = -255;
+            if (brightness > 255) brightness = 255;
+            Color c;
+            for (int i = 0; i < bmap.Width; i++)
+            {
+                for (int j = 0; j < bmap.Height; j++)
+                {
+                    c = bmap.GetPixel(i, j);
+                    int cR = c.R + brightness;
+                    int cG = c.G + brightness;
+                    int cB = c.B + brightness;
+
+                    if (cR < 0) cR = 1;
+                    if (cR > 255) cR = 255;
+
+                    if (cG < 0) cG = 1;
+                    if (cG > 255) cG = 255;
+
+                    if (cB < 0) cB = 1;
+                    if (cB > 255) cB = 255;
+
+                    bmap.SetPixel(i, j,
+        Color.FromArgb((byte)cR, (byte)cG, (byte)cB));
+                }
+            }
+            bitmap = (Bitmap)bmap.Clone();
+        }
         #endregion
 
- 
+
+
+
     }
 }

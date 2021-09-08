@@ -28,7 +28,7 @@ namespace GenshinGuide
         public void GatherData()
         {
             // Get Traveler Name
-            AssignTravelerName();
+            //AssignTravelerName();
 
             // Get characters
             //Navigation.CharacterScreen();
@@ -36,15 +36,15 @@ namespace GenshinGuide
             //Navigation.MainMenuScreen();
 
             // Get Weapons
-            Navigation.InventoryScreen();
-            Navigation.SelectWeaponInventory();
-            inventory.GetWeapons(ref equippedWeapons);
-            Navigation.MainMenuScreen();
+            //Navigation.InventoryScreen();
+            //Navigation.SelectWeaponInventory();
+            //inventory.GetWeapons(ref equippedWeapons);
+            //Navigation.MainMenuScreen();
 
             // Get Artifacts
             //Navigation.InventoryScreen();
             //Navigation.SelectArtifactInventory();
-            //inventory.GetArtifacts(ref equippedArtifacts);
+            inventory.GetArtifacts(ref equippedArtifacts);
             //Navigation.MainMenuScreen();
 
             // Assign Artifacts to Characters

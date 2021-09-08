@@ -70,7 +70,7 @@ namespace GenshinGuide
 
         public static void SelectWeaponInventory()
         {
-            Double artifactButtonLocation_X = (Double)area.right * ((Double)52 / (Double)160);
+            Double artifactButtonLocation_X = (Double)area.right * ((Double)50 / (Double)160);
             Double artifactButtonLocation_Y = (Double)area.bottom * ((Double)5 / (Double)90);
             SetCursorPos(position.left + Convert.ToInt32(artifactButtonLocation_X), position.top + Convert.ToInt32(artifactButtonLocation_Y));
             sim.Mouse.LeftButtonClick();
@@ -211,6 +211,11 @@ namespace GenshinGuide
             }
             else if (type == Speed.Instant)
             {
+                int value = r.Next(2, 6);
+                System.Threading.Thread.Sleep(value);
+            }
+            else if (type == Speed.Faster)
+            {
                 int value = r.Next(20, 35);
                 System.Threading.Thread.Sleep(value);
             }
@@ -237,6 +242,7 @@ namespace GenshinGuide
             Normal,
             Instant,
             Fast,
+            Faster,
             UI
         }
         #endregion

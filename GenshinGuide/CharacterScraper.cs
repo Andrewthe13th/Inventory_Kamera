@@ -31,7 +31,7 @@ namespace GenshinGuide
             bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
             Scraper.SetGrayscale(ref bm);
             Scraper.SetInvert(ref bm);
-            Scraper.SetContrast(20.0, ref bm);
+            Scraper.SetContrast(60.0, ref bm);
 
             UserInterface.Reset();
             UserInterface.SetImage(bm);

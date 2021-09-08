@@ -53,7 +53,7 @@ namespace GenshinGuide
                 // Select Artifact
                 Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(artifactLocation_X) + (xOffset * (currentArtifactCount % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(artifactLocation_Y));
                 Navigation.sim.Mouse.LeftButtonClick();
-                Navigation.SystemRandomWait();
+                Navigation.SystemRandomWait(Navigation.Speed.Instant);
 
                 // Scan Artifact
                 Artifact a = ScanArtifact(currentArtifactCount);
@@ -118,7 +118,7 @@ namespace GenshinGuide
                         }
                         Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(artifactLocation_X) + (xOffset * (k % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(artifactLocation_Y) + (yOffset * (i % (maxRows+1))));
                         Navigation.sim.Mouse.LeftButtonClick();
-                        Navigation.SystemRandomWait();
+                        Navigation.SystemRandomWait(Navigation.Speed.Instant);
 
                         // Scan Artifact
                         Artifact a = ScanArtifact(currentArtifactCount);
@@ -182,6 +182,7 @@ namespace GenshinGuide
             Double artifactLocation_X = (Double)Navigation.GetArea().right * ((Double)108 / (Double)160);
             Double artifactLocation_Y = (Double)Navigation.GetArea().bottom * ((Double)10 / (Double)90);
             int width = 325; int height = 560;
+
             Bitmap bm = new Bitmap(width, height);
             Graphics g = Graphics.FromImage(bm);
             int screenLocation_X = Navigation.GetPosition().left + Convert.ToInt32(artifactLocation_X);
@@ -202,40 +203,39 @@ namespace GenshinGuide
             Color firstStar = Color.FromArgb(255, 114, 119, 138);
 
             if ( CompareColors(fiveStar,rarityColor) || CompareColors(fourthStar, rarityColor))
+            //if (true)
             {
                 rarity = ( CompareColors(fiveStar, rarityColor) ) ? 5 : 4;
 
-                // Improved Scanning using multi threading
-                Thread thr1 = new Thread(() => gearSlot = ScanArtifactGearSlot(screenLocation_X, screenLocation_Y, width, height));
-                Thread thr2 = new Thread(() => mainStat = ScanArtifactMainStat(screenLocation_X, screenLocation_Y, width, height, gearSlot));
-                //Thread thr3 = new Thread(() => mainStatValue = ScanArtifactMainStatValue(screenLocation_X, screenLocation_Y, width, height));
-                Thread thr4 = new Thread(() => level = ScanArtifactLevel(screenLocation_X, screenLocation_Y, width, height));
-                Thread thr5 = new Thread(() => subStats = ScanArtifactSubStats(screenLocation_X, screenLocation_Y, width, height, ref subStatsCount, ref setName));
-                Thread thr6 = new Thread(() => equippedCharacter = ScanArtifactEquippedCharacter(screenLocation_X, screenLocation_Y, width, height));
+                //// Improved Scanning using multi threading
+                //Thread thr1 = new Thread(() => gearSlot = ScanArtifactGearSlot(screenLocation_X, screenLocation_Y, width, height));
+                //Thread thr2 = new Thread(() => mainStat = ScanArtifactMainStat(screenLocation_X, screenLocation_Y, width, height, gearSlot));
+                ////Thread thr3 = new Thread(() => mainStatValue = ScanArtifactMainStatValue(screenLocation_X, screenLocation_Y, width, height));
+                //Thread thr4 = new Thread(() => level = ScanArtifactLevel(screenLocation_X, screenLocation_Y, width, height));
+                //Thread thr5 = new Thread(() => subStats = ScanArtifactSubStats(screenLocation_X, screenLocation_Y, width, height, ref subStatsCount, ref setName));
+                //Thread thr6 = new Thread(() => equippedCharacter = ScanArtifactEquippedCharacter(screenLocation_X, screenLocation_Y, width, height));
 
-                thr1.Start();
-                //thr3.Start();
-                thr4.Start();
-                thr5.Start();
-                thr6.Start();
+                //thr1.Start();
+                ////thr3.Start();
+                //thr4.Start();
+                //thr5.Start();
+                //thr6.Start();
 
-                thr1.Join();
-                thr2.Start();
+                //thr1.Join();
+                //thr2.Start();
 
-                //thr3.Join();
-                thr4.Join();
-                thr5.Join();
-                thr6.Join();
-                thr2.Join();
+                ////thr3.Join();
+                //thr4.Join();
+                //thr5.Join();
+                //thr6.Join();
+                //thr2.Join();
 
-                //// Test individual Functions
-                //gearSlot = ScanArtifactGearSlot(screenLocation_X, screenLocation_Y, width, height, imageBox, textBox);
-                //mainStat = ScanArtifactMainStat(screenLocation_X, screenLocation_Y, width, height, gearSlot, imageBox, textBox);
-                //mainStatValue = ScanArtifactMainStatValue(screenLocation_X, screenLocation_Y, width, height, imageBox, textBox);
-                //level = ScanArtifactLevel(screenLocation_X, screenLocation_Y, width, height, imageBox, textBox);
-                //subStats = ScanArtifactSubStats(screenLocation_X, screenLocation_Y, width, height, imageBox, textBox, ref subStatsCount, ref setName);
-                //equippedCharacter = ScanArtifactEquippedCharacter(screenLocation_X, screenLocation_Y, width, height, imageBox, textBox);
-
+                // Test individual Functions
+                gearSlot = ScanArtifactGearSlot(bm, width, height);
+                mainStat = ScanArtifactMainStat(bm, width, height, gearSlot);
+                level = ScanArtifactLevel(bm, width, height);
+                subStats = ScanArtifactSubStats(bm, width, height, ref subStatsCount, ref setName);
+                equippedCharacter = ScanArtifactEquippedCharacter(bm, width, height);
 
             }
             // Don't fully scan 3 star artifacts and lower
@@ -579,21 +579,18 @@ namespace GenshinGuide
         }
 
         #region Threaded Scan Functions
-        private static int ScanArtifactGearSlot(int artifactLocation_X, int artifactLocation_Y, int max_X, int max_Y)
+        private static int ScanArtifactGearSlot(Bitmap artifactImage, int max_X, int max_Y)
         {
             //Init
             string gearSlot = null;
             int offset = 46;
-            Bitmap bm = new Bitmap(max_X / 2, 20);
-            Graphics g = Graphics.FromImage(bm);
+            Bitmap bm = artifactImage.Clone(new Rectangle(3, offset, artifactImage.Width / 2, 20), artifactImage.PixelFormat);
 
-            // Setup Img
-            g = Graphics.FromImage(bm);
-            g.CopyFromScreen(artifactLocation_X + max_X / 28, artifactLocation_Y + offset, 0, 0, bm.Size);
+            // Process Img
             Scraper.SetGrayscale(ref bm);
-            Scraper.SetContrast(60.0, ref bm);
+            Scraper.SetContrast(80.0, ref bm);
             Scraper.SetInvert(ref bm);
-            bm = Scraper.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
+
 
             // Analyze
             gearSlot = Scraper.AnalyzeText(bm);
@@ -607,7 +604,7 @@ namespace GenshinGuide
             return Scraper.GetGearSlotCode(gearSlot);
         }
 
-        private static int ScanArtifactMainStat(int artifactLocation_X, int artifactLocation_Y, int max_X, int max_Y, int gearSlot)
+        private static int ScanArtifactMainStat(Bitmap artifactImage, int max_X, int max_Y, int gearSlot)
         {
             // Get Main Stat
             string mainStat = null;
@@ -621,23 +618,14 @@ namespace GenshinGuide
                 return Scraper.GetMainStatCode("ATK_Flat");
             }
             else // scan time, cup, hat artifacts only
-            { 
-                Bitmap bm = new Bitmap(max_X / 2 + max_X / 28, 20);
-                Graphics g = Graphics.FromImage(bm);
-                g.CopyFromScreen(artifactLocation_X, artifactLocation_Y + yOffset, 0, 0, bm.Size);
-                //Scraper.SetGrayscale(ref bm);
+            {
+                Bitmap bm = artifactImage.Clone(new Rectangle(0, yOffset, artifactImage.Width / 2 + artifactImage.Width / 28, 20),artifactImage.PixelFormat);
                 Scraper.SetContrast(50.0, ref bm);
-                //Scraper.SetGrayscale(ref bm);
                 Scraper.SetInvert(ref bm);
-                bm = Scraper.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
 
                 mainStat = Scraper.AnalyzeText(bm);
                 mainStat = mainStat.Replace("\n", String.Empty);
                 mainStat.Trim();
-
-                //// Check if Defense
-                //if (mainStat == "DEF")
-                //    mainStat = "DEF%";
 
                 // View Picture
                 UserInterface.Reset();
@@ -648,15 +636,12 @@ namespace GenshinGuide
             }
         }
 
-        private static decimal ScanArtifactMainStatValue(int artifactLocation_X, int artifactLocation_Y, int max_X, int max_Y)
+        private static decimal ScanArtifactMainStatValue(Bitmap artifactImage, int max_X, int max_Y)
         {
             // Get Main Stat Value
             string mainStatValueText = "";
-            int yOffset = 119;
+            //int yOffset = 119;
             Bitmap bm = new Bitmap(max_X / 3 + (max_X / 16), 34);
-            //Bitmap bm = new Bitmap(max_X / 4, 35);
-            Graphics g = Graphics.FromImage(bm);
-            g.CopyFromScreen(artifactLocation_X, artifactLocation_Y + yOffset, 0, 0, bm.Size);
             Scraper.SetGrayscale(ref bm);
             Scraper.SetContrast(90.0, ref bm);
             Scraper.SetInvert(ref bm);
@@ -708,19 +693,18 @@ namespace GenshinGuide
             }
         }
 
-        private static int ScanArtifactLevel(int artifactLocation_X, int artifactLocation_Y, int max_X, int max_Y)
+        private static int ScanArtifactLevel(Bitmap artifactImage, int max_X, int max_Y)
         {
             // Get Level
-            Bitmap bm = new Bitmap(50, 33);
-            //Bitmap bm = new Bitmap(100, 100);
+            Bitmap bm = artifactImage.Clone(new Rectangle(11, 198, 50, 33), artifactImage.PixelFormat);
             Graphics g = Graphics.FromImage(bm);
-            g.CopyFromScreen(artifactLocation_X + 11, artifactLocation_Y + 198, 0, 0, bm.Size);
+            // Add more padding to be able to read level better
             g.DrawRectangle(new Pen(bm.GetPixel(7, 10), 16), new Rectangle(0, 0, bm.Width, bm.Height));
             g.DrawRectangle(new Pen(bm.GetPixel(7, 10), 12), new Rectangle(0, 0, bm.Width, bm.Height));
+            // Process Img
             Scraper.SetGrayscale(ref bm);
             Scraper.SetContrast(60.0, ref bm);
             Scraper.SetInvert(ref bm);
-            bm = Scraper.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
 
             string text = Scraper.AnalyzeText(bm);
             text.Trim();
@@ -755,43 +739,34 @@ namespace GenshinGuide
             }
         }
 
-        private static Artifact.SubStats[] ScanArtifactSubStats(int artifactLocation_X, int artifactLocation_Y, int max_X, int max_Y, ref int subStatsCount, ref int setName)
+        private static Artifact.SubStats[] ScanArtifactSubStats(Bitmap artifactImage, int max_X, int max_Y, ref int subStatsCount, ref int setName)
         {
             // Get SubStats
             Artifact.SubStats[] subStats = new Artifact.SubStats[4];
             int offset = 26;
             int yOffset = 235;
+            int xOffset = 30;
             int subStatSpacing = 27;
             string text = "";
 
             for (int i = 0; i < 5; i++)
             {
-                Bitmap bm = new Bitmap(max_X, 29);
-                Graphics g = Graphics.FromImage(bm);
-                g.CopyFromScreen(artifactLocation_X, artifactLocation_Y + yOffset + (i * subStatSpacing), 0, 0, bm.Size);
-                g.DrawRectangle(new Pen(bm.GetPixel(max_X - 1, 10), 18), new Rectangle(0, 0, 18, bm.Height));
-                //g.DrawRectangle(new Pen(Brushes.Red, 17), new Rectangle(0, 0, 17, bm.Height));
-                //Scraper.SetGrayscale(ref bm);
-                //Scraper.SetContrast(60.0, ref bm);
-                bm = Scraper.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
+                Bitmap bm = artifactImage.Clone(new Rectangle(xOffset, yOffset + (i * subStatSpacing), artifactImage.Width-xOffset, 29), artifactImage.PixelFormat);
 
-                text = Scraper.AnalyzeText(bm).Trim();
+                text = Scraper.AnalyzeText_Line(bm);
                 text = text.Replace("\n", String.Empty);
 
-                //// View Picture
-                //UserInterface.Reset();
-                //UserInterface.SetImage(bm);
-                //UserInterface.AddText(text);
+                // view picture
+                UserInterface.Reset();
+                UserInterface.SetImage(bm);
+                UserInterface.AddText(text);
 
                 // Check if Scanned Set Name
                 if (text.Contains(":") || i >= 4)
                 {
-                    bm = new Bitmap(max_X - offset, 29);
-                    g = Graphics.FromImage(bm);
-                    g.CopyFromScreen(artifactLocation_X, artifactLocation_Y + yOffset + (i * subStatSpacing), 0, 0, bm.Size);
-                    //Scraper.SetGrayscale(ref bm);
-                    //Scraper.SetContrast(80.0, ref bm);
-                    bm = Scraper.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
+                    //bm = new Bitmap(max_X - offset, 29);
+                    bm = artifactImage.Clone(new Rectangle(0, yOffset + (i * subStatSpacing), artifactImage.Width - offset, 29), artifactImage.PixelFormat);
+                    Scraper.SetGrayscale(ref bm);
                     text = Scraper.AnalyzeText(bm).Trim();
 
                     // View Picture
@@ -869,18 +844,17 @@ namespace GenshinGuide
             return subStats;
         }
 
-        private static int ScanArtifactEquippedCharacter(int artifactLocation_X, int artifactLocation_Y, int max_X, int max_Y)
+        private static int ScanArtifactEquippedCharacter(Bitmap artifactImage, int max_X, int max_Y)
         {
             int xOffset = 30;
             int yOffset = 532;
-            Bitmap bm = new Bitmap(max_X - xOffset, 20);
+
+            Bitmap bm = artifactImage.Clone(new Rectangle(xOffset, yOffset, artifactImage.Width - xOffset, 20), artifactImage.PixelFormat);
             Graphics g = Graphics.FromImage(bm);
-            g.CopyFromScreen(artifactLocation_X + xOffset, artifactLocation_Y + yOffset, 0, 0, bm.Size);
+            // Gets rid of character head on Left
             g.DrawRectangle(new Pen(bm.GetPixel(max_X - xOffset - 1, 10), 14), new Rectangle(0, 0, 13, bm.Height));
             Scraper.SetGrayscale(ref bm);
             Scraper.SetContrast(60.0, ref bm);
-            //g.DrawRectangle(new Pen(Brushes.Red, 14), new Rectangle(0, 0, 13, bm.Height));
-            bm = Scraper.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
 
             string equippedCharacter = Scraper.AnalyzeText(bm);
             equippedCharacter.Trim();
