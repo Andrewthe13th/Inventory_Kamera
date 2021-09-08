@@ -53,7 +53,7 @@ namespace GenshinGuide
                 // Select Artifact
                 Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(artifactLocation_X) + (xOffset * (currentArtifactCount % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(artifactLocation_Y));
                 Navigation.sim.Mouse.LeftButtonClick();
-                Navigation.SystemRandomWait(Navigation.Speed.Instant);
+                //Navigation.SystemRandomWait(Navigation.Speed.Instant);
 
                 // Scan Artifact
                 Artifact a = ScanArtifact(currentArtifactCount);
@@ -68,7 +68,7 @@ namespace GenshinGuide
 
                 // Add to Artifact List Object
                 artifacts.Add(a);
-                GC.Collect();
+                //GC.Collect();
 
                 // reach end of row
                 if (currentColumn == maxColumns)
@@ -202,54 +202,78 @@ namespace GenshinGuide
             Color twoStar = Color.FromArgb(255, 42, 143, 114);
             Color firstStar = Color.FromArgb(255, 114, 119, 138);
 
+            // Check for equipped color
+            Color equipped = Color.FromArgb(255, 255, 231, 187);
+            Color equippedColor = bm.GetPixel(5, bm.Height - 10);
+
             if ( CompareColors(fiveStar,rarityColor) || CompareColors(fourthStar, rarityColor))
             //if (true)
             {
                 rarity = ( CompareColors(fiveStar, rarityColor) ) ? 5 : 4;
+                bool b_equipped = CompareColors(equipped, equippedColor);
 
-                //// Improved Scanning using multi threading
-                //Thread thr1 = new Thread(() => gearSlot = ScanArtifactGearSlot(screenLocation_X, screenLocation_Y, width, height));
-                //Thread thr2 = new Thread(() => mainStat = ScanArtifactMainStat(screenLocation_X, screenLocation_Y, width, height, gearSlot));
-                ////Thread thr3 = new Thread(() => mainStatValue = ScanArtifactMainStatValue(screenLocation_X, screenLocation_Y, width, height));
-                //Thread thr4 = new Thread(() => level = ScanArtifactLevel(screenLocation_X, screenLocation_Y, width, height));
-                //Thread thr5 = new Thread(() => subStats = ScanArtifactSubStats(screenLocation_X, screenLocation_Y, width, height, ref subStatsCount, ref setName));
-                //Thread thr6 = new Thread(() => equippedCharacter = ScanArtifactEquippedCharacter(screenLocation_X, screenLocation_Y, width, height));
+                Bitmap bm_1 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
+                Bitmap bm_2 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
+                Bitmap bm_3 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
+                Bitmap bm_4 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
 
-                //thr1.Start();
-                ////thr3.Start();
-                //thr4.Start();
-                //thr5.Start();
-                //thr6.Start();
+                // Improved Scanning using multi threading
+                Thread thr1 = new Thread(() => gearSlot = ScanArtifactGearSlot(bm_1, width, height));
+                Thread thr2 = new Thread(() => mainStat = ScanArtifactMainStat(bm_1, width, height, gearSlot));
+                Thread thr3 = new Thread(() => level = ScanArtifactLevel(bm_2, width, height));
+                Thread thr4 = new Thread(() => subStats = ScanArtifactSubStats(bm_3, rarity, level, ref subStatsCount, ref setName));
+                Thread thr5 = new Thread(() => equippedCharacter = ScanArtifactEquippedCharacter(bm_4, width, height));
 
-                //thr1.Join();
-                //thr2.Start();
+                thr1.Start();
+                thr3.Start();
+                if (b_equipped)
+                {
+                    thr5.Start();
+                }
 
-                ////thr3.Join();
-                //thr4.Join();
-                //thr5.Join();
-                //thr6.Join();
-                //thr2.Join();
+                //  sub stats will check level and rarity
+                thr3.Join();
+                thr4.Start();
 
-                // Test individual Functions
-                gearSlot = ScanArtifactGearSlot(bm, width, height);
-                mainStat = ScanArtifactMainStat(bm, width, height, gearSlot);
-                level = ScanArtifactLevel(bm, width, height);
-                subStats = ScanArtifactSubStats(bm, width, height, ref subStatsCount, ref setName);
-                equippedCharacter = ScanArtifactEquippedCharacter(bm, width, height);
+                // main stat will check gearslot
+                thr1.Join();
+                thr2.Start();
+
+                // 2-5 join back
+                thr4.Join();
+                if (b_equipped)
+                {
+                    thr5.Join();
+                }
+                thr2.Join();
+
+                //// Test individual Functions
+                //gearSlot = ScanArtifactGearSlot(bm, width, height);
+                //mainStat = ScanArtifactMainStat(bm, width, height, gearSlot);
+                //level = ScanArtifactLevel(bm, width, height);
+                //subStats = ScanArtifactSubStats(bm, width, height, ref subStatsCount, ref setName);
+
+                //if(CompareColors(equipped, equippedColor))
+                //{
+                //    equippedCharacter = ScanArtifactEquippedCharacter(bm, width, height);
+                //}
 
             }
             // Don't fully scan 3 star artifacts and lower
             else if (CompareColors(thirdStar, rarityColor))
             {
                 rarity = 3;
+                Navigation.SystemRandomWait(Navigation.Speed.ArtifactIgnore);
             }
             else if (CompareColors(twoStar, rarityColor))
             {
                 rarity = 2;
+                Navigation.SystemRandomWait(Navigation.Speed.ArtifactIgnore);
             }
             else if (CompareColors(firstStar, rarityColor))
             {
                 rarity = 1;
+                Navigation.SystemRandomWait(Navigation.Speed.ArtifactIgnore);
             }
             else
             { // Not found
@@ -584,7 +608,7 @@ namespace GenshinGuide
             //Init
             string gearSlot = null;
             int offset = 46;
-            Bitmap bm = artifactImage.Clone(new Rectangle(3, offset, artifactImage.Width / 2, 20), artifactImage.PixelFormat);
+            Bitmap bm = artifactImage.Clone(new Rectangle(3, offset, max_X / 2, 20), artifactImage.PixelFormat);
 
             // Process Img
             Scraper.SetGrayscale(ref bm);
@@ -593,13 +617,13 @@ namespace GenshinGuide
 
 
             // Analyze
-            gearSlot = Scraper.AnalyzeText(bm);
+            gearSlot = Scraper.AnalyzeText_1(bm);
             gearSlot = gearSlot.Replace("\n", String.Empty);
 
             // View Picture
-            UserInterface.Reset();
-            UserInterface.SetImage(bm);
-            UserInterface.AddText(gearSlot);
+            //UserInterface.Reset();
+            //UserInterface.SetImage(bm);
+            //UserInterface.AddText(gearSlot);
 
             return Scraper.GetGearSlotCode(gearSlot);
         }
@@ -619,18 +643,19 @@ namespace GenshinGuide
             }
             else // scan time, cup, hat artifacts only
             {
-                Bitmap bm = artifactImage.Clone(new Rectangle(0, yOffset, artifactImage.Width / 2 + artifactImage.Width / 28, 20),artifactImage.PixelFormat);
+                Bitmap bm = artifactImage.Clone(new Rectangle(0, yOffset, max_X / 2 + max_X / 28, 20),artifactImage.PixelFormat);
                 Scraper.SetContrast(50.0, ref bm);
                 Scraper.SetInvert(ref bm);
 
-                mainStat = Scraper.AnalyzeText(bm);
+                mainStat = Scraper.AnalyzeText_1(bm);
                 mainStat = mainStat.Replace("\n", String.Empty);
                 mainStat.Trim();
+                mainStat = Regex.Replace(mainStat, @"(?![A-Za-z\s]).", "");
 
                 // View Picture
-                UserInterface.Reset();
-                UserInterface.SetImage(bm);
-                UserInterface.AddText(mainStat);
+                //UserInterface.Reset();
+                //UserInterface.SetImage(bm);
+                //UserInterface.AddText(mainStat);
 
                 return Scraper.GetMainStatCode(mainStat);
             }
@@ -697,23 +722,24 @@ namespace GenshinGuide
         {
             // Get Level
             Bitmap bm = artifactImage.Clone(new Rectangle(11, 198, 50, 33), artifactImage.PixelFormat);
+            //Bitmap bm = artifactImage.Clone(new Rectangle(18, 206, 36, 18), artifactImage.PixelFormat);
             Graphics g = Graphics.FromImage(bm);
             // Add more padding to be able to read level better
             g.DrawRectangle(new Pen(bm.GetPixel(7, 10), 16), new Rectangle(0, 0, bm.Width, bm.Height));
             g.DrawRectangle(new Pen(bm.GetPixel(7, 10), 12), new Rectangle(0, 0, bm.Width, bm.Height));
             // Process Img
             Scraper.SetGrayscale(ref bm);
-            Scraper.SetContrast(60.0, ref bm);
+            //Scraper.SetContrast(60.0, ref bm);
             Scraper.SetInvert(ref bm);
 
-            string text = Scraper.AnalyzeText(bm);
+            string text = Scraper.AnalyzeText_2(bm);
             text.Trim();
             text = text.Replace("\n", String.Empty);
 
             // View Picture
-            UserInterface.Reset();
-            UserInterface.SetImage(bm);
-            UserInterface.AddText(text);
+            //UserInterface.Reset();
+            //UserInterface.SetImage(bm);
+            //UserInterface.AddText(text);
 
             int level;
             if (text != "" && int.TryParse(text, out level))
@@ -739,7 +765,7 @@ namespace GenshinGuide
             }
         }
 
-        private static Artifact.SubStats[] ScanArtifactSubStats(Bitmap artifactImage, int max_X, int max_Y, ref int subStatsCount, ref int setName)
+        private static Artifact.SubStats[] ScanArtifactSubStats(Bitmap artifactImage, int rarity, int level ,ref int subStatsCount, ref int setName)
         {
             // Get SubStats
             Artifact.SubStats[] subStats = new Artifact.SubStats[4];
@@ -748,36 +774,145 @@ namespace GenshinGuide
             int xOffset = 30;
             int subStatSpacing = 27;
             string text = "";
+            int width = artifactImage.Width;
+            System.Drawing.Imaging.PixelFormat pixelFormat = artifactImage.PixelFormat;
 
-            for (int i = 0; i < 5; i++)
+            // Get Substats Count
+            int count = 2;
+            if(rarity == 5)
             {
-                Bitmap bm = artifactImage.Clone(new Rectangle(xOffset, yOffset + (i * subStatSpacing), artifactImage.Width-xOffset, 29), artifactImage.PixelFormat);
+                if (level >= 4)
+                {
+                    count = 4;
+                }
+                else
+                    count = 3;
+            }
+            if(rarity == 4)
+            {
+                if (level >= 8)
+                {
+                    count = 4;
+                }
+                else if (level >= 4)
+                {
+                    count = 3;
+                }
+                else
+                    count = 2;
+            }
+
+
+            if (count == 4)
+            {
+                //Do first two substats using threads
+                Bitmap bm_1 = artifactImage.Clone(new Rectangle(xOffset, yOffset + (0 * subStatSpacing), width - xOffset, 29), pixelFormat);
+                Bitmap bm_2 = artifactImage.Clone(new Rectangle(xOffset, yOffset + (1 * subStatSpacing), width - xOffset, 29), pixelFormat);
+                Bitmap bm_3 = artifactImage.Clone(new Rectangle(xOffset, yOffset + (2 * subStatSpacing), width - xOffset, 29), pixelFormat);
+                Bitmap bm_4 = artifactImage.Clone(new Rectangle(xOffset, yOffset + (3 * subStatSpacing), width - xOffset, 29), pixelFormat);
+
+                Thread thr1 = new Thread(() => subStats[0] = ScanArtifactSubStat(bm_1, 1));
+                Thread thr2 = new Thread(() => subStats[1] = ScanArtifactSubStat(bm_2, 2));
+                Thread thr3 = new Thread(() => subStats[2] = ScanArtifactSubStat(bm_3, 3));
+                Thread thr4 = new Thread(() => subStats[3] = ScanArtifactSubStat(bm_4, 4));
+
+                thr1.Start();
+                thr2.Start();
+                thr3.Start();
+                thr4.Start();
+                thr1.Join();
+                thr2.Join();
+                thr3.Join();
+                thr4.Join();
+
+                Bitmap bm = artifactImage.Clone(new Rectangle(0, yOffset + (4 * subStatSpacing), width - offset, 29), pixelFormat);
+                Scraper.SetGrayscale(ref bm);
+                text = Scraper.AnalyzeText(bm).Trim();
+
+                // View Picture
+                //UserInterface.Reset();
+                //UserInterface.SetImage(bm);
+                //UserInterface.AddText(text);
+
+                if (text.Contains(':'))
+                {
+                    text = text.Split(':')[0];
+                    text = Regex.Replace(text, @"(?![A-Za-z\s]).", "");
+                    text = text.Trim();
+                    setName = Scraper.GetSetNameCode(text);
+                    return subStats;
+                }
+                else
+                {
+                    Debug.Print("Error: " + text + " is not a valid SET NAME");
+                    System.Environment.Exit(1);
+                    setName = -1;
+                }
+            }
+            else if(count == 3)
+            {
+                //Do first two substats using threads
+                Bitmap bm_1 = artifactImage.Clone(new Rectangle(xOffset, yOffset + (0 * subStatSpacing), width - xOffset, 29), pixelFormat);
+                Bitmap bm_2 = artifactImage.Clone(new Rectangle(xOffset, yOffset + (1 * subStatSpacing), width - xOffset, 29), pixelFormat);
+                Bitmap bm_3 = artifactImage.Clone(new Rectangle(xOffset, yOffset + (2 * subStatSpacing), width - xOffset, 29), pixelFormat);
+
+                Thread thr1 = new Thread(() => subStats[0] = ScanArtifactSubStat(bm_1, 1));
+                Thread thr2 = new Thread(() => subStats[1] = ScanArtifactSubStat(bm_2, 2));
+                Thread thr3 = new Thread(() => subStats[2] = ScanArtifactSubStat(bm_3, 3));
+
+                thr1.Start();
+                thr2.Start();
+                thr3.Start();
+                thr1.Join();
+                thr2.Join();
+                thr3.Join();
+            }
+            else 
+            {
+                //Do first two substats using threads
+                Bitmap bm_1 = artifactImage.Clone(new Rectangle(xOffset, yOffset + (0 * subStatSpacing), width - xOffset, 29), pixelFormat);
+                Bitmap bm_2 = artifactImage.Clone(new Rectangle(xOffset, yOffset + (1 * subStatSpacing), width - xOffset, 29), pixelFormat);
+
+                Thread thr1 = new Thread(() => subStats[0] = ScanArtifactSubStat(bm_1, 1));
+                Thread thr2 = new Thread(() => subStats[1] = ScanArtifactSubStat(bm_2, 2));
+
+                thr1.Start();
+                thr2.Start();
+                thr1.Join();
+                thr2.Join();
+            }
+
+
+            for (int i = count; i < 5; i++)
+            {
+                Bitmap bm = artifactImage.Clone(new Rectangle(xOffset, yOffset + (i * subStatSpacing), width-xOffset, 29), pixelFormat);
 
                 text = Scraper.AnalyzeText_Line(bm);
                 text = text.Replace("\n", String.Empty);
 
                 // view picture
-                UserInterface.Reset();
-                UserInterface.SetImage(bm);
-                UserInterface.AddText(text);
+                //UserInterface.Reset();
+                //UserInterface.SetImage(bm);
+                //UserInterface.AddText(text);
 
                 // Check if Scanned Set Name
                 if (text.Contains(":") || i >= 4)
                 {
                     //bm = new Bitmap(max_X - offset, 29);
-                    bm = artifactImage.Clone(new Rectangle(0, yOffset + (i * subStatSpacing), artifactImage.Width - offset, 29), artifactImage.PixelFormat);
+                    bm = artifactImage.Clone(new Rectangle(0, yOffset + (i * subStatSpacing), width - offset, 29), pixelFormat);
                     Scraper.SetGrayscale(ref bm);
-                    text = Scraper.AnalyzeText(bm).Trim();
+                    text = Scraper.AnalyzeText_3(bm).Trim();
 
                     // View Picture
-                    UserInterface.Reset();
-                    UserInterface.SetImage(bm);
-                    UserInterface.AddText(text);
+                    //UserInterface.Reset();
+                    //UserInterface.SetImage(bm);
+                    //UserInterface.AddText(text);
 
                     if (text.Contains(':'))
                     {
                         text = text.Split(':')[0];
                         text = Regex.Replace(text, @"(?![A-Za-z\s]).", "");
+                        text = text.Trim();
                         setName = Scraper.GetSetNameCode(text);
                     }
                     else
@@ -794,8 +929,7 @@ namespace GenshinGuide
                     {
                         text = Regex.Replace(text, @"(?![A-Za-z0-9+%\s/.]).", "");
                         string[] subStat = text.Split('+');
-                        // get rid of 1 and I issues
-                        subStat[1] = subStat[1].Replace('I', '1');
+                        subStat[0] = subStat[0].Trim();
 
                         // Percentage Based
                         if (subStat[1].Contains('%'))
@@ -808,9 +942,9 @@ namespace GenshinGuide
                             }
 
                             // View Picture
-                            UserInterface.Reset();
-                            UserInterface.SetImage(bm);
-                            UserInterface.AddText(subStat[0] + " " + subStat[1]);
+                            //UserInterface.Reset();
+                            //UserInterface.SetImage(bm);
+                            //UserInterface.AddText(subStat[0] + " " + subStat[1]);
 
                             subStats[i].stat = Scraper.GetSubStatCode(subStat[0] + optional);
 
@@ -825,10 +959,10 @@ namespace GenshinGuide
                         else // flat stats
                         {
                             // View Picture
-                            UserInterface.Reset();
-                            UserInterface.SetImage(bm);
-                            UserInterface.AddText(subStat[0] + " " + subStat[1]);
-
+                            //UserInterface.Reset();
+                            //UserInterface.SetImage(bm);
+                            //UserInterface.AddText(subStat[0] + " " + subStat[1]);
+ 
                             subStats[i].stat = Scraper.GetSubStatCode(subStat[0]);
                             subStats[i].value = Convert.ToDecimal(subStat[1].Replace("\n", String.Empty));
                         }
@@ -844,6 +978,86 @@ namespace GenshinGuide
             return subStats;
         }
 
+        private static Artifact.SubStats ScanArtifactSubStat(Bitmap bm, int ocr)
+        {
+            Artifact.SubStats subStat = new Artifact.SubStats();
+            string text = "";
+            if (ocr == 4)
+            {
+                text = Scraper.AnalyzeText_Line4(bm);
+            }
+            else if(ocr == 3)
+            {
+                text = Scraper.AnalyzeText_Line3(bm);
+            }
+            else if (ocr == 2)
+            {
+                text = Scraper.AnalyzeText_Line2(bm);
+            }
+            else
+            {
+                text = Scraper.AnalyzeText_Line1(bm);
+            }
+            
+
+
+            text = text.Replace("\n", String.Empty);
+
+            // view picture
+            //UserInterface.Reset();
+            //UserInterface.SetImage(bm);
+            //UserInterface.AddText(text);
+
+            if (text.Contains("+"))
+            {
+                text = Regex.Replace(text, @"(?![A-Za-z0-9+%\s/.]).", "");
+                string[] subStatText = text.Split('+');
+                subStatText[0] = subStatText[0].Trim();
+
+                // Percentage Based
+                if (subStatText[1].Contains('%'))
+                {
+                    string optional = "";
+
+                    if (subStatText[0] == "ATK" || subStatText[0] == "DEF" || subStatText[0] == "HP")
+                    {
+                        optional = "%";
+                    }
+
+                    // View Picture
+                    //UserInterface.Reset();
+                    //UserInterface.SetImage(bm);
+                    //UserInterface.AddText(subStatText[0] + " " + subStatText[1]);
+
+                    subStat.stat = Scraper.GetSubStatCode(subStatText[0] + optional);
+
+                    // Check if subStat has space (when value is not detected with a deciminal)
+                    if (subStatText[1].Contains(' ') && !subStatText[1].Contains('.'))
+                    {
+                        subStatText[1] = subStatText[1].Replace(' ', '.');
+                    }
+
+                    subStat.value = Convert.ToDecimal(subStatText[1].Split('%')[0]);
+                }
+                else // flat stats
+                {
+                    // View Picture
+                    //UserInterface.Reset();
+                    //UserInterface.SetImage(bm);
+                    //UserInterface.AddText(subStatText[0] + " " + subStatText[1]);
+
+                    subStat.stat = Scraper.GetSubStatCode(subStatText[0]);
+                    subStat.value = Convert.ToDecimal(subStatText[1].Replace("\n", String.Empty));
+                }
+            }
+            else
+            {
+                subStat.value = Convert.ToDecimal(-1);
+            }
+
+            return subStat;
+        }
+
         private static int ScanArtifactEquippedCharacter(Bitmap artifactImage, int max_X, int max_Y)
         {
             int xOffset = 30;
@@ -856,14 +1070,14 @@ namespace GenshinGuide
             Scraper.SetGrayscale(ref bm);
             Scraper.SetContrast(60.0, ref bm);
 
-            string equippedCharacter = Scraper.AnalyzeText(bm);
+            string equippedCharacter = Scraper.AnalyzeText_4(bm);
             equippedCharacter.Trim();
             equippedCharacter = equippedCharacter.Replace("\n", String.Empty);
 
             // View Picture
-            UserInterface.Reset();
-            UserInterface.SetImage(bm);
-            UserInterface.AddText(equippedCharacter);
+            //UserInterface.Reset();
+            //UserInterface.SetImage(bm);
+            //UserInterface.AddText(equippedCharacter);
 
             if (equippedCharacter != "")
             {

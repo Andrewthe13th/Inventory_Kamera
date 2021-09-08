@@ -102,7 +102,7 @@ namespace GenshinGuide
             // Artifact has no one assigned
             [""] = 0,
             /////////// Traveler is Assigned at runtime /////////////
-            //["Andross"] = 1,
+            ["Andross"] = 1,
             ///////////////////////////////////////////////
             ["Amber"] = ++characterCount,
             ["Kaeya"] = ++characterCount,
@@ -132,7 +132,8 @@ namespace GenshinGuide
             ["Albedo"] = ++characterCount,
             ["Ganyu"] = ++characterCount,
             ["Xiao"] = ++characterCount,
-            ["HuTao"] = ++characterCount, // 30
+            ["Hu Tao"] = ++characterCount, // 30
+            ["HuTao"] = characterCount, // 30
             ["Rosaria"] = ++characterCount,
             ["Yanfei"] = ++characterCount,
             ["Eula"] = ++characterCount,
@@ -143,7 +144,9 @@ namespace GenshinGuide
             ["Yoimiya"] = ++characterCount,
             ["Sayu"] = ++characterCount,
             ["Raiden Shogun"] = ++characterCount,
+            ["Raiden"] = characterCount,
             ["Kujou Sara"] = ++characterCount,
+            ["Kujou"] = characterCount,
             ["Aloy"] = ++characterCount, // 40
             ["Sangonomiya Kokomi"] = ++characterCount,
             ["Sangonomiya "] = characterCount,
@@ -290,6 +293,14 @@ namespace GenshinGuide
         };
 
         private static TesseractEngine ocr_live = new TesseractEngine( (Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+        private static TesseractEngine ocr_1 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+        private static TesseractEngine ocr_2 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+        private static TesseractEngine ocr_3 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+        private static TesseractEngine ocr_4 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+        private static TesseractEngine ocr_5 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+        private static TesseractEngine ocr_6 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+        private static TesseractEngine ocr_7 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+        private static TesseractEngine ocr_8 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
 
         //TODO: subStats Dictionaries
 
@@ -303,17 +314,17 @@ namespace GenshinGuide
         }
 
         /// <summary> Use Tesseract OCR to find words on picture to string </summary>
-        public static string AnalyzeTextWithLiveTesseract(Bitmap img)
-        {
-            string text = "";
-            string dir = Directory.GetCurrentDirectory() + "\\tessdata";
-            using (var ocr = new TesseractEngine(dir, "genshin_eng", EngineMode.LstmOnly))
-            {
-                var page = ocr.Process(img, PageSegMode.SingleLine);
-                text = page.GetText();
-            }
-            return text;
-        }
+        //public static string AnalyzeTextWithLiveTesseract(Bitmap img)
+        //{
+        //    string text = "";
+        //    string dir = Directory.GetCurrentDirectory() + "\\tessdata";
+        //    using (var ocr = new TesseractEngine(dir, "genshin_eng", EngineMode.LstmOnly))
+        //    {
+        //        var page = ocr.Process(img, PageSegMode.SingleLine);
+        //        text = page.GetText();
+        //    }
+        //    return text;
+        //}
 
         public static string AnalyzeText(Bitmap bitmap)
         {
@@ -336,6 +347,89 @@ namespace GenshinGuide
             return text;
         }
 
+        #region Multi threaded Options
+        public static string AnalyzeText_1(Bitmap bitmap)
+        {
+            string text = "";
+
+            using (var page = ocr_1.Process(bitmap, PageSegMode.SingleBlock))
+            {
+                using (var iter = page.GetIterator())
+                {
+                    iter.Begin();
+                    do
+                    {
+                        text += iter.GetText(PageIteratorLevel.TextLine);
+                    }
+                    while (iter.Next(PageIteratorLevel.TextLine));
+                }
+            }
+
+
+            return text;
+        }
+        public static string AnalyzeText_2(Bitmap bitmap)
+        {
+            string text = "";
+
+            using (var page = ocr_2.Process(bitmap, PageSegMode.SingleBlock))
+            {
+                using (var iter = page.GetIterator())
+                {
+                    iter.Begin();
+                    do
+                    {
+                        text += iter.GetText(PageIteratorLevel.TextLine);
+                    }
+                    while (iter.Next(PageIteratorLevel.TextLine));
+                }
+            }
+
+
+            return text;
+        }
+        public static string AnalyzeText_3(Bitmap bitmap)
+        {
+            string text = "";
+
+            using (var page = ocr_3.Process(bitmap, PageSegMode.SingleBlock))
+            {
+                using (var iter = page.GetIterator())
+                {
+                    iter.Begin();
+                    do
+                    {
+                        text += iter.GetText(PageIteratorLevel.TextLine);
+                    }
+                    while (iter.Next(PageIteratorLevel.TextLine));
+                }
+            }
+
+
+            return text;
+        }
+        public static string AnalyzeText_4(Bitmap bitmap)
+        {
+            string text = "";
+
+            using (var page = ocr_4.Process(bitmap, PageSegMode.SingleBlock))
+            {
+                using (var iter = page.GetIterator())
+                {
+                    iter.Begin();
+                    do
+                    {
+                        text += iter.GetText(PageIteratorLevel.TextLine);
+                    }
+                    while (iter.Next(PageIteratorLevel.TextLine));
+                }
+            }
+
+
+            return text;
+        }
+
+        #endregion
         public static string AnalyzeText_Line(Bitmap bitmap)
         {
             string text = "";
@@ -356,6 +450,91 @@ namespace GenshinGuide
 
             return text;
         }
+
+        #region Multi thread Substats Options
+        public static string AnalyzeText_Line1(Bitmap bitmap)
+        {
+            string text = "";
+
+            using (var page = ocr_5.Process(bitmap, PageSegMode.SingleLine))
+            {
+                using (var iter = page.GetIterator())
+                {
+                    iter.Begin();
+                    do
+                    {
+                        text += iter.GetText(PageIteratorLevel.TextLine);
+                    }
+                    while (iter.Next(PageIteratorLevel.TextLine));
+                }
+            }
+
+
+            return text;
+        }
+
+        public static string AnalyzeText_Line2(Bitmap bitmap)
+        {
+            string text = "";
+
+            using (var page = ocr_6.Process(bitmap, PageSegMode.SingleLine))
+            {
+                using (var iter = page.GetIterator())
+                {
+                    iter.Begin();
+                    do
+                    {
+                        text += iter.GetText(PageIteratorLevel.TextLine);
+                    }
+                    while (iter.Next(PageIteratorLevel.TextLine));
+                }
+            }
+
+
+            return text;
+        }
+
+        public static string AnalyzeText_Line3(Bitmap bitmap)
+        {
+            string text = "";
+
+            using (var page = ocr_7.Process(bitmap, PageSegMode.SingleLine))
+            {
+                using (var iter = page.GetIterator())
+                {
+                    iter.Begin();
+                    do
+                    {
+                        text += iter.GetText(PageIteratorLevel.TextLine);
+                    }
+                    while (iter.Next(PageIteratorLevel.TextLine));
+                }
+            }
+
+
+            return text;
+        }
+        public static string AnalyzeText_Line4(Bitmap bitmap)
+        {
+            string text = "";
+
+            using (var page = ocr_8.Process(bitmap, PageSegMode.SingleLine))
+            {
+                using (var iter = page.GetIterator())
+                {
+                    iter.Begin();
+                    do
+                    {
+                        text += iter.GetText(PageIteratorLevel.TextLine);
+                    }
+                    while (iter.Next(PageIteratorLevel.TextLine));
+                }
+            }
+
+
+            return text;
+        }
+        #endregion
 
         public static string AnalyzeText_Sparse(Bitmap bitmap)
         {
@@ -507,7 +686,7 @@ namespace GenshinGuide
                 Debug.Print("Error: " + character + " is not a valid Character Name");
                 if(!bRedo)
                     System.Environment.Exit(1);
-                return code;
+                return -1;
             };
         }
 
@@ -620,6 +799,24 @@ namespace GenshinGuide
             }
 
             return destImage;
+        }
+
+        public static Bitmap SetGrayscale(Bitmap bitmap)
+        {
+            Bitmap temp = (Bitmap)bitmap;
+            Bitmap bmap = (Bitmap)temp.Clone();
+            Color c;
+            for (int i = 0; i < bmap.Width; i++)
+            {
+                for (int j = 0; j < bmap.Height; j++)
+                {
+                    c = bmap.GetPixel(i, j);
+                    byte gray = (byte)(.299 * c.R + .587 * c.G + .114 * c.B);
+
+                    bmap.SetPixel(i, j, Color.FromArgb(gray, gray, gray));
+                }
+            }
+            return bitmap = (Bitmap)bmap.Clone();
         }
 
         public static void SetGrayscale(ref Bitmap bitmap)

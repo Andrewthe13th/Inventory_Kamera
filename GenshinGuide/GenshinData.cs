@@ -32,7 +32,7 @@ namespace GenshinGuide
 
             // Get characters
             //Navigation.CharacterScreen();
-            //characters = CharacterScraper.ScanCharacters();
+            characters = CharacterScraper.ScanCharacters();
             //Navigation.MainMenuScreen();
 
             // Get Weapons
@@ -44,12 +44,14 @@ namespace GenshinGuide
             // Get Artifacts
             //Navigation.InventoryScreen();
             //Navigation.SelectArtifactInventory();
-            inventory.GetArtifacts(ref equippedArtifacts);
+            //inventory.GetArtifacts(ref equippedArtifacts);
             //Navigation.MainMenuScreen();
 
             // Assign Artifacts to Characters
             //AssignArtifacts();
             //AssignWeapons();
+
+            Console.ReadKey();
         }
 
         public void AssignArtifacts()

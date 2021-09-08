@@ -84,7 +84,7 @@ namespace GenshinGuide
             do
             {
                 ScanNameAndElement(ref name, ref element);
-                Navigation.SystemRandomWait(Navigation.Speed.Fast);
+                Navigation.SystemRandomWait(Navigation.Speed.Faster);
                 currentRuntimes++;
             } while ( (name <= 0 || element == -1) && (currentRuntimes < maxRuntimes) );
             
@@ -104,7 +104,7 @@ namespace GenshinGuide
                 do
                 {
                     level = ScanLevel(ref ascension);
-                    Navigation.SystemRandomWait(Navigation.Speed.Fast);
+                    Navigation.SystemRandomWait(Navigation.Speed.Faster);
                     currentRuntimes++;
                     // check if level exists in Level comparison
                     if (!LevelComparison.Contains(level))
@@ -140,17 +140,20 @@ namespace GenshinGuide
         {
             int xOffset = 83;
             int yOffset = 22;
-            Bitmap bm = new Bitmap(175,23);
+
+            //Bitmap bm = new Bitmap(220,23);
+            Bitmap bm = new Bitmap(220, 20);
             Graphics g = Graphics.FromImage(bm);
             int screenLocation_X = Navigation.GetPosition().left + xOffset;
             int screenLocation_Y = Navigation.GetPosition().top + yOffset;
             g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
 
             //Image Operations
-            bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
+            //bm = bm.Clone(new Rectangle(0, 0, 220, 20), bm.PixelFormat);
             Scraper.SetGrayscale(ref bm);
             Scraper.SetInvert(ref bm);
             Scraper.SetContrast(100.0, ref bm);
+            bm = Scraper.ResizeImage(bm, bm.Width * 3, bm.Height * 3);
 
             UserInterface.Reset();
             UserInterface.SetImage(bm);
@@ -161,13 +164,26 @@ namespace GenshinGuide
 
             if(text != "")
             {
-                text = Regex.Replace(text, @"[\/!@#$%^&*()\[\]\-_`~\\+={};:',.<>?‘]", "");
+                text = Regex.Replace(text, @"[!@#$%^&*()\[\]\-_`~\\+={};:',.<>?‘]", "");
+                text = Regex.Replace(text, @"\s{1,}\/", "/");
+                text = Regex.Replace(text, @"\/\s{1,}", "/");
+                // Get rid of / in front of Anemo bug
+                if(text[0] == '/')
+                {
+                    text = text.Substring(1);
+                }
+
                 //text = Regex.Replace(text, @"(?![\0-9\s]).", "");
-                text = Regex.Replace(text, @"[\s]{2,}", " ");
+                //text = Regex.Replace(text, @"[\s]{2,}", " ");
 
-                string[] x = text.Split(new[] {' '}, 2);
+                string[] x = text.Split(new[] {'/'}, 2);
+                // Get rid of spacing 
+                for (int i = 0; i < x.Length; i++)
+                {
+                    x[i] = x[i].Trim();
+                }
 
-                if (x.Length != 2)
+                if (x.Length <= 1)
                 {
                     Debug.Print("Error: " + x + " is not a valid element and character name.");
                     //System.Environment.Exit(1);
@@ -179,7 +195,27 @@ namespace GenshinGuide
                     UserInterface.AddText("Name: " + x[1]);
 
                     element = Scraper.GetElementalCode(x[0],true);
-                    name = Scraper.GetCharacterCode(x[1],true);
+
+                    int temp = -1;
+                    // strip each char from name until found in dictionary
+                    while(x[1].Length > 1)
+                    {
+                        temp = Scraper.GetCharacterCode(x[1], true);
+                        if(temp == -1)
+                        {
+                            x[1] = x[1].Substring(0, x[1].Length - 1);
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+
+                    if(x[1].Length > 1)
+                    {
+                        name = Scraper.GetCharacterCode(x[1], false);
+                    }
+                    
                 }
             }
         }
@@ -188,9 +224,12 @@ namespace GenshinGuide
         {
             int level = -1;
 
-            int xOffset = 1035;
-            int yOffset = 138;
-            Bitmap bm = new Bitmap(80, 24);
+            //int xOffset = 1035;
+            int xOffset = 960;
+            //int yOffset = 138;
+            int yOffset = 135;
+            //Bitmap bm = new Bitmap(80, 24);
+            Bitmap bm = new Bitmap(165, 28);
             Graphics g = Graphics.FromImage(bm);
             int screenLocation_X = Navigation.GetPosition().left + xOffset;
             int screenLocation_Y = Navigation.GetPosition().top + yOffset;
@@ -205,9 +244,10 @@ namespace GenshinGuide
             UserInterface.Reset();
             UserInterface.SetImage(bm);
 
-            string text = Scraper.AnalyzeFewText(bm);
+            //string text = Scraper.AnalyzeFewText(bm);
+            string text = Scraper.AnalyzeText(bm);
             text = text.Trim();
-            text = Regex.Replace(text, @"(?![0-9\s/]).", "");
+            text = Regex.Replace(text, @"(?![0-9/]).", "");
             text = Regex.Replace(text, @"/", " ");
 
             UserInterface.AddText(text);
@@ -217,16 +257,17 @@ namespace GenshinGuide
             {
                 temp = text.Split(' ');
             }
-            else if(temp.Length == 1)
+            else if (temp.Length == 1)
             {
-                int numR = (int)((temp[0].Length/2) + 1);
-                string[] temp1 = new string[2];
-                temp1[0] = temp[0].Substring(0, numR - 1);
-                temp1[1] = temp[0].Substring(temp1.Length + 1, numR - 1);
-                temp = temp1;
+                //int numR = (int)((temp[0].Length/2) + 1);
+                //string[] temp1 = new string[2];
+                //temp1[0] = temp[0].Substring(0, numR - 1);
+                //temp1[1] = temp[0].Substring(temp1[0].Length + 1, numR - 1);
+                //temp = temp1;
+                return level;
             }
-            
-            if(temp.Length == 3)
+
+            if (temp.Length == 3)
             {
                 string[] temp1 = new string[2];
                 temp1[0] = temp[0];
@@ -235,7 +276,7 @@ namespace GenshinGuide
             }
             int x = -1;
             int y = -1;
-            if(int.TryParse(temp[0],out x) && int.TryParse(temp[1], out y))
+            if (int.TryParse(temp[0], out x) && int.TryParse(temp[1], out y))
             {
                 // level must be within 1-100
                 if (x > 0 && x < 101)
@@ -249,7 +290,7 @@ namespace GenshinGuide
             }
             else
             {
-                if(temp.Length > 1)
+                if (temp.Length > 1)
                 {
                     Debug.Print("Error: Found " + temp[0] + " and " + temp[1] + " instead of level");
                     //System.Environment.Exit(1);
@@ -264,6 +305,88 @@ namespace GenshinGuide
 
             return level;
         }
+
+        //private static int ScanLevel(ref bool ascension)
+        //{
+        //    int level = -1;
+
+        //    int xOffset = 1035;
+        //    int yOffset = 138;
+        //    Bitmap bm = new Bitmap(80, 24);
+        //    Graphics g = Graphics.FromImage(bm);
+        //    int screenLocation_X = Navigation.GetPosition().left + xOffset;
+        //    int screenLocation_Y = Navigation.GetPosition().top + yOffset;
+        //    g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
+
+        //    //Image Operations
+        //    bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
+        //    Scraper.SetGrayscale(ref bm);
+        //    Scraper.SetInvert(ref bm);
+        //    Scraper.SetContrast(30.0, ref bm);
+
+        //    UserInterface.Reset();
+        //    UserInterface.SetImage(bm);
+
+        //    string text = Scraper.AnalyzeFewText(bm);
+        //    text = text.Trim();
+        //    text = Regex.Replace(text, @"(?![0-9\s/]).", "");
+        //    text = Regex.Replace(text, @"/", " ");
+
+        //    UserInterface.AddText(text);
+        //    string[] temp = { text };
+
+        //    if (Regex.IsMatch(text, " "))
+        //    {
+        //        temp = text.Split(' ');
+        //    }
+        //    else if(temp.Length == 1)
+        //    {
+        //        //int numR = (int)((temp[0].Length/2) + 1);
+        //        //string[] temp1 = new string[2];
+        //        //temp1[0] = temp[0].Substring(0, numR - 1);
+        //        //temp1[1] = temp[0].Substring(temp1[0].Length + 1, numR - 1);
+        //        //temp = temp1;
+        //        return level;
+        //    }
+
+        //    if(temp.Length == 3)
+        //    {
+        //        string[] temp1 = new string[2];
+        //        temp1[0] = temp[0];
+        //        temp1[1] = temp[2];
+        //        temp = temp1;
+        //    }
+        //    int x = -1;
+        //    int y = -1;
+        //    if(int.TryParse(temp[0],out x) && int.TryParse(temp[1], out y))
+        //    {
+        //        // level must be within 1-100
+        //        if (x > 0 && x < 101)
+        //        {
+        //            level = Convert.ToInt32(temp[0]);
+        //            if (level != y && level > 0 && level <= characterMaxLevel)
+        //            {
+        //                ascension = true;
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        if(temp.Length > 1)
+        //        {
+        //            Debug.Print("Error: Found " + temp[0] + " and " + temp[1] + " instead of level");
+        //            //System.Environment.Exit(1);
+        //        }
+        //        else
+        //        {
+        //            Debug.Print("Error: Found " + temp[0] + " instead of level");
+        //            //System.Environment.Exit(1);
+        //        }
+
+        //    }
+
+        //    return level;
+        //}
 
         private static int ScanExperience()
         {
@@ -391,7 +514,7 @@ namespace GenshinGuide
                 }
                 else
                 {
-                    Navigation.SystemRandomWait(Navigation.Speed.Instant);
+                    Navigation.SystemRandomWait(Navigation.Speed.Fast);
                 }
 
                 g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);

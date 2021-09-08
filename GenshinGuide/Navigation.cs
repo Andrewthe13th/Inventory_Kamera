@@ -224,6 +224,11 @@ namespace GenshinGuide
                 int value = r.Next(125, 150);
                 System.Threading.Thread.Sleep(value);
             }
+            else if (type == Speed.ArtifactIgnore)
+            {
+                int value = r.Next(80, 120);
+                System.Threading.Thread.Sleep(value);
+            }
             else if (type == Speed.Slow)
             {
                 int value = r.Next(1900, 2600);
@@ -243,7 +248,8 @@ namespace GenshinGuide
             Instant,
             Fast,
             Faster,
-            UI
+            UI,
+            ArtifactIgnore,
         }
         #endregion
     }
