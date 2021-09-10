@@ -11,15 +11,15 @@ namespace GenshinGuide
 {
     public class Artifact
     {
-        [JsonProperty] private int gearSlot;
-        [JsonProperty] private int rarity;
-        [JsonProperty] private int mainStat;
-        [JsonProperty] private int level;
-        [JsonProperty] private SubStats[] subStats;
-        [JsonProperty] private int subStatsCount;
-        [JsonProperty] private int setName;
-        [JsonProperty] private int equippedCharacter;
-        [JsonProperty] private int id;
+        [JsonProperty] public int gearSlot { get; private set; }
+        [JsonProperty] public int rarity { get; private set; }
+        [JsonProperty] public int mainStat { get; private set; }
+        [JsonProperty] public int level { get; private set; }
+        [JsonProperty] public SubStats[] subStats { get; private set; }
+        [JsonProperty] public int subStatsCount { get; private set; }
+        [JsonProperty] public int setName { get; private set; }
+        [JsonProperty] public int equippedCharacter { get; private set; }
+        [JsonProperty] public int id { get; private set; }
 
         public Artifact(int _rarity, int _gearSlot, int _mainStat, int _level, SubStats[] _subStats, int _subStatsCount, int _setName, int _equippedCharacter = 0, int _id = 0)
         {

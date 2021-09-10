@@ -30,7 +30,9 @@ namespace GenshinGuide
             Graphics g = Graphics.FromImage(bm);
             int maxColumns = 7;
             int maxRows = 4;
+            int totalRows = (int)Math.Ceiling((decimal)((decimal)(artifactCount) / (decimal)(maxColumns)));
             int currentColumn = 0;
+            int currentRow = 0;
 
             // offset used to move mouse to other artifacts
             int xOffset = Convert.ToInt32((Double)Navigation.GetArea().right * ((Double)12.25 / (Double)160));
@@ -45,10 +47,19 @@ namespace GenshinGuide
             // Go through artifact list
             while ( currentArtifactCount < artifactCount )
             {
-                if ( (artifactCount - currentArtifactCount <= (maxRows * maxColumns)) && (currentColumn == 0))
+
+                if (currentArtifactCount % maxColumns == 0)
                 {
-                    break;
+                    currentRow++;
+                    if (totalRows - currentRow <= maxRows - 1)
+                    {
+                        break;
+                    }
                 }
+                //if ( (artifactCount - currentArtifactCount <= (maxRows * maxColumns)) && (currentColumn == 0))
+                //{
+                //    break;
+                //}
 
                 // Select Artifact
                 Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(artifactLocation_X) + (xOffset * (currentArtifactCount % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(artifactLocation_Y));
@@ -100,34 +111,40 @@ namespace GenshinGuide
                 }
             };
 
-                // scroll down as much as possible
-                for (int i = 0; i < 20; i++)
-                    {
-                        Navigation.sim.Mouse.VerticalScroll(-1);
-                    }
+            // scroll down as much as possible
+            for (int i = 0; i < 20; i++)
+            {
+                Navigation.sim.Mouse.VerticalScroll(-1);
+            }
+            Navigation.SystemRandomWait(Navigation.Speed.Normal);
 
-                // Get artifacts on bottom of page
-                int rowsLeft = (int)Math.Ceiling( (double)(artifactCount - currentArtifactCount) / (double)maxRows);
-                for (int i = 1; i < rowsLeft; i++)
+            // Get artifacts on bottom of page
+            int rowsLeft = (int)Math.Ceiling( (double)(artifactCount - currentArtifactCount) / (double)maxColumns);
+            int startPostion = 1;
+            if ((artifactCount - currentArtifactCount) > maxRows*maxColumns)
+            {
+                startPostion = 0;
+            }
+            for (int i = startPostion; i < (rowsLeft + startPostion); i++)
+            {
+                for (int k = 0; k < maxColumns; k++)
                 {
-                    for (int k = 0; k < maxColumns; k++)
+                    if(artifactCount - currentArtifactCount <= 0)
                     {
-                        if(artifactCount - currentArtifactCount <= 0)
-                        {
-                            break;
-                        }
-                        Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(artifactLocation_X) + (xOffset * (k % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(artifactLocation_Y) + (yOffset * (i % (maxRows+1))));
-                        Navigation.sim.Mouse.LeftButtonClick();
-                        Navigation.SystemRandomWait(Navigation.Speed.Instant);
-
-                        // Scan Artifact
-                        Artifact a = ScanArtifact(currentArtifactCount);
-                        currentArtifactCount++;
-
-                        // Add to Artifact List Object
-                        artifacts.Add(a);
+                        break;
                     }
-                }//*/
+                    Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(artifactLocation_X) + (xOffset * (k % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(artifactLocation_Y) + (yOffset * (i % (maxRows+1))));
+                    Navigation.sim.Mouse.LeftButtonClick();
+                    Navigation.SystemRandomWait(Navigation.Speed.Instant);
+
+                    // Scan Artifact
+                    Artifact a = ScanArtifact(currentArtifactCount);
+                    currentArtifactCount++;
+
+                    // Add to Artifact List Object
+                    artifacts.Add(a);
+                }
+            }//*/
 
             return artifacts;
 
@@ -190,6 +207,7 @@ namespace GenshinGuide
             g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
 
             // Display Image
+            UserInterface.Reset();
             UserInterface.SetImage(bm);
 
             // Get Rarity (Check color)
@@ -206,11 +224,11 @@ namespace GenshinGuide
             Color equipped = Color.FromArgb(255, 255, 231, 187);
             Color equippedColor = bm.GetPixel(5, bm.Height - 10);
 
-            if ( CompareColors(fiveStar,rarityColor) || CompareColors(fourthStar, rarityColor))
+            if ( Scraper.CompareColors(fiveStar,rarityColor) || Scraper.CompareColors(fourthStar, rarityColor))
             //if (true)
             {
-                rarity = ( CompareColors(fiveStar, rarityColor) ) ? 5 : 4;
-                bool b_equipped = CompareColors(equipped, equippedColor);
+                rarity = ( Scraper.CompareColors(fiveStar, rarityColor) ) ? 5 : 4;
+                bool b_equipped = Scraper.CompareColors(equipped, equippedColor);
 
                 Bitmap bm_1 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
                 Bitmap bm_2 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
@@ -253,24 +271,24 @@ namespace GenshinGuide
                 //level = ScanArtifactLevel(bm, width, height);
                 //subStats = ScanArtifactSubStats(bm, width, height, ref subStatsCount, ref setName);
 
-                //if(CompareColors(equipped, equippedColor))
+                //if(Scraper.CompareColors(equipped, equippedColor))
                 //{
                 //    equippedCharacter = ScanArtifactEquippedCharacter(bm, width, height);
                 //}
 
             }
             // Don't fully scan 3 star artifacts and lower
-            else if (CompareColors(thirdStar, rarityColor))
+            else if (Scraper.CompareColors(thirdStar, rarityColor))
             {
                 rarity = 3;
                 Navigation.SystemRandomWait(Navigation.Speed.ArtifactIgnore);
             }
-            else if (CompareColors(twoStar, rarityColor))
+            else if (Scraper.CompareColors(twoStar, rarityColor))
             {
                 rarity = 2;
                 Navigation.SystemRandomWait(Navigation.Speed.ArtifactIgnore);
             }
-            else if (CompareColors(firstStar, rarityColor))
+            else if (Scraper.CompareColors(firstStar, rarityColor))
             {
                 rarity = 1;
                 Navigation.SystemRandomWait(Navigation.Speed.ArtifactIgnore);
@@ -287,20 +305,7 @@ namespace GenshinGuide
             return a;
         }
 
-        private static bool CompareColors(Color a, Color b)
-        {
-            int[] diff = new int[3];
-            diff[0] = Math.Abs(a.R - b.R);
-            diff[1] = Math.Abs(a.G - b.G);
-            diff[2] = Math.Abs(a.B - b.B);
-
-            if(diff[0] < 10 && diff[1] < 10 && diff[2] < 10)
-            {
-                return true;
-            }
-
-            return false;
-        }
+        
 
         private static int ScanArtifactGearSlot(int artifactLocation_X, int artifactLocation_Y, int max_X, int max_Y , PictureBox pictureBox, TextBox textBox)
         {
@@ -1063,7 +1068,7 @@ namespace GenshinGuide
             int xOffset = 30;
             int yOffset = 532;
 
-            Bitmap bm = artifactImage.Clone(new Rectangle(xOffset, yOffset, artifactImage.Width - xOffset, 20), artifactImage.PixelFormat);
+            Bitmap bm = artifactImage.Clone(new Rectangle(xOffset, yOffset, max_X - xOffset, 20), artifactImage.PixelFormat);
             Graphics g = Graphics.FromImage(bm);
             // Gets rid of character head on Left
             g.DrawRectangle(new Pen(bm.GetPixel(max_X - xOffset - 1, 10), 14), new Rectangle(0, 0, 13, bm.Height));

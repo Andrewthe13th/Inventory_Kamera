@@ -5,6 +5,7 @@ using System.Linq;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace GenshinGuide
@@ -28,8 +29,10 @@ namespace GenshinGuide
             Bitmap bm = new Bitmap(130, 130);
             Graphics g = Graphics.FromImage(bm);
             int maxColumns = 7;
-            int maxRows = 3;
+            int maxRows = 4;
+            int totalRows = (int)Math.Ceiling((decimal)( (decimal)(weaponCount) / (decimal)(maxColumns) ));
             int currentColumn = 0;
+            int currentRow = 0;
 
             // offset used to move mouse to other weapons
             int xOffset = Convert.ToInt32((Double)Navigation.GetArea().right * ((Double)12.25 / (Double)160));
@@ -42,15 +45,25 @@ namespace GenshinGuide
             // Go through weapon list
             while (currentweaponCount < weaponCount)
             {
-                if ((weaponCount - currentweaponCount <= (maxRows * maxColumns)) && (currentColumn == 0))
+                //if ((weaponCount - currentweaponCount <= (maxRows * maxColumns-1)) && (currentColumn == 0))
+                //{
+
+                //    break;
+                //}
+                if ( currentweaponCount % maxColumns == 0)
                 {
-                    break;
+                    currentRow++;
+                    if(totalRows - currentRow <= maxRows-1)
+                    {
+                        break;
+                    }
                 }
+
 
                 // Select weapon
                 Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(weaponLocation_X) + (xOffset * (currentweaponCount % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(weaponLocation_Y));
                 Navigation.sim.Mouse.LeftButtonClick();
-                //Navigation.SystemRandomWait(Navigation.Speed.Instant);
+                //Navigation.SystemRandomWait(Navigation.Speed.Faster);
 
                 // Scan weapon
                 Weapon w = ScanWeapon(currentweaponCount);
@@ -66,7 +79,7 @@ namespace GenshinGuide
 
                 // Add to weapon List Object
                 weapons.Add(w);
-                GC.Collect();
+                //GC.Collect();
 
                 // reach end of row
                 if (currentColumn == maxColumns)
@@ -105,10 +118,16 @@ namespace GenshinGuide
             {
                 Navigation.sim.Mouse.VerticalScroll(-1);
             }
+            Navigation.SystemRandomWait(Navigation.Speed.Normal);
 
             // Get weapons on bottom of page
-            int rowsLeft = (int)Math.Ceiling((double)(weaponCount - currentweaponCount) / (double)maxRows);
-            for (int i = 1; i < rowsLeft; i++)
+            int rowsLeft = (int)Math.Ceiling((double)(weaponCount - currentweaponCount) / (double)maxColumns);
+            int startPostion = 1;
+            if( (weaponCount - currentweaponCount) > 21)
+            {
+                startPostion = 0;
+            }
+            for (int i = startPostion; i < (rowsLeft + startPostion); i++)
             {
                 for (int k = 0; k < maxColumns; k++)
                 {
@@ -118,7 +137,7 @@ namespace GenshinGuide
                     }
                     Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(weaponLocation_X) + (xOffset * (k % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(weaponLocation_Y) + (yOffset * (i % (maxRows + 1))));
                     Navigation.sim.Mouse.LeftButtonClick();
-                    //Navigation.SystemRandomWait(Navigation.Speed.Instant);
+                    //Navigation.SystemRandomWait(Navigation.Speed.Faster);
 
                     // Scan weapon
                     Weapon w = ScanWeapon(currentweaponCount);
@@ -157,19 +176,57 @@ namespace GenshinGuide
             // Display Image
             UserInterface.SetImage(bm);
 
-            //string text = Scraper.AnalyzeWeaponImage(bm);
+            // Check for Rarity
+            Color rarityColor = bm.GetPixel(12, 10);
+            Color fiveStar = Color.FromArgb(255, 188, 105, 50);
+            Color fourthStar = Color.FromArgb(255, 161, 86, 224);
+            Color threeStar = Color.FromArgb(255, 81, 127, 203);
+            // Check for equipped color
+            Color equipped = Color.FromArgb(255, 255, 231, 187);
+            Color equippedColor = bm.GetPixel(5, bm.Height - 10);
 
-            // TODO:: ADD multi threading support 
-
-            // All Weapons will be scanned 
-            name = ScanWeaponName(screenLocation_X, screenLocation_Y, width, height);
-            // Skip weapons lower than 3 stars
-            if(name >= 10)
+            if (Scraper.CompareColors(fiveStar, rarityColor) || Scraper.CompareColors(fourthStar, rarityColor) || Scraper.CompareColors(threeStar, rarityColor))
             {
-                level = ScanWeaponLevel(screenLocation_X, screenLocation_Y, width, height, ref ascension);
-                refinementLevel = ScanWeaponRefinement(screenLocation_X, screenLocation_Y, width, height);
-                equippedCharacter = ScanWeaponEquippedCharacter(screenLocation_X, screenLocation_Y, width, height);
+
+                bool b_equipped = Scraper.CompareColors(equipped, equippedColor);
+                // TODO:: ADD multi threading support 
+                Bitmap bm_1 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
+                Bitmap bm_2 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
+                Bitmap bm_3 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
+                Bitmap bm_4 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
+
+                Thread thr1 = new Thread(() => name = ScanWeaponName(bm_1, width, height));
+                Thread thr2 = new Thread(() => level = ScanWeaponLevel(bm_2, width, height, ref ascension));
+                Thread thr3 = new Thread(() => refinementLevel = ScanWeaponRefinement(bm_3, width, height));
+                Thread thr4 = new Thread(() => equippedCharacter = ScanWeaponEquippedCharacter(bm_4, width, height));
+
+                thr1.Start();thr2.Start();thr3.Start();
+                if(b_equipped)
+                {
+                    thr4.Start();
+                }
+
+                thr1.Join(); thr2.Join(); thr3.Join();
+                if (b_equipped)
+                {
+                    thr4.Join();
+                }
+
+                //// Non threaded
+                //name = ScanWeaponName(bm_1, width, height);
+                //level = ScanWeaponLevel(bm_2, width, height, ref ascension);
+                //refinementLevel = ScanWeaponRefinement(bm_3, width, height);
+                //if(Scraper.CompareColors(equipped, equippedColor))
+                //{
+                //    equippedCharacter = ScanWeaponEquippedCharacter(bm_4, width, height);
+                //}
+
             }
+            else
+            {
+                Navigation.SystemRandomWait(Navigation.Speed.ArtifactIgnore);
+            }
+
 
             Weapon weapon = new Weapon(name,level,ascension,refinementLevel,equippedCharacter,id);
 
@@ -199,19 +256,20 @@ namespace GenshinGuide
             return Int32.Parse(text.Split()[1].Split('/')[0]);
         }
 
-        public static int ScanWeaponName(int weaponLocation_X, int weaponLocation_Y, int max_X, int max_Y)
+        public static int ScanWeaponName(Bitmap weaponImage, int max_X, int max_Y)
         {
             int name = 0;
 
             //Init
             int xOffset = 10;
             int yOffset = 7;
-            Bitmap bm = new Bitmap(max_X-2*xOffset, 25);
+            //Bitmap bm = new Bitmap(max_X-2*xOffset, 25);
+            Bitmap bm = weaponImage.Clone(new Rectangle(xOffset, yOffset, max_X-2*xOffset, 25), weaponImage.PixelFormat);
 
             // Setup Img
             Graphics g = Graphics.FromImage(bm);
-            g.CopyFromScreen(weaponLocation_X + xOffset, weaponLocation_Y + yOffset, 0, 0, bm.Size);
-            g.Dispose();
+            //g.CopyFromScreen(weaponLocation_X + xOffset, weaponLocation_Y + yOffset, 0, 0, bm.Size);
+            //g.Dispose();
             // View Picture
             //UserInterface.Reset();
             //UserInterface.SetImage(bm);
@@ -237,7 +295,7 @@ namespace GenshinGuide
             //Scraper.SetContrast(20.0, ref bm);
 
 
-            //bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
+            //bm = Scraper.ResizeImage(bm, max_X * 2, max_Y * 2);
 
             // View Picture
             //UserInterface.Reset();
@@ -245,7 +303,7 @@ namespace GenshinGuide
 
             // Analyze
             //string text = Scraper.AnalyzeText(bm);
-            string text = Scraper.AnalyzeText(bm);
+            string text = Scraper.AnalyzeText_1(bm);
             text = text.Trim();
 
             // View Picture
@@ -262,16 +320,17 @@ namespace GenshinGuide
             return name;
         }
 
-        public static int ScanWeaponLevel(int weaponLocation_X, int weaponLocation_Y, int max_X, int max_Y, ref bool ascension)
+        public static int ScanWeaponLevel(Bitmap weaponImage, int max_X, int max_Y, ref bool ascension)
         {
             // Get Level
-            int xOffset = 15;
-            int yOffset = 206;
-            Bitmap bm = new Bitmap(150, 19); // old was 100
-            Graphics g = Graphics.FromImage(bm);
-            g.CopyFromScreen(weaponLocation_X + xOffset, weaponLocation_Y + yOffset, 0, 0, bm.Size);
-            //g.DrawRectangle(new Pen(bm.GetPixel(1, 20), 22), new Rectangle(0, 0, bm.Width, bm.Height));
-            bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
+            int xOffset = 14;
+            int yOffset = 204;
+            //Bitmap bm = new Bitmap(110, 22); // old was 100
+            Bitmap bm = weaponImage.Clone(new Rectangle(xOffset, yOffset, 110, 22), weaponImage.PixelFormat);
+            //Graphics g = Graphics.FromImage(bm);
+            //g.CopyFromScreen(weaponLocation_X + xOffset, weaponLocation_Y + yOffset, 0, 0, bm.Size);
+            //g.DrawRectangle(new Pen(bm.GetPixel(1, 20), 22), new Rectangle(0, 0, max_X, max_Y));
+            //bm = Scraper.ResizeImage(bm, max_X * 2, max_Y * 2);
 
             Scraper.SetGrayscale(ref bm);
             Scraper.SetInvert(ref bm);
@@ -282,7 +341,7 @@ namespace GenshinGuide
             UserInterface.SetImage(bm);
 
 
-            string text = Scraper.AnalyzeText(bm);
+            string text = Scraper.AnalyzeText_2(bm);
             //string text = Scraper.AnalyzeOneText(bm);
             text = Regex.Replace(text, @"(?![0-9\s/]).", "");
             text = text.Trim();
@@ -331,24 +390,26 @@ namespace GenshinGuide
             }
         }
 
-        public static int ScanWeaponRefinement(int weaponLocation_X, int weaponLocation_Y, int max_X, int max_Y)
+        public static int ScanWeaponRefinement(Bitmap weaponImage, int max_X, int max_Y)
         {
             int xOffset = 13;
             int yOffset = 230;
             // Get Level
-            Bitmap bm = new Bitmap(30, 30);
-            //Bitmap bm = new Bitmap(100, 100);
+            //Bitmap bm = new Bitmap(30, 30);
+            Bitmap bm = weaponImage.Clone(new Rectangle(xOffset, yOffset, 30, 30), weaponImage.PixelFormat);
             Graphics g = Graphics.FromImage(bm);
-            g.CopyFromScreen(weaponLocation_X + xOffset, weaponLocation_Y + yOffset, 0, 0, bm.Size);
-            g.DrawRectangle(new Pen(bm.GetPixel(7, 10), 14), new Rectangle(0, 0, bm.Width, bm.Height));
+            //g.CopyFromScreen(weaponLocation_X + xOffset, weaponLocation_Y + yOffset, 0, 0, bm.Size);
+            g.DrawRectangle(new Pen(bm.GetPixel(7, 10), 14), new Rectangle(0, 0, 30, 30));
             //Scraper.SetContrast(100.0, ref bm);
-            Scraper.SetGrayscale(ref bm);
-            Scraper.SetContrast(60.0, ref bm);
+            
+            //Scraper.SetContrast(60.0, ref bm);
             Scraper.SetInvert(ref bm);
-            bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
+            Scraper.SetGrayscale(ref bm);
+            //bm = Scraper.ResizeImage(bm, max_X * 2, max_Y * 2);
 
-            string text = Scraper.AnalyzeText(bm);
+            string text = Scraper.AnalyzeText_3(bm);
             text = text.Trim();
+            text = Regex.Replace(text, @"[!@#$%^&*()\[\]\-_`~\\+={};:',.<>?‘]", "");
 
             // View Picture
             UserInterface.Reset();
@@ -365,14 +426,15 @@ namespace GenshinGuide
             {
                 // try again to try to get 5
                 bm = new Bitmap(30, 30);
+                bm = weaponImage.Clone(new Rectangle(xOffset, yOffset, max_X - xOffset, max_Y - yOffset), weaponImage.PixelFormat);
                 g = Graphics.FromImage(bm);
-                g.CopyFromScreen(weaponLocation_X + xOffset, weaponLocation_Y + yOffset, 0, 0, bm.Size);
-                g.DrawRectangle(new Pen(bm.GetPixel(7, 10), 14), new Rectangle(0, 0, bm.Width, bm.Height));
+                //g.CopyFromScreen(weaponLocation_X + xOffset, weaponLocation_Y + yOffset, 0, 0, bm.Size);
+                g.DrawRectangle(new Pen(bm.GetPixel(7, 10), 14), new Rectangle(0, 0, max_X, max_Y));
                 //Scraper.SetContrast(100.0, ref bm);
                 Scraper.SetGrayscale(ref bm);
                 //Scraper.SetContrast(60.0, ref bm);
                 //Scraper.SetInvert(ref bm);
-                bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
+                bm = Scraper.ResizeImage(bm, max_X * 2, max_Y * 2);
 
                 text = Scraper.AnalyzeText(bm);
                 text = text.Trim();
@@ -392,21 +454,21 @@ namespace GenshinGuide
             }
         }
 
-        public static int ScanWeaponEquippedCharacter(int weaponLocation_X, int weaponLocation_Y, int max_X, int max_Y)
+        public static int ScanWeaponEquippedCharacter(Bitmap weaponImage, int max_X, int max_Y)
         {
             int xOffset = 30;
             int yOffset = 532;
-            Bitmap bm = new Bitmap(max_X - xOffset, 20);
+
+            Bitmap bm = weaponImage.Clone(new Rectangle(xOffset, yOffset, max_X - xOffset, 20), weaponImage.PixelFormat);
             Graphics g = Graphics.FromImage(bm);
-            g.CopyFromScreen(weaponLocation_X + xOffset, weaponLocation_Y + yOffset, 0, 0, bm.Size);
+            // Gets rid of character head on Left
             g.DrawRectangle(new Pen(bm.GetPixel(max_X - xOffset - 1, 10), 14), new Rectangle(0, 0, 13, bm.Height));
             Scraper.SetGrayscale(ref bm);
-            Scraper.SetContrast(30.0, ref bm);
-            //g.DrawRectangle(new Pen(Brushes.Red, 14), new Rectangle(0, 0, 13, bm.Height));
-            bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
+            Scraper.SetContrast(60.0, ref bm);
 
-            string equippedCharacter = Scraper.AnalyzeText(bm);
-            equippedCharacter = equippedCharacter.Trim();
+            string equippedCharacter = Scraper.AnalyzeText_4(bm);
+            equippedCharacter.Trim();
+            equippedCharacter = equippedCharacter.Replace("\n", String.Empty);
 
             // View Picture
             UserInterface.Reset();
@@ -426,7 +488,7 @@ namespace GenshinGuide
                     return Scraper.GetCharacterCode(equippedCharacter);
                 }
             }
-            // Weapon has no equipped character
+            // artifact has no equipped character
             return 0;
         }
     }

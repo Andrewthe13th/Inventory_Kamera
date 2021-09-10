@@ -25,33 +25,43 @@ namespace GenshinGuide
             equippedArtifacts = new List<Artifact>();
         }
 
+        public List<Character> GetCharacters()
+        {
+            return characters;
+        }
+
+        public Inventory GetInventory()
+        {
+            return inventory;
+        }
+
         public void GatherData()
         {
             // Get Traveler Name
-            //AssignTravelerName();
+            AssignTravelerName();
 
             // Get characters
-            //Navigation.CharacterScreen();
+            Navigation.CharacterScreen();
             characters = CharacterScraper.ScanCharacters();
-            //Navigation.MainMenuScreen();
+            Navigation.MainMenuScreen();
 
             // Get Weapons
-            //Navigation.InventoryScreen();
-            //Navigation.SelectWeaponInventory();
-            //inventory.GetWeapons(ref equippedWeapons);
-            //Navigation.MainMenuScreen();
+            Navigation.InventoryScreen();
+            Navigation.SelectWeaponInventory();
+            inventory.AssignWeapons(ref equippedWeapons);
+            Navigation.MainMenuScreen();
 
             // Get Artifacts
-            //Navigation.InventoryScreen();
-            //Navigation.SelectArtifactInventory();
-            //inventory.GetArtifacts(ref equippedArtifacts);
-            //Navigation.MainMenuScreen();
+            Navigation.InventoryScreen();
+            Navigation.SelectArtifactInventory();
+            inventory.AssignArtifacts(ref equippedArtifacts);
+            Navigation.MainMenuScreen();
 
             // Assign Artifacts to Characters
-            //AssignArtifacts();
-            //AssignWeapons();
+            AssignArtifacts();
+            AssignWeapons();
 
-            Console.ReadKey();
+            //Console.ReadKey();
         }
 
         public void AssignArtifacts()

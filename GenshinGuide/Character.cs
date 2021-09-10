@@ -9,14 +9,14 @@ namespace GenshinGuide
 {
     public class Character
     {
-        [JsonProperty] private int name;
-        [JsonProperty] private int element;
-        [JsonProperty] private int level;
-        [JsonProperty] private bool ascension;
-        [JsonProperty] private int experience;
-        [JsonProperty] private Weapon weapon;
+        [JsonProperty] public int name { get; private set; }
+        [JsonProperty] public int element { get; private set; }
+        [JsonProperty] public int level { get; private set; }
+        [JsonProperty] public bool ascension { get; private set; }
+        [JsonProperty] public int experience { get; private set; }
+        [JsonProperty] public Weapon weapon { get; private set; }
         [JsonProperty] private Artifact[] artifacts = new Artifact[5];
-        [JsonProperty] private int constellation;
+        [JsonProperty] public int constellation { get; private set; }
         [JsonProperty] private int[] talents = new int[3];
 
         public Character(int _name, int _element, int _level, bool _ascension, int _experience, int _constellation, int[] _talents)
@@ -28,6 +28,18 @@ namespace GenshinGuide
             experience = _experience;
             constellation = _constellation;
             talents = _talents;
+        }
+
+
+
+        public Artifact[] GetArtifacts()
+        {
+            return artifacts;
+        }
+
+        public int[] GetTalents()
+        {
+            return talents;
         }
 
         public void AssignWeapon(Weapon newWeapon)
@@ -43,6 +55,39 @@ namespace GenshinGuide
         public int GetName()
         {
             return name;
+        }
+
+        public int AscensionCount()
+        {
+            if (level < 20 || (level == 20 && ascension == false))
+            {
+                return 0;
+            }
+            else if (level < 40 || (level == 40 && ascension == false))
+            {
+                return 1;
+            }
+            else if (level < 50 || (level == 50 && ascension == false))
+            {
+                return 2;
+            }
+            else if (level < 60 || (level == 60 && ascension == false))
+            {
+                return 3;
+            }
+            else if (level < 70 || (level == 70 && ascension == false))
+            {
+                return 4;
+            }
+            else if (level < 80 || (level == 80 && ascension == false))
+            {
+                return 5;
+            }
+            else if (level <= 90 || (level == 90 && ascension == false))
+            {
+                return 6;
+             }
+            return 0;
         }
 
     }

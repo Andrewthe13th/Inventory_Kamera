@@ -20,13 +20,23 @@ namespace GenshinGuide
             //equippedArtifacts = new List<Artifact>();
         }
 
-        public void GetArtifacts(ref List<Artifact> equippedArtifacts)
+        public List<Artifact> GetArtifactList()
+        {
+            return artifacts;
+        }
+
+        public List<Weapon> GetWeaponList()
+        {
+            return weapons;
+        }
+
+        public void AssignArtifacts(ref List<Artifact> equippedArtifacts)
         {
             artifacts = ArtifactScraper.ScanArtifacts(ref equippedArtifacts);
             //ArtifactScraper.ScanArtifacts();
         }
 
-        public void GetWeapons(ref List<Weapon> equippedWeapon)
+        public void AssignWeapons(ref List<Weapon> equippedWeapon)
         {
             weapons = WeaponScraper.ScanWeapons(ref equippedWeapon);
         }

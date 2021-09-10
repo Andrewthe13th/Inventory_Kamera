@@ -45,8 +45,12 @@ namespace GenshinGuide
                 GenshinData data = new GenshinData();
                 data.GatherData();
 
+                // Covert to GOOD format
+                GOOD good = new GOOD(data);
+
                 // Make Json File
-                Scraper.CreateJsonFile(data);
+                Scraper.CreateJsonFile(good);
+
 
                 // Open GenshinDataFolder
                 Process.Start("explorer.exe", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\GenshinData");

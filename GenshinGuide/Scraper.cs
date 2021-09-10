@@ -102,7 +102,7 @@ namespace GenshinGuide
             // Artifact has no one assigned
             [""] = 0,
             /////////// Traveler is Assigned at runtime /////////////
-            ["Andross"] = 1,
+            //["Andross"] = 1,
             ///////////////////////////////////////////////
             ["Amber"] = ++characterCount,
             ["Kaeya"] = ++characterCount,
@@ -757,6 +757,59 @@ namespace GenshinGuide
                     tw.Close();
                 }
             }
+        }
+
+        public static void CreateJsonFile(GOOD data)
+        {
+            // write to JSON file
+            string JSONresult = JsonConvert.SerializeObject(data);
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            path += "\\GenshinData";
+            //string path = @"C:\Users\delaf\Downloads\genshinImpact_Data.json";
+
+            if (!Directory.Exists(path))
+            {
+                // Make Directory
+                Directory.CreateDirectory(path);
+            }
+            // Create file with timestamp in name
+            string fileName = "\\genshinData_" + DateTime.Today.ToString("d") + ".json";
+            fileName = fileName.Replace('/', '_');
+            string filePath = path + fileName;
+
+            // Override previous file if exists
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+                using (var tw = new StreamWriter(filePath, true))
+                {
+                    tw.WriteLine(JSONresult.ToString());
+                    tw.Close();
+                }
+            }
+            else if (!File.Exists(filePath))
+            {
+                using (var tw = new StreamWriter(filePath, true))
+                {
+                    tw.WriteLine(JSONresult.ToString());
+                    tw.Close();
+                }
+            }
+        }
+
+        public static bool CompareColors(Color a, Color b)
+        {
+            int[] diff = new int[3];
+            diff[0] = Math.Abs(a.R - b.R);
+            diff[1] = Math.Abs(a.G - b.G);
+            diff[2] = Math.Abs(a.B - b.B);
+
+            if (diff[0] < 10 && diff[1] < 10 && diff[2] < 10)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary> Take a screenshot to be used later with tesseract </summary>
