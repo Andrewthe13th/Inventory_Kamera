@@ -21,7 +21,7 @@ namespace GenshinGuide
         {
             int xOffset = 185;
             int yOffset = 26;
-            Bitmap bm = new Bitmap(155, 30);
+            Bitmap bm = new Bitmap(275, 30);
             Graphics g = Graphics.FromImage(bm);
             int screenLocation_X = Navigation.GetPosition().left + xOffset;
             int screenLocation_Y = Navigation.GetPosition().top + yOffset;
@@ -126,6 +126,27 @@ namespace GenshinGuide
                 Navigation.SelectCharacterTalents();
                 talents = ScanTalents();
 
+                // Scale down talents due to constellations
+                if(constellation >= 3)
+                {
+                    // get talent if character 
+                    string talent = Scraper.characterTalentConstellationOrder[name][0];
+                    if (constellation >= 5)
+                    {
+                        talents[1] = talents[1] - 3;
+                        talents[2] = talents[2] - 3;
+                    }
+                    else if (talent == "skill")
+                    {
+                        talents[1] = talents[1] - 3;
+                    }
+                    else
+                    {
+                        talents[2] = talents[2] - 3;
+                    }
+
+                }
+
                 character = new Character(name, element, level, ascension, experience, constellation, talents);
                 return true;
             }
@@ -142,7 +163,8 @@ namespace GenshinGuide
             int yOffset = 22;
 
             //Bitmap bm = new Bitmap(220,23);
-            Bitmap bm = new Bitmap(220, 20);
+            //Bitmap bm = new Bitmap(220, 20);
+            Bitmap bm = new Bitmap(242, 20);
             Graphics g = Graphics.FromImage(bm);
             int screenLocation_X = Navigation.GetPosition().left + xOffset;
             int screenLocation_Y = Navigation.GetPosition().top + yOffset;
@@ -447,7 +469,11 @@ namespace GenshinGuide
                 // Select Constellation
                 Navigation.SetCursorPos(Navigation.GetPosition().left + 1130, Navigation.GetPosition().top + 180 + (i * 75));
                 Navigation.sim.Mouse.LeftButtonClick();
-                Navigation.SystemRandomWait(Navigation.Speed.Fast);
+                // Selecting the first constellation takes a while to show
+                if(i == 0)
+                    Navigation.SystemRandomWait(Navigation.Speed.Normal);
+                else
+                    Navigation.SystemRandomWait(Navigation.Speed.Fast);
 
                 // Grab Color
                 g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);

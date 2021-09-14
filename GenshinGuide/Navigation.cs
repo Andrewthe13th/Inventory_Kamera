@@ -65,7 +65,7 @@ namespace GenshinGuide
             Double artifactButtonLocation_Y = (Double)area.bottom * ((Double)5 / (Double)90);
             SetCursorPos(position.left + Convert.ToInt32(artifactButtonLocation_X), position.top + Convert.ToInt32(artifactButtonLocation_Y));
             sim.Mouse.LeftButtonClick();
-            SystemRandomWait();
+            SystemRandomWait(Speed.UI);
         }
 
         public static void SelectWeaponInventory()
@@ -74,7 +74,7 @@ namespace GenshinGuide
             Double artifactButtonLocation_Y = (Double)area.bottom * ((Double)5 / (Double)90);
             SetCursorPos(position.left + Convert.ToInt32(artifactButtonLocation_X), position.top + Convert.ToInt32(artifactButtonLocation_Y));
             sim.Mouse.LeftButtonClick();
-            SystemRandomWait();
+            SystemRandomWait(Speed.UI);
         }
 
         public static void SelectCharacterAttributes()
@@ -211,12 +211,12 @@ namespace GenshinGuide
             }
             else if (type == Speed.Instant)
             {
-                int value = r.Next(2, 6);
+                int value = 10;
                 System.Threading.Thread.Sleep(value);
             }
             else if (type == Speed.Faster)
             {
-                int value = r.Next(20, 35);
+                int value = 25;
                 System.Threading.Thread.Sleep(value);
             }
             else if (type == Speed.Fast)

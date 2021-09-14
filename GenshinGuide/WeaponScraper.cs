@@ -63,7 +63,7 @@ namespace GenshinGuide
                 // Select weapon
                 Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(weaponLocation_X) + (xOffset * (currentweaponCount % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(weaponLocation_Y));
                 Navigation.sim.Mouse.LeftButtonClick();
-                //Navigation.SystemRandomWait(Navigation.Speed.Faster);
+                Navigation.SystemRandomWait(Navigation.Speed.Faster);
 
                 // Scan weapon
                 Weapon w = ScanWeapon(currentweaponCount);
@@ -109,7 +109,7 @@ namespace GenshinGuide
                             }
                         }
                     }
-                    //Navigation.SystemRandomWait();
+                    Navigation.SystemRandomWait(Navigation.Speed.Fast);
                 }
             };
 
@@ -137,7 +137,7 @@ namespace GenshinGuide
                     }
                     Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(weaponLocation_X) + (xOffset * (k % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(weaponLocation_Y) + (yOffset * (i % (maxRows + 1))));
                     Navigation.sim.Mouse.LeftButtonClick();
-                    //Navigation.SystemRandomWait(Navigation.Speed.Faster);
+                    Navigation.SystemRandomWait(Navigation.Speed.Instant);
 
                     // Scan weapon
                     Weapon w = ScanWeapon(currentweaponCount);
@@ -183,49 +183,48 @@ namespace GenshinGuide
             Color threeStar = Color.FromArgb(255, 81, 127, 203);
             // Check for equipped color
             Color equipped = Color.FromArgb(255, 255, 231, 187);
-            Color equippedColor = bm.GetPixel(5, bm.Height - 10);
+            Color equippedColor = bm.GetPixel(5, height - 10);
 
-            if (Scraper.CompareColors(fiveStar, rarityColor) || Scraper.CompareColors(fourthStar, rarityColor) || Scraper.CompareColors(threeStar, rarityColor))
+            // Scan different parts of the weapon
+
+            bool b_equipped = Scraper.CompareColors(equipped, equippedColor);
+            bool b_RarityAboveTwo = Scraper.CompareColors(fiveStar, rarityColor) || Scraper.CompareColors(fourthStar, rarityColor) || Scraper.CompareColors(threeStar, rarityColor);
+            // TODO:: ADD multi threading support 
+            Bitmap bm_1 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
+            Bitmap bm_2 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
+            Bitmap bm_3 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
+            Bitmap bm_4 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
+
+            Thread thr1 = new Thread(() => name = ScanWeaponName(bm_1, width, height));
+            Thread thr2 = new Thread(() => level = ScanWeaponLevel(bm_2, width, height, ref ascension));
+            Thread thr3 = new Thread(() => refinementLevel = ScanWeaponRefinement(bm_3, width, height));
+            Thread thr4 = new Thread(() => equippedCharacter = ScanWeaponEquippedCharacter(bm_4, width, height));
+
+            // Start Threads
+
+            thr1.Start();thr2.Start();
+            if (b_RarityAboveTwo)
             {
-
-                bool b_equipped = Scraper.CompareColors(equipped, equippedColor);
-                // TODO:: ADD multi threading support 
-                Bitmap bm_1 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
-                Bitmap bm_2 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
-                Bitmap bm_3 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
-                Bitmap bm_4 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
-
-                Thread thr1 = new Thread(() => name = ScanWeaponName(bm_1, width, height));
-                Thread thr2 = new Thread(() => level = ScanWeaponLevel(bm_2, width, height, ref ascension));
-                Thread thr3 = new Thread(() => refinementLevel = ScanWeaponRefinement(bm_3, width, height));
-                Thread thr4 = new Thread(() => equippedCharacter = ScanWeaponEquippedCharacter(bm_4, width, height));
-
-                thr1.Start();thr2.Start();thr3.Start();
-                if(b_equipped)
-                {
-                    thr4.Start();
-                }
-
-                thr1.Join(); thr2.Join(); thr3.Join();
-                if (b_equipped)
-                {
-                    thr4.Join();
-                }
-
-                //// Non threaded
-                //name = ScanWeaponName(bm_1, width, height);
-                //level = ScanWeaponLevel(bm_2, width, height, ref ascension);
-                //refinementLevel = ScanWeaponRefinement(bm_3, width, height);
-                //if(Scraper.CompareColors(equipped, equippedColor))
-                //{
-                //    equippedCharacter = ScanWeaponEquippedCharacter(bm_4, width, height);
-                //}
-
+                thr3.Start();
             }
-            else
+            if(b_equipped)
             {
-                Navigation.SystemRandomWait(Navigation.Speed.ArtifactIgnore);
+                thr4.Start();
             }
+
+            // End Threads
+
+            thr1.Join(); thr2.Join();
+            if (b_equipped)
+            {
+                thr4.Join();
+            }
+            if (b_RarityAboveTwo)
+            {
+                thr3.Join();
+            }
+
+            
 
 
             Weapon weapon = new Weapon(name,level,ascension,refinementLevel,equippedCharacter,id);

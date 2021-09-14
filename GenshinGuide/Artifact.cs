@@ -19,9 +19,11 @@ namespace GenshinGuide
         [JsonProperty] public int subStatsCount { get; private set; }
         [JsonProperty] public int setName { get; private set; }
         [JsonProperty] public int equippedCharacter { get; private set; }
+
+        [JsonProperty] public bool _lock { get; private set; }
         [JsonProperty] public int id { get; private set; }
 
-        public Artifact(int _rarity, int _gearSlot, int _mainStat, int _level, SubStats[] _subStats, int _subStatsCount, int _setName, int _equippedCharacter = 0, int _id = 0)
+        public Artifact(int _rarity, int _gearSlot, int _mainStat, int _level, SubStats[] _subStats, int _subStatsCount, int _setName, int _equippedCharacter = 0, int _id = 0, bool _Lock = false)
         {
             gearSlot = _gearSlot;
             rarity = _rarity;
@@ -31,6 +33,7 @@ namespace GenshinGuide
             subStatsCount = _subStatsCount;
             setName = _setName;
             equippedCharacter = _equippedCharacter;
+            _lock = _Lock;
             id = _id;
         }
 

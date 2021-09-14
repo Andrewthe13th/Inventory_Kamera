@@ -274,6 +274,14 @@ namespace GenshinGuide
             format = "GOOD";
             version = 1;
             source = "Genshin_Data_Scanner";
+            characters = new List<ICharacter>();
+            artifacts = new List<IArtifact>();
+            weapons = new List<IWeapon>();
+
+            // Get rid of VS warning since we are converting this class to JSON
+            format = format.Trim();
+            version = version + 0;
+            source = source.Trim();
 
             // Assign Characters
             List<Character> _characters = genshinData.GetCharacters();
@@ -307,25 +315,34 @@ namespace GenshinGuide
             List<Artifact> _artifacts = genshinData.GetInventory().GetArtifactList();
             foreach (Artifact x in _artifacts)
             {
-                IArtifact temp = new IArtifact();
-                temp.setKey = eng_Artifacts[x.setName];
-                temp.slotKey = eng_ArtifactSlotList[x.gearSlot];
-                temp.level = x.level;
-                temp.rarity = x.rarity;
-                temp.mainStatKey = eng_ArtifactMainStatList[x.mainStat];
-                temp.location = eng_Names[x.equippedCharacter];
-                temp._lock = false;
-                // SubStats
-                temp.subStats = new ISubstat[4];
-                temp.subStats[0].key = eng_ArtifactSubStatList[x.subStats[0].stat];
-                temp.subStats[0].value = x.subStats[0].value;
-                temp.subStats[1].key = eng_ArtifactSubStatList[x.subStats[1].stat];
-                temp.subStats[1].value = x.subStats[1].value;
-                temp.subStats[2].key = eng_ArtifactSubStatList[x.subStats[2].stat];
-                temp.subStats[2].value = x.subStats[2].value;
-                temp.subStats[3].key = eng_ArtifactSubStatList[x.subStats[3].stat];
-                temp.subStats[3].value = x.subStats[3].value;
-                artifacts.Add(temp);
+                // only assign artifact level 5-4
+                if(x.rarity >= 4)
+                {
+                    IArtifact temp = new IArtifact();
+                    temp.setKey = eng_Artifacts[x.setName];
+                    temp.slotKey = eng_ArtifactSlotList[x.gearSlot];
+                    temp.level = x.level;
+                    temp.rarity = x.rarity;
+                    temp.mainStatKey = eng_ArtifactMainStatList[x.mainStat];
+                    temp.location = eng_Names[x.equippedCharacter];
+                    temp._lock = false;
+                    // SubStats
+                    temp.substats = new ISubstat[4];
+                    for(int i = 0; i < 4; i++)
+                    {
+                        if (x.subStats[i].value != 0)
+                        {
+                            temp.substats[i].key = eng_ArtifactSubStatList[x.subStats[i].stat];
+                            temp.substats[i].value = x.subStats[i].value;
+                        }
+                        else
+                        {
+                            temp.substats[i].key = "";
+                            temp.substats[i].value = x.subStats[i].value;
+                        }
+                    }
+                    artifacts.Add(temp);
+                }
             }
 
         }
@@ -349,7 +366,7 @@ namespace GenshinGuide
             [JsonProperty] public string location;
             // change Lock to "_lock" after
             [JsonProperty] public bool _lock;
-            [JsonProperty] public ISubstat[] subStats;
+            [JsonProperty] public ISubstat[] substats;
         }
 
         private struct ISubstat

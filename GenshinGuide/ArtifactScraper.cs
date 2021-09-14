@@ -61,10 +61,15 @@ namespace GenshinGuide
                 //    break;
                 //}
 
+                //if(currentArtifactCount > 23)
+                //{
+                //    Debug.Print("Nice!");
+                //}
+
                 // Select Artifact
                 Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(artifactLocation_X) + (xOffset * (currentArtifactCount % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(artifactLocation_Y));
                 Navigation.sim.Mouse.LeftButtonClick();
-                //Navigation.SystemRandomWait(Navigation.Speed.Instant);
+                Navigation.SystemRandomWait(Navigation.Speed.Faster);
 
                 // Scan Artifact
                 Artifact a = ScanArtifact(currentArtifactCount);
@@ -108,6 +113,7 @@ namespace GenshinGuide
                             }
                         }
                     }
+                    //Navigation.SystemRandomWait(Navigation.Speed.Fast);
                 }
             };
 
@@ -121,7 +127,7 @@ namespace GenshinGuide
             // Get artifacts on bottom of page
             int rowsLeft = (int)Math.Ceiling( (double)(artifactCount - currentArtifactCount) / (double)maxColumns);
             int startPostion = 1;
-            if ((artifactCount - currentArtifactCount) > maxRows*maxColumns)
+            if ((artifactCount - currentArtifactCount) > 21)
             {
                 startPostion = 0;
             }
@@ -193,6 +199,7 @@ namespace GenshinGuide
             int subStatsCount = 0;
             int setName = 0;
             int equippedCharacter = 0;
+            bool _lock = false;
 
 
             // Grab Image of Entire Artifact on Right
@@ -222,14 +229,29 @@ namespace GenshinGuide
 
             // Check for equipped color
             Color equipped = Color.FromArgb(255, 255, 231, 187);
-            Color equippedColor = bm.GetPixel(5, bm.Height - 10);
+            Color equippedColor = bm.GetPixel(5, height - 10);
+
+            // Check for lock color
+            Color lockColor = Color.FromArgb(255, 255, 138, 117);
+            Color lockStatus = bm.GetPixel(width - 35, 220);
+
+            //Bitmap lock_bm = new Bitmap(15, 15);
+            //Graphics g_1 = Graphics.FromImage(lock_bm);
+            //int screenLocation_X_1 = Navigation.GetPosition().left + Convert.ToInt32(artifactLocation_X);
+            //int screenLocation_Y_1 = Navigation.GetPosition().top + Convert.ToInt32(artifactLocation_Y);
+            //g_1.CopyFromScreen(screenLocation_X_1 + width - 35, screenLocation_Y_1 + 220, 0, 0, lock_bm.Size);
+
+            //// Display Image
+            //UserInterface.Reset();
+            //UserInterface.SetImage(lock_bm);
 
             if ( Scraper.CompareColors(fiveStar,rarityColor) || Scraper.CompareColors(fourthStar, rarityColor))
             //if (true)
             {
                 rarity = ( Scraper.CompareColors(fiveStar, rarityColor) ) ? 5 : 4;
                 bool b_equipped = Scraper.CompareColors(equipped, equippedColor);
-
+                _lock = Scraper.CompareColors(lockColor, lockStatus);
+ 
                 Bitmap bm_1 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
                 Bitmap bm_2 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
                 Bitmap bm_3 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
@@ -299,312 +321,10 @@ namespace GenshinGuide
             }
 
 
-            Artifact a =  new Artifact(rarity, gearSlot, mainStat, level, subStats, subStatsCount, setName, equippedCharacter, id);
+            Artifact a =  new Artifact(rarity, gearSlot, mainStat, level, subStats, subStatsCount, setName, equippedCharacter, id, _lock);
             //Artifact a = new Artifact("",0,"",0,0,null,0,"",null);
 
             return a;
-        }
-
-        
-
-        private static int ScanArtifactGearSlot(int artifactLocation_X, int artifactLocation_Y, int max_X, int max_Y , PictureBox pictureBox, TextBox textBox)
-        {
-            //Init
-            string gearSlot = null;
-            int offset = 46;
-            Bitmap bm = new Bitmap(max_X/2, 20);
-            Graphics g = Graphics.FromImage(bm);
-
-            // Setup Img
-            g = Graphics.FromImage(bm);
-            g.CopyFromScreen(artifactLocation_X + max_X / 28, artifactLocation_Y + offset, 0, 0, bm.Size);
-            Scraper.SetGrayscale(ref bm);
-            Scraper.SetContrast(60.0, ref bm);
-            Scraper.SetInvert(ref bm);
-            bm = Scraper.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
-
-            // Analyze
-            gearSlot = Scraper.AnalyzeText(bm);
-            gearSlot = gearSlot.Replace("\n", String.Empty);
-
-            // Display Image && Text
-            pictureBox.Image = bm;
-            pictureBox.Refresh();
-            textBox.Text = gearSlot;
-            textBox.Refresh();
-
-            return Scraper.GetGearSlotCode(gearSlot);
-        }
-
-        private static int ScanArtifactMainStat(int artifactLocation_X, int artifactLocation_Y, int max_X, int max_Y, int gearSlot, PictureBox pictureBox, TextBox textBox)
-        {
-            // Get Main Stat
-            string mainStat = null;
-            int yOffset = 100;
-            Bitmap bm = new Bitmap(max_X / 2 + max_X / 28, 20);
-            Graphics g = Graphics.FromImage(bm);
-            g.CopyFromScreen(artifactLocation_X, artifactLocation_Y + yOffset, 0, 0, bm.Size);
-            //Scraper.SetGrayscale(ref bm);
-            Scraper.SetContrast(50.0,ref bm);
-            //Scraper.SetGrayscale(ref bm);
-            Scraper.SetInvert(ref bm);
-            bm = Scraper.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
-
-            mainStat = Scraper.AnalyzeText(bm);
-            mainStat = mainStat.Replace("\n", String.Empty);
-            mainStat.Trim();
-
-            // Display Image && Text
-            pictureBox.Image = bm;
-            pictureBox.Refresh();
-            textBox.Text = mainStat;
-            textBox.Refresh();
-
-            // Check if Defense
-            if (mainStat == "DEF")
-                mainStat = "DEF%";
-
-            return Scraper.GetMainStatCode(mainStat);
-        }
-
-        private static decimal ScanArtifactMainStatValue(int artifactLocation_X, int artifactLocation_Y, int max_X, int max_Y, PictureBox pictureBox, TextBox textBox)
-        {
-            // Get Main Stat Value
-            string mainStatValueText = "";
-            int yOffset = 119;
-            Bitmap bm = new Bitmap(max_X / 3 + (max_X / 16), 34);
-            //Bitmap bm = new Bitmap(max_X / 4, 35);
-            Graphics g = Graphics.FromImage(bm);
-            g.CopyFromScreen(artifactLocation_X, artifactLocation_Y + yOffset, 0, 0, bm.Size);
-            Scraper.SetGrayscale(ref bm);
-            Scraper.SetContrast(90.0, ref bm);
-            Scraper.SetInvert(ref bm);
-            bm = Scraper.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
-            mainStatValueText = Scraper.AnalyzeText(bm);
-            mainStatValueText = mainStatValueText.Replace("\n", String.Empty);
-
-            // Display Image && Text
-            pictureBox.Image = bm;
-            pictureBox.Refresh();
-            textBox.Text = mainStatValueText;
-            textBox.Refresh();
-
-            // Check if percentage based or flat stat
-            if (mainStatValueText.Contains("%"))
-            {
-                mainStatValueText = mainStatValueText.Split('%')[0];
-            }
-
-            Decimal value;
-            if(decimal.TryParse(mainStatValueText, out value))
-            {
-                return value;
-            }
-            else
-            {
-                // Second Try
-                mainStatValueText = Scraper.AnalyzeFewText(bm);
-
-                if (mainStatValueText.Contains("%"))
-                {
-                    mainStatValueText = mainStatValueText.Split('%')[0];
-                }
-
-                Decimal value2;
-                if (decimal.TryParse(mainStatValueText, out value2))
-                {
-                    return value2;
-                }
-
-                Debug.Print("MainStatValue: " + value2.ToString() + " is NOT VALID");
-                System.Environment.Exit(1);
-                return -1.0m;
-                
-            }
-        }
-
-        private static int ScanArtifactLevel(int artifactLocation_X, int artifactLocation_Y, int max_X, int max_Y, PictureBox pictureBox, TextBox textBox)
-        {
-            // Get Level
-            Bitmap bm = new Bitmap(50, 33);
-            //Bitmap bm = new Bitmap(100, 100);
-            Graphics g = Graphics.FromImage(bm);
-            g.CopyFromScreen(artifactLocation_X + 11, artifactLocation_Y + 198, 0, 0, bm.Size);
-            g.DrawRectangle(new Pen(bm.GetPixel(7, 10), 16), new Rectangle(0, 0, bm.Width, bm.Height));
-            g.DrawRectangle(new Pen(bm.GetPixel(7, 10), 12), new Rectangle(0, 0, bm.Width, bm.Height));
-            Scraper.SetGrayscale(ref bm);
-            Scraper.SetContrast(60.0, ref bm);
-            Scraper.SetInvert(ref bm);
-            bm = Scraper.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
-
-            string text = Scraper.AnalyzeText(bm);
-            text.Trim();
-            text = text.Replace("\n", String.Empty);
-
-            // Display Image && Text
-            pictureBox.Image = bm;
-            pictureBox.Refresh();
-            textBox.Text = text;
-            textBox.Refresh();
-
-            int level;
-            if (text != "" && int.TryParse(text, out level))
-            {
-                // Check if level is valid
-                if(level <= 20 && level >= 0)
-                {
-                    return level;
-                }
-                else
-                {
-                    Debug.Print("Error: Found " + level + " for level for artifact");
-                    System.Environment.Exit(1);
-                    return -1;
-                }
-                
-            }
-            else
-            {
-                Debug.Print("Error: Found '" + text + "' for level for artifact");
-                System.Environment.Exit(1);
-                return -1;
-            }
-        }
-
-        private static Artifact.SubStats[] ScanArtifactSubStats(int artifactLocation_X, int artifactLocation_Y, int max_X, int max_Y, PictureBox pictureBox, TextBox textBox, ref int subStatsCount, ref int setName)
-        {
-            // Get SubStats
-            Artifact.SubStats[] subStats = new Artifact.SubStats[4];
-            int offset = 26;
-            int yOffset = 235;
-            int subStatSpacing = 27;
-            string text = "";
-
-            for (int i = 0; i < 5; i++)
-            {
-                Bitmap bm = new Bitmap(max_X, 29);
-                Graphics g = Graphics.FromImage(bm);
-                g.CopyFromScreen(artifactLocation_X, artifactLocation_Y + yOffset + (i * subStatSpacing), 0, 0, bm.Size);
-                g.DrawRectangle(new Pen(bm.GetPixel( max_X - 1, 10), 18), new Rectangle(0, 0, 18, bm.Height));
-                //g.DrawRectangle(new Pen(Brushes.Red, 17), new Rectangle(0, 0, 17, bm.Height));
-                //Scraper.SetGrayscale(ref bm);
-                //Scraper.SetContrast(60.0, ref bm);
-                bm = Scraper.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
-
-                text = Scraper.AnalyzeText(bm).Trim();
-                text = text.Replace("\n", String.Empty);
-
-                // Display Image && Text
-                pictureBox.Image = bm;
-                pictureBox.Refresh();
-                textBox.Text = text;
-                textBox.Refresh();
-
-                // Check if Scanned Set Name
-                if (text.Contains(":") || i >= 4)
-                {
-                    bm = new Bitmap(max_X - offset, 29);
-                    g = Graphics.FromImage(bm);
-                    g.CopyFromScreen(artifactLocation_X, artifactLocation_Y + yOffset + (i * subStatSpacing), 0, 0, bm.Size);
-                    //Scraper.SetGrayscale(ref bm);
-                    //Scraper.SetContrast(80.0, ref bm);
-                    bm = Scraper.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
-                    text = Scraper.AnalyzeText(bm).Trim();
-
-                    // Display Image && Text
-                    pictureBox.Image = bm;
-                    pictureBox.Refresh();
-                    textBox.Text = text;
-                    textBox.Refresh();
-
-                    if (text.Contains(':'))
-                    {
-                        text = text.Split(':')[0];
-                        text = Regex.Replace(text, @"(?![A-Za-z\s]).", "");
-                        setName = Scraper.GetSetNameCode(text);
-                    }
-                    else
-                    {
-                        Debug.Print("Error: " + text + " is not a valid SET NAME");
-                        System.Environment.Exit(1);
-                        setName = -1;
-                    }
-                    break;
-                }
-                else // Get SubStat
-                {
-                    if (text.Contains("+"))
-                    {
-                        string[] subStat = text.Split('+');
-                        subStat[1].Replace("\n", String.Empty);
-
-                        // Percentage Based
-                        if (subStat[1].Contains('%'))
-                        {
-                            string optional = "";
-
-                            if(subStat[0] == "ATK" || subStat[0] == "DEF" || subStat[0] == "HP")
-                            {
-                                optional = "%";
-                            }
-
-                            subStats[i].stat = Scraper.GetSubStatCode(subStat[0] + optional);
-                            subStats[i].value = Convert.ToDecimal(subStat[1].Split('%')[0]);
-                        }
-                        else // flat stats
-                        {
-                            subStats[i].stat = Scraper.GetSubStatCode(subStat[0]);
-                            subStats[i].value = Convert.ToDecimal(subStat[1].Replace("\n", String.Empty));
-                        }
-                    }
-                    else
-                    {
-                        subStats[i].value = Convert.ToDecimal(-1);
-                    }
-                    subStatsCount++;
-                }
-            }
-
-            return subStats;
-        }
-
-        private static int ScanArtifactEquippedCharacter(int artifactLocation_X, int artifactLocation_Y, int max_X, int max_Y, PictureBox pictureBox, TextBox textBox)
-        {
-            int xOffset = 30;
-            int yOffset = 532;
-            Bitmap bm = new Bitmap(max_X - xOffset, 20);
-            Graphics g = Graphics.FromImage(bm);
-            g.CopyFromScreen(artifactLocation_X + xOffset, artifactLocation_Y + yOffset, 0, 0, bm.Size);
-            g.DrawRectangle(new Pen(bm.GetPixel(max_X - xOffset - 1, 10), 14), new Rectangle(0, 0, 13, bm.Height));
-            Scraper.SetGrayscale(ref bm);
-            Scraper.SetContrast(60.0, ref bm);
-            //g.DrawRectangle(new Pen(Brushes.Red, 14), new Rectangle(0, 0, 13, bm.Height));
-            bm = Scraper.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
-
-            string equippedCharacter = Scraper.AnalyzeText(bm);
-            equippedCharacter.Trim();
-            equippedCharacter = equippedCharacter.Replace("\n", String.Empty);
-
-            // Display Image && Text
-            pictureBox.Image = bm;
-            pictureBox.Refresh();
-            textBox.Text = equippedCharacter;
-            textBox.Refresh();
-
-            if (equippedCharacter != "")
-            {
-                var regexItem = new Regex("Equipped:");
-                if (regexItem.IsMatch(equippedCharacter))
-                {
-                    string[] tempString = equippedCharacter.Split(':');
-                    equippedCharacter = tempString[1].Replace("\n", String.Empty);
-                    equippedCharacter = equippedCharacter.Trim();
-
-                    return Scraper.GetCharacterCode(equippedCharacter);
-                }
-            }
-            // artifact has no equipped character
-            return 0;
         }
 
         #region Threaded Scan Functions
@@ -725,13 +445,14 @@ namespace GenshinGuide
 
         private static int ScanArtifactLevel(Bitmap artifactImage, int max_X, int max_Y)
         {
+            int width = 50; int height = 33;
             // Get Level
-            Bitmap bm = artifactImage.Clone(new Rectangle(11, 198, 50, 33), artifactImage.PixelFormat);
+            Bitmap bm = artifactImage.Clone(new Rectangle(11, 198, width, height), artifactImage.PixelFormat);
             //Bitmap bm = artifactImage.Clone(new Rectangle(18, 206, 36, 18), artifactImage.PixelFormat);
             Graphics g = Graphics.FromImage(bm);
             // Add more padding to be able to read level better
-            g.DrawRectangle(new Pen(bm.GetPixel(7, 10), 16), new Rectangle(0, 0, bm.Width, bm.Height));
-            g.DrawRectangle(new Pen(bm.GetPixel(7, 10), 12), new Rectangle(0, 0, bm.Width, bm.Height));
+            g.DrawRectangle(new Pen(bm.GetPixel(7, 10), 16), new Rectangle(0, 0, width, height));
+            g.DrawRectangle(new Pen(bm.GetPixel(7, 10), 12), new Rectangle(0, 0, width, height));
             // Process Img
             Scraper.SetGrayscale(ref bm);
             //Scraper.SetContrast(60.0, ref bm);
