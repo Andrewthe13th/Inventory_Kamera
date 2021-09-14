@@ -61,7 +61,7 @@ namespace GenshinGuide
             {
                 characters.Add(character);
                 Navigation.SelectNextCharacter();
-                Navigation.SystemRandomWait(Navigation.Speed.Fast);
+                Navigation.SystemRandomWait(Navigation.Speed.SelectNextCharacter);
             }
 
 
@@ -164,7 +164,7 @@ namespace GenshinGuide
 
             //Bitmap bm = new Bitmap(220,23);
             //Bitmap bm = new Bitmap(220, 20);
-            Bitmap bm = new Bitmap(242, 20);
+            Bitmap bm = new Bitmap(220, 20);
             Graphics g = Graphics.FromImage(bm);
             int screenLocation_X = Navigation.GetPosition().left + xOffset;
             int screenLocation_Y = Navigation.GetPosition().top + yOffset;

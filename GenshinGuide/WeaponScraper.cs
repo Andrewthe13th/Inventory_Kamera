@@ -137,7 +137,7 @@ namespace GenshinGuide
                     }
                     Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(weaponLocation_X) + (xOffset * (k % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(weaponLocation_Y) + (yOffset * (i % (maxRows + 1))));
                     Navigation.sim.Mouse.LeftButtonClick();
-                    Navigation.SystemRandomWait(Navigation.Speed.Instant);
+                    Navigation.SystemRandomWait(Navigation.Speed.Faster);
 
                     // Scan weapon
                     Weapon w = ScanWeapon(currentweaponCount);

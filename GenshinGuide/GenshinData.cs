@@ -97,6 +97,7 @@ namespace GenshinGuide
             string traveler = CharacterScraper.ScanMainCharacterName();
             if(traveler != "")
             {
+                traveler = traveler.Substring(0, 7);
                 Scraper.AddTravelerToCharacterList(traveler);
             }
             else

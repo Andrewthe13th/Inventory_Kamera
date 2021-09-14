@@ -216,7 +216,7 @@ namespace GenshinGuide
             }
             else if (type == Speed.Faster)
             {
-                int value = 25;
+                int value = 40;
                 System.Threading.Thread.Sleep(value);
             }
             else if (type == Speed.Fast)
@@ -238,6 +238,16 @@ namespace GenshinGuide
                 int value = r.Next(1000, 1200);
                 System.Threading.Thread.Sleep(value);
             }
+            else if (type == Speed.UI)
+            {
+                int value = r.Next(1000, 1200);
+                System.Threading.Thread.Sleep(value);
+            }
+            else if (type == Speed.SelectNextCharacter)
+            {
+                int value = r.Next(225, 275);
+                System.Threading.Thread.Sleep(value);
+            }
 
         }
 
@@ -250,6 +260,7 @@ namespace GenshinGuide
             Faster,
             UI,
             ArtifactIgnore,
+            SelectNextCharacter,
         }
         #endregion
     }
