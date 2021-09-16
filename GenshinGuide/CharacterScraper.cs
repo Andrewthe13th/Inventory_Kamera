@@ -28,20 +28,35 @@ namespace GenshinGuide
             g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
 
             //Image Operations
-            bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
-            Scraper.SetGrayscale(ref bm);
+            Scraper.SetGamma(0.2, 0.2, 0.2, ref bm);
             Scraper.SetInvert(ref bm);
-            Scraper.SetContrast(60.0, ref bm);
+            Scraper.SetGrayscale(ref bm);
+            Scraper.SetContrast(40.0, ref bm);
+            //bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
+            //Scraper.SetGrayscale(ref bm);
+            //Scraper.SetInvert(ref bm);
+            //Scraper.SetContrast(80.0, ref bm);
 
             UserInterface.Reset();
             UserInterface.SetImage(bm);
+            Application.DoEvents();
+
+#if DEBUG
+            if (Scraper.s_bDoDebugOnlyCode)
+            {
+                UserInterface.Reset();
+                UserInterface.SetImage(bm);
+            }
+#endif
 
             string text = Scraper.AnalyzeText(bm);
             text = text.Trim();
 
             if (text != "")
             {
-                text = Regex.Replace(text, @"[\/!@#$%^&*()\[\]\-_`~\\+={};:',.<>?‘]", "");
+                text = Regex.Replace(text, @"[\W_]", "");
+                // Get rid of space and the text right after it
+                text = Regex.Replace(text, @"\s+\w*", "");
             }
             else
             {
@@ -179,6 +194,15 @@ namespace GenshinGuide
 
             UserInterface.Reset();
             UserInterface.SetImage(bm);
+            Application.DoEvents();
+
+#if DEBUG
+            if (Scraper.s_bDoDebugOnlyCode)
+            {
+                UserInterface.Reset();
+                UserInterface.SetImage(bm);
+            }
+#endif
 
             //string text = Scraper.AnalyzeElementAndCharName(bm);
             string text = Scraper.AnalyzeText(bm);
@@ -212,9 +236,14 @@ namespace GenshinGuide
                 }
                 else
                 {
-                    UserInterface.AddText("Element: " + x[0]);
-                    UserInterface.AddText(System.Environment.NewLine);
-                    UserInterface.AddText("Name: " + x[1]);
+#if DEBUG
+                    if (Scraper.s_bDoDebugOnlyCode)
+                    {
+                        UserInterface.AddText("Element: " + x[0]);
+                        UserInterface.AddText(System.Environment.NewLine);
+                        UserInterface.AddText("Name: " + x[1]);
+                    }
+#endif
 
                     element = Scraper.GetElementalCode(x[0],true);
 
@@ -263,8 +292,7 @@ namespace GenshinGuide
             Scraper.SetInvert(ref bm);
             Scraper.SetContrast(30.0, ref bm);
 
-            UserInterface.Reset();
-            UserInterface.SetImage(bm);
+            
 
             //string text = Scraper.AnalyzeFewText(bm);
             string text = Scraper.AnalyzeText(bm);
@@ -272,7 +300,15 @@ namespace GenshinGuide
             text = Regex.Replace(text, @"(?![0-9/]).", "");
             text = Regex.Replace(text, @"/", " ");
 
-            UserInterface.AddText(text);
+#if DEBUG
+            if (Scraper.s_bDoDebugOnlyCode)
+            {
+                UserInterface.Reset();
+                UserInterface.SetImage(bm);
+                UserInterface.AddText(text);
+            }
+#endif
+
             string[] temp = { text };
 
             if (Regex.IsMatch(text, " "))
@@ -428,8 +464,13 @@ namespace GenshinGuide
             //Scraper.SetInvert(ref bm);
             Scraper.SetContrast(30.0, ref bm);
 
-            UserInterface.Reset();
-            UserInterface.SetImage(bm);
+#if DEBUG
+            if (Scraper.s_bDoDebugOnlyCode)
+            {
+                UserInterface.Reset();
+                UserInterface.SetImage(bm);
+            }
+#endif
 
             string text = Scraper.AnalyzeText(bm);
             text = text.Trim();
@@ -477,8 +518,13 @@ namespace GenshinGuide
 
                 // Grab Color
                 g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
-                UserInterface.Reset();
-                UserInterface.SetImage(bm);
+#if DEBUG
+                if (Scraper.s_bDoDebugOnlyCode)
+                {
+                    UserInterface.Reset();
+                    UserInterface.SetImage(bm);
+                }
+#endif
                 constellationColor = bm.GetPixel(0, 0);
 
                 // Compare
@@ -495,7 +541,12 @@ namespace GenshinGuide
                         int screenLocation_Y1 = Navigation.GetPosition().top + 667;
                         g1.CopyFromScreen(screenLocation_X1, screenLocation_Y1, 0, 0, bm1.Size);
 
-                        UserInterface.SetImage(bm1);
+#if DEBUG
+                        if (Scraper.s_bDoDebugOnlyCode)
+                        {
+                            UserInterface.SetImage(bm1);
+                        }
+#endif
 
                         string text = Scraper.AnalyzeText(bm1);
 
@@ -511,7 +562,12 @@ namespace GenshinGuide
 
             }
 
-            UserInterface.AddText(constellation.ToString());
+#if DEBUG
+            if (Scraper.s_bDoDebugOnlyCode)
+            {
+                UserInterface.AddText(constellation.ToString());
+            }
+#endif
             Navigation.sim.Keyboard.KeyPress(WindowsInput.Native.VirtualKeyCode.ESCAPE);
             Navigation.SystemRandomWait();
             return constellation;
@@ -550,13 +606,18 @@ namespace GenshinGuide
                 Scraper.SetInvert(ref bm);
                 Scraper.SetContrast(60.0, ref bm);
 
-                UserInterface.Reset();
-                UserInterface.SetImage(bm);
-
                 text = Scraper.AnalyzeText(bm);
                 text = text.Trim();
                 text = Regex.Replace(text, @"(?![0-9]).", "");
-                UserInterface.AddText(text);
+
+#if DEBUG
+                if (Scraper.s_bDoDebugOnlyCode)
+                {
+                    UserInterface.Reset();
+                    UserInterface.SetImage(bm);
+                    UserInterface.AddText(text);
+                }
+#endif
 
                 int x = -1;
                 if(int.TryParse(text, out x))

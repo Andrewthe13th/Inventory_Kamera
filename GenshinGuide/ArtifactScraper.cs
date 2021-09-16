@@ -126,11 +126,8 @@ namespace GenshinGuide
 
             // Get artifacts on bottom of page
             int rowsLeft = (int)Math.Ceiling( (double)(artifactCount - currentArtifactCount) / (double)maxColumns);
+            bool b_EnchancementOre = false;
             int startPostion = 1;
-            if ((artifactCount - currentArtifactCount) > 21)
-            {
-                startPostion = 0;
-            }
             for (int i = startPostion; i < (rowsLeft + startPostion); i++)
             {
                 for (int k = 0; k < maxColumns; k++)
@@ -139,9 +136,26 @@ namespace GenshinGuide
                     {
                         break;
                     }
-                    Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(artifactLocation_X) + (xOffset * (k % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(artifactLocation_Y) + (yOffset * (i % (maxRows+1))));
-                    Navigation.sim.Mouse.LeftButtonClick();
-                    Navigation.SystemRandomWait(Navigation.Speed.Instant);
+                    if (!b_EnchancementOre)
+                    {
+                        Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(artifactLocation_X) + (xOffset * (k % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(artifactLocation_Y) + (yOffset * (i % (maxRows + 1))));
+                        Navigation.sim.Mouse.LeftButtonClick();
+                        Navigation.SystemRandomWait(Navigation.Speed.Faster);
+                    }
+
+                    // check if enchnacement Ore
+                    if (artifactCount - currentArtifactCount == 7)
+                    {
+                        b_EnchancementOre = WeaponScraper.CheckForEnchancementOre();
+                    }
+
+                    if (b_EnchancementOre)
+                    {
+                        // Scan top row instead
+                        Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(artifactLocation_X) + (xOffset * (k % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(artifactLocation_Y) + (yOffset * (0 % (maxRows + 1))));
+                        Navigation.sim.Mouse.LeftButtonClick();
+                        Navigation.SystemRandomWait(Navigation.Speed.Faster);
+                    }
 
                     // Scan Artifact
                     Artifact a = ScanArtifact(currentArtifactCount);
@@ -214,8 +228,13 @@ namespace GenshinGuide
             g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
 
             // Display Image
-            UserInterface.Reset();
-            UserInterface.SetImage(bm);
+#if DEBUG
+            if (Scraper.s_bDoDebugOnlyCode)
+            {
+                UserInterface.Reset();
+                UserInterface.SetImage(bm);
+            }
+#endif
 
             // Get Rarity (Check color)
             int rarity = 0;
@@ -409,9 +428,14 @@ namespace GenshinGuide
             if (decimal.TryParse(mainStatValueText, out value))
             {
                 // View Picture
-                UserInterface.Reset();
-                UserInterface.SetImage(bm);
-                UserInterface.AddText(mainStatValueText);
+#if DEBUG
+                if (Scraper.s_bDoDebugOnlyCode)
+                {
+                    UserInterface.Reset();
+                    UserInterface.SetImage(bm);
+                    UserInterface.AddText(mainStatValueText);
+                }
+#endif
 
                 return value;
             }
@@ -426,9 +450,14 @@ namespace GenshinGuide
                 }
 
                 // View Picture
-                UserInterface.Reset();
-                UserInterface.SetImage(bm);
-                UserInterface.AddText(mainStatValueText);
+#if DEBUG
+                if (Scraper.s_bDoDebugOnlyCode)
+                {
+                    UserInterface.Reset();
+                    UserInterface.SetImage(bm);
+                    UserInterface.AddText(mainStatValueText);
+                }
+#endif
 
                 Decimal value2;
                 if (decimal.TryParse(mainStatValueText, out value2))
@@ -814,6 +843,20 @@ namespace GenshinGuide
                     equippedCharacter = tempString[1].Replace("\n", String.Empty);
                     equippedCharacter = equippedCharacter.Trim();
                     equippedCharacter = Regex.Replace(equippedCharacter, @"[\/!@#$%^&*()\[\]\-_`~\\+={};:',.<>?‘|]", "");
+
+                    // Used to match with Traveler Name
+                    while (equippedCharacter.Length > 1)
+                    {
+                        int temp = Scraper.GetCharacterCode(equippedCharacter, true);
+                        if (temp == -1)
+                        {
+                            equippedCharacter = equippedCharacter.Substring(0, equippedCharacter.Length - 1);
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
 
                     return Scraper.GetCharacterCode(equippedCharacter);
                 }

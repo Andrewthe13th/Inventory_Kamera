@@ -37,14 +37,6 @@ namespace GenshinGuide
 
         public void GatherData()
         {
-            // Get Traveler Name
-            AssignTravelerName();
-
-            // Get characters
-            Navigation.CharacterScreen();
-            characters = CharacterScraper.ScanCharacters();
-            Navigation.MainMenuScreen();
-
             // Get Weapons
             Navigation.InventoryScreen();
             Navigation.SelectWeaponInventory();
@@ -55,6 +47,14 @@ namespace GenshinGuide
             Navigation.InventoryScreen();
             Navigation.SelectArtifactInventory();
             inventory.AssignArtifacts(ref equippedArtifacts);
+            Navigation.MainMenuScreen();
+
+            // Get Traveler Name
+            //AssignTravelerName();
+
+            // Get characters
+            Navigation.CharacterScreen();
+            characters = CharacterScraper.ScanCharacters();
             Navigation.MainMenuScreen();
 
             // Assign Artifacts to Characters
@@ -92,19 +92,7 @@ namespace GenshinGuide
             }
         }
 
-        public void AssignTravelerName()
-        {
-            string traveler = CharacterScraper.ScanMainCharacterName();
-            if(traveler != "")
-            {
-                traveler = traveler.Substring(0, 7);
-                Scraper.AddTravelerToCharacterList(traveler);
-            }
-            else
-            {
-                System.Environment.Exit(1);
-            }
-        }
+        
 
     }
 }

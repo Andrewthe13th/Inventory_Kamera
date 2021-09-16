@@ -11,15 +11,32 @@ namespace GenshinGuide
 {
     public partial class Form1 : Form
     {
-        private KeyHandler ghk;
+        //private KeyHandler ghk;
         private bool bStopExecution = false;
+        Thread mainThread;
+
+        KeyboardHook hook = new KeyboardHook();
 
         public Form1()
         {
             InitializeComponent();
-            ghk = new KeyHandler(Keys.Enter, this);
-            ghk.Register();
+            //ghk = new KeyHandler(Keys.Enter, this);
+            //ghk.Register();
+            // register the event that is fired after the key press.
+            hook.KeyPressed += new EventHandler<KeyPressedEventArgs>(hook_KeyPressed);
+            // register the control + alt + F12 combination as hot key.
+            hook.RegisterHotKey(Keys.Enter);
             comboBox1.SelectedItem = "ENG";
+        }
+
+        void hook_KeyPressed(object sender, KeyPressedEventArgs e)
+        {
+            // show the keys pressed in a label.
+            //txtOutput.Text = e.Modifier.ToString() + " + " + e.Key.ToString();
+            if (mainThread.IsAlive)
+            {
+                mainThread.Abort();
+            }
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -32,14 +49,16 @@ namespace GenshinGuide
             bStopExecution = false;
             bool threadCompletion = false;
 
-            Thread th = new Thread(() =>
+            mainThread = new Thread(() =>
             {
 
                 // Get Screen Location and Size
                 Navigation.Initialize("GenshinImpact");
 
                 // Global space to refer to form elements
+#if DEBUG
                 UserInterface.Init(picTarget, txtOutput);
+#endif
 
                 // The Data object of json object
                 GenshinData data = new GenshinData();
@@ -58,39 +77,36 @@ namespace GenshinGuide
                 // End Thread and finish
                 threadCompletion = true;
             });
+            mainThread.IsBackground = true;
+            mainThread.Start();
 
-            th.Start();
-
-            while (!threadCompletion)
+#if DEBUG
+            if (Scraper.s_bDoDebugOnlyCode)
             {
-                //Update Image and Text Box from threads
-                Application.DoEvents();
-                // End program when pressing 'Enter'
-                if (bStopExecution)
+                while (!threadCompletion)
                 {
-                    th.Abort();
-                    Navigation.Reset();
-                    GenshinData data = new GenshinData();
+
+                    // End program when pressing 'Enter'
+                    if (bStopExecution)
+                    {
+                        mainThread.Abort();
+                        Navigation.Reset();
+                        GenshinData data = new GenshinData();
+                    }
+
+                    //Update Image and Text Box from threads
+                    Application.DoEvents();
                 }
+                mainThread.Join();
+                System.Windows.Forms.Application.Exit();
             }
 
-            th.Join();
+#endif
 
-            //// Get Screen Location and Size
-            //Navigation.Initialize("GenshinImpact");
+            //while (Console.ReadKey(true).Key != ConsoleKey.Enter) { };
 
-            //// Global space to refer to form elements
-            //UserInterface.Init(picTarget, txtOutput);
-
-            //// The Data structure of json object
-            //GenshinData data = new GenshinData();
-            //data.GatherData();
-
-            //// Make File
-            //Scraper.CreateJsonFile(data);
-
-            //End Program
-            System.Windows.Forms.Application.Exit();
+            //th.Join();
+            //System.Windows.Forms.Application.Exit();
 
         }
 

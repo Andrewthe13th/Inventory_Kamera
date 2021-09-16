@@ -121,6 +121,7 @@
     </Compile>
     <Compile Include="GenshinData.cs" />
     <Compile Include="Inventory.cs" />
+    <Compile Include="KeyboardHook.cs" />
     <Compile Include="KeyHandler.cs" />
     <Compile Include="Navigation.cs" />
     <Compile Include="Program.cs" />

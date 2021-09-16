@@ -12,7 +12,11 @@ namespace GenshinGuide
 {
     public static class Scraper
     {
+#if DEBUG
+    public static bool s_bDoDebugOnlyCode = false;
+#endif
         // GLOBALS
+        public static bool b_AssignedTravelerName = false;
         private static int setCount = 0;
         private static int mainStatCount = 0;
         private static int characterCount = 1;
@@ -336,6 +340,14 @@ namespace GenshinGuide
             ["Engulfing Lightning"] = ++weaponCount,
             ["Everlasting Moonglow"] = ++weaponCount,
 
+        };
+        private static Dictionary<string, int> enchancementMaterialCode = new Dictionary<string, int>
+        {
+            ["Enhancement Ore"] = 1,
+            ["Fine Enhancement Ore"] = 2,
+            ["Mystic Enchnacement Ore"] = 3,
+            ["Sanctifying Unction"] = 4,
+            ["Sanctifying Essence"] = 5, // 4
         };
 
         private static TesseractEngine ocr_live = new TesseractEngine( (Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
@@ -727,13 +739,17 @@ namespace GenshinGuide
             {
                 return code;
             }
+            else if(Scraper.b_AssignedTravelerName == false)
+            {
+                return 0;
+            }
             else
             {
                 Debug.Print("Error: " + character + " is not a valid Character Name");
-                if(!bRedo)
+                if (!bRedo)
                     System.Environment.Exit(1);
                 return -1;
-            };
+            }
         }
 
         public static int GetElementalCode(string element, bool bRedo = false)
@@ -748,6 +764,20 @@ namespace GenshinGuide
                 Debug.Print("Error: " + element + " is not a valid Elemental Type");
                 if(!bRedo)
                     System.Environment.Exit(1);
+                return code;
+            };
+        }
+
+        public static int GetEnhancementMaterialCode(string enchancementMaterial)
+        {
+            int code = -1;
+            if (enchancementMaterialCode.TryGetValue(enchancementMaterial, out code))
+            {
+                return code;
+            }
+            else
+            {
+                Debug.Print("Error: " + enchancementMaterial + " is not a valid Enchancement Material");
                 return code;
             };
         }
@@ -1113,7 +1143,26 @@ namespace GenshinGuide
         }
         #endregion
 
-
+        public static void AssignTravelerName(string name)
+        {
+            string traveler = name;
+            if (traveler != "")
+            {
+                if (traveler.Length > 7)
+                {
+                    traveler = traveler.Substring(0, 7);
+                    Scraper.AddTravelerToCharacterList(traveler);
+                }
+                else
+                {
+                    Scraper.AddTravelerToCharacterList(traveler);
+                }
+            }
+            else
+            {
+                System.Environment.Exit(1);
+            }
+        }
 
 
     }

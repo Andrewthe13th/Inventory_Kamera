@@ -122,11 +122,8 @@ namespace GenshinGuide
 
             // Get weapons on bottom of page
             int rowsLeft = (int)Math.Ceiling((double)(weaponCount - currentweaponCount) / (double)maxColumns);
+            bool b_EnchancementOre = false;
             int startPostion = 1;
-            if( (weaponCount - currentweaponCount) > 21)
-            {
-                startPostion = 0;
-            }
             for (int i = startPostion; i < (rowsLeft + startPostion); i++)
             {
                 for (int k = 0; k < maxColumns; k++)
@@ -135,15 +132,29 @@ namespace GenshinGuide
                     {
                         break;
                     }
-                    Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(weaponLocation_X) + (xOffset * (k % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(weaponLocation_Y) + (yOffset * (i % (maxRows + 1))));
-                    Navigation.sim.Mouse.LeftButtonClick();
-                    Navigation.SystemRandomWait(Navigation.Speed.Faster);
+                    if (!b_EnchancementOre)
+                    {
+                        Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(weaponLocation_X) + (xOffset * (k % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(weaponLocation_Y) + (yOffset * (i % (maxRows + 1))));
+                        Navigation.sim.Mouse.LeftButtonClick();
+                        Navigation.SystemRandomWait(Navigation.Speed.Faster);
+                    }
 
-                    // Scan weapon
+                    // check if enchnacement Ore
+                    if(weaponCount - currentweaponCount == 7)
+                    {
+                        b_EnchancementOre = CheckForEnchancementOre();
+                    }
+
+                    if (b_EnchancementOre)
+                    {
+                        // Scan top row instead
+                        Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(weaponLocation_X) + (xOffset * (k % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(weaponLocation_Y) + (yOffset * (0 % (maxRows + 1))));
+                        Navigation.sim.Mouse.LeftButtonClick();
+                        Navigation.SystemRandomWait(Navigation.Speed.Faster);
+                    }
+
                     Weapon w = ScanWeapon(currentweaponCount);
                     currentweaponCount++;
-                    //Debug.Print("Weapon Count: " + currentweaponCount.ToString());
-                    //Debug.Print("Weapon Name: " + w.GetName());
 
                     // Add to weapon List Object
                     weapons.Add(w);
@@ -173,8 +184,14 @@ namespace GenshinGuide
             int screenLocation_Y = Navigation.GetPosition().top + Convert.ToInt32(weaponLocation_Y);
             g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
 
+
+#if DEBUG
             // Display Image
-            UserInterface.SetImage(bm);
+            if (Scraper.s_bDoDebugOnlyCode)
+            {
+                UserInterface.SetImage(bm);
+            }
+#endif
 
             // Check for Rarity
             Color rarityColor = bm.GetPixel(12, 10);
@@ -202,12 +219,12 @@ namespace GenshinGuide
 
             // Start Threads
 
-            thr1.Start();thr2.Start();
+            thr1.Start(); thr2.Start();
             if (b_RarityAboveTwo)
             {
                 thr3.Start();
             }
-            if(b_equipped)
+            if (b_equipped)
             {
                 thr4.Start();
             }
@@ -224,12 +241,41 @@ namespace GenshinGuide
                 thr3.Join();
             }
 
-            
 
 
-            Weapon weapon = new Weapon(name,level,ascension,refinementLevel,equippedCharacter,id);
+
+            Weapon weapon = new Weapon(name, level, ascension, refinementLevel, equippedCharacter, id);
 
             return weapon;
+            
+        }
+
+        public static bool CheckForEnchancementOre()
+        {
+            // Init Variables
+            int name = 0;
+
+            // Grab Image of Entire weapon on Right
+            Double weaponLocation_X = (Double)Navigation.GetArea().right * ((Double)108 / (Double)160);
+            Double weaponLocation_Y = (Double)Navigation.GetArea().bottom * ((Double)10 / (Double)90);
+            int width = 325; int height = 560;
+            Bitmap bm = new Bitmap(width, height);
+            Graphics g = Graphics.FromImage(bm);
+            int screenLocation_X = Navigation.GetPosition().left + Convert.ToInt32(weaponLocation_X);
+            int screenLocation_Y = Navigation.GetPosition().top + Convert.ToInt32(weaponLocation_Y);
+            g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
+
+            // Display Image
+#if DEBUG
+            if (Scraper.s_bDoDebugOnlyCode)
+            {
+                UserInterface.SetImage(bm);
+            }
+#endif
+
+            name = ScanEnchancementOreName(bm, width, height);
+
+            return (name > 0)? true:false;
         }
 
         public static int ScanWeaponCount()
@@ -282,8 +328,13 @@ namespace GenshinGuide
             //Scraper.SetContrast(80.0, ref bm);
 
             // View Picture
-            UserInterface.Reset();
-            UserInterface.SetImage(bm);
+#if DEBUG
+            if (Scraper.s_bDoDebugOnlyCode)
+            {
+                UserInterface.Reset();
+                UserInterface.SetImage(bm);
+            }
+#endif
 
             //Scraper.SetGrayscale(ref bm);
             //Scraper.SetInvert(ref bm);
@@ -306,15 +357,61 @@ namespace GenshinGuide
             text = text.Trim();
 
             // View Picture
-            UserInterface.Reset();
-            UserInterface.SetImage(bm);
-            UserInterface.AddText(text);
+#if DEBUG
+            if (Scraper.s_bDoDebugOnlyCode)
+            {
+                UserInterface.Reset();
+                UserInterface.SetImage(bm);
+                UserInterface.AddText(text);
+            }
+#endif
             text = text.Trim();
             text = Regex.Replace(text, @"(?![A-Za-z\s]).", "");
             //Debug.Print("Weapon Name: " + text);
 
             // Check in Dictionary
             name = Scraper.GetWeaponCode(text);
+
+            return name;
+        }
+
+        public static int ScanEnchancementOreName(Bitmap weaponImage, int max_X, int max_Y)
+        {
+            int name = 0;
+
+            //Init
+            int xOffset = 10;
+            int yOffset = 7;
+            //Bitmap bm = new Bitmap(max_X-2*xOffset, 25);
+            Bitmap bm = weaponImage.Clone(new Rectangle(xOffset, yOffset, max_X - 2 * xOffset, 25), weaponImage.PixelFormat);
+
+            // Setup Img
+            Graphics g = Graphics.FromImage(bm);
+
+            Scraper.SetGamma(0.2, 0.2, 0.2, ref bm);
+            Scraper.SetGrayscale(ref bm);
+            Scraper.SetInvert(ref bm);
+
+            // Analyze
+            //string text = Scraper.AnalyzeText(bm);
+            string text = Scraper.AnalyzeText(bm);
+            text = text.Trim();
+
+            // View Picture
+#if DEBUG
+            if (Scraper.s_bDoDebugOnlyCode)
+            {
+                UserInterface.Reset();
+                UserInterface.SetImage(bm);
+                UserInterface.AddText(text);
+            }
+#endif
+            text = text.Trim();
+            text = Regex.Replace(text, @"(?![A-Za-z\s]).", "");
+            //Debug.Print("Weapon Name: " + text);
+
+            // Check in Dictionary
+            name = Scraper.GetEnhancementMaterialCode(text);
 
             return name;
         }
@@ -335,11 +432,6 @@ namespace GenshinGuide
             Scraper.SetInvert(ref bm);
             Scraper.SetContrast(100.0, ref bm);
 
-            // View Picture
-            UserInterface.Reset();
-            UserInterface.SetImage(bm);
-
-
             string text = Scraper.AnalyzeText_2(bm);
             //string text = Scraper.AnalyzeOneText(bm);
             text = Regex.Replace(text, @"(?![0-9\s/]).", "");
@@ -348,9 +440,14 @@ namespace GenshinGuide
             text = text.Trim();
 
             // View Picture
-            UserInterface.Reset();
-            UserInterface.SetImage(bm);
-            UserInterface.AddText(text);
+#if DEBUG
+            if (Scraper.s_bDoDebugOnlyCode)
+            {
+                UserInterface.Reset();
+                UserInterface.SetImage(bm);
+                UserInterface.AddText(text);
+            }
+#endif
 
             if (text.Contains('/'))
             {
@@ -411,9 +508,14 @@ namespace GenshinGuide
             text = Regex.Replace(text, @"[!@#$%^&*()\[\]\-_`~\\+={};:',.<>?‘]", "");
 
             // View Picture
-            UserInterface.Reset();
-            UserInterface.SetImage(bm);
-            UserInterface.AddText(text);
+#if DEBUG
+            if (Scraper.s_bDoDebugOnlyCode)
+            {
+                UserInterface.Reset();
+                UserInterface.SetImage(bm);
+                UserInterface.AddText(text);
+            }
+#endif
 
             // Parse Int
             int refinementLevel = -1;
@@ -439,9 +541,14 @@ namespace GenshinGuide
                 text = text.Trim();
 
                 // View Picture
-                UserInterface.Reset();
-                UserInterface.SetImage(bm);
-                UserInterface.AddText(text);
+#if DEBUG
+                if (Scraper.s_bDoDebugOnlyCode)
+                {
+                    UserInterface.Reset();
+                    UserInterface.SetImage(bm);
+                    UserInterface.AddText(text);
+                }
+#endif
 
                 refinementLevel = -1;
                 if (int.TryParse(text, out refinementLevel))
@@ -470,9 +577,14 @@ namespace GenshinGuide
             equippedCharacter = equippedCharacter.Replace("\n", String.Empty);
 
             // View Picture
-            UserInterface.Reset();
-            UserInterface.SetImage(bm);
-            UserInterface.AddText(equippedCharacter);
+#if DEBUG
+            if (Scraper.s_bDoDebugOnlyCode)
+            {
+                UserInterface.Reset();
+                UserInterface.SetImage(bm);
+                UserInterface.AddText(equippedCharacter);
+            }
+#endif
 
             if (equippedCharacter != "")
             {
@@ -483,6 +595,28 @@ namespace GenshinGuide
                     equippedCharacter = tempString[1].Replace("\n", String.Empty);
                     equippedCharacter = equippedCharacter.Trim();
                     equippedCharacter = Regex.Replace(equippedCharacter, @"[\/!@#$%^&*()\[\]\-_`~\\+={};:',.<>?‘|]", "");
+
+                    // Assign Traveler Name if not found
+                    int character = Scraper.GetCharacterCode(equippedCharacter);
+                    if (Scraper.b_AssignedTravelerName == false && character == 0)
+                    {
+                        Scraper.AssignTravelerName(equippedCharacter);
+                        Scraper.b_AssignedTravelerName = true;
+                    }
+
+                    // Used to match with Traveler Name
+                    while (equippedCharacter.Length > 1)
+                    {
+                        int temp = Scraper.GetCharacterCode(equippedCharacter, true);
+                        if (temp == -1)
+                        {
+                            equippedCharacter = equippedCharacter.Substring(0, equippedCharacter.Length - 1);
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
 
                     return Scraper.GetCharacterCode(equippedCharacter);
                 }
