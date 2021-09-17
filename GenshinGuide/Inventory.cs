@@ -30,15 +30,30 @@ namespace GenshinGuide
             return weapons;
         }
 
-        public void AssignArtifacts(ref List<Artifact> equippedArtifacts)
+        public void AssignArtifact(Artifact _artifact)
         {
-            artifacts = ArtifactScraper.ScanArtifacts(ref equippedArtifacts);
+            artifacts.Add(_artifact);
+            //artifacts = ArtifactScraper.ScanArtifacts(ref equippedArtifacts);
             //ArtifactScraper.ScanArtifacts();
         }
 
-        public void AssignWeapons(ref List<Weapon> equippedWeapon)
+        public void AssignWeapon(Weapon _weapon)
         {
-            weapons = WeaponScraper.ScanWeapons(ref equippedWeapon);
+            weapons.Add(_weapon);
+            //weapons = WeaponScraper.ScanWeapons(ref equippedWeapon);
+        }
+
+        public void AssignArtifacts(ref List<Artifact> _artifacts)
+        {
+            artifacts = _artifacts;
+            //artifacts = ArtifactScraper.ScanArtifacts(ref equippedArtifacts);
+            //ArtifactScraper.ScanArtifacts();
+        }
+
+        public void AssignWeapons(ref List<Weapon> _weapons)
+        {
+            weapons = _weapons;
+            //weapons = WeaponScraper.ScanWeapons(ref equippedWeapon);
         }
     }
 }

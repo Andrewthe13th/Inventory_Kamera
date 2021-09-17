@@ -192,9 +192,9 @@ namespace GenshinGuide
             Scraper.SetContrast(100.0, ref bm);
             bm = Scraper.ResizeImage(bm, bm.Width * 3, bm.Height * 3);
 
-            UserInterface.Reset();
-            UserInterface.SetImage(bm);
-            Application.DoEvents();
+            //UserInterface.Reset();
+            //UserInterface.SetImage(bm);
+            //Application.DoEvents();
 
 #if DEBUG
             if (Scraper.s_bDoDebugOnlyCode)

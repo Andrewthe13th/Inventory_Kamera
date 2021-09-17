@@ -68,7 +68,6 @@ namespace GenshinGuide
                 // Scan weapon
                 Weapon w = ScanWeapon(currentweaponCount);
                 currentweaponCount++;
-                //Debug.Print("Weapon Count: " + currentweaponCount.ToString());
                 currentColumn++;
 
                 // Add weapon to equipped list
@@ -79,7 +78,6 @@ namespace GenshinGuide
 
                 // Add to weapon List Object
                 weapons.Add(w);
-                //GC.Collect();
 
                 // reach end of row
                 if (currentColumn == maxColumns)
@@ -163,6 +161,227 @@ namespace GenshinGuide
 
 
             return weapons;
+        }
+
+        public static void ScanWeapons()
+        {
+            // Get Max weapons from screen
+            int weaponCount = ScanWeaponCount();
+            //Debug.Print("Max Weapons: " + weaponCount.ToString());
+            //int weaponCount = 29;
+            int currentweaponCount = 0;
+            int scrollCount = 0;
+
+            // Where in screen space weapons are
+            Double weaponLocation_X = (Double)Navigation.GetArea().right * ((Double)21 / (Double)160);
+            Double weaponLocation_Y = (Double)Navigation.GetArea().bottom * ((Double)14 / (Double)90);
+            Bitmap bm = new Bitmap(130, 130);
+            Graphics g = Graphics.FromImage(bm);
+            int maxColumns = 7;
+            int maxRows = 4;
+            int totalRows = (int)Math.Ceiling((decimal)((decimal)(weaponCount) / (decimal)(maxColumns)));
+            int currentColumn = 0;
+            int currentRow = 0;
+
+            // offset used to move mouse to other weapons
+            int xOffset = Convert.ToInt32((Double)Navigation.GetArea().right * ((Double)12.25 / (Double)160));
+            int yOffset = Convert.ToInt32((Double)Navigation.GetArea().bottom * ((Double)14.5 / (Double)90));
+
+            // Testing for single weapons. REMOVE LATER!!!
+            //Weapon a = ScanWeapon(0);
+
+
+            // Go through weapon list
+            while (currentweaponCount < weaponCount)
+            {
+                //if ((weaponCount - currentweaponCount <= (maxRows * maxColumns-1)) && (currentColumn == 0))
+                //{
+
+                //    break;
+                //}
+                if (currentweaponCount % maxColumns == 0)
+                {
+                    currentRow++;
+                    if (totalRows - currentRow <= maxRows - 1)
+                    {
+                        break;
+                    }
+                }
+
+
+                // Select weapon
+                Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(weaponLocation_X) + (xOffset * (currentweaponCount % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(weaponLocation_Y));
+                Navigation.sim.Mouse.LeftButtonClick();
+                Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
+
+                // Scan weapon
+                ScanWeaponImage(currentweaponCount);
+
+                currentweaponCount++;
+                currentColumn++;
+
+                // reach end of row
+                if (currentColumn == maxColumns)
+                {
+                    // reset mouse pointer and scroll down weapon list
+                    currentColumn = 0;
+                    scrollCount++;
+
+                    // scroll down
+                    for (int k = 0; k < 10; k++)
+                    {
+                        Navigation.sim.Mouse.VerticalScroll(-1);
+                        // skip a scroll
+                        if ((k == 7) && ((scrollCount % 3) == 0))
+                        {
+                            k++;
+                            if (scrollCount % 9 == 0)
+                            {
+                                if (scrollCount == 18)
+                                {
+                                    scrollCount = 0;
+                                }
+                                else
+                                {
+                                    Navigation.sim.Mouse.VerticalScroll(-1);
+                                }
+                            }
+                        }
+                    }
+                    Navigation.SystemRandomWait(Navigation.Speed.Fast);
+                }
+            };
+
+            // scroll down as much as possible
+            for (int i = 0; i < 20; i++)
+            {
+                Navigation.sim.Mouse.VerticalScroll(-1);
+            }
+            Navigation.SystemRandomWait(Navigation.Speed.Normal);
+
+            // Get weapons on bottom of page
+            int rowsLeft = (int)Math.Ceiling((double)(weaponCount - currentweaponCount) / (double)maxColumns);
+            bool b_EnchancementOre = false;
+            int startPostion = 1;
+            for (int i = startPostion; i < (rowsLeft + startPostion); i++)
+            {
+                for (int k = 0; k < maxColumns; k++)
+                {
+                    if (weaponCount - currentweaponCount <= 0)
+                    {
+                        break;
+                    }
+                    if (!b_EnchancementOre)
+                    {
+                        Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(weaponLocation_X) + (xOffset * (k % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(weaponLocation_Y) + (yOffset * (i % (maxRows + 1))));
+                        Navigation.sim.Mouse.LeftButtonClick();
+                        Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
+                    }
+
+                    // check if enchnacement Ore
+                    if (weaponCount - currentweaponCount == 7)
+                    {
+                        b_EnchancementOre = CheckForEnchancementOre();
+                    }
+
+                    if (b_EnchancementOre)
+                    {
+                        // Scan top row instead
+                        Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(weaponLocation_X) + (xOffset * (k % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(weaponLocation_Y) + (yOffset * (0 % (maxRows + 1))));
+                        Navigation.sim.Mouse.LeftButtonClick();
+                        Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
+                    }
+
+                    ScanWeaponImage(currentweaponCount);
+                    currentweaponCount++;
+                }
+            }//*/
+        }
+
+        public static void ScanWeaponImage(int id)
+        {
+
+            // Grab Image of Entire weapon on Right
+            Double weaponLocation_X = (Double)Navigation.GetArea().right * ((Double)108 / (Double)160);
+            Double weaponLocation_Y = (Double)Navigation.GetArea().bottom * ((Double)10 / (Double)90);
+            int width = 325; int height = 560;
+            Bitmap bm = new Bitmap(width, height);
+            Graphics g = Graphics.FromImage(bm);
+            int screenLocation_X = Navigation.GetPosition().left + Convert.ToInt32(weaponLocation_X);
+            int screenLocation_Y = Navigation.GetPosition().top + Convert.ToInt32(weaponLocation_Y);
+            g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
+
+            // Send Image to Worker Queue
+            GenshinData.workerQueue.Enqueue(new OCRImage(bm,"weapon",id));
+            g.Dispose();
+        }
+
+        public static Weapon ScanWeapon(Bitmap bm, int id)
+        {
+            // Init Variables
+            int name = 0;
+            int level = 1;
+            bool ascension = false;
+            int refinementLevel = 1;
+            int equippedCharacter = 0;
+            int width = 325; int height = 560;
+
+            // Check for Rarity
+            Color rarityColor = bm.GetPixel(12, 10);
+            Color fiveStar = Color.FromArgb(255, 188, 105, 50);
+            Color fourthStar = Color.FromArgb(255, 161, 86, 224);
+            Color threeStar = Color.FromArgb(255, 81, 127, 203);
+            // Check for equipped color
+            Color equipped = Color.FromArgb(255, 255, 231, 187);
+            Color equippedColor = bm.GetPixel(5, height - 10);
+
+            // Scan different parts of the weapon
+            bool b_equipped = Scraper.CompareColors(equipped, equippedColor);
+            bool b_RarityAboveTwo = Scraper.CompareColors(fiveStar, rarityColor) || Scraper.CompareColors(fourthStar, rarityColor) || Scraper.CompareColors(threeStar, rarityColor);
+            // multi threading support 
+            Bitmap bm_1 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
+            Bitmap bm_2 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
+            Bitmap bm_3 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
+            Bitmap bm_4 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
+            bm.Dispose();
+
+            Thread thr1 = new Thread(() => name = ScanWeaponName(bm_1, width, height));
+            Thread thr2 = new Thread(() => level = ScanWeaponLevel(bm_2, width, height, ref ascension));
+            Thread thr3 = new Thread(() => refinementLevel = ScanWeaponRefinement(bm_3, width, height));
+            Thread thr4 = new Thread(() => equippedCharacter = ScanWeaponEquippedCharacter(bm_4, width, height));
+
+            // Start Threads
+
+            thr1.Start(); thr2.Start();
+            if (b_RarityAboveTwo)
+            {
+                thr3.Start();
+            }
+            if (b_equipped)
+            {
+                thr4.Start();
+            }
+
+            // End Threads
+
+            thr1.Join(); thr2.Join();
+            if (b_equipped)
+            {
+                thr4.Join();
+            }
+            if (b_RarityAboveTwo)
+            {
+                thr3.Join();
+            }
+
+            bm_1.Dispose(); bm_2.Dispose(); bm_3.Dispose(); bm_4.Dispose();
+
+
+
+            Weapon weapon = new Weapon(name, level, ascension, refinementLevel, equippedCharacter, id);
+
+            return weapon;
+
         }
 
         public static Weapon ScanWeapon(int id)
@@ -274,6 +493,7 @@ namespace GenshinGuide
 #endif
 
             name = ScanEnchancementOreName(bm, width, height);
+            bm.Dispose();
 
             return (name > 0)? true:false;
         }
@@ -352,7 +572,6 @@ namespace GenshinGuide
             //UserInterface.SetImage(bm);
 
             // Analyze
-            //string text = Scraper.AnalyzeText(bm);
             string text = Scraper.AnalyzeText_1(bm);
             text = text.Trim();
 
@@ -393,19 +612,11 @@ namespace GenshinGuide
             Scraper.SetInvert(ref bm);
 
             // Analyze
-            //string text = Scraper.AnalyzeText(bm);
             string text = Scraper.AnalyzeText(bm);
             text = text.Trim();
+            bm.Dispose();
+            
 
-            // View Picture
-#if DEBUG
-            if (Scraper.s_bDoDebugOnlyCode)
-            {
-                UserInterface.Reset();
-                UserInterface.SetImage(bm);
-                UserInterface.AddText(text);
-            }
-#endif
             text = text.Trim();
             text = Regex.Replace(text, @"(?![A-Za-z\s]).", "");
             //Debug.Print("Weapon Name: " + text);
@@ -438,16 +649,7 @@ namespace GenshinGuide
             text = text.Trim();
             text = Regex.Replace(text, @"(\s{1}.*)", "");
             text = text.Trim();
-
-            // View Picture
-#if DEBUG
-            if (Scraper.s_bDoDebugOnlyCode)
-            {
-                UserInterface.Reset();
-                UserInterface.SetImage(bm);
-                UserInterface.AddText(text);
-            }
-#endif
+            bm.Dispose();
 
             if (text.Contains('/'))
             {
@@ -506,16 +708,7 @@ namespace GenshinGuide
             string text = Scraper.AnalyzeText_3(bm);
             text = text.Trim();
             text = Regex.Replace(text, @"[!@#$%^&*()\[\]\-_`~\\+={};:',.<>?‘]", "");
-
-            // View Picture
-#if DEBUG
-            if (Scraper.s_bDoDebugOnlyCode)
-            {
-                UserInterface.Reset();
-                UserInterface.SetImage(bm);
-                UserInterface.AddText(text);
-            }
-#endif
+            bm.Dispose();
 
             // Parse Int
             int refinementLevel = -1;
@@ -537,18 +730,9 @@ namespace GenshinGuide
                 //Scraper.SetInvert(ref bm);
                 bm = Scraper.ResizeImage(bm, max_X * 2, max_Y * 2);
 
-                text = Scraper.AnalyzeText(bm);
+                text = Scraper.AnalyzeText_3(bm);
+                bm.Dispose();
                 text = text.Trim();
-
-                // View Picture
-#if DEBUG
-                if (Scraper.s_bDoDebugOnlyCode)
-                {
-                    UserInterface.Reset();
-                    UserInterface.SetImage(bm);
-                    UserInterface.AddText(text);
-                }
-#endif
 
                 refinementLevel = -1;
                 if (int.TryParse(text, out refinementLevel))
@@ -575,16 +759,7 @@ namespace GenshinGuide
             string equippedCharacter = Scraper.AnalyzeText_4(bm);
             equippedCharacter.Trim();
             equippedCharacter = equippedCharacter.Replace("\n", String.Empty);
-
-            // View Picture
-#if DEBUG
-            if (Scraper.s_bDoDebugOnlyCode)
-            {
-                UserInterface.Reset();
-                UserInterface.SetImage(bm);
-                UserInterface.AddText(equippedCharacter);
-            }
-#endif
+            bm.Dispose();
 
             if (equippedCharacter != "")
             {

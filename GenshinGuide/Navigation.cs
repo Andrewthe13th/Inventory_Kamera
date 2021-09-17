@@ -248,6 +248,11 @@ namespace GenshinGuide
                 int value = r.Next(225, 275);
                 System.Threading.Thread.Sleep(value);
             }
+            else if (type == Speed.SelectNextInventoryItem)
+            {
+                int value = 80;
+                System.Threading.Thread.Sleep(value);
+            }
 
         }
 
@@ -261,6 +266,7 @@ namespace GenshinGuide
             UI,
             ArtifactIgnore,
             SelectNextCharacter,
+            SelectNextInventoryItem,
         }
         #endregion
     }

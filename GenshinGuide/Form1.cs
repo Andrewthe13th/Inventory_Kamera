@@ -55,11 +55,6 @@ namespace GenshinGuide
                 // Get Screen Location and Size
                 Navigation.Initialize("GenshinImpact");
 
-                // Global space to refer to form elements
-#if DEBUG
-                UserInterface.Init(picTarget, txtOutput);
-#endif
-
                 // The Data object of json object
                 GenshinData data = new GenshinData();
                 data.GatherData();

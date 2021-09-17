@@ -672,6 +672,7 @@ namespace GenshinGuide
             return text;
         }
 
+        #region Get Dictionary Codes
         public static int GetSetNameCode(string setName)
         {
             int code = -1;
@@ -796,6 +797,7 @@ namespace GenshinGuide
                 return code;
             };
         }
+        #endregion
 
         public static void CreateJsonFile(GenshinData data)
         {
@@ -891,22 +893,6 @@ namespace GenshinGuide
 
             return false;
         }
-
-        /// <summary> Take a screenshot to be used later with tesseract </summary>
-        //public static Bitmap CaptureText()
-        //{
-        //    IntPtr handle = genshinImpact.MainWindowHandle;
-        //    RECT position = new RECT();
-        //    RECT area = new RECT();
-        //    Bitmap bm = null;
-        //    if (ClientToScreen(handle, ref position) && GetClientRect(handle, ref area))
-        //    {
-        //        bm = new Bitmap(area.right, area.bottom);
-        //        Graphics g = Graphics.FromImage(bm);
-        //        g.CopyFromScreen(position.left, position.top, 0, 0, bm.Size);
-        //    }
-        //    return bm;
-        //}
 
         #region Image Operations
         public static Bitmap ResizeImage(Image image, int width, int height)
