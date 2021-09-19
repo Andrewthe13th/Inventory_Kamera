@@ -4,7 +4,7 @@ An OCR Scanner that scans your characters, weapons and artifacts in Genshin Impa
 Currently it only supports ENGLISH words. 
 
 ## How to use
-1. [Download the program](https://github.com/Andrewthe13th/Genshin_Scanner/releases/download/v0.4/Genshin_Scanner_V0.4.zip), unzip and then run.
+1. [Download the program](https://github.com/Andrewthe13th/Genshin_Scanner/releases/download/v0.5/Genshin_Scanner_V0.5.zip), unzip and then run.
 2. Open Genshin Impact and Log In. 
 3. In Genshin Impact, go to Settings
 4. Under Graphics, set Display Mode to 1280x720 Windowed
