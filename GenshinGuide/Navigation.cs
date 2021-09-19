@@ -28,7 +28,7 @@ namespace GenshinGuide
             {
                 // Exit if wasn't able to set area and position
                 Debug.Print("Can't initialize Navigation!!!!");
-                System.Environment.Exit(1);
+                Form1.UnexpectedError("Can't initialize Navigation!!!!");
                 throw;
             }
         }
@@ -83,7 +83,7 @@ namespace GenshinGuide
             int yOffset = 100;
             Navigation.SetCursorPos(Navigation.GetPosition().left + xOffset, Navigation.GetPosition().top + yOffset);
             Navigation.sim.Mouse.LeftButtonClick();
-            Navigation.SystemRandomWait(Speed.Normal);
+            Navigation.SystemRandomWait(Speed.UI);
         }
 
         public static void SelectCharacterConstellation()
@@ -109,8 +109,10 @@ namespace GenshinGuide
             int xOffset = 1230;
             int yOffset = 350;
             Navigation.SetCursorPos(Navigation.GetPosition().left + xOffset, Navigation.GetPosition().top + yOffset);
+            Navigation.SystemRandomWait(); 
+            Navigation.SetCursorPos(Navigation.GetPosition().left + xOffset, Navigation.GetPosition().top + yOffset);
             Navigation.sim.Mouse.LeftButtonClick();
-            Navigation.SystemRandomWait();
+            Navigation.SystemRandomWait(Speed.SelectNextCharacter);
         }
 
         public static void CharacterScreen()
@@ -188,7 +190,7 @@ namespace GenshinGuide
             else
             {
                 // the process is not running, so start it
-                System.Environment.Exit(1);
+                Form1.UnexpectedError("Cannot find process");
             }
         }
         #endregion
@@ -240,17 +242,17 @@ namespace GenshinGuide
             }
             else if (type == Speed.UI)
             {
-                int value = r.Next(1000, 1200);
+                int value = r.Next(1200, 1500);
                 System.Threading.Thread.Sleep(value);
             }
             else if (type == Speed.SelectNextCharacter)
             {
-                int value = r.Next(225, 275);
+                int value = 500;
                 System.Threading.Thread.Sleep(value);
             }
             else if (type == Speed.SelectNextInventoryItem)
             {
-                int value = 80;
+                int value = 70;
                 System.Threading.Thread.Sleep(value);
             }
 

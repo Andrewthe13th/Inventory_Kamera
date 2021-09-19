@@ -174,6 +174,7 @@ namespace GenshinGuide
         {
             // Get Max artifacts from screen
             int artifactCount = ScanArtifactCount();
+            UserInterface.SetArtifact_Max(artifactCount);
             //int artifactCount = 29;
             int currentArtifactCount = 0;
             int scrollCount = 0;
@@ -477,15 +478,6 @@ namespace GenshinGuide
             int screenLocation_Y = Navigation.GetPosition().top + Convert.ToInt32(artifactLocation_Y);
             g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
 
-            // Display Image
-#if DEBUG
-            if (Scraper.s_bDoDebugOnlyCode)
-            {
-                UserInterface.Reset();
-                UserInterface.SetImage(bm);
-            }
-#endif
-
             // Get Rarity (Check color)
             int rarity = 0;
             Color rarityColor = bm.GetPixel(12, 10);
@@ -510,9 +502,6 @@ namespace GenshinGuide
             //int screenLocation_Y_1 = Navigation.GetPosition().top + Convert.ToInt32(artifactLocation_Y);
             //g_1.CopyFromScreen(screenLocation_X_1 + width - 35, screenLocation_Y_1 + 220, 0, 0, lock_bm.Size);
 
-            //// Display Image
-            //UserInterface.Reset();
-            //UserInterface.SetImage(lock_bm);
 
             if ( Scraper.CompareColors(fiveStar,rarityColor) || Scraper.CompareColors(fourthStar, rarityColor))
             //if (true)
@@ -555,17 +544,6 @@ namespace GenshinGuide
                     thr5.Join();
                 }
                 thr2.Join();
-
-                //// Test individual Functions
-                //gearSlot = ScanArtifactGearSlot(bm, width, height);
-                //mainStat = ScanArtifactMainStat(bm, width, height, gearSlot);
-                //level = ScanArtifactLevel(bm, width, height);
-                //subStats = ScanArtifactSubStats(bm, width, height, ref subStatsCount, ref setName);
-
-                //if(Scraper.CompareColors(equipped, equippedColor))
-                //{
-                //    equippedCharacter = ScanArtifactEquippedCharacter(bm, width, height);
-                //}
 
             }
             // Don't fully scan 3 star artifacts and lower
@@ -613,11 +591,9 @@ namespace GenshinGuide
             // Analyze
             gearSlot = Scraper.AnalyzeText_1(bm);
             gearSlot = gearSlot.Replace("\n", String.Empty);
+            UserInterface.SetArtifact_GearSlot(bm, gearSlot);
+            gearSlot = Regex.Replace(gearSlot, @"[\W_]", "");
 
-            // View Picture
-            //UserInterface.Reset();
-            //UserInterface.SetImage(bm);
-            //UserInterface.AddText(gearSlot);
             bm.Dispose();
 
             return Scraper.GetGearSlotCode(gearSlot);
@@ -630,10 +606,12 @@ namespace GenshinGuide
             int yOffset = 100;
             if(gearSlot == 0) // Flower HP
             {
+                //UserInterface.SetArtifact_MainStat(artifactImage, "HP");
                 return Scraper.GetMainStatCode("HP_Flat");
             }
             else if (gearSlot == 1) // Plume ATK
             {
+                //UserInterface.SetArtifact_MainStat(artifactImage, "ATK");
                 return Scraper.GetMainStatCode("ATK_Flat");
             }
             else // scan time, cup, hat artifacts only
@@ -645,14 +623,10 @@ namespace GenshinGuide
                 mainStat = Scraper.AnalyzeText_1(bm);
                 mainStat = mainStat.Replace("\n", String.Empty);
                 mainStat.Trim();
-                mainStat = Regex.Replace(mainStat, @"(?![A-Za-z\s]).", "");
+                UserInterface.SetArtifact_MainStat(bm, mainStat);
+                mainStat = Regex.Replace(mainStat, @"[\W_]", "");
 
                 bm.Dispose();
-
-                // View Picture
-                //UserInterface.Reset();
-                //UserInterface.SetImage(bm);
-                //UserInterface.AddText(mainStat);
 
                 return Scraper.GetMainStatCode(mainStat);
             }
@@ -676,12 +650,8 @@ namespace GenshinGuide
             string text = Scraper.AnalyzeText_2(bm);
             text.Trim();
             text = text.Replace("\n", String.Empty);
+            UserInterface.SetArtifact_Level(bm, text);
             g.Dispose(); bm.Dispose();
-
-            // View Picture
-            //UserInterface.Reset();
-            //UserInterface.SetImage(bm);
-            //UserInterface.AddText(text);
 
             int level;
             if (text != "" && int.TryParse(text, out level))
@@ -694,7 +664,7 @@ namespace GenshinGuide
                 else
                 {
                     Debug.Print("Error: Found " + level + " for level for artifact");
-                    System.Environment.Exit(1);
+                    Form1.UnexpectedError("Found " + level + " for level for artifact");;
                     return -1;
                 }
 
@@ -702,7 +672,7 @@ namespace GenshinGuide
             else
             {
                 Debug.Print("Error: Found '" + text + "' for level for artifact");
-                System.Environment.Exit(1);
+                Form1.UnexpectedError("Found '" + text + "' for level for artifact");;
                 return -1;
             }
         }
@@ -773,23 +743,20 @@ namespace GenshinGuide
                 Scraper.SetGrayscale(ref bm);
                 text = Scraper.AnalyzeText_Line1(bm).Trim();
 
-                // View Picture
-                //UserInterface.Reset();
-                //UserInterface.SetImage(bm);
-                //UserInterface.AddText(text);
-
                 if (text.Contains(':'))
                 {
                     text = text.Split(':')[0];
-                    text = Regex.Replace(text, @"(?![A-Za-z\s]).", "");
+                    //text = Regex.Replace(text, @"(?![A-Za-z\s]).", "");
+                    text = Regex.Replace(text, @"[^\w]", "");
                     text = text.Trim();
+                    UserInterface.SetArtifact_SetName(bm, text);
                     setName = Scraper.GetSetNameCode(text);
                     return subStats;
                 }
                 else
                 {
                     Debug.Print("Error: " + text + " is not a valid SET NAME");
-                    System.Environment.Exit(1);
+                    Form1.UnexpectedError(text + " is not a valid SET NAME");;
                     setName = -1;
                 }
             }
@@ -838,11 +805,6 @@ namespace GenshinGuide
                 text = Scraper.AnalyzeText_Line1(bm);
                 text = text.Replace("\n", String.Empty);
 
-                // view picture
-                //UserInterface.Reset();
-                //UserInterface.SetImage(bm);
-                //UserInterface.AddText(text);
-
                 // Check if Scanned Set Name
                 if (text.Contains(":") || i >= 4)
                 {
@@ -850,32 +812,30 @@ namespace GenshinGuide
                     bm = artifactImage.Clone(new Rectangle(0, yOffset + (i * subStatSpacing), width - offset, 29), pixelFormat);
                     Scraper.SetGrayscale(ref bm);
                     text = Scraper.AnalyzeText_3(bm).Trim();
-
-                    // View Picture
-                    //UserInterface.Reset();
-                    //UserInterface.SetImage(bm);
-                    //UserInterface.AddText(text);
+                    UserInterface.SetArtifact_SetName(bm, text);
 
                     if (text.Contains(':'))
                     {
                         text = text.Split(':')[0];
-                        text = Regex.Replace(text, @"(?![A-Za-z\s]).", "");
+                        text = Regex.Replace(text, @"[^\w]", "");
                         text = text.Trim();
                         setName = Scraper.GetSetNameCode(text);
                     }
                     else
                     {
                         Debug.Print("Error: " + text + " is not a valid SET NAME");
-                        System.Environment.Exit(1);
+                        Form1.UnexpectedError(text + " is not a valid SET NAME");;
                         setName = -1;
                     }
                     break;
                 }
                 else // Get SubStat
                 {
+                    UserInterface.SetArtifact_SubStat(bm, text, count - 1);
                     if (text.Contains("+"))
                     {
-                        text = Regex.Replace(text, @"(?![A-Za-z0-9+%\s/.]).", "");
+                        //text = Regex.Replace(text, @"(?![A-Za-z0-9+%\s/.]).", "");
+                        text = Regex.Replace(text, @"[^\w.+%]", "");
                         string[] subStat = text.Split('+');
                         subStat[0] = subStat[0].Trim();
 
@@ -889,11 +849,6 @@ namespace GenshinGuide
                                 optional = "%";
                             }
 
-                            // View Picture
-                            //UserInterface.Reset();
-                            //UserInterface.SetImage(bm);
-                            //UserInterface.AddText(subStat[0] + " " + subStat[1]);
-
                             subStats[i].stat = Scraper.GetSubStatCode(subStat[0] + optional);
 
                             // Check if subStat has space (when value is not detected with a deciminal)
@@ -906,10 +861,6 @@ namespace GenshinGuide
                         }
                         else // flat stats
                         {
-                            // View Picture
-                            //UserInterface.Reset();
-                            //UserInterface.SetImage(bm);
-                            //UserInterface.AddText(subStat[0] + " " + subStat[1]);
  
                             subStats[i].stat = Scraper.GetSubStatCode(subStat[0]);
                             subStats[i].value = Convert.ToDecimal(subStat[1].Replace("\n", String.Empty));
@@ -951,15 +902,12 @@ namespace GenshinGuide
 
 
             text = text.Replace("\n", String.Empty);
-
-            // view picture
-            //UserInterface.Reset();
-            //UserInterface.SetImage(bm);
-            //UserInterface.AddText(text);
+            UserInterface.SetArtifact_SubStat(bm, text,ocr - 1);
+            text = Regex.Replace(text, @"[^\w+%.]", "");
 
             if (text.Contains("+"))
             {
-                text = Regex.Replace(text, @"(?![A-Za-z0-9+%\s/.]).", "");
+                //text = Regex.Replace(text, @"(?![A-Za-z0-9+%\s/.]).", "");
                 string[] subStatText = text.Split('+');
                 subStatText[0] = subStatText[0].Trim();
 
@@ -973,11 +921,6 @@ namespace GenshinGuide
                         optional = "%";
                     }
 
-                    // View Picture
-                    //UserInterface.Reset();
-                    //UserInterface.SetImage(bm);
-                    //UserInterface.AddText(subStatText[0] + " " + subStatText[1]);
-
                     subStat.stat = Scraper.GetSubStatCode(subStatText[0] + optional);
 
                     // Check if subStat has space (when value is not detected with a deciminal)
@@ -990,10 +933,6 @@ namespace GenshinGuide
                 }
                 else // flat stats
                 {
-                    // View Picture
-                    //UserInterface.Reset();
-                    //UserInterface.SetImage(bm);
-                    //UserInterface.AddText(subStatText[0] + " " + subStatText[1]);
 
                     subStat.stat = Scraper.GetSubStatCode(subStatText[0]);
                     subStat.value = Convert.ToDecimal(subStatText[1].Replace("\n", String.Empty));
@@ -1022,12 +961,7 @@ namespace GenshinGuide
             string equippedCharacter = Scraper.AnalyzeText_4(bm);
             equippedCharacter.Trim();
             equippedCharacter = equippedCharacter.Replace("\n", String.Empty);
-            bm.Dispose();
-
-            // View Picture
-            //UserInterface.Reset();
-            //UserInterface.SetImage(bm);
-            //UserInterface.AddText(equippedCharacter);
+            //bm.Dispose();
 
             if (equippedCharacter != "")
             {
@@ -1037,7 +971,9 @@ namespace GenshinGuide
                     string[] tempString = equippedCharacter.Split(':');
                     equippedCharacter = tempString[1].Replace("\n", String.Empty);
                     equippedCharacter = equippedCharacter.Trim();
-                    equippedCharacter = Regex.Replace(equippedCharacter, @"[\/!@#$%^&*()\[\]\-_`~\\+={};:',.<>?‘|]", "");
+                    //equippedCharacter = Regex.Replace(equippedCharacter, @"[\/!@#$%^&*()\[\]\-_`~\\+={};:',.<>?‘|]", "");
+                    UserInterface.SetArtifact_Equipped(bm, equippedCharacter);
+                    equippedCharacter = Regex.Replace(equippedCharacter, @"[^\w_]", "");
 
                     // Used to match with Traveler Name
                     while (equippedCharacter.Length > 1)

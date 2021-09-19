@@ -167,6 +167,7 @@ namespace GenshinGuide
         {
             // Get Max weapons from screen
             int weaponCount = ScanWeaponCount();
+            UserInterface.SetWeapon_Max(weaponCount);
             //Debug.Print("Max Weapons: " + weaponCount.ToString());
             //int weaponCount = 29;
             int currentweaponCount = 0;
@@ -403,15 +404,6 @@ namespace GenshinGuide
             int screenLocation_Y = Navigation.GetPosition().top + Convert.ToInt32(weaponLocation_Y);
             g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
 
-
-#if DEBUG
-            // Display Image
-            if (Scraper.s_bDoDebugOnlyCode)
-            {
-                UserInterface.SetImage(bm);
-            }
-#endif
-
             // Check for Rarity
             Color rarityColor = bm.GetPixel(12, 10);
             Color fiveStar = Color.FromArgb(255, 188, 105, 50);
@@ -484,14 +476,6 @@ namespace GenshinGuide
             int screenLocation_Y = Navigation.GetPosition().top + Convert.ToInt32(weaponLocation_Y);
             g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
 
-            // Display Image
-#if DEBUG
-            if (Scraper.s_bDoDebugOnlyCode)
-            {
-                UserInterface.SetImage(bm);
-            }
-#endif
-
             name = ScanEnchancementOreName(bm, width, height);
             bm.Dispose();
 
@@ -514,9 +498,6 @@ namespace GenshinGuide
 
             string text = Scraper.AnalyzeText(bm);
 
-            //UserInterface.Reset();
-            //UserInterface.SetImage(bm);
-            //UserInterface.AddText(text);
 
             return Int32.Parse(text.Split()[1].Split('/')[0]);
         }
@@ -533,63 +514,24 @@ namespace GenshinGuide
 
             // Setup Img
             Graphics g = Graphics.FromImage(bm);
-            //g.CopyFromScreen(weaponLocation_X + xOffset, weaponLocation_Y + yOffset, 0, 0, bm.Size);
-            //g.Dispose();
-            // View Picture
-            //UserInterface.Reset();
-            //UserInterface.SetImage(bm);
 
             Scraper.SetGamma(0.2, 0.2, 0.2, ref bm);
             Scraper.SetGrayscale(ref bm);
             Scraper.SetInvert(ref bm);
 
-            //Scraper.SetGrayscale(ref bm);
-            //Scraper.SetInvert(ref bm);
-            //Scraper.SetContrast(80.0, ref bm);
-
-            // View Picture
-#if DEBUG
-            if (Scraper.s_bDoDebugOnlyCode)
-            {
-                UserInterface.Reset();
-                UserInterface.SetImage(bm);
-            }
-#endif
-
-            //Scraper.SetGrayscale(ref bm);
-            //Scraper.SetInvert(ref bm);
-            //Scraper.SetGamma(0.2, 0.2, 0.2, ref bm);
-
-            //Scraper.SetGrayscale(ref bm);
-            //Scraper.SetInvert(ref bm);
-            //Scraper.SetContrast(20.0, ref bm);
-
-
-            //bm = Scraper.ResizeImage(bm, max_X * 2, max_Y * 2);
-
-            // View Picture
-            //UserInterface.Reset();
-            //UserInterface.SetImage(bm);
-
             // Analyze
             string text = Scraper.AnalyzeText_1(bm);
             text = text.Trim();
 
-            // View Picture
-#if DEBUG
-            if (Scraper.s_bDoDebugOnlyCode)
-            {
-                UserInterface.Reset();
-                UserInterface.SetImage(bm);
-                UserInterface.AddText(text);
-            }
-#endif
             text = text.Trim();
-            text = Regex.Replace(text, @"(?![A-Za-z\s]).", "");
-            //Debug.Print("Weapon Name: " + text);
+            text = Regex.Replace(text, @"[\W]", "");
+
+            UserInterface.SetArtifact_GearSlot(bm, text,true);
 
             // Check in Dictionary
             name = Scraper.GetWeaponCode(text);
+
+            bm.Dispose();g.Dispose();
 
             return name;
         }
@@ -618,7 +560,8 @@ namespace GenshinGuide
             
 
             text = text.Trim();
-            text = Regex.Replace(text, @"(?![A-Za-z\s]).", "");
+            //text = Regex.Replace(text, @"(?![A-Za-z\s]).", "");
+            text = Regex.Replace(text, @"[\W_]", "");
             //Debug.Print("Weapon Name: " + text);
 
             // Check in Dictionary
@@ -649,6 +592,9 @@ namespace GenshinGuide
             text = text.Trim();
             text = Regex.Replace(text, @"(\s{1}.*)", "");
             text = text.Trim();
+
+            UserInterface.SetArtifact_MainStat(bm, text,true);
+
             bm.Dispose();
 
             if (text.Contains('/'))
@@ -663,27 +609,29 @@ namespace GenshinGuide
                     int level = -1;
                     if (int.TryParse(temp[0],out level))
                     {
+
+
                         return level;
                     }
                     else
                     {
-                        Debug.Print("Error: Found " + temp[0] + "instead of Weapon Level.");
-                        System.Environment.Exit(1);
+                        Debug.Print("Found " + temp[0] + "instead of Weapon Level.");
+                        Form1.UnexpectedError(text);;
                         return level;
                     }
                 }
                 else
                 {
-                    Debug.Print("Error: Found " + temp[0] + "instead of Weapon Level.");
-                    System.Environment.Exit(1);
+                    Debug.Print("Found " + temp[0] + "instead of Weapon Level.");
+                    Form1.UnexpectedError(text);;
                     return -1;
                 }
 
             }
             else
             {
-                Debug.Print("Error: Found " + text + "instead of Weapon Level." );
-                System.Environment.Exit(1);
+                Debug.Print("Found " + text + "instead of Weapon Level." );
+                Form1.UnexpectedError(text);;
                 return -1;
             }
         }
@@ -708,12 +656,13 @@ namespace GenshinGuide
             string text = Scraper.AnalyzeText_3(bm);
             text = text.Trim();
             text = Regex.Replace(text, @"[!@#$%^&*()\[\]\-_`~\\+={};:',.<>?‘]", "");
-            bm.Dispose();
 
             // Parse Int
             int refinementLevel = -1;
             if(int.TryParse(text, out refinementLevel))
             {
+                UserInterface.SetArtifact_Level(bm, text,true);
+                bm.Dispose(); g.Dispose();
                 return refinementLevel;
             }
             else
@@ -729,14 +678,14 @@ namespace GenshinGuide
                 //Scraper.SetContrast(60.0, ref bm);
                 //Scraper.SetInvert(ref bm);
                 bm = Scraper.ResizeImage(bm, max_X * 2, max_Y * 2);
-
                 text = Scraper.AnalyzeText_3(bm);
-                bm.Dispose();
                 text = text.Trim();
 
                 refinementLevel = -1;
                 if (int.TryParse(text, out refinementLevel))
                 {
+                    UserInterface.SetArtifact_Level(bm, text);
+                    bm.Dispose(); g.Dispose();
                     return refinementLevel;
                 }
                 else
@@ -759,7 +708,7 @@ namespace GenshinGuide
             string equippedCharacter = Scraper.AnalyzeText_4(bm);
             equippedCharacter.Trim();
             equippedCharacter = equippedCharacter.Replace("\n", String.Empty);
-            bm.Dispose();
+            //UserInterface.SetArtifact_Equipped(bm, equippedCharacter);
 
             if (equippedCharacter != "")
             {
@@ -768,8 +717,9 @@ namespace GenshinGuide
                 {
                     string[] tempString = equippedCharacter.Split(':');
                     equippedCharacter = tempString[1].Replace("\n", String.Empty);
-                    equippedCharacter = equippedCharacter.Trim();
-                    equippedCharacter = Regex.Replace(equippedCharacter, @"[\/!@#$%^&*()\[\]\-_`~\\+={};:',.<>?‘|]", "");
+                    UserInterface.SetArtifact_Equipped(bm, equippedCharacter);
+                    equippedCharacter = Regex.Replace(equippedCharacter, @"[\W_]", "");
+                    //equippedCharacter = Regex.Replace(equippedCharacter, @"[\/!@#$%^&*()\[\]\-_`~\\+={};:',.<>?‘|]", "");
 
                     // Assign Traveler Name if not found
                     int character = Scraper.GetCharacterCode(equippedCharacter);

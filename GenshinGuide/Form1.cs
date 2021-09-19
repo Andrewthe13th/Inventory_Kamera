@@ -12,9 +12,8 @@ namespace GenshinGuide
     public partial class Form1 : Form
     {
         //private KeyHandler ghk;
-        private bool bStopExecution = false;
-        Thread mainThread;
-
+        static Thread mainThread;
+        static GenshinData data = new GenshinData();
         KeyboardHook hook = new KeyboardHook();
 
         public Form1()
@@ -27,15 +26,28 @@ namespace GenshinGuide
             // register the control + alt + F12 combination as hot key.
             hook.RegisterHotKey(Keys.Enter);
             comboBox1.SelectedItem = "ENG";
+            UserInterface.Init(a_GearSlot_Image,a_MainStat_Image,a_Level_Image,(new []{a_SubStat1_Image,a_SubStat2_Image,a_SubStat3_Image,a_SubStat4_Image }),a_SetName_Image,a_Equipped_Image,a_TextBox,c_Name_Image,c_Level_Image,(new[] { c_Talent_1,c_Talent_2,c_Talent_3}), c_TextBox,weaponCount,maxWeapons,artifactCount,maxArtifacts,characterCount,ProgramStatus);
         }
 
-        void hook_KeyPressed(object sender, KeyPressedEventArgs e)
+        private void hook_KeyPressed(object sender, KeyPressedEventArgs e)
         {
             // show the keys pressed in a label.
             //txtOutput.Text = e.Modifier.ToString() + " + " + e.Key.ToString();
             if (mainThread.IsAlive)
             {
+                data.StopImageProcessorWorker();
                 mainThread.Abort();
+                UserInterface.SetProgramStatus("Scan Stopped",true);
+            }
+        }
+
+        public static void UnexpectedError(string error)
+        {
+            if (mainThread.IsAlive)
+            {
+                data.StopImageProcessorWorker();
+                mainThread.Abort();
+                UserInterface.SetProgramStatus(error, true);
             }
         }
 
@@ -46,8 +58,7 @@ namespace GenshinGuide
 
         private void button1_Click(object sender, EventArgs e)
         {
-            bStopExecution = false;
-            bool threadCompletion = false;
+            UserInterface.SetProgramStatus("Scanning");
 
             mainThread = new Thread(() =>
             {
@@ -56,7 +67,6 @@ namespace GenshinGuide
                 Navigation.Initialize("GenshinImpact");
 
                 // The Data object of json object
-                GenshinData data = new GenshinData();
                 data.GatherData();
 
                 // Covert to GOOD format
@@ -69,39 +79,10 @@ namespace GenshinGuide
                 // Open GenshinDataFolder
                 Process.Start("explorer.exe", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\GenshinData");
 
-                // End Thread and finish
-                threadCompletion = true;
+                UserInterface.SetProgramStatus("Success");
             });
             mainThread.IsBackground = true;
             mainThread.Start();
-
-#if DEBUG
-            if (Scraper.s_bDoDebugOnlyCode)
-            {
-                while (!threadCompletion)
-                {
-
-                    // End program when pressing 'Enter'
-                    if (bStopExecution)
-                    {
-                        mainThread.Abort();
-                        Navigation.Reset();
-                        GenshinData data = new GenshinData();
-                    }
-
-                    //Update Image and Text Box from threads
-                    Application.DoEvents();
-                }
-                mainThread.Join();
-                System.Windows.Forms.Application.Exit();
-            }
-
-#endif
-
-            //while (Console.ReadKey(true).Key != ConsoleKey.Enter) { };
-
-            //th.Join();
-            //System.Windows.Forms.Application.Exit();
 
         }
 
@@ -129,7 +110,6 @@ namespace GenshinGuide
         {
             // Do stuff...
             Debug.Print("Key down event captured: Enter Key!!");
-            bStopExecution = true;
         }
 
         protected override void WndProc(ref Message m)
@@ -160,6 +140,21 @@ namespace GenshinGuide
         }
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label13_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void pictureBox5_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label17_Click(object sender, EventArgs e)
         {
 
         }

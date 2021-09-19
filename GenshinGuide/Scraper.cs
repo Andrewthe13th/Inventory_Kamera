@@ -24,40 +24,40 @@ namespace GenshinGuide
         private static Dictionary<string, int> setNameCode = new Dictionary<string, int>
         {
             ["Adventurer"] = setCount,
-            ["Lucky Dog"] = ++setCount,
-            ["Traveling Doctor"] = ++setCount,
-            ["Resolution of Sojourner"] = ++setCount,
-            ["Tiny Miracle"] = ++setCount,
+            ["LuckyDog"] = ++setCount,
+            ["TravelingDoctor"] = ++setCount,
+            ["ResolutionofSojourner"] = ++setCount,
+            ["TinyMiracle"] = ++setCount,
             ["Berserker"] = ++setCount, // 5
             ["Instructor"] = ++setCount,
-            ["The Exile"] = ++setCount,
-            ["Defenders Will"] = ++setCount,
-            ["Brave Heart"] = ++setCount,
-            ["Martial Artist"] = ++setCount, // 10
+            ["TheExile"] = ++setCount,
+            ["DefendersWill"] = ++setCount,
+            ["BraveHeart"] = ++setCount,
+            ["MartialArtist"] = ++setCount, // 10
             ["Gambler"] = ++setCount,
             ["Scholar"] = ++setCount,
-            ["Prayers for Illumination"] = ++setCount,
-            ["Prayers for Destiny"] = ++setCount,
-            ["Prayers for Wisdom"] = ++setCount, // 15
-            ["Prayers for Springtime"] = ++setCount,
+            ["PrayersforIllumination"] = ++setCount,
+            ["PrayersforDestiny"] = ++setCount,
+            ["PrayersforWisdom"] = ++setCount, // 15
+            ["PrayersforSpringtime"] = ++setCount,
             ["Thundersoother"] = ++setCount,
             ["Lavawalker"] = ++setCount,
-            ["Maiden Beloved"] = ++setCount,
-            ["Gladiators Finale"] = ++setCount, // 20
-            ["Viridescent Venerer"] = ++setCount,
-            ["Wanderers Troupe"] = ++setCount,
-            ["Thundering Fury"] = ++setCount,
-            ["Crimson Witch of Flames"] = ++setCount,
-            ["Noblesse Oblige"] = ++setCount, // 25
-            ["Bloodstained Chivalry"] = ++setCount,
-            ["Archaic Petra"] = ++setCount,
-            ["Retracing Bolide"] = ++setCount,
-            ["Heart of Depth"] = ++setCount,
-            ["Blizzard Strayer"] = ++setCount, // 30
-            ["Pale Flame"] = ++setCount,
-            ["Tenacity of the Millelith"] = ++setCount,
-            ["Shimenawas Reminiscence"] = ++setCount,
-            ["Emblem of Severed Fate"] = ++setCount,
+            ["MaidenBeloved"] = ++setCount,
+            ["GladiatorsFinale"] = ++setCount, // 20
+            ["ViridescentVenerer"] = ++setCount,
+            ["WanderersTroupe"] = ++setCount,
+            ["ThunderingFury"] = ++setCount,
+            ["CrimsonWitchofFlames"] = ++setCount,
+            ["NoblesseOblige"] = ++setCount, // 25
+            ["BloodstainedChivalry"] = ++setCount,
+            ["ArchaicPetra"] = ++setCount,
+            ["RetracingBolide"] = ++setCount,
+            ["HeartofDepth"] = ++setCount,
+            ["BlizzardStrayer"] = ++setCount, // 30
+            ["PaleFlame"] = ++setCount,
+            ["TenacityoftheMillelith"] = ++setCount,
+            ["ShimenawasReminiscence"] = ++setCount,
+            ["EmblemofSeveredFate"] = ++setCount,
         };
         private static Dictionary<string, int> mainStatCode = new Dictionary<string, int>
         {
@@ -67,26 +67,26 @@ namespace GenshinGuide
             ["HP"] = ++mainStatCount,
             ["ATK"] = ++mainStatCount, 
             ["DEF"] = ++mainStatCount,
-            ["Energy Recharge"] = ++mainStatCount, //5
-            ["Elemental Mastery"] = ++mainStatCount,
-            ["Healing Bonus"] = ++mainStatCount,
-            ["CRIT Rate"] = ++mainStatCount,
-            ["CRIT DMG"] = ++mainStatCount,
-            ["Physical DMG Bonus"] = ++mainStatCount, //10
-            ["Pyro DMG Bonus"] = ++mainStatCount,
-            ["Electro DMG Bonus"] = ++mainStatCount,
-            ["Cryo DMG Bonus"] = ++mainStatCount,
-            ["Hydro DMG Bonus"] = ++mainStatCount,
-            ["Anemo DMG Bonus"] = ++mainStatCount, //15
-            ["Geo DMG Bonus"] = ++mainStatCount,
+            ["EnergyRecharge"] = ++mainStatCount, //5
+            ["ElementalMastery"] = ++mainStatCount,
+            ["HealingBonus"] = ++mainStatCount,
+            ["CRITRate"] = ++mainStatCount,
+            ["CRITDMG"] = ++mainStatCount,
+            ["PhysicalDMGBonus"] = ++mainStatCount, //10
+            ["PyroDMGBonus"] = ++mainStatCount,
+            ["ElectroDMGBonus"] = ++mainStatCount,
+            ["CryoDMGBonus"] = ++mainStatCount,
+            ["HydroDMGBonus"] = ++mainStatCount,
+            ["AnemoDMGBonus"] = ++mainStatCount, //15
+            ["GeoDMGBonus"] = ++mainStatCount,
         };
         private static Dictionary<string, int> gearSlotCode = new Dictionary<string, int>
         {
-            ["Flower of Life"] = 0,
-            ["Plume of Death"] = 1,
-            ["Sands of Eon"] = 2,
-            ["Goblet of Eonothem"] = 3,
-            ["Circlet of Logos"] = 4,
+            ["FlowerofLife"] = 0,
+            ["PlumeofDeath"] = 1,
+            ["SandsofEon"] = 2,
+            ["GobletofEonothem"] = 3,
+            ["CircletofLogos"] = 4,
         };
         private static Dictionary<string, int> subStatCode = new Dictionary<string, int>
         {
@@ -96,10 +96,10 @@ namespace GenshinGuide
             ["ATK%"] = 3,
             ["DEF"] = 4,
             ["DEF%"] = 5,
-            ["Energy Recharge"] = 6,
-            ["Elemental Mastery"] = 7,
-            ["CRIT Rate"] = 8,
-            ["CRIT DMG"] = 9,
+            ["EnergyRecharge"] = 6,
+            ["ElementalMastery"] = 7,
+            ["CRITRate"] = 8,
+            ["CRITDMG"] = 9,
         };
         private static Dictionary<string, int> characterCode = new Dictionary<string, int>
         {
@@ -136,24 +136,24 @@ namespace GenshinGuide
             ["Albedo"] = ++characterCount,
             ["Ganyu"] = ++characterCount,
             ["Xiao"] = ++characterCount,
-            ["Hu Tao"] = ++characterCount, // 30
+            ["HuTao"] = ++characterCount, // 30
             ["HuTao"] = characterCount, // 30
             ["Rosaria"] = ++characterCount,
             ["Yanfei"] = ++characterCount,
             ["Eula"] = ++characterCount,
-            ["Kaedehara Kazuha"] = ++characterCount,
+            ["KaedeharaKazuha"] = ++characterCount,
             ["Kaedehara"] = characterCount,
-            ["Kamisato Ayaka"] = ++characterCount, //35
+            ["KamisatoAyaka"] = ++characterCount, //35
             ["Kamisato"] = characterCount, //35
             ["Yoimiya"] = ++characterCount,
             ["Sayu"] = ++characterCount,
-            ["Raiden Shogun"] = ++characterCount,
+            ["RaidenShogun"] = ++characterCount,
             ["Raiden"] = characterCount,
-            ["Kujou Sara"] = ++characterCount,
+            ["KujouSara"] = ++characterCount,
             ["Kujou"] = characterCount,
             ["Aloy"] = ++characterCount, // 40
-            ["Sangonomiya Kokomi"] = ++characterCount,
-            ["Sangonomiya "] = characterCount,
+            ["SangonomiyaKokomi"] = ++characterCount,
+            ["Sangonomiya"] = characterCount,
         };
         public static Dictionary<int, string[]> characterTalentConstellationOrder = new Dictionary<int, string[]>
         {
@@ -214,140 +214,140 @@ namespace GenshinGuide
         private static Dictionary<string, int> weaponCode = new Dictionary<string, int>
         {
             // 1 Star
-            ["Dull Blade"] = weaponCount,
-            ["Waster Greatsword"] = ++weaponCount,
-            ["Beginners Protector"] = ++weaponCount,
-            ["Apprentices Notes"] = ++weaponCount,
-            ["Hunters Bow"] = ++weaponCount, // 4
+            ["DullBlade"] = weaponCount,
+            ["WasterGreatsword"] = ++weaponCount,
+            ["BeginnersProtector"] = ++weaponCount,
+            ["ApprenticesNotes"] = ++weaponCount,
+            ["HuntersBow"] = ++weaponCount, // 4
             // 2 Stars
-            ["Silver Sword"] = ++weaponCount,
-            ["Old Mercs Pal"] = ++weaponCount,
-            ["Iron Point"] = ++weaponCount,
-            ["Pocket Grimoire"] = ++weaponCount,
-            ["Seasoned Hunters Bow"] = ++weaponCount, // 9
+            ["SilverSword"] = ++weaponCount,
+            ["OldMercsPal"] = ++weaponCount,
+            ["IronPoint"] = ++weaponCount,
+            ["PocketGrimoire"] = ++weaponCount,
+            ["SeasonedHuntersBow"] = ++weaponCount, // 9
             // 3 Star
-            ["Cool Steel"] = ++weaponCount, // 10
-            ["Harbinger of Dawn"] = ++weaponCount,
-            ["Travelers Handy Sword"] = ++weaponCount,
-            ["Fillet Blade"] = ++weaponCount,
-            ["Skyrider Sword"] = ++weaponCount,
-            ["Ferrous Shadow"] = ++weaponCount, // 15
-            ["Bloodtainted Greatsword"] = ++weaponCount,
-            ["White Iron Greatsword"] = ++weaponCount,
-            ["Debate Club"] = ++weaponCount,
-            ["Skyrider Greatsword"] = ++weaponCount,
-            ["White Tassel"] = ++weaponCount, // 20
+            ["CoolSteel"] = ++weaponCount, // 10
+            ["HarbingerofDawn"] = ++weaponCount,
+            ["TravelersHandySword"] = ++weaponCount,
+            ["FilletBlade"] = ++weaponCount,
+            ["SkyriderSword"] = ++weaponCount,
+            ["FerrousShadow"] = ++weaponCount, // 15
+            ["BloodtaintedGreatsword"] = ++weaponCount,
+            ["WhiteIronGreatsword"] = ++weaponCount,
+            ["DebateClub"] = ++weaponCount,
+            ["SkyriderGreatsword"] = ++weaponCount,
+            ["WhiteTassel"] = ++weaponCount, // 20
             ["Halberd"] = ++weaponCount,
-            ["Black Tassel"] = ++weaponCount,
-            ["Magic Guide"] = ++weaponCount,
-            ["Thrilling Tales of Dragon Slayers"] = ++weaponCount,
-            ["Otherworldly Story"] = ++weaponCount, // 25
-            ["Emerald Orb"] = ++weaponCount,
-            ["Twin Nephrite"] = ++weaponCount,
-            ["Raven Bow"] = ++weaponCount,
-            ["Sharpshooters Oath"] = ++weaponCount,
-            ["Recurve Bow"] = ++weaponCount, // 30
+            ["BlackTassel"] = ++weaponCount,
+            ["MagicGuide"] = ++weaponCount,
+            ["ThrillingTalesofDragonSlayers"] = ++weaponCount,
+            ["OtherworldlyStory"] = ++weaponCount, // 25
+            ["EmeraldOrb"] = ++weaponCount,
+            ["TwinNephrite"] = ++weaponCount,
+            ["RavenBow"] = ++weaponCount,
+            ["SharpshootersOath"] = ++weaponCount,
+            ["RecurveBow"] = ++weaponCount, // 30
             ["Slingshot"] = ++weaponCount,
             ["Messenger"] = ++weaponCount,
             // 4 star
-            ["Favonius Sword"] = ++weaponCount,
-            ["The Flute"] = ++weaponCount,
-            ["Sacrificial Sword"] = ++weaponCount, // 35
-            ["Royal Longsword"] = ++weaponCount,
-            ["Lions Roar"] = ++weaponCount,
-            ["Prototype Rancour"] = ++weaponCount,
-            ["Iron Sting"] = ++weaponCount,
-            ["Blackcliff Longsword"] = ++weaponCount, // 40
-            ["The Black Sword"] = ++weaponCount,
-            ["Sword of Descension"] = ++weaponCount,
-            ["Festering Desire"] = ++weaponCount,
-            ["The Alley Flash"] = ++weaponCount,
-            ["Favonius Greatsword"] = ++weaponCount, // 45
-            ["The Bell"] = ++weaponCount,
-            ["Sacrificial Greatsword"] = ++weaponCount,
-            ["Royal Greatsword"] = ++weaponCount,
+            ["FavoniusSword"] = ++weaponCount,
+            ["TheFlute"] = ++weaponCount,
+            ["SacrificialSword"] = ++weaponCount, // 35
+            ["RoyalLongsword"] = ++weaponCount,
+            ["LionsRoar"] = ++weaponCount,
+            ["PrototypeRancour"] = ++weaponCount,
+            ["IronSting"] = ++weaponCount,
+            ["BlackcliffLongsword"] = ++weaponCount, // 40
+            ["TheBlackSword"] = ++weaponCount,
+            ["SwordofDescension"] = ++weaponCount,
+            ["FesteringDesire"] = ++weaponCount,
+            ["TheAlleyFlash"] = ++weaponCount,
+            ["FavoniusGreatsword"] = ++weaponCount, // 45
+            ["TheBell"] = ++weaponCount,
+            ["SacrificialGreatsword"] = ++weaponCount,
+            ["RoyalGreatsword"] = ++weaponCount,
             ["Rainslasher"] = ++weaponCount,
-            ["Prototype Archaic"] = ++weaponCount, // 50
+            ["PrototypeArchaic"] = ++weaponCount, // 50
             ["Whiteblind"] = ++weaponCount,
-            ["Blackcliff Slasher"] = ++weaponCount,
-            ["Serpent Spine"] = ++weaponCount,
-            ["SnowTombed Starsilver"] = ++weaponCount,
-            ["Lithic Blade"] = ++weaponCount, // 55
-            ["Dragons Bane"] = ++weaponCount,
-            ["Prototype Starglitter"] = ++weaponCount,
-            ["Crescent Pike"] = ++weaponCount,
-            ["Blackcliff Pole"] = ++weaponCount,
+            ["BlackcliffSlasher"] = ++weaponCount,
+            ["SerpentSpine"] = ++weaponCount,
+            ["SnowTombedStarsilver"] = ++weaponCount,
+            ["LithicBlade"] = ++weaponCount, // 55
+            ["DragonsBane"] = ++weaponCount,
+            ["PrototypeStarglitter"] = ++weaponCount,
+            ["CrescentPike"] = ++weaponCount,
+            ["BlackcliffPole"] = ++weaponCount,
             ["Deathmatch"] = ++weaponCount, // 60
-            ["Favonius Lance"] = ++weaponCount,
-            ["Royal Spear"] = ++weaponCount,
-            ["Dragonspine Spear"] = ++weaponCount,
-            ["Lithic Spear"] = ++weaponCount,
-            ["Favonius Codex"] = ++weaponCount, // 65
-            ["The Widsith"] = ++weaponCount,
-            ["Sacrificial Fragments"] = ++weaponCount,
-            ["Royal Grimoire"] = ++weaponCount,
-            ["Solar Pearl"] = ++weaponCount,
-            ["Prototype Amber"] = ++weaponCount, // 70
-            ["Mappa Mare"] = ++weaponCount,
-            ["Blackcliff Agate"] = ++weaponCount,
-            ["Eye of Perception"] = ++weaponCount,
+            ["FavoniusLance"] = ++weaponCount,
+            ["RoyalSpear"] = ++weaponCount,
+            ["DragonspineSpear"] = ++weaponCount,
+            ["LithicSpear"] = ++weaponCount,
+            ["FavoniusCodex"] = ++weaponCount, // 65
+            ["TheWidsith"] = ++weaponCount,
+            ["SacrificialFragments"] = ++weaponCount,
+            ["RoyalGrimoire"] = ++weaponCount,
+            ["SolarPearl"] = ++weaponCount,
+            ["PrototypeAmber"] = ++weaponCount, // 70
+            ["MappaMare"] = ++weaponCount,
+            ["BlackcliffAgate"] = ++weaponCount,
+            ["EyeofPerception"] = ++weaponCount,
             ["Frostbearer"] = ++weaponCount,
-            ["Wine and Song"] = ++weaponCount, // 75
-            ["Favonius Warbow"] = ++weaponCount,
-            ["The Stringless"] = ++weaponCount,
-            ["Sacrificial Bow"] = ++weaponCount,
-            ["Royal Bow"] = ++weaponCount,
+            ["WineandSong"] = ++weaponCount, // 75
+            ["FavoniusWarbow"] = ++weaponCount,
+            ["TheStringless"] = ++weaponCount,
+            ["SacrificialBow"] = ++weaponCount,
+            ["RoyalBow"] = ++weaponCount,
             ["Rust"] = ++weaponCount, // 80
-            ["Prototype Crescent"] = ++weaponCount,
-            ["Compound Bow"] = ++weaponCount,
-            ["Blackcliff Warbow"] = ++weaponCount,
-            ["The Viridescent"] = ++weaponCount,
-            ["Alley Hunter"] = ++weaponCount, // 85
-            ["Windblume Ode"] = ++weaponCount,
-            ["Aquilia Favonia"] = ++weaponCount,
-            ["Skyward Blade"] = ++weaponCount,
-            ["Summit Shaper"] = ++weaponCount,
-            ["Primordial Jade Cutter"] = ++weaponCount, // 90
-            ["Skyward Pride"] = ++weaponCount,
-            ["Wolfs Gravestone"] = ++weaponCount,
-            ["The Unforged"] = ++weaponCount,
-            ["Primordial Jade WingedSpear"] = ++weaponCount,
-            ["Skyward Spine"] = ++weaponCount, // 95
-            ["Vortext Vanquisher"] = ++weaponCount,
-            ["Staff of Homa"] = ++weaponCount,
-            ["Skyward Atlas"] = ++weaponCount,
-            ["Lost Prayer to the Sacred Winds"] = ++weaponCount,
-            ["Memory of Dust"] = ++weaponCount, // 100
-            ["Skyward Harp"] = ++weaponCount,
-            ["Amos Bow"] = ++weaponCount,
-            ["Elegy for the End"] = ++weaponCount,
-            ["Song of Broken Pines"] = ++weaponCount,
-            ["Mitternachts Waltz"] = ++weaponCount, // 105
-            ["Freedom-Sworn"] = ++weaponCount,
-            ["Dodoco Tales"] = ++weaponCount,
+            ["PrototypeCrescent"] = ++weaponCount,
+            ["CompoundBow"] = ++weaponCount,
+            ["BlackcliffWarbow"] = ++weaponCount,
+            ["TheViridescent"] = ++weaponCount,
+            ["AlleyHunter"] = ++weaponCount, // 85
+            ["WindblumeOde"] = ++weaponCount,
+            ["AquiliaFavonia"] = ++weaponCount,
+            ["SkywardBlade"] = ++weaponCount,
+            ["SummitShaper"] = ++weaponCount,
+            ["PrimordialJadeCutter"] = ++weaponCount, // 90
+            ["SkywardPride"] = ++weaponCount,
+            ["WolfsGravestone"] = ++weaponCount,
+            ["TheUnforged"] = ++weaponCount,
+            ["PrimordialJadeWingedSpear"] = ++weaponCount,
+            ["SkywardSpine"] = ++weaponCount, // 95
+            ["VortextVanquisher"] = ++weaponCount,
+            ["StaffofHoma"] = ++weaponCount,
+            ["SkywardAtlas"] = ++weaponCount,
+            ["LostPrayertotheSacredWinds"] = ++weaponCount,
+            ["MemoryofDust"] = ++weaponCount, // 100
+            ["SkywardHarp"] = ++weaponCount,
+            ["AmosBow"] = ++weaponCount,
+            ["ElegyfortheEnd"] = ++weaponCount,
+            ["SongofBrokenPines"] = ++weaponCount,
+            ["MitternachtsWaltz"] = ++weaponCount, // 105
+            ["FreedomSworn"] = ++weaponCount,
+            ["DodocoTales"] = ++weaponCount,
             // 2.0 Inazuma Patch
-            ["Amenoma Kageuchi"] = ++weaponCount,
-            ["Katsuragikiri Nagamasa"] = ++weaponCount,
-            ["Kitain Cross Spear"] = ++weaponCount, // 110
+            ["AmenomaKageuchi"] = ++weaponCount,
+            ["KatsuragikiriNagamasa"] = ++weaponCount,
+            ["KitainCrossSpear"] = ++weaponCount, // 110
             ["Hamayumi"] = ++weaponCount,
-            ["Hakushin Ring"] = ++weaponCount,
-            ["Mistsplitter Reforged"] = ++weaponCount,
-            ["Thundering Pulse"] = ++weaponCount,
+            ["HakushinRing"] = ++weaponCount,
+            ["MistsplitterReforged"] = ++weaponCount,
+            ["ThunderingPulse"] = ++weaponCount,
             // 2.1
             ["Predator"] = ++weaponCount, // 115
-            ["Luxurious SeaLord"] = ++weaponCount,
-            ["The Catch"] = ++weaponCount,
-            ["Engulfing Lightning"] = ++weaponCount,
-            ["Everlasting Moonglow"] = ++weaponCount,
+            ["LuxuriousSeaLord"] = ++weaponCount,
+            ["TheCatch"] = ++weaponCount,
+            ["EngulfingLightning"] = ++weaponCount,
+            ["EverlastingMoonglow"] = ++weaponCount,
 
         };
         private static Dictionary<string, int> enchancementMaterialCode = new Dictionary<string, int>
         {
-            ["Enhancement Ore"] = 1,
-            ["Fine Enhancement Ore"] = 2,
-            ["Mystic Enchnacement Ore"] = 3,
-            ["Sanctifying Unction"] = 4,
-            ["Sanctifying Essence"] = 5, // 4
+            ["EnhancementOre"] = 1,
+            ["FineEnhancementOre"] = 2,
+            ["MysticEnchnacementOre"] = 3,
+            ["SanctifyingUnction"] = 4,
+            ["SanctifyingEssence"] = 5, // 4
         };
 
         private static TesseractEngine ocr_live = new TesseractEngine( (Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
@@ -683,7 +683,7 @@ namespace GenshinGuide
             else
             {
                 Debug.Print("Error: " + setName + " is not a valid Set Name");
-                System.Environment.Exit(1);
+                Form1.UnexpectedError(setName + " is not a valid Set Name");
                 return code;
             };
         }
@@ -698,7 +698,7 @@ namespace GenshinGuide
             else
             {
                 Debug.Print("Error: " + mainStat + " is not a valid Main Stat Name");
-                System.Environment.Exit(1);
+                Form1.UnexpectedError(mainStat + " is not a valid Main Stat Name");
                 return code;
             };
         }
@@ -713,7 +713,7 @@ namespace GenshinGuide
             else
             {
                 Debug.Print("Error: " + gearSlot + " is not a valid Gear Slot");
-                System.Environment.Exit(1);
+                Form1.UnexpectedError("gearSlot" + " is not a valid Gear Slot");
                 return code;
             };
         }
@@ -728,7 +728,7 @@ namespace GenshinGuide
             else
             {
                 Debug.Print("Error: " + subStat + " is not a valid Sub Stat");
-                System.Environment.Exit(1);
+                Form1.UnexpectedError(subStat + " is not a valid Sub Stat");
                 return code;
             };
         }
@@ -748,7 +748,7 @@ namespace GenshinGuide
             {
                 Debug.Print("Error: " + character + " is not a valid Character Name");
                 if (!bRedo)
-                    System.Environment.Exit(1);
+                    Form1.UnexpectedError(character + " is not a valid Character Name");
                 return -1;
             }
         }
@@ -764,7 +764,7 @@ namespace GenshinGuide
             {
                 Debug.Print("Error: " + element + " is not a valid Elemental Type");
                 if(!bRedo)
-                    System.Environment.Exit(1);
+                    Form1.UnexpectedError(element + " is not a valid Elemental Type");
                 return code;
             };
         }
@@ -778,7 +778,7 @@ namespace GenshinGuide
             }
             else
             {
-                Debug.Print("Error: " + enchancementMaterial + " is not a valid Enchancement Material");
+                Debug.Print(enchancementMaterial + " is not a valid Enchancement Material");
                 return code;
             };
         }
@@ -793,7 +793,7 @@ namespace GenshinGuide
             else
             {
                 Debug.Print("Error: " + weapon + " is not a valid Weapon Name");
-                System.Environment.Exit(1);
+                Form1.UnexpectedError(weapon + " is not a valid Weapon Name");
                 return code;
             };
         }
@@ -1146,7 +1146,7 @@ namespace GenshinGuide
             }
             else
             {
-                System.Environment.Exit(1);
+                Form1.UnexpectedError("Traveler name cannot be empty");
             }
         }
 

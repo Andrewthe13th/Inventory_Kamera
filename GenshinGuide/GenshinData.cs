@@ -19,6 +19,7 @@ namespace GenshinGuide
         private static List<Weapon> equippedWeapons = new List<Weapon>();
         public static Queue<OCRImage> workerQueue = new Queue<OCRImage>();
         private static volatile bool b_ScanWeapons = false;
+        private static Thread ImageProcessor = new Thread(() => { ImageProcessorWorker(); });
         // TODO add language option
 
         public GenshinData()
@@ -27,6 +28,14 @@ namespace GenshinGuide
             inventory = new Inventory();
             equippedArtifacts = new List<Artifact>();
             equippedWeapons = new List<Weapon>();
+        }
+
+        public void StopImageProcessorWorker()
+        {
+            if (ImageProcessor.IsAlive)
+            {
+                ImageProcessor.Abort();
+            }
         }
 
         public List<Character> GetCharacters()
@@ -42,7 +51,6 @@ namespace GenshinGuide
         public void GatherData()
         {
             // Initize Image Processor Queue
-            Thread ImageProcessor = new Thread(() => { ImageProcessorWorker(); });
             ImageProcessor.IsBackground = true;
             ImageProcessor.Start();
 
@@ -60,21 +68,22 @@ namespace GenshinGuide
             ArtifactScraper.ScanArtifacts();
             //inventory.AssignArtifacts(ref equippedArtifacts);
             Navigation.MainMenuScreen();
+            workerQueue.Enqueue(new OCRImage(null, "END", 0));
 
             // Wait till weapons have been scanned
             // Used to Get name of traveler
-            while(b_ScanWeapons == false)
+            while (b_ScanWeapons == false)
             {
                 System.Threading.Thread.Sleep(1000);
             }
 
             // Get characters
             Navigation.CharacterScreen();
+            characters = new List<Character>();
             characters = CharacterScraper.ScanCharacters();
             Navigation.MainMenuScreen();
 
             // Wait for Image Processor to finish
-            workerQueue.Enqueue(new OCRImage(null, "END", 0));
             ImageProcessor.Join();
 
             // Assign Artifacts to Characters
@@ -84,9 +93,11 @@ namespace GenshinGuide
             //Console.ReadKey();
         }
 
-        public void ImageProcessorWorker()
+        public static void ImageProcessorWorker()
         {
             Weapon w; Artifact a;
+            int weaponCount = 0;
+            int artifactCount = 0;
             //List<Weapon> weapons = new List<Weapon>();
             //List<Artifact> artifacts = new List<Artifact>();
             bool b_End = false;
@@ -95,12 +106,15 @@ namespace GenshinGuide
                 if (workerQueue.Count > 0)
                 {
                     OCRImage img = workerQueue.Dequeue();
-                    if (img.type != "END" || img.bm != null)
+                    if (img.type != "END" && img.bm != null)
                     {
                         if (img.type == "weapon")
                         {
+                            weaponCount++;
                             // Scan as weapon
+                            UserInterface.Reset_Artifact();
                             w = WeaponScraper.ScanWeapon(img.bm, img.id);
+                            UserInterface.IncrementWeaponCount();
                             inventory.AssignWeapon(w);
 
                             if (w.equippedCharacter != 0)
@@ -114,8 +128,11 @@ namespace GenshinGuide
                             if (!b_ScanWeapons)
                                 b_ScanWeapons = true;
 
+                            artifactCount++;
                             // Scan as weapon
+                            UserInterface.Reset_Artifact();
                             a = ArtifactScraper.ScanArtifact(img.bm, img.id);
+                            UserInterface.IncrementArtifactCount();
                             inventory.AssignArtifact(a);
 
                             if (a.equippedCharacter != 0)
@@ -126,7 +143,7 @@ namespace GenshinGuide
                         }
                         else // not supposed to happen
                         {
-                            System.Environment.Exit(1);
+                            Form1.UnexpectedError("Unknown Image type for Image Processor");
                         }
                     }
                     else
