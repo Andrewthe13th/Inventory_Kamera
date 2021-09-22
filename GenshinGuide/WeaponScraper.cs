@@ -377,9 +377,9 @@ namespace GenshinGuide
 
             bm_1.Dispose(); bm_2.Dispose(); bm_3.Dispose(); bm_4.Dispose();
 
-
-
             Weapon weapon = new Weapon(name, level, ascension, refinementLevel, equippedCharacter, id);
+
+            // Check for Errors
 
             return weapon;
 
@@ -497,9 +497,28 @@ namespace GenshinGuide
             bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
 
             string text = Scraper.AnalyzeText(bm);
+            text = Regex.Replace(text, @"[^\d/]", "");
+
+            int count = 0;
+            // Check for dash
+            if (Regex.IsMatch(text, "/"))
+            {
+                count = Int32.Parse(text.Split('/')[0]);
+            }
+            else
+            {
+                // divide by the number on the right if both numbers fused
+                count = Int32.Parse(text) / 2000;
+            }
+
+            // Check if larger than 1000
+            while (count > 2000)
+            {
+                count = count / 20;
+            }
 
 
-            return Int32.Parse(text.Split()[1].Split('/')[0]);
+            return count;
         }
 
         public static int ScanWeaponName(Bitmap weaponImage, int max_X, int max_Y)
@@ -615,23 +634,29 @@ namespace GenshinGuide
                     }
                     else
                     {
+                        string text1 = "Found " + temp[0] + "instead of Weapon Level.";
                         Debug.Print("Found " + temp[0] + "instead of Weapon Level.");
-                        Form1.UnexpectedError(text);;
-                        return level;
+                        UserInterface.AddError(text1);
+                        //Form1.UnexpectedError(text);
+                        return -1;
                     }
                 }
                 else
                 {
+                    string text1 = "Found " + temp[0] + "instead of Weapon Level.";
                     Debug.Print("Found " + temp[0] + "instead of Weapon Level.");
-                    Form1.UnexpectedError(text);;
+                    UserInterface.AddError(text1);
+                    //Form1.UnexpectedError(text);
                     return -1;
                 }
 
             }
             else
             {
+                string text1 = "Found " + text + "instead of Weapon Level.";
                 Debug.Print("Found " + text + "instead of Weapon Level." );
-                Form1.UnexpectedError(text);;
+                UserInterface.AddError(text1);
+                //Form1.UnexpectedError(text);
                 return -1;
             }
         }
@@ -718,12 +743,11 @@ namespace GenshinGuide
                     string[] tempString = equippedCharacter.Split(':');
                     equippedCharacter = tempString[1].Replace("\n", String.Empty);
                     UserInterface.SetArtifact_Equipped(bm, equippedCharacter);
-                    equippedCharacter = Regex.Replace(equippedCharacter, @"[\W_]", "");
-                    //equippedCharacter = Regex.Replace(equippedCharacter, @"[\/!@#$%^&*()\[\]\-_`~\\+={};:',.<>?‘|]", "");
+                    equippedCharacter = Regex.Replace(equippedCharacter, @"[^\w_]", "");
 
                     // Assign Traveler Name if not found
                     int character = Scraper.GetCharacterCode(equippedCharacter);
-                    if (Scraper.b_AssignedTravelerName == false && character == 0)
+                    if (Scraper.b_AssignedTravelerName == false && character == 1)
                     {
                         Scraper.AssignTravelerName(equippedCharacter);
                         Scraper.b_AssignedTravelerName = true;
@@ -743,7 +767,11 @@ namespace GenshinGuide
                         }
                     }
 
-                    return Scraper.GetCharacterCode(equippedCharacter);
+                    if(equippedCharacter.Length > 0)
+                    {
+                        return Scraper.GetCharacterCode(equippedCharacter);
+                    }
+                    return 0;
                 }
             }
             // artifact has no equipped character

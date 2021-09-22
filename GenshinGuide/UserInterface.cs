@@ -33,7 +33,10 @@ namespace GenshinGuide
         private static Label characterCount;
         private static Label programStatus;
 
-        public static void Init(PictureBox _a_gearSlot, PictureBox _a_mainStat, PictureBox _a_level, PictureBox[] _a_subStats, PictureBox _a_setName, PictureBox _a_equipped, TextBox _a_textbox, PictureBox _c_name, PictureBox _c_level, PictureBox[] _c_talent, TextBox _c_textbox, Label _weaponCount, Label _weaponMax, Label _artifactCount, Label _artifactMax, Label _characterCount, Label _programStatus)
+        // Error Log
+        private static TextBox error_textBox;
+
+        public static void Init(PictureBox _a_gearSlot, PictureBox _a_mainStat, PictureBox _a_level, PictureBox[] _a_subStats, PictureBox _a_setName, PictureBox _a_equipped, TextBox _a_textbox, PictureBox _c_name, PictureBox _c_level, PictureBox[] _c_talent, TextBox _c_textbox, Label _weaponCount, Label _weaponMax, Label _artifactCount, Label _artifactMax, Label _characterCount, Label _programStatus, TextBox _error_textBox)
         {
             // Artifact
             a_gearSlot = _a_gearSlot;
@@ -56,6 +59,8 @@ namespace GenshinGuide
             characterCount = _characterCount;
             // Status
             programStatus = _programStatus;
+            // Error
+            error_textBox = _error_textBox;
         }
 
         public static void SetArtifact_GearSlot(Bitmap bm, string text, bool bWeapon = false)
@@ -344,11 +349,7 @@ namespace GenshinGuide
 
         public static void SetArtifact_Max(int max)
         {
-            MethodInvoker countAction = delegate
-            {
-                artifactMax.Text = max.ToString();
-                artifactMax.Refresh();
-            };
+            MethodInvoker countAction = delegate { artifactMax.Text = max.ToString(); artifactMax.Refresh();};
 
             artifactMax.Invoke(countAction);
         }
@@ -373,7 +374,7 @@ namespace GenshinGuide
                     programStatus.Text = status;
                     programStatus.ForeColor = Color.Green;
                     programStatus.Font = new Font(programStatus.Font.FontFamily, 15);
-                    programStatus.Location = new Point(201, 10);
+                    programStatus.Location = new Point(40, 164);
                     programStatus.Refresh();
                 };
             }
@@ -384,12 +385,83 @@ namespace GenshinGuide
                     programStatus.Text = "Error: " + status;
                     programStatus.ForeColor = Color.Red;
                     programStatus.Font = new Font(programStatus.Font.FontFamily, 8);
-                    programStatus.Location = new Point(100,10);
+                    programStatus.Location = new Point(31, 166);
                     programStatus.Refresh();
                 };
             }
 
             programStatus.Invoke(statusAction);
+        }
+
+        public static void AddError(string error)
+        {
+            MethodInvoker textAction = delegate
+            {
+                error_textBox.AppendText("Error: " + error);
+                error_textBox.AppendText(Environment.NewLine);
+                error_textBox.Refresh();
+            };
+
+            error_textBox.Invoke(textAction);
+        }
+
+        public static void Reset_All()
+        {
+            // Counters
+            MethodInvoker characterCountAction = delegate { characterCount.Text = "0"; weaponMax.Refresh(); };
+            MethodInvoker weaponCountAction = delegate { weaponCount.Text = "0"; weaponMax.Refresh(); };
+            MethodInvoker weaponMaxAction = delegate { weaponMax.Text = "?"; weaponMax.Refresh(); };
+            MethodInvoker artifactCountAction = delegate { artifactCount.Text = "0"; artifactMax.Refresh(); };
+            MethodInvoker artifactMaxAction = delegate { artifactMax.Text = "?"; artifactMax.Refresh(); };
+            // Images
+            MethodInvoker gearSlotAction = delegate { a_gearSlot.Image = null; };
+            MethodInvoker mainStatAction = delegate { a_mainStat.Image = null; };
+            MethodInvoker artifactlevelAction = delegate { a_level.Image = null; };
+            MethodInvoker subStatsAction_1 = delegate { a_subStats[0].Image = null; };
+            MethodInvoker subStatsAction_2 = delegate { a_subStats[1].Image = null; };
+            MethodInvoker subStatsAction_3 = delegate { a_subStats[2].Image = null; };
+            MethodInvoker subStatsAction_4 = delegate { a_subStats[3].Image = null; };
+            MethodInvoker setNameAction = delegate { a_setName.Image = null; };
+            MethodInvoker equippedAction = delegate { a_equipped.Image = null; };
+            MethodInvoker artifactAction = delegate { a_textBox.Text = ""; };
+            MethodInvoker nameAction = delegate { c_name.Image = null; };
+            MethodInvoker levelAction = delegate { c_level.Image = null; };
+            MethodInvoker talentAction_1 = delegate { c_talent[0].Image = null; };
+            MethodInvoker talentAction_2 = delegate { c_talent[1].Image = null; };
+            MethodInvoker talentAction_3 = delegate { c_talent[2].Image = null; };
+            MethodInvoker characterAction = delegate { c_textBox.Text = ""; };
+            //Error
+            MethodInvoker errorAction = delegate { error_textBox.Text = ""; };
+
+            characterCount.Invoke(characterCountAction);
+            weaponCount.Invoke(weaponCountAction);
+            weaponMax.Invoke(weaponMaxAction);
+            artifactCount.Invoke(artifactCountAction);
+            artifactMax.Invoke(artifactMaxAction);
+            a_gearSlot.Invoke(gearSlotAction);
+            a_mainStat.Invoke(mainStatAction);
+            a_level.Invoke(artifactlevelAction);
+            a_subStats[0].Invoke(subStatsAction_1);
+            a_subStats[1].Invoke(subStatsAction_2);
+            a_subStats[2].Invoke(subStatsAction_3);
+            a_subStats[3].Invoke(subStatsAction_4);
+            a_setName.Invoke(setNameAction);
+            a_equipped.Invoke(equippedAction);
+            a_textBox.Invoke(artifactAction);
+            c_name.Invoke(nameAction);
+            c_level.Invoke(levelAction);
+            c_talent[0].Invoke(talentAction_1);
+            c_talent[1].Invoke(talentAction_2);
+            c_talent[2].Invoke(talentAction_3);
+            c_textBox.Invoke(characterAction);
+            error_textBox.Invoke(errorAction);
+        }
+
+        public static void Reset_Error()
+        {
+            MethodInvoker textAction = delegate { error_textBox.Text = ""; };
+
+            error_textBox.Invoke(textAction);
         }
 
     }

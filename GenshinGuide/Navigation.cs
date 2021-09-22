@@ -37,6 +37,8 @@ namespace GenshinGuide
         {
             area = new RECT();
             position = new RECT();
+            sim = new InputSimulator();
+            genshinImpact = null;
         }
 
         public static RECT GetArea()
@@ -83,7 +85,7 @@ namespace GenshinGuide
             int yOffset = 100;
             Navigation.SetCursorPos(Navigation.GetPosition().left + xOffset, Navigation.GetPosition().top + yOffset);
             Navigation.sim.Mouse.LeftButtonClick();
-            Navigation.SystemRandomWait(Speed.UI);
+            Navigation.SystemRandomWait(Speed.CharacterUI);
         }
 
         public static void SelectCharacterConstellation()
@@ -92,7 +94,7 @@ namespace GenshinGuide
             int yOffset = 235;
             Navigation.SetCursorPos(Navigation.GetPosition().left + xOffset, Navigation.GetPosition().top + yOffset);
             Navigation.sim.Mouse.LeftButtonClick();
-            Navigation.SystemRandomWait(Speed.Fast);
+            Navigation.SystemRandomWait(Speed.CharacterUI);
         }
 
         public static void SelectCharacterTalents()
@@ -101,15 +103,15 @@ namespace GenshinGuide
             int yOffset = 290;
             Navigation.SetCursorPos(Navigation.GetPosition().left + xOffset, Navigation.GetPosition().top + yOffset);
             Navigation.sim.Mouse.LeftButtonClick();
-            Navigation.SystemRandomWait(Speed.Fast);
+            Navigation.SystemRandomWait(Speed.CharacterUI);
         }
 
         public static void SelectNextCharacter()
         {
             int xOffset = 1230;
             int yOffset = 350;
-            Navigation.SetCursorPos(Navigation.GetPosition().left + xOffset, Navigation.GetPosition().top + yOffset);
-            Navigation.SystemRandomWait(); 
+            //Navigation.SetCursorPos(Navigation.GetPosition().left + xOffset, Navigation.GetPosition().top + yOffset);
+            //Navigation.SystemRandomWait(); 
             Navigation.SetCursorPos(Navigation.GetPosition().left + xOffset, Navigation.GetPosition().top + yOffset);
             Navigation.sim.Mouse.LeftButtonClick();
             Navigation.SystemRandomWait(Speed.SelectNextCharacter);
@@ -226,6 +228,11 @@ namespace GenshinGuide
                 int value = r.Next(125, 150);
                 System.Threading.Thread.Sleep(value);
             }
+            else if (type == Speed.CharacterUI)
+            {
+                int value = 200;
+                System.Threading.Thread.Sleep(value);
+            }
             else if (type == Speed.ArtifactIgnore)
             {
                 int value = r.Next(80, 120);
@@ -269,6 +276,7 @@ namespace GenshinGuide
             ArtifactIgnore,
             SelectNextCharacter,
             SelectNextInventoryItem,
+            CharacterUI,
         }
         #endregion
     }

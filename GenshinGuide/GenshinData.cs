@@ -20,6 +20,7 @@ namespace GenshinGuide
         public static Queue<OCRImage> workerQueue = new Queue<OCRImage>();
         private static volatile bool b_ScanWeapons = false;
         private static Thread ImageProcessor = new Thread(() => { ImageProcessorWorker(); });
+        private static volatile bool b_threadCancel = false;
         // TODO add language option
 
         public GenshinData()
@@ -34,7 +35,8 @@ namespace GenshinGuide
         {
             if (ImageProcessor.IsAlive)
             {
-                ImageProcessor.Abort();
+                b_threadCancel = true;
+                workerQueue = new Queue<OCRImage>();
             }
         }
 
@@ -51,6 +53,7 @@ namespace GenshinGuide
         public void GatherData()
         {
             // Initize Image Processor Queue
+            ImageProcessor = new Thread(() => { ImageProcessorWorker(); });
             ImageProcessor.IsBackground = true;
             ImageProcessor.Start();
 
@@ -103,6 +106,13 @@ namespace GenshinGuide
             bool b_End = false;
             while (!b_End)
             {
+                //b_canCancel = true;
+                if(b_threadCancel)
+                {
+                    workerQueue.Clear();
+                    b_End = true;
+                }
+                
                 if (workerQueue.Count > 0)
                 {
                     OCRImage img = workerQueue.Dequeue();
@@ -114,13 +124,18 @@ namespace GenshinGuide
                             // Scan as weapon
                             UserInterface.Reset_Artifact();
                             w = WeaponScraper.ScanWeapon(img.bm, img.id);
-                            UserInterface.IncrementWeaponCount();
-                            inventory.AssignWeapon(w);
 
-                            if (w.equippedCharacter != 0)
+                            if (w.IsValid())
                             {
-                                equippedWeapons.Add(w);
+                                UserInterface.IncrementWeaponCount();
+                                inventory.AssignWeapon(w);
+                                if (w.equippedCharacter != 0)
+                                {
+                                    equippedWeapons.Add(w);
+                                }
                             }
+                            
+                            
                         }
                         else if (img.type == "artifact")
                         {
@@ -132,14 +147,17 @@ namespace GenshinGuide
                             // Scan as weapon
                             UserInterface.Reset_Artifact();
                             a = ArtifactScraper.ScanArtifact(img.bm, img.id);
-                            UserInterface.IncrementArtifactCount();
-                            inventory.AssignArtifact(a);
 
-                            if (a.equippedCharacter != 0)
+                            if (a.IsValid())
                             {
-                                equippedArtifacts.Add(a);
-                            }
+                                UserInterface.IncrementArtifactCount();
+                                inventory.AssignArtifact(a);
 
+                                if (a.equippedCharacter >= 1)
+                                {
+                                    equippedArtifacts.Add(a);
+                                }
+                            }
                         }
                         else // not supposed to happen
                         {
@@ -155,10 +173,10 @@ namespace GenshinGuide
                 }
                 else
                 { // Wait for more images to process
-                    System.Threading.Thread.Sleep(1000);
+                    System.Threading.Thread.Sleep(500);
                 }
             }
-
+            b_threadCancel = false;
             // Assign weapons and artifacts to inventory
             //inventory.AssignArtifacts(ref artifacts);
             //inventory.AssignWeapons(ref weapons);

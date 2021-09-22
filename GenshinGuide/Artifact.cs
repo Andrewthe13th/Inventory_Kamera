@@ -42,6 +42,24 @@ namespace GenshinGuide
             return gearSlot;
         }
 
+        public bool IsValid()
+        {
+            // Check subStats
+            for(int i = 0; i < subStatsCount; i++)
+            {
+                if(subStats[i].stat == -1 || subStats[i].value == (decimal)(-1.0))
+                {
+                    return false;
+                }
+            }
+
+            if (gearSlot == -1 || level == -1 || setName == -1 || equippedCharacter < 0 || rarity == 0)
+            {
+                return false;
+            }
+            return true;
+        }
+
         public int GetEquippedCharacter()
         {
             return equippedCharacter;

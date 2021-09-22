@@ -30,7 +30,22 @@ namespace GenshinGuide
             talents = _talents;
         }
 
+        public bool IsValid()
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                if (talents[i] == -1 )
+                {
+                    return false;
+                }
+            }
 
+            if (name == -1 || level == -1 || element == -1 || constellation == -1)
+            {
+                return false;
+            }
+            return true;
+        }
 
         public Artifact[] GetArtifacts()
         {

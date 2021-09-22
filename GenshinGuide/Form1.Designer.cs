@@ -30,17 +30,11 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.btnClickHere = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
-            this.label9 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
-            this.label11 = new System.Windows.Forms.Label();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.a_GearSlot_Image = new System.Windows.Forms.PictureBox();
             this.a_MainStat_Image = new System.Windows.Forms.PictureBox();
@@ -71,6 +65,18 @@
             this.maxWeapons = new System.Windows.Forms.Label();
             this.maxArtifacts = new System.Windows.Forms.Label();
             this.ProgramStatus = new System.Windows.Forms.Label();
+            this.linkLabel1 = new System.Windows.Forms.LinkLabel();
+            this.error_TextBox = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.label10 = new System.Windows.Forms.Label();
+            this.label11 = new System.Windows.Forms.Label();
+            this.linkLabel2 = new System.Windows.Forms.LinkLabel();
+            this.label17 = new System.Windows.Forms.Label();
+            this.label18 = new System.Windows.Forms.Label();
+            this.linkLabel3 = new System.Windows.Forms.LinkLabel();
             ((System.ComponentModel.ISupportInitialize)(this.a_GearSlot_Image)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.a_MainStat_Image)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.a_Level_Image)).BeginInit();
@@ -89,7 +95,7 @@
             // 
             // btnClickHere
             // 
-            this.btnClickHere.Location = new System.Drawing.Point(276, 233);
+            this.btnClickHere.Location = new System.Drawing.Point(18, 207);
             this.btnClickHere.Name = "btnClickHere";
             this.btnClickHere.Size = new System.Drawing.Size(155, 43);
             this.btnClickHere.TabIndex = 0;
@@ -97,21 +103,10 @@
             this.btnClickHere.UseVisualStyleBackColor = true;
             this.btnClickHere.Click += new System.EventHandler(this.button1_Click);
             // 
-            // label1
-            // 
-            this.label1.Location = new System.Drawing.Point(36, 54);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(501, 59);
-            this.label1.TabIndex = 6;
-            this.label1.Text = "This tool will take control of your mouse and keyboard.  You will not be able to " +
-    "use your computer while it runs. Cancel anytime by pressing \'ENTER\' on keyboard." +
-    "";
-            this.label1.Click += new System.EventHandler(this.label1_Click_1);
-            // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(9, 314);
+            this.label3.Location = new System.Drawing.Point(204, 186);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(113, 17);
             this.label3.TabIndex = 8;
@@ -121,36 +116,27 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(128, 314);
+            this.label4.Location = new System.Drawing.Point(323, 186);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(51, 17);
             this.label4.TabIndex = 9;
             this.label4.Text = "Output";
             // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.ForeColor = System.Drawing.Color.Red;
-            this.label2.Location = new System.Drawing.Point(12, 37);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(63, 17);
-            this.label2.TabIndex = 10;
-            this.label2.Text = "NOTICE:";
-            // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(227, 279);
+            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label5.Location = new System.Drawing.Point(17, 256);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(268, 17);
+            this.label5.Size = new System.Drawing.Size(156, 16);
             this.label5.TabIndex = 11;
-            this.label5.Text = "Cancel by pressing \'ENTER\' on keyboard";
+            this.label5.Text = "Press \'ENTER\' to cancel";
             // 
             // label6
             // 
             this.label6.AutoSize = true;
             this.label6.ForeColor = System.Drawing.Color.DarkGreen;
-            this.label6.Location = new System.Drawing.Point(12, 113);
+            this.label6.Location = new System.Drawing.Point(15, 49);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(114, 17);
             this.label6.TabIndex = 12;
@@ -159,48 +145,11 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(39, 134);
+            this.label7.Location = new System.Drawing.Point(39, 66);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(223, 17);
             this.label7.TabIndex = 13;
             this.label7.Text = "1. Run Genshin Impact and Log In";
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(39, 151);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(114, 17);
-            this.label8.TabIndex = 14;
-            this.label8.Text = "2. Go to Settings";
-            this.label8.Click += new System.EventHandler(this.label8_Click);
-            // 
-            // label9
-            // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(65, 168);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(399, 17);
-            this.label9.TabIndex = 15;
-            this.label9.Text = "2a. Under Graphics, set Display Mode to 1280x720 Windowed";
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(65, 185);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(320, 17);
-            this.label10.TabIndex = 16;
-            this.label10.Text = "2b. Under Controls, set Control Type to Keyboard";
-            // 
-            // label11
-            // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(39, 202);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(309, 17);
-            this.label11.TabIndex = 17;
-            this.label11.Text = "3. Exit settings and leave game in Paimon Menu";
             // 
             // comboBox1
             // 
@@ -216,7 +165,7 @@
             // 
             // a_GearSlot_Image
             // 
-            this.a_GearSlot_Image.Location = new System.Drawing.Point(15, 335);
+            this.a_GearSlot_Image.Location = new System.Drawing.Point(210, 207);
             this.a_GearSlot_Image.Name = "a_GearSlot_Image";
             this.a_GearSlot_Image.Size = new System.Drawing.Size(90, 18);
             this.a_GearSlot_Image.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -225,7 +174,7 @@
             // 
             // a_MainStat_Image
             // 
-            this.a_MainStat_Image.Location = new System.Drawing.Point(15, 359);
+            this.a_MainStat_Image.Location = new System.Drawing.Point(210, 231);
             this.a_MainStat_Image.Name = "a_MainStat_Image";
             this.a_MainStat_Image.Size = new System.Drawing.Size(90, 21);
             this.a_MainStat_Image.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -234,7 +183,7 @@
             // 
             // a_Level_Image
             // 
-            this.a_Level_Image.Location = new System.Drawing.Point(15, 386);
+            this.a_Level_Image.Location = new System.Drawing.Point(210, 258);
             this.a_Level_Image.Name = "a_Level_Image";
             this.a_Level_Image.Size = new System.Drawing.Size(16, 16);
             this.a_Level_Image.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -243,7 +192,7 @@
             // 
             // a_SubStat1_Image
             // 
-            this.a_SubStat1_Image.Location = new System.Drawing.Point(15, 408);
+            this.a_SubStat1_Image.Location = new System.Drawing.Point(210, 280);
             this.a_SubStat1_Image.Name = "a_SubStat1_Image";
             this.a_SubStat1_Image.Size = new System.Drawing.Size(90, 18);
             this.a_SubStat1_Image.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -252,7 +201,7 @@
             // 
             // a_SubStat2_Image
             // 
-            this.a_SubStat2_Image.Location = new System.Drawing.Point(15, 432);
+            this.a_SubStat2_Image.Location = new System.Drawing.Point(210, 304);
             this.a_SubStat2_Image.Name = "a_SubStat2_Image";
             this.a_SubStat2_Image.Size = new System.Drawing.Size(90, 18);
             this.a_SubStat2_Image.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -261,7 +210,7 @@
             // 
             // a_SubStat3_Image
             // 
-            this.a_SubStat3_Image.Location = new System.Drawing.Point(15, 456);
+            this.a_SubStat3_Image.Location = new System.Drawing.Point(210, 328);
             this.a_SubStat3_Image.Name = "a_SubStat3_Image";
             this.a_SubStat3_Image.Size = new System.Drawing.Size(90, 18);
             this.a_SubStat3_Image.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -270,7 +219,7 @@
             // 
             // a_SubStat4_Image
             // 
-            this.a_SubStat4_Image.Location = new System.Drawing.Point(15, 480);
+            this.a_SubStat4_Image.Location = new System.Drawing.Point(210, 352);
             this.a_SubStat4_Image.Name = "a_SubStat4_Image";
             this.a_SubStat4_Image.Size = new System.Drawing.Size(90, 18);
             this.a_SubStat4_Image.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -279,7 +228,7 @@
             // 
             // a_SetName_Image
             // 
-            this.a_SetName_Image.Location = new System.Drawing.Point(15, 504);
+            this.a_SetName_Image.Location = new System.Drawing.Point(210, 376);
             this.a_SetName_Image.Name = "a_SetName_Image";
             this.a_SetName_Image.Size = new System.Drawing.Size(90, 18);
             this.a_SetName_Image.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -288,7 +237,7 @@
             // 
             // a_Equipped_Image
             // 
-            this.a_Equipped_Image.Location = new System.Drawing.Point(15, 528);
+            this.a_Equipped_Image.Location = new System.Drawing.Point(210, 400);
             this.a_Equipped_Image.Name = "a_Equipped_Image";
             this.a_Equipped_Image.Size = new System.Drawing.Size(90, 18);
             this.a_Equipped_Image.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -297,7 +246,7 @@
             // 
             // a_TextBox
             // 
-            this.a_TextBox.Location = new System.Drawing.Point(131, 335);
+            this.a_TextBox.Location = new System.Drawing.Point(326, 207);
             this.a_TextBox.Multiline = true;
             this.a_TextBox.Name = "a_TextBox";
             this.a_TextBox.Size = new System.Drawing.Size(131, 211);
@@ -305,7 +254,7 @@
             // 
             // c_TextBox
             // 
-            this.c_TextBox.Location = new System.Drawing.Point(406, 335);
+            this.c_TextBox.Location = new System.Drawing.Point(592, 207);
             this.c_TextBox.Multiline = true;
             this.c_TextBox.Name = "c_TextBox";
             this.c_TextBox.Size = new System.Drawing.Size(131, 211);
@@ -313,7 +262,7 @@
             // 
             // c_Talent_3
             // 
-            this.c_Talent_3.Location = new System.Drawing.Point(290, 441);
+            this.c_Talent_3.Location = new System.Drawing.Point(476, 313);
             this.c_Talent_3.Name = "c_Talent_3";
             this.c_Talent_3.Size = new System.Drawing.Size(90, 18);
             this.c_Talent_3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -322,7 +271,7 @@
             // 
             // c_Talent_2
             // 
-            this.c_Talent_2.Location = new System.Drawing.Point(290, 417);
+            this.c_Talent_2.Location = new System.Drawing.Point(476, 289);
             this.c_Talent_2.Name = "c_Talent_2";
             this.c_Talent_2.Size = new System.Drawing.Size(90, 18);
             this.c_Talent_2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -332,7 +281,7 @@
             // 
             // c_Talent_1
             // 
-            this.c_Talent_1.Location = new System.Drawing.Point(290, 393);
+            this.c_Talent_1.Location = new System.Drawing.Point(476, 265);
             this.c_Talent_1.Name = "c_Talent_1";
             this.c_Talent_1.Size = new System.Drawing.Size(90, 18);
             this.c_Talent_1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -341,7 +290,7 @@
             // 
             // c_Level_Image
             // 
-            this.c_Level_Image.Location = new System.Drawing.Point(290, 366);
+            this.c_Level_Image.Location = new System.Drawing.Point(476, 238);
             this.c_Level_Image.Name = "c_Level_Image";
             this.c_Level_Image.Size = new System.Drawing.Size(90, 21);
             this.c_Level_Image.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -350,7 +299,7 @@
             // 
             // c_Name_Image
             // 
-            this.c_Name_Image.Location = new System.Drawing.Point(290, 335);
+            this.c_Name_Image.Location = new System.Drawing.Point(476, 207);
             this.c_Name_Image.Name = "c_Name_Image";
             this.c_Name_Image.Size = new System.Drawing.Size(110, 25);
             this.c_Name_Image.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -360,7 +309,7 @@
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(403, 314);
+            this.label12.Location = new System.Drawing.Point(589, 186);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(51, 17);
             this.label12.TabIndex = 30;
@@ -369,7 +318,7 @@
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(284, 314);
+            this.label13.Location = new System.Drawing.Point(470, 186);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(74, 17);
             this.label13.TabIndex = 29;
@@ -379,7 +328,7 @@
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(15, 242);
+            this.label14.Location = new System.Drawing.Point(15, 299);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(76, 17);
             this.label14.TabIndex = 41;
@@ -388,7 +337,7 @@
             // label15
             // 
             this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(15, 259);
+            this.label15.Location = new System.Drawing.Point(15, 316);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(67, 17);
             this.label15.TabIndex = 42;
@@ -397,7 +346,7 @@
             // label16
             // 
             this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(15, 276);
+            this.label16.Location = new System.Drawing.Point(15, 333);
             this.label16.Name = "label16";
             this.label16.Size = new System.Drawing.Size(85, 17);
             this.label16.TabIndex = 43;
@@ -406,7 +355,7 @@
             // characterCount
             // 
             this.characterCount.AutoSize = true;
-            this.characterCount.Location = new System.Drawing.Point(106, 276);
+            this.characterCount.Location = new System.Drawing.Point(106, 333);
             this.characterCount.Name = "characterCount";
             this.characterCount.Size = new System.Drawing.Size(16, 17);
             this.characterCount.TabIndex = 44;
@@ -416,7 +365,7 @@
             // artifactCount
             // 
             this.artifactCount.AutoSize = true;
-            this.artifactCount.Location = new System.Drawing.Point(106, 259);
+            this.artifactCount.Location = new System.Drawing.Point(106, 316);
             this.artifactCount.Name = "artifactCount";
             this.artifactCount.Size = new System.Drawing.Size(16, 17);
             this.artifactCount.TabIndex = 45;
@@ -425,7 +374,7 @@
             // weaponCount
             // 
             this.weaponCount.AutoSize = true;
-            this.weaponCount.Location = new System.Drawing.Point(106, 242);
+            this.weaponCount.Location = new System.Drawing.Point(106, 299);
             this.weaponCount.Name = "weaponCount";
             this.weaponCount.Size = new System.Drawing.Size(16, 17);
             this.weaponCount.TabIndex = 46;
@@ -434,7 +383,7 @@
             // label20
             // 
             this.label20.AutoSize = true;
-            this.label20.Location = new System.Drawing.Point(145, 242);
+            this.label20.Location = new System.Drawing.Point(145, 299);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(12, 17);
             this.label20.TabIndex = 47;
@@ -443,7 +392,7 @@
             // label21
             // 
             this.label21.AutoSize = true;
-            this.label21.Location = new System.Drawing.Point(145, 259);
+            this.label21.Location = new System.Drawing.Point(145, 316);
             this.label21.Name = "label21";
             this.label21.Size = new System.Drawing.Size(12, 17);
             this.label21.TabIndex = 48;
@@ -452,7 +401,7 @@
             // maxWeapons
             // 
             this.maxWeapons.AutoSize = true;
-            this.maxWeapons.Location = new System.Drawing.Point(163, 242);
+            this.maxWeapons.Location = new System.Drawing.Point(163, 299);
             this.maxWeapons.Name = "maxWeapons";
             this.maxWeapons.Size = new System.Drawing.Size(16, 17);
             this.maxWeapons.TabIndex = 49;
@@ -461,7 +410,7 @@
             // maxArtifacts
             // 
             this.maxArtifacts.AutoSize = true;
-            this.maxArtifacts.Location = new System.Drawing.Point(163, 259);
+            this.maxArtifacts.Location = new System.Drawing.Point(163, 316);
             this.maxArtifacts.Name = "maxArtifacts";
             this.maxArtifacts.Size = new System.Drawing.Size(16, 17);
             this.maxArtifacts.TabIndex = 50;
@@ -472,16 +421,142 @@
             this.ProgramStatus.AutoSize = true;
             this.ProgramStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.ProgramStatus.ForeColor = System.Drawing.Color.Green;
-            this.ProgramStatus.Location = new System.Drawing.Point(201, 10);
+            this.ProgramStatus.Location = new System.Drawing.Point(64, 165);
             this.ProgramStatus.Name = "ProgramStatus";
             this.ProgramStatus.Size = new System.Drawing.Size(0, 29);
             this.ProgramStatus.TabIndex = 51;
+            // 
+            // linkLabel1
+            // 
+            this.linkLabel1.AutoSize = true;
+            this.linkLabel1.Location = new System.Drawing.Point(589, 17);
+            this.linkLabel1.Name = "linkLabel1";
+            this.linkLabel1.Size = new System.Drawing.Size(122, 17);
+            this.linkLabel1.TabIndex = 52;
+            this.linkLabel1.TabStop = true;
+            this.linkLabel1.Text = "Genshin_Scanner";
+            this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
+            // 
+            // error_TextBox
+            // 
+            this.error_TextBox.Location = new System.Drawing.Point(210, 450);
+            this.error_TextBox.Multiline = true;
+            this.error_TextBox.Name = "error_TextBox";
+            this.error_TextBox.Size = new System.Drawing.Size(513, 90);
+            this.error_TextBox.TabIndex = 53;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(210, 430);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(76, 17);
+            this.label1.TabIndex = 54;
+            this.label1.Text = "Error Log: ";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(39, 83);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(114, 17);
+            this.label2.TabIndex = 55;
+            this.label2.Text = "2. Go to Settings";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(66, 100);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(407, 17);
+            this.label8.TabIndex = 56;
+            this.label8.Text = "2a. Under Graphics, set Display Mode to 1280 x 720 Windowed";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(66, 117);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(320, 17);
+            this.label9.TabIndex = 57;
+            this.label9.Text = "2b. Under Controls, set Control Type to Keyboard";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(39, 134);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(309, 17);
+            this.label10.TabIndex = 58;
+            this.label10.Text = "3. Exit settings and leave game in Paimon Menu";
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(442, 430);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(168, 17);
+            this.label11.TabIndex = 59;
+            this.label11.Text = "Got Errors? Report Here:";
+            // 
+            // linkLabel2
+            // 
+            this.linkLabel2.AutoSize = true;
+            this.linkLabel2.Location = new System.Drawing.Point(616, 430);
+            this.linkLabel2.Name = "linkLabel2";
+            this.linkLabel2.Size = new System.Drawing.Size(78, 17);
+            this.linkLabel2.TabIndex = 60;
+            this.linkLabel2.TabStop = true;
+            this.linkLabel2.Text = "Issue Page";
+            this.linkLabel2.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel2_LinkClicked);
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(501, 17);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(90, 17);
+            this.label17.TabIndex = 61;
+            this.label17.Text = "Project Link: ";
+            this.label17.Click += new System.EventHandler(this.label17_Click_1);
+            // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.Location = new System.Drawing.Point(501, 49);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(90, 17);
+            this.label18.TabIndex = 63;
+            this.label18.Text = "Old Version?";
+            // 
+            // linkLabel3
+            // 
+            this.linkLabel3.AutoSize = true;
+            this.linkLabel3.Location = new System.Drawing.Point(597, 49);
+            this.linkLabel3.Name = "linkLabel3";
+            this.linkLabel3.Size = new System.Drawing.Size(114, 17);
+            this.linkLabel3.TabIndex = 62;
+            this.linkLabel3.TabStop = true;
+            this.linkLabel3.Text = "Latest_Releases";
+            this.linkLabel3.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel3_LinkClicked);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(120F, 120F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(549, 552);
+            this.ClientSize = new System.Drawing.Size(735, 552);
+            this.Controls.Add(this.label18);
+            this.Controls.Add(this.linkLabel3);
+            this.Controls.Add(this.label17);
+            this.Controls.Add(this.linkLabel2);
+            this.Controls.Add(this.label11);
+            this.Controls.Add(this.label10);
+            this.Controls.Add(this.label9);
+            this.Controls.Add(this.label8);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.error_TextBox);
+            this.Controls.Add(this.linkLabel1);
             this.Controls.Add(this.ProgramStatus);
             this.Controls.Add(this.maxArtifacts);
             this.Controls.Add(this.maxWeapons);
@@ -512,18 +587,13 @@
             this.Controls.Add(this.a_MainStat_Image);
             this.Controls.Add(this.a_GearSlot_Image);
             this.Controls.Add(this.comboBox1);
-            this.Controls.Add(this.label11);
-            this.Controls.Add(this.label10);
-            this.Controls.Add(this.label9);
-            this.Controls.Add(this.label8);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.label5);
-            this.Controls.Add(this.label2);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
-            this.Controls.Add(this.label1);
             this.Controls.Add(this.btnClickHere);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
             this.Text = "Genshin Impact Scanner";
@@ -550,17 +620,11 @@
         #endregion
 
         private System.Windows.Forms.Button btnClickHere;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.Label label11;
         private System.Windows.Forms.ComboBox comboBox1;
         private System.Windows.Forms.PictureBox a_GearSlot_Image;
         private System.Windows.Forms.PictureBox a_MainStat_Image;
@@ -591,6 +655,18 @@
         private System.Windows.Forms.Label maxWeapons;
         private System.Windows.Forms.Label maxArtifacts;
         private System.Windows.Forms.Label ProgramStatus;
+        private System.Windows.Forms.LinkLabel linkLabel1;
+        private System.Windows.Forms.TextBox error_TextBox;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.LinkLabel linkLabel2;
+        private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.LinkLabel linkLabel3;
     }
 }
 

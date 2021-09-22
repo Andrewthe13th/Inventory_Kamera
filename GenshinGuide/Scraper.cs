@@ -301,7 +301,7 @@ namespace GenshinGuide
             ["PrototypeCrescent"] = ++weaponCount,
             ["CompoundBow"] = ++weaponCount,
             ["BlackcliffWarbow"] = ++weaponCount,
-            ["TheViridescent"] = ++weaponCount,
+            ["TheViridescentHunt"] = ++weaponCount,
             ["AlleyHunter"] = ++weaponCount, // 85
             ["WindblumeOde"] = ++weaponCount,
             ["AquiliaFavonia"] = ++weaponCount,
@@ -313,7 +313,7 @@ namespace GenshinGuide
             ["TheUnforged"] = ++weaponCount,
             ["PrimordialJadeWingedSpear"] = ++weaponCount,
             ["SkywardSpine"] = ++weaponCount, // 95
-            ["VortextVanquisher"] = ++weaponCount,
+            ["VortexVanquisher"] = ++weaponCount,
             ["StaffofHoma"] = ++weaponCount,
             ["SkywardAtlas"] = ++weaponCount,
             ["LostPrayertotheSacredWinds"] = ++weaponCount,
@@ -683,8 +683,9 @@ namespace GenshinGuide
             else
             {
                 Debug.Print("Error: " + setName + " is not a valid Set Name");
-                Form1.UnexpectedError(setName + " is not a valid Set Name");
-                return code;
+                UserInterface.AddError("Error: " + setName + " is not a valid Set Name");
+                //Form1.UnexpectedError(setName + " is not a valid Set Name");
+                return -1;
             };
         }
 
@@ -698,8 +699,9 @@ namespace GenshinGuide
             else
             {
                 Debug.Print("Error: " + mainStat + " is not a valid Main Stat Name");
-                Form1.UnexpectedError(mainStat + " is not a valid Main Stat Name");
-                return code;
+                UserInterface.AddError(mainStat + " is not a valid Main Stat Name");
+                //Form1.UnexpectedError(mainStat + " is not a valid Main Stat Name");
+                return -1;
             };
         }
 
@@ -713,8 +715,9 @@ namespace GenshinGuide
             else
             {
                 Debug.Print("Error: " + gearSlot + " is not a valid Gear Slot");
-                Form1.UnexpectedError("gearSlot" + " is not a valid Gear Slot");
-                return code;
+                UserInterface.AddError("gearSlot" + " is not a valid Gear Slot");
+                //Form1.UnexpectedError("gearSlot" + " is not a valid Gear Slot");
+                return -1;
             };
         }
 
@@ -728,8 +731,9 @@ namespace GenshinGuide
             else
             {
                 Debug.Print("Error: " + subStat + " is not a valid Sub Stat");
-                Form1.UnexpectedError(subStat + " is not a valid Sub Stat");
-                return code;
+                UserInterface.AddError(subStat + " is not a valid Sub Stat");
+                //Form1.UnexpectedError(subStat + " is not a valid Sub Stat");
+                return -1;
             };
         }
 
@@ -740,15 +744,18 @@ namespace GenshinGuide
             {
                 return code;
             }
-            else if(Scraper.b_AssignedTravelerName == false)
+            else if (Scraper.b_AssignedTravelerName == false)
             {
-                return 0;
+                return 1;
             }
             else
             {
                 Debug.Print("Error: " + character + " is not a valid Character Name");
                 if (!bRedo)
-                    Form1.UnexpectedError(character + " is not a valid Character Name");
+                {
+                    UserInterface.AddError(character + " is not a valid Character Name");
+                    //Form1.UnexpectedError(character + " is not a valid Character Name");
+                }
                 return -1;
             }
         }
@@ -763,9 +770,12 @@ namespace GenshinGuide
             else
             {
                 Debug.Print("Error: " + element + " is not a valid Elemental Type");
-                if(!bRedo)
+                if (!bRedo)
+                {
                     Form1.UnexpectedError(element + " is not a valid Elemental Type");
-                return code;
+                    //Form1.UnexpectedError(element + " is not a valid Elemental Type");
+                }
+                return -1;
             };
         }
 
@@ -779,7 +789,7 @@ namespace GenshinGuide
             else
             {
                 Debug.Print(enchancementMaterial + " is not a valid Enchancement Material");
-                return code;
+                return -1;
             };
         }
 
@@ -793,8 +803,9 @@ namespace GenshinGuide
             else
             {
                 Debug.Print("Error: " + weapon + " is not a valid Weapon Name");
-                Form1.UnexpectedError(weapon + " is not a valid Weapon Name");
-                return code;
+                UserInterface.AddError(weapon + " is not a valid Weapon Name");
+                //Form1.UnexpectedError(weapon + " is not a valid Weapon Name");
+                return -1;
             };
         }
         #endregion
@@ -876,6 +887,10 @@ namespace GenshinGuide
                     tw.WriteLine(JSONresult.ToString());
                     tw.Close();
                 }
+            }
+            else // did not make file
+            {
+                UserInterface.AddError("Failed to make folder at : " + path);
             }
         }
 

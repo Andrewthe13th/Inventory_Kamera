@@ -36,6 +36,15 @@ namespace GenshinGuide
             return name;
         }
 
+        public bool IsValid()
+        {
+            if(name == -1 || level == -1 || refinementLevel == -1 || equippedCharacter == -1)
+            {
+                return false;
+            }
+            return true;
+        }
+
         public int AscensionCount()
         {
             if (level < 20 || (level == 20 && ascension == false))

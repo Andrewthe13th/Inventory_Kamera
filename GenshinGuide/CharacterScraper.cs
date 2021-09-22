@@ -48,7 +48,7 @@ namespace GenshinGuide
             }
             else
             {
-                Form1.UnexpectedError(text);;
+                UserInterface.AddError(text);;
             }
 
             return text;
@@ -62,9 +62,13 @@ namespace GenshinGuide
             Character character;
             while(ScanCharacter(out character))
             {
-                characters.Add(character);
+                if (character.IsValid())
+                {
+                    characters.Add(character);
+                    UserInterface.IncrementCharacterCount();
+                }
+                character = null;
                 Navigation.SelectNextCharacter();
-                UserInterface.IncrementCharacterCount();
                 UserInterface.Reset_Character();
             }
 
@@ -83,25 +87,25 @@ namespace GenshinGuide
             int[] talents = new int[3];
 
             // Scan the Name and element of Character
-            int maxRuntimes = 100;
+            int maxRuntimes = 20;
             int currentRuntimes = 0;
             do
             {
                 ScanNameAndElement(ref name, ref element);
                 Navigation.SystemRandomWait(Navigation.Speed.Faster);
                 currentRuntimes++;
-            } while ( (name < 0 || element < 0) && (currentRuntimes < maxRuntimes) );
+            } while ( (name < 1 || element < 0) && (currentRuntimes < maxRuntimes) );
             
-            if(name < 0 && element < 0)
+            if(name < 1 && element < 0)
             {
-                UserInterface.SetProgramStatus("Character Name and Element are wrong", true);
+                UserInterface.AddError("Character Name and Element are wrong");
             }
 
             // Check if character has been scanned before
             if (name != firstCharacterName)
             {
                 // assign the first name to serve as first index
-                if (firstCharacterName == -1)
+                if (firstCharacterName == -1 && name >= 1)
                     firstCharacterName = name;
 
                 // Scan Level and ascension
@@ -123,6 +127,12 @@ namespace GenshinGuide
 
                 } while (level == -1 && currentRuntimes < maxRuntimes);
 
+
+                if (level == -1)
+                {
+                    UserInterface.AddError("Character Level is wrong");
+                }
+
                 // Scan Experience
                 //experience = ScanExperience();
 
@@ -137,22 +147,30 @@ namespace GenshinGuide
                 // Scale down talents due to constellations
                 if(constellation >= 3)
                 {
-                    // get talent if character 
-                    string talent = Scraper.characterTalentConstellationOrder[name][0];
-                    if (constellation >= 5)
+                    string[] skills;
+                    if(Scraper.characterTalentConstellationOrder.TryGetValue(name,out skills))
                     {
-                        talents[1] = talents[1] - 3;
-                        talents[2] = talents[2] - 3;
-                    }
-                    else if (talent == "skill")
-                    {
-                        talents[1] = talents[1] - 3;
+                        // get talent if character 
+                        string talent = Scraper.characterTalentConstellationOrder[name][0];
+                        if (constellation >= 5)
+                        {
+                            talents[1] = talents[1] - 3;
+                            talents[2] = talents[2] - 3;
+                        }
+                        else if (talent == "skill")
+                        {
+                            talents[1] = talents[1] - 3;
+                        }
+                        else
+                        {
+                            talents[2] = talents[2] - 3;
+                        }
                     }
                     else
                     {
-                        talents[2] = talents[2] - 3;
+                        talents[1] = -1;
+                        talents[2] = -1;
                     }
-
                 }
 
                 character = new Character(name, element, level, ascension, experience, constellation, talents);
@@ -160,7 +178,7 @@ namespace GenshinGuide
             }
             else
             {
-                character = new Character(name, element, level, ascension, experience, constellation, talents);
+                character = new Character(-1, -1, -1, ascension, experience, constellation, talents);
                 return false;
             }
         }
@@ -188,7 +206,7 @@ namespace GenshinGuide
 
             if(text != "")
             {
-                text = Regex.Replace(text, @"![\w/]", "");
+                text = Regex.Replace(text, @"[^\w/]", "");
                 // Get rid of / in front of Anemo bug
                 if (text[0] == '/')
                 {
@@ -206,8 +224,8 @@ namespace GenshinGuide
 
                     if (x.Length <= 1)
                     {
-                        Debug.Print("Error: " + x + " is not a valid element and character name.");
-                        Form1.UnexpectedError(x + " is not a valid element and character name."); ;
+                        //Debug.Print("Error: " + x + " is not a valid element and character name.");
+                        //UserInterface.AddError(x + " is not a valid element and character name."); ;
                     }
                     else
                     {
@@ -310,20 +328,20 @@ namespace GenshinGuide
                     }
                 }
             }
-            else
-            {
-                if (temp.Length > 1)
-                {
-                    Debug.Print("Error: Found " + temp[0] + " and " + temp[1] + " instead of level");
-                    Form1.UnexpectedError("Found " + temp[0] + " and " + temp[1] + " instead of level");;
-                }
-                else
-                {
-                    Debug.Print("Error: Found " + temp[0] + " instead of level");
-                    Form1.UnexpectedError("Found " + temp[0] + " instead of level");;
-                }
+            //else
+            //{
+            //    if (temp.Length > 1)
+            //    {
+            //        Debug.Print("Error: Found " + temp[0] + " and " + temp[1] + " instead of level");
+            //        UserInterface.AddError("Found " + temp[0] + " and " + temp[1] + " instead of level");;
+            //    }
+            //    else
+            //    {
+            //        Debug.Print("Error: Found " + temp[0] + " instead of level");
+            //        UserInterface.AddError("Found " + temp[0] + " instead of level");;
+            //    }
 
-            }
+            //}
 
             return level;
         }
@@ -358,7 +376,7 @@ namespace GenshinGuide
             else
             {
                 Debug.Print("Error: Found " + experience + " instead of experience");
-                Form1.UnexpectedError("Found " + experience + " instead of experience");;
+                UserInterface.AddError("Found " + experience + " instead of experience");;
             }
 
             return experience;
@@ -488,10 +506,11 @@ namespace GenshinGuide
                         Debug.Print("Error: " + x + " is not a valid Talent Number");
                         // Try Again
                         i--;
-                        Form1.UnexpectedError(x + " is not a valid Talent Number");;
+                        UserInterface.AddError(x + " is not a valid Talent Number");
+                        
                     }
                     Debug.Print("Error: " + x + " is not a valid Talent Number");
-                    Form1.UnexpectedError(x + " is not a valid Talent Number");;
+                    UserInterface.AddError(x + " is not a valid Talent Number");
                 }
             }
 
