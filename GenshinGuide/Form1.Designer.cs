@@ -77,6 +77,8 @@
             this.label17 = new System.Windows.Forms.Label();
             this.label18 = new System.Windows.Forms.Label();
             this.linkLabel3 = new System.Windows.Forms.LinkLabel();
+            this.navigation_Image = new System.Windows.Forms.PictureBox();
+            this.label19 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.a_GearSlot_Image)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.a_MainStat_Image)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.a_Level_Image)).BeginInit();
@@ -91,6 +93,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.c_Talent_1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.c_Level_Image)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.c_Name_Image)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.navigation_Image)).BeginInit();
             this.SuspendLayout();
             // 
             // btnClickHere
@@ -540,11 +543,31 @@
             this.linkLabel3.Text = "Latest_Releases";
             this.linkLabel3.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel3_LinkClicked);
             // 
+            // navigation_Image
+            // 
+            this.navigation_Image.Location = new System.Drawing.Point(504, 117);
+            this.navigation_Image.Name = "navigation_Image";
+            this.navigation_Image.Size = new System.Drawing.Size(100, 50);
+            this.navigation_Image.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.navigation_Image.TabIndex = 64;
+            this.navigation_Image.TabStop = false;
+            // 
+            // label19
+            // 
+            this.label19.AutoSize = true;
+            this.label19.Location = new System.Drawing.Point(501, 97);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(79, 17);
+            this.label19.TabIndex = 65;
+            this.label19.Text = "Navigation:";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(120F, 120F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(735, 552);
+            this.Controls.Add(this.label19);
+            this.Controls.Add(this.navigation_Image);
             this.Controls.Add(this.label18);
             this.Controls.Add(this.linkLabel3);
             this.Controls.Add(this.label17);
@@ -612,6 +635,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.c_Talent_1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.c_Level_Image)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.c_Name_Image)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.navigation_Image)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -667,6 +691,8 @@
         private System.Windows.Forms.Label label17;
         private System.Windows.Forms.Label label18;
         private System.Windows.Forms.LinkLabel linkLabel3;
+        private System.Windows.Forms.PictureBox navigation_Image;
+        private System.Windows.Forms.Label label19;
     }
 }
 

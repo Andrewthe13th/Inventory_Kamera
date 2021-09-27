@@ -79,6 +79,15 @@ namespace GenshinGuide
             SystemRandomWait(Speed.UI);
         }
 
+        public static void SelectCharacterDevelopmentItems()
+        {
+            Double artifactButtonLocation_X = (Double)area.right * ((Double)64 / (Double)160);
+            Double artifactButtonLocation_Y = (Double)area.bottom * ((Double)5 / (Double)90);
+            SetCursorPos(position.left + Convert.ToInt32(artifactButtonLocation_X), position.top + Convert.ToInt32(artifactButtonLocation_Y));
+            sim.Mouse.LeftButtonClick();
+            SystemRandomWait(Speed.UI);
+        }
+
         public static void SelectCharacterAttributes()
         {
             int xOffset = 100;
@@ -259,7 +268,7 @@ namespace GenshinGuide
             }
             else if (type == Speed.SelectNextInventoryItem)
             {
-                int value = 70;
+                int value = 58;
                 System.Threading.Thread.Sleep(value);
             }
 

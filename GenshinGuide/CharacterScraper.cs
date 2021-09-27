@@ -43,6 +43,7 @@ namespace GenshinGuide
             if (text != "")
             {
                 text = Regex.Replace(text, @"[\W_]", "");
+                text = text.ToLower();
                 // Get rid of space and the text right after it
                 text = Regex.Replace(text, @"\s+\w*", "");
             }
@@ -202,6 +203,7 @@ namespace GenshinGuide
 
             //string text = Scraper.AnalyzeElementAndCharName(bm);
             string text = Scraper.AnalyzeText(bm);
+            text = text.ToLower();
             text = text.Trim();
 
             if(text != "")

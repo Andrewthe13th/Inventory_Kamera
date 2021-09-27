@@ -9,11 +9,11 @@ namespace GenshinGuide
 {
     public class OCRImage 
     {
-        public Bitmap bm  { get; set; }
+        public List <Bitmap> bm  { get; set; }
         public string type { get; set; }
         public int id { get; set; }
 
-        public OCRImage(Bitmap _bm, string _type, int _id)
+        public OCRImage(List <Bitmap> _bm, string _type, int _id)
         {
             bm = _bm;
             type = _type;

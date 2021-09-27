@@ -325,7 +325,7 @@ namespace GenshinGuide
                     temp.rarity = x.rarity;
                     temp.mainStatKey = eng_ArtifactMainStatList[x.mainStat];
                     temp.location = eng_Names[x.equippedCharacter];
-                    temp._lock = false;
+                    temp._lock = x._lock;
                     // SubStats
                     temp.substats = new ISubstat[4];
                     for(int i = 0; i < 4; i++)

@@ -26,7 +26,7 @@ namespace GenshinGuide
             // register the control + alt + F12 combination as hot key.
             //hook.RegisterHotKey(Keys.Enter);
             comboBox1.SelectedItem = "ENG";
-            UserInterface.Init(a_GearSlot_Image,a_MainStat_Image,a_Level_Image,(new []{a_SubStat1_Image,a_SubStat2_Image,a_SubStat3_Image,a_SubStat4_Image }),a_SetName_Image,a_Equipped_Image,a_TextBox,c_Name_Image,c_Level_Image,(new[] { c_Talent_1,c_Talent_2,c_Talent_3}), c_TextBox,weaponCount,maxWeapons,artifactCount,maxArtifacts,characterCount,ProgramStatus,error_TextBox);
+            UserInterface.Init(a_GearSlot_Image,a_MainStat_Image,a_Level_Image,(new []{a_SubStat1_Image,a_SubStat2_Image,a_SubStat3_Image,a_SubStat4_Image }),a_SetName_Image,a_Equipped_Image,a_TextBox,c_Name_Image,c_Level_Image,(new[] { c_Talent_1,c_Talent_2,c_Talent_3}), c_TextBox,weaponCount,maxWeapons,artifactCount,maxArtifacts,characterCount,ProgramStatus,error_TextBox, navigation_Image);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
         }

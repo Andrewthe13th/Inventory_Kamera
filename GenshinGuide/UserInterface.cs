@@ -36,7 +36,10 @@ namespace GenshinGuide
         // Error Log
         private static TextBox error_textBox;
 
-        public static void Init(PictureBox _a_gearSlot, PictureBox _a_mainStat, PictureBox _a_level, PictureBox[] _a_subStats, PictureBox _a_setName, PictureBox _a_equipped, TextBox _a_textbox, PictureBox _c_name, PictureBox _c_level, PictureBox[] _c_talent, TextBox _c_textbox, Label _weaponCount, Label _weaponMax, Label _artifactCount, Label _artifactMax, Label _characterCount, Label _programStatus, TextBox _error_textBox)
+        // Current Images
+        private static PictureBox navigation_Image;
+
+        public static void Init(PictureBox _a_gearSlot, PictureBox _a_mainStat, PictureBox _a_level, PictureBox[] _a_subStats, PictureBox _a_setName, PictureBox _a_equipped, TextBox _a_textbox, PictureBox _c_name, PictureBox _c_level, PictureBox[] _c_talent, TextBox _c_textbox, Label _weaponCount, Label _weaponMax, Label _artifactCount, Label _artifactMax, Label _characterCount, Label _programStatus, TextBox _error_textBox, PictureBox _navigation_Image)
         {
             // Artifact
             a_gearSlot = _a_gearSlot;
@@ -61,6 +64,8 @@ namespace GenshinGuide
             programStatus = _programStatus;
             // Error
             error_textBox = _error_textBox;
+            // Navigation Image
+            navigation_Image = _navigation_Image;
         }
 
         public static void SetArtifact_GearSlot(Bitmap bm, string text, bool bWeapon = false)
@@ -403,6 +408,17 @@ namespace GenshinGuide
             };
 
             error_textBox.Invoke(textAction);
+        }
+
+        public static void SetNavigation_Image(Bitmap bm)
+        {
+            MethodInvoker imageAction = delegate
+            {
+                navigation_Image.Image = bm;
+                navigation_Image.Refresh();
+            };
+
+            navigation_Image.Invoke(imageAction);
         }
 
         public static void Reset_All()
