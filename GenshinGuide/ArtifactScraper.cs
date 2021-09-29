@@ -541,6 +541,7 @@ namespace GenshinGuide
                 Color lockColor = Color.FromArgb(255, 255, 138, 117);
                 Color lockStatus = bm[a_lock].GetPixel(0, 0);
 
+                // Remove artifacts lower than 3 star
                 if (Scraper.CompareColors(fiveStar, rarityColor) || Scraper.CompareColors(fourthStar, rarityColor))
                 //if (true)
                 {
@@ -588,19 +589,24 @@ namespace GenshinGuide
                 // Don't fully scan 3 star artifacts and lower
                 else if (Scraper.CompareColors(thirdStar, rarityColor))
                 {
-                    rarity = 3;
+                    rarity = 0; equippedCharacter = -1; setName = -1; level = -1; gearSlot = -1;
+                    //rarity = 3;
+                    //gearSlot == -1 || level == -1 || setName == -1 || equippedCharacter < 0 || rarity == 0
                 }
                 else if (Scraper.CompareColors(twoStar, rarityColor))
                 {
-                    rarity = 2;
+                    rarity = 0; equippedCharacter = -1; setName = -1; level = -1; gearSlot = -1;
+                    //rarity = 2;
                 }
                 else if (Scraper.CompareColors(firstStar, rarityColor))
                 {
-                    rarity = 1;
+                    rarity = 0; equippedCharacter = -1; setName = -1; level = -1; gearSlot = -1;
+                    //rarity = 1;
                 }
                 else
                 { // Not found
-                    rarity = 0;
+                    rarity = 0; equippedCharacter = -1; setName = -1; level = -1; gearSlot = -1;
+                    //rarity = 0;
                     UserInterface.AddError("Couldn't find rarity for artifact");
                 }
             }

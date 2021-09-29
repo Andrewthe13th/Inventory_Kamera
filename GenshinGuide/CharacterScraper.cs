@@ -143,7 +143,7 @@ namespace GenshinGuide
 
                 // Scan Talents
                 Navigation.SelectCharacterTalents();
-                talents = ScanTalents();
+                talents = ScanTalents(name);
 
                 // Scale down talents due to constellations
                 if(constellation >= 3)
@@ -187,9 +187,9 @@ namespace GenshinGuide
         private static void ScanNameAndElement(ref int name, ref int element)
         {
             int xOffset = 83;
-            int yOffset = 22;
+            int yOffset = 5;
 
-            Bitmap bm = new Bitmap(220, 20);
+            Bitmap bm = new Bitmap(220, 54);
             Graphics g = Graphics.FromImage(bm);
             int screenLocation_X = Navigation.GetPosition().left + xOffset;
             int screenLocation_Y = Navigation.GetPosition().top + yOffset;
@@ -199,7 +199,7 @@ namespace GenshinGuide
             Scraper.SetGrayscale(ref bm);
             Scraper.SetInvert(ref bm);
             Scraper.SetContrast(100.0, ref bm);
-            bm = Scraper.ResizeImage(bm, bm.Width * 3, bm.Height * 3);
+            bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
 
             //string text = Scraper.AnalyzeElementAndCharName(bm);
             string text = Scraper.AnalyzeText(bm);
@@ -208,56 +208,38 @@ namespace GenshinGuide
 
             if(text != "")
             {
-                text = Regex.Replace(text, @"[^\w/]", "");
-                // Get rid of / in front of Anemo bug
-                if (text[0] == '/')
-                {
-                    text = text.Substring(1);
-                }
+                text = Regex.Replace(text, @"[^\w]", "");
 
-                if (Regex.IsMatch(text, "/"))
-                {
-                    string[] x = text.Split(new[] { '/' }, 2);
-                    // Get rid of spacing 
-                    for (int i = 0; i < x.Length; i++)
-                    {
-                        x[i] = Regex.Replace(x[i], " ", "");
-                    }
+                // search for element in block
+                string elementString = "";
+                elementString = Scraper.FindElement(text);
 
-                    if (x.Length <= 1)
+                if(elementString != "")
+                {
+                    element = Scraper.GetElementalCode(elementString, true);
+                    text = Regex.Replace(text, elementString, "");
+                    if(text != "")
                     {
-                        //Debug.Print("Error: " + x + " is not a valid element and character name.");
-                        //UserInterface.AddError(x + " is not a valid element and character name."); ;
-                    }
-                    else
-                    {
-                        if(x[0] != "")
+                        string characterName = text; int temp = -1;
+                        // strip each char from name until found in dictionary
+                        while (characterName.Length > 1)
                         {
-                            string elementString = x[0];
-                            string characterName = x[1];
-                            int temp = -1;
-                            // strip each char from name until found in dictionary
-                            while (characterName.Length > 1)
+                            temp = Scraper.GetCharacterCode(characterName, true);
+                            if (temp == -1)
                             {
-                                temp = Scraper.GetCharacterCode(characterName, true);
-                                if (temp == -1)
-                                {
-                                    characterName = characterName.Substring(0, characterName.Length - 1);
-                                }
-                                else
-                                {
-                                    break;
-                                }
+                                characterName = characterName.Substring(0, characterName.Length - 1);
                             }
-
-                            if (characterName.Length > 1)
+                            else
                             {
-                                UserInterface.SetCharacter_NameAndElement(bm, characterName, elementString);
-                                name = Scraper.GetCharacterCode(characterName, false);
-                                element = Scraper.GetElementalCode(elementString, true);
+                                break;
                             }
                         }
 
+                        if (characterName.Length > 1)
+                        {
+                            UserInterface.SetCharacter_NameAndElement(bm, characterName, elementString);
+                            name = Scraper.GetCharacterCode(characterName, false);
+                        }
                     }
                 }
             }
@@ -447,22 +429,29 @@ namespace GenshinGuide
             return constellation;
         }
 
-        private static int[] ScanTalents()
+        private static int[] ScanTalents(int name)
         {
             int[] talents = {-1,-1,-1};
 
             int xOffset = 165;
             int yOffset = 116;
+            int monaOffset = 0;
             string text = "";
             int screenLocation_X = Navigation.GetPosition().left + xOffset;
             int screenLocation_Y = Navigation.GetPosition().top + yOffset;
+
+            // check if character is mona or ayaka
+            if(name == 19 || name == 35)
+            {
+                monaOffset = 1;
+            }
 
             for(int i = 0; i < 3; i++)
             {
                 Bitmap bm = new Bitmap(60, 25);
                 Graphics g = Graphics.FromImage(bm);
 
-                Navigation.SetCursorPos(Navigation.GetPosition().left + 1130, Navigation.GetPosition().top + 110 + (i * 60));
+                Navigation.SetCursorPos(Navigation.GetPosition().left + 1130, Navigation.GetPosition().top + 110 + ((i + ((i == 2)? monaOffset: 0) ) * 60));
                 Navigation.sim.Mouse.LeftButtonClick();
                 if(i == 0)
                 {

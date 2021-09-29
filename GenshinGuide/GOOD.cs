@@ -143,7 +143,7 @@ namespace GenshinGuide
             "PrototypeCrescent",
             "CompoundBow",
             "BlackcliffWarbow",
-            "TheViridescent",
+            "TheViridescentHunt",
             "AlleyHunter",//85
             "WindblumeOde",
             "AquiliaFavonia",
@@ -181,6 +181,7 @@ namespace GenshinGuide
             "TheCatch",
             "EngulfingLightning",
             "EverlastingMoonglow",
+            "darkironsword",
         };
         private string[] eng_Artifacts = { 
             "Adventurer",

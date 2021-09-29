@@ -434,7 +434,7 @@ namespace GenshinGuide
             {
                 int w_name = 0;int w_level = 1;int w_refinement = 2;int w_equippedCharacter = 3;
                 // Check for Rarity
-                Color rarityColor = bm[w_name].GetPixel(12, 10);
+                Color rarityColor = bm[0].GetPixel(5, 5);
                 Color fiveStar = Color.FromArgb(255, 188, 105, 50);
                 Color fourthStar = Color.FromArgb(255, 161, 86, 224);
                 Color threeStar = Color.FromArgb(255, 81, 127, 203);
@@ -446,39 +446,46 @@ namespace GenshinGuide
                 bool b_equipped = Scraper.CompareColors(equipped, equippedColor);
                 bool b_RarityAboveTwo = Scraper.CompareColors(fiveStar, rarityColor) || Scraper.CompareColors(fourthStar, rarityColor) || Scraper.CompareColors(threeStar, rarityColor);
 
-                Thread thr1 = new Thread(() => name = ScanWeaponName(bm[w_name], width, height));
-                Thread thr2 = new Thread(() => level = ScanWeaponLevel(bm[w_level], width, height, ref ascension));
-                Thread thr3 = new Thread(() => refinementLevel = ScanWeaponRefinement(bm[w_refinement], width, height));
-                Thread thr4 = new Thread(() => equippedCharacter = ScanWeaponEquippedCharacter(bm[w_equippedCharacter], width, height));
-
-                // Start Threads
-
-                thr1.Start(); thr2.Start();
-                if (b_RarityAboveTwo)
+                if ( b_RarityAboveTwo || b_equipped )
                 {
-                    thr3.Start();
+                    Thread thr1 = new Thread(() => name = ScanWeaponName(bm[w_name], width, height));
+                    Thread thr2 = new Thread(() => level = ScanWeaponLevel(bm[w_level], width, height, ref ascension));
+                    Thread thr3 = new Thread(() => refinementLevel = ScanWeaponRefinement(bm[w_refinement], width, height));
+                    Thread thr4 = new Thread(() => equippedCharacter = ScanWeaponEquippedCharacter(bm[w_equippedCharacter], width, height));
+
+                    // Start Threads
+
+                    thr1.Start(); thr2.Start();
+                    if (b_RarityAboveTwo)
+                    {
+                        thr3.Start();
+                    }
+                    if (b_equipped)
+                    {
+                        thr4.Start();
+                    }
+
+                    // End Threads
+
+                    thr1.Join(); thr2.Join();
+                    if (b_equipped)
+                    {
+                        thr4.Join();
+                    }
+                    if (b_RarityAboveTwo)
+                    {
+                        thr3.Join();
+                    }
+
+                    // dispose the list
+                    foreach (Bitmap x in bm)
+                    {
+                        x.Dispose();
+                    }
                 }
-                if (b_equipped)
+                else
                 {
-                    thr4.Start();
-                }
-
-                // End Threads
-
-                thr1.Join(); thr2.Join();
-                if (b_equipped)
-                {
-                    thr4.Join();
-                }
-                if (b_RarityAboveTwo)
-                {
-                    thr3.Join();
-                }
-
-                // dispose the list
-                foreach(Bitmap x in bm)
-                {
-                    x.Dispose();
+                    name = -1; refinementLevel = -1; equippedCharacter = -1;
                 }
             }
 

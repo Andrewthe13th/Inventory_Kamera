@@ -263,12 +263,12 @@ namespace GenshinGuide
             }
             else if (type == Speed.SelectNextCharacter)
             {
-                int value = 500;
+                int value = 600;
                 System.Threading.Thread.Sleep(value);
             }
             else if (type == Speed.SelectNextInventoryItem)
             {
-                int value = 58;
+                int value = 64;
                 System.Threading.Thread.Sleep(value);
             }
 

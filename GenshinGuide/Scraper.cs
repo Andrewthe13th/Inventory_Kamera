@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
+using System.Text.RegularExpressions;
 using System.IO;
 using Tesseract;
 using Newtonsoft.Json;
@@ -213,6 +214,7 @@ namespace GenshinGuide
             ["cryo"] = 5,
             ["geo"] = 6,
         };
+        private static string[] elementList = { "pyro", "hydro", "dendro", "electro", "anemo", "cryo", "geo" };
         private static Dictionary<string, int> weaponCode = new Dictionary<string, int>
         {
             // 1 star
@@ -341,6 +343,8 @@ namespace GenshinGuide
             ["thecatch"] = ++weaponCount,
             ["engulfinglightning"] = ++weaponCount,
             ["everlastingmoonglow"] = ++weaponCount,
+            ["darkironsword"] = ++weaponCount,
+            // 2.2
 
         };
         private static Dictionary<string, int> characterDevelopmentItemsCode = new Dictionary<string, int>
@@ -1170,6 +1174,22 @@ namespace GenshinGuide
             };
         }
         #endregion
+
+        public static string FindElement(string name)
+        {
+            string element = "";
+
+            foreach (string x in elementList)
+            {
+                if (name.Contains(x))
+                {
+                    element = x;
+                    break;
+                }
+            }
+
+            return element;
+        }
 
         public static void CreateJsonFile(GenshinData data)
         {

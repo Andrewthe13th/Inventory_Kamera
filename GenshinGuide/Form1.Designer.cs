@@ -619,7 +619,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
-            this.Text = "Genshin Impact Scanner";
+            this.Text = "Genshin Impact Scanner V0.8";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.a_GearSlot_Image)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.a_MainStat_Image)).EndInit();
