@@ -249,7 +249,7 @@ namespace GenshinGuide
                             }
                         }
                     }
-                    Navigation.SystemRandomWait(Navigation.Speed.Fast);
+                    Navigation.SystemRandomWait(Navigation.Speed.InventoryScroll);
                 }
             };
 
@@ -258,7 +258,7 @@ namespace GenshinGuide
             {
                 Navigation.sim.Mouse.VerticalScroll(-1);
             }
-            Navigation.SystemRandomWait(Navigation.Speed.Normal);
+            Navigation.SystemRandomWait(Navigation.Speed.InventoryScroll);
 
             // Get weapons on bottom of page
             int rowsLeft = (int)Math.Ceiling((double)(weaponCount - currentweaponCount) / (double)maxColumns);
@@ -599,15 +599,16 @@ namespace GenshinGuide
         {
             //Find weapon count
             Double weaponCountLocation_X = (Double)Navigation.GetArea().right * ((Double)130 / (Double)160);
-            Double weaponCountLocation_Y = (Double)Navigation.GetArea().bottom * ((Double)3 / (Double)90);
-            Bitmap bm = new Bitmap(160, 16);
+            Double weaponCountLocation_Y = (Double)Navigation.GetArea().bottom * ((Double)2 / (Double)90);
+            Bitmap bm = new Bitmap(175, 34);
             Graphics g = Graphics.FromImage(bm);
             g.CopyFromScreen(Navigation.GetPosition().left + Convert.ToInt32(weaponCountLocation_X), Navigation.GetPosition().top + Convert.ToInt32(weaponCountLocation_Y), 0, 0, bm.Size);
 
             Scraper.SetGrayscale(ref bm);
             Scraper.SetContrast(60.0, ref bm);
             Scraper.SetInvert(ref bm);
-            bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
+            UserInterface.SetNavigation_Image(bm);
+            //bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
 
             string text = Scraper.AnalyzeText(bm);
             text = Regex.Replace(text, @"[^\d/]", "");

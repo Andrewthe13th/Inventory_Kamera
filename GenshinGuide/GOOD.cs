@@ -146,7 +146,7 @@ namespace GenshinGuide
             "TheViridescentHunt",
             "AlleyHunter",//85
             "WindblumeOde",
-            "AquiliaFavonia",
+            "AquilaFavonia",
             "SkywardBlade",
             "SummitShaper",
             "PrimordialJadeCutter",//90
@@ -181,7 +181,10 @@ namespace GenshinGuide
             "TheCatch",
             "EngulfingLightning",
             "EverlastingMoonglow",
-            "darkironsword",
+            "DarkIronSword",
+            // 2.2
+            "PolarStar", 
+            "Akuoumaru",
         };
         private string[] eng_Artifacts = { 
             "Adventurer",
@@ -200,7 +203,7 @@ namespace GenshinGuide
             "PrayersForIllumination",
             "PrayersForDestiny",
             "PrayersForWisdom",//15
-            "PrayersForSpringtime",
+            "PrayersTheSpringtime",
             "Thundersoother",
             "Lavawalker",
             "MaidenBeloved",

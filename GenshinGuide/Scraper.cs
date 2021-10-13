@@ -42,7 +42,7 @@ namespace GenshinGuide
             ["prayersforillumination"] = ++setCount,
             ["prayersfordestiny"] = ++setCount,
             ["prayersforwisdom"] = ++setCount, // 15
-            ["prayersforspringtime"] = ++setCount,
+            ["prayersthespringtime"] = ++setCount,
             ["thundersoother"] = ++setCount,
             ["lavawalker"] = ++setCount,
             ["maidenbeloved"] = ++setCount,
@@ -308,7 +308,7 @@ namespace GenshinGuide
             ["theviridescenthunt"] = ++weaponCount,
             ["alleyhunter"] = ++weaponCount, // 85
             ["windblumeode"] = ++weaponCount,
-            ["aquiliafavonia"] = ++weaponCount,
+            ["aquilafavonia"] = ++weaponCount,
             ["skywardblade"] = ++weaponCount,
             ["summitshaper"] = ++weaponCount,
             ["primordialjadecutter"] = ++weaponCount, // 90
@@ -343,8 +343,10 @@ namespace GenshinGuide
             ["thecatch"] = ++weaponCount,
             ["engulfinglightning"] = ++weaponCount,
             ["everlastingmoonglow"] = ++weaponCount,
-            ["darkironsword"] = ++weaponCount,
+            ["darkironsword"] = ++weaponCount, // 120
             // 2.2
+            ["polarstar"] = ++weaponCount, 
+            ["akuoumaru"] = ++weaponCount,
 
         };
         private static Dictionary<string, int> characterDevelopmentItemsCode = new Dictionary<string, int>
@@ -1229,13 +1231,10 @@ namespace GenshinGuide
             }
         }
 
-        public static void CreateJsonFile(GOOD data)
+        public static void CreateJsonFile(GOOD data,string path)
         {
             // write to JSON file
             string JSONresult = JsonConvert.SerializeObject(data);
-            string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            path += "\\GenshinData";
-
 
             // Alter JSON file to have correct names for lock and auto keywords
             JSONresult = JSONresult.Replace("_lock", "lock");

@@ -87,8 +87,9 @@ namespace GenshinGuide
             _currentId = _currentId + 1;
 
             // register the hot key.
-            if (!RegisterHotKey(_window.Handle, _currentId, 0, (uint)key))
-                throw new InvalidOperationException("Couldn’t register the hot key.");
+            RegisterHotKey(_window.Handle, _currentId, 0, (uint)key);
+            //if (!RegisterHotKey(_window.Handle, _currentId, 0, (uint)key))
+            //    throw new InvalidOperationException("Couldn’t register the hot key.");
         }
 
         /// <summary>

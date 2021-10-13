@@ -12,6 +12,7 @@ namespace GenshinGuide
         public static InputSimulator sim = new InputSimulator();
         private static RECT area = new RECT();
         private static RECT position = new RECT();
+        private static int delay = 0;
 
         public static void Initialize(string processName)
         {
@@ -31,6 +32,11 @@ namespace GenshinGuide
                 Form1.UnexpectedError("Can't initialize Navigation!!!!");
                 throw;
             }
+        }
+
+        public static void AddDelay(int _delay)
+        {
+            delay = _delay;
         }
 
         public static void Reset()
@@ -215,62 +221,70 @@ namespace GenshinGuide
         public static void SystemRandomWait(Speed type = Speed.Normal)
         {
             Random r = new Random();
+            int value = 0;
 
             if (type == Speed.Normal)
             {
-                int value = r.Next(320, 500);
-                System.Threading.Thread.Sleep(value);
-
+                value = r.Next(320, 500);
+                value += delay;
             }
             else if (type == Speed.Instant)
             {
-                int value = 10;
-                System.Threading.Thread.Sleep(value);
+                value = 10;
+                value += delay / 10;
             }
             else if (type == Speed.Faster)
             {
-                int value = 40;
-                System.Threading.Thread.Sleep(value);
+                value = 40;
+                value += delay/5;
             }
             else if (type == Speed.Fast)
             {
-                int value = r.Next(125, 150);
-                System.Threading.Thread.Sleep(value);
+                value = r.Next(125, 150);
+                value += delay/2;
             }
             else if (type == Speed.CharacterUI)
             {
-                int value = 200;
-                System.Threading.Thread.Sleep(value);
+                value = 400;
+                value += delay;
             }
             else if (type == Speed.ArtifactIgnore)
             {
-                int value = r.Next(80, 120);
-                System.Threading.Thread.Sleep(value);
+                value = r.Next(50, 70);
+                value += delay/5;
             }
             else if (type == Speed.Slow)
             {
-                int value = r.Next(1900, 2600);
-                System.Threading.Thread.Sleep(value);
-            }else if (type == Speed.UI)
-            {
-                int value = r.Next(1000, 1200);
-                System.Threading.Thread.Sleep(value);
+                value = r.Next(1900, 2600);
+                value += 3*delay;
             }
             else if (type == Speed.UI)
             {
-                int value = r.Next(1200, 1500);
-                System.Threading.Thread.Sleep(value);
+                value = r.Next(1000, 1200);
+                value += delay;
+            }
+            else if (type == Speed.UI)
+            {
+                value = r.Next(1200, 1500);
+                value += delay;
             }
             else if (type == Speed.SelectNextCharacter)
             {
-                int value = 600;
-                System.Threading.Thread.Sleep(value);
+                value = 600;
+                value += 2*delay;
+            }
+            else if (type == Speed.InventoryScroll)
+            {
+                value = 20;
+                value += delay/5;
             }
             else if (type == Speed.SelectNextInventoryItem)
             {
-                int value = 64;
-                System.Threading.Thread.Sleep(value);
+                value = 64;
+                value += delay/4;
             }
+
+            System.Threading.Thread.Sleep(value);
 
         }
 
@@ -285,6 +299,7 @@ namespace GenshinGuide
             ArtifactIgnore,
             SelectNextCharacter,
             SelectNextInventoryItem,
+            InventoryScroll,
             CharacterUI,
         }
         #endregion

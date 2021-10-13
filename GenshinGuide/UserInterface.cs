@@ -379,7 +379,7 @@ namespace GenshinGuide
                     programStatus.Text = status;
                     programStatus.ForeColor = Color.Green;
                     programStatus.Font = new Font(programStatus.Font.FontFamily, 15);
-                    programStatus.Location = new Point(40, 164);
+                    programStatus.Location = new Point(40, 355);
                     programStatus.Refresh();
                 };
             }
@@ -390,7 +390,7 @@ namespace GenshinGuide
                     programStatus.Text = "Error: " + status;
                     programStatus.ForeColor = Color.Red;
                     programStatus.Font = new Font(programStatus.Font.FontFamily, 8);
-                    programStatus.Location = new Point(31, 166);
+                    programStatus.Location = new Point(31, 355);
                     programStatus.Refresh();
                 };
             }

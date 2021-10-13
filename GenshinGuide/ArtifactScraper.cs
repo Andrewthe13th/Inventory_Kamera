@@ -112,6 +112,7 @@ namespace GenshinGuide
                                 }
                             }
                         }
+                        Navigation.SystemRandomWait(Navigation.Speed.InventoryScroll);
                     }
                     //Navigation.SystemRandomWait(Navigation.Speed.Fast);
                 }
@@ -121,6 +122,7 @@ namespace GenshinGuide
             for (int i = 0; i < 20; i++)
             {
                 Navigation.sim.Mouse.VerticalScroll(-1);
+                Navigation.SystemRandomWait(Navigation.Speed.InventoryScroll);
             }
             Navigation.SystemRandomWait(Navigation.Speed.Normal);
 
@@ -303,16 +305,16 @@ namespace GenshinGuide
         private static int ScanArtifactCount()
         {
             //Find artifact count
-            Double artifactCountLocation_X = (Double)Navigation.GetArea().right * ((Double)130 / (Double)160);
-            Double artifactCountLocation_Y = (Double)Navigation.GetArea().bottom * ((Double)3 / (Double)90);
-            Bitmap bm = new Bitmap(160, 16);
+            Double weaponCountLocation_X = (Double)Navigation.GetArea().right * ((Double)130 / (Double)160);
+            Double weaponCountLocation_Y = (Double)Navigation.GetArea().bottom * ((Double)2 / (Double)90);
+            Bitmap bm = new Bitmap(175, 34);
             Graphics g = Graphics.FromImage(bm);
-            g.CopyFromScreen(Navigation.GetPosition().left + Convert.ToInt32(artifactCountLocation_X), Navigation.GetPosition().top + Convert.ToInt32(artifactCountLocation_Y), 0, 0, bm.Size);
+            g.CopyFromScreen(Navigation.GetPosition().left + Convert.ToInt32(weaponCountLocation_X), Navigation.GetPosition().top + Convert.ToInt32(weaponCountLocation_Y), 0, 0, bm.Size);
 
             Scraper.SetGrayscale(ref bm);
             Scraper.SetContrast(60.0, ref bm);
             Scraper.SetInvert(ref bm);
-            bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
+            UserInterface.SetNavigation_Image(bm);
 
             string text = Scraper.AnalyzeText(bm);
             text = Regex.Replace(text, @"[^\d/]", "");
@@ -330,7 +332,7 @@ namespace GenshinGuide
             }
 
             // Check if larger than 1000
-            while(count > 1000)
+            while(count > 1600)
             {
                 count = count / 10;
             }
@@ -835,8 +837,10 @@ namespace GenshinGuide
             }
             else // scan time, cup, hat artifacts only
             {
-                Scraper.SetContrast(50.0, ref bm);
+                Scraper.SetContrast(100.0, ref bm);
+                Scraper.SetGamma(0.1, 0.1, 0.1,ref bm);
                 Scraper.SetInvert(ref bm);
+                Scraper.SetGrayscale(ref bm);
 
                 mainStat = Scraper.AnalyzeText_1(bm);
                 mainStat = mainStat.Replace("\n", String.Empty);

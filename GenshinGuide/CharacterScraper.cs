@@ -36,6 +36,7 @@ namespace GenshinGuide
             //Scraper.SetGrayscale(ref bm);
             //Scraper.SetInvert(ref bm);
             //Scraper.SetContrast(80.0, ref bm);
+            UserInterface.SetNavigation_Image(bm);
 
             string text = Scraper.AnalyzeText(bm);
             text = text.Trim();
@@ -60,13 +61,14 @@ namespace GenshinGuide
             List<Character> characters = new List<Character>();
 
             // first character name is used to stop scanning characters
-            Character character;
-            while(ScanCharacter(out character))
+            Character character; int characterCount = 0;
+            while(ScanCharacter(out character) || characterCount < 4)
             {
                 if (character.IsValid())
                 {
                     characters.Add(character);
                     UserInterface.IncrementCharacterCount();
+                    characterCount++;
                 }
                 character = null;
                 Navigation.SelectNextCharacter();
@@ -136,6 +138,7 @@ namespace GenshinGuide
 
                 // Scan Experience
                 //experience = ScanExperience();
+                Navigation.SystemRandomWait(Navigation.Speed.Normal);
 
                 // Scan Constellation
                 Navigation.SelectCharacterConstellation();
@@ -382,14 +385,19 @@ namespace GenshinGuide
 
             for(int i = 0; i < 6; i++)
             {
+                Navigation.SystemRandomWait(Navigation.Speed.Faster);
+
                 // Select Constellation
                 Navigation.SetCursorPos(Navigation.GetPosition().left + 1130, Navigation.GetPosition().top + 180 + (i * 75));
                 Navigation.sim.Mouse.LeftButtonClick();
+
                 // Selecting the first constellation takes a while to show
-                if(i == 0)
+                if (i == 0)
                     Navigation.SystemRandomWait(Navigation.Speed.Normal);
                 else
+                {
                     Navigation.SystemRandomWait(Navigation.Speed.Fast);
+                }
 
                 // Grab Color
                 g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
@@ -451,9 +459,13 @@ namespace GenshinGuide
                 Bitmap bm = new Bitmap(60, 25);
                 Graphics g = Graphics.FromImage(bm);
 
+                Navigation.SystemRandomWait(Navigation.Speed.Faster);
+
                 Navigation.SetCursorPos(Navigation.GetPosition().left + 1130, Navigation.GetPosition().top + 110 + ((i + ((i == 2)? monaOffset: 0) ) * 60));
                 Navigation.sim.Mouse.LeftButtonClick();
-                if(i == 0)
+
+                // Pause for each constellation
+                if (i == 0)
                 {
                     Navigation.SystemRandomWait(Navigation.Speed.Normal);
                 }
