@@ -90,7 +90,6 @@ namespace GenshinGuide
 					a_textBox.Refresh();
 				};
 			}
-
 			a_gearSlot.Invoke(imageAction);
 			a_textBox.Invoke(textAction);
 		}
@@ -366,31 +365,19 @@ namespace GenshinGuide
 			characterCount.Invoke(countAction);
 		}
 
-		public static void SetProgramStatus(string status, bool b_crash = false)
+		public static void SetProgramStatus(string status)
 		{
 			MethodInvoker statusAction;
-			if (!b_crash)
+
+			statusAction = delegate
 			{
-				statusAction = delegate
-				{
-					programStatus.Text = status;
-					programStatus.ForeColor = Color.Green;
-					programStatus.Font = new Font(programStatus.Font.FontFamily, 15);
-					programStatus.Location = new Point(44, 278);
-					programStatus.Refresh();
-				};
-			}
-			else
-			{
-				statusAction = delegate
-				{
-					programStatus.Text = "Error: " + status;
-					programStatus.ForeColor = Color.Red;
-					programStatus.Font = new Font(programStatus.Font.FontFamily, 8);
-					programStatus.Location = new Point(31, 355);
-					programStatus.Refresh();
-				};
-			}
+				programStatus.Text = status;
+				programStatus.ForeColor = Color.Green;
+				programStatus.Font = new Font(programStatus.Font.FontFamily, 15);
+				programStatus.Location = new Point(44, 278);
+				programStatus.Refresh();
+			};
+
 			programStatus.Invoke(statusAction);
 		}
 
@@ -398,7 +385,7 @@ namespace GenshinGuide
 		{
 			MethodInvoker textAction = delegate
 			{
-				error_textBox.AppendText("Error: " + error);
+				error_textBox.AppendText(error);
 				error_textBox.AppendText(Environment.NewLine);
 				error_textBox.Refresh();
 			};
@@ -435,15 +422,15 @@ namespace GenshinGuide
 			MethodInvoker subStatsAction_4 = delegate { a_subStats[3].Image = null; };
 			MethodInvoker setNameAction = delegate { a_setName.Image = null; };
 			MethodInvoker equippedAction = delegate { a_equipped.Image = null; };
-			MethodInvoker artifactAction = delegate { a_textBox.Text = ""; };
+			MethodInvoker artifactAction = delegate { a_textBox.Clear(); };
 			MethodInvoker nameAction = delegate { c_name.Image = null; };
 			MethodInvoker levelAction = delegate { c_level.Image = null; };
 			MethodInvoker talentAction_1 = delegate { c_talent[0].Image = null; };
 			MethodInvoker talentAction_2 = delegate { c_talent[1].Image = null; };
 			MethodInvoker talentAction_3 = delegate { c_talent[2].Image = null; };
-			MethodInvoker characterAction = delegate { c_textBox.Text = ""; };
+			MethodInvoker characterAction = delegate { c_textBox.Clear(); };
 			//Error
-			MethodInvoker errorAction = delegate { error_textBox.Text = ""; };
+			MethodInvoker errorAction = delegate { error_textBox.Clear(); };
 
 			characterCount.Invoke(characterCountAction);
 			weaponCount.Invoke(weaponCountAction);
@@ -471,7 +458,7 @@ namespace GenshinGuide
 
 		public static void Reset_Error()
 		{
-			MethodInvoker textAction = delegate { error_textBox.Text = ""; };
+			MethodInvoker textAction = delegate { error_textBox.Clear(); };
 
 			error_textBox.Invoke(textAction);
 		}

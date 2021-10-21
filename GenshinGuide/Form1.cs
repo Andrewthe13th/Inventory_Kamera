@@ -15,6 +15,11 @@ namespace GenshinGuide
 		static public KeyboardHook hook = new KeyboardHook();
 		static string filePath = "";
 
+		private int Delay;
+		private bool WeaponsChecked;
+		private bool ArtifactsChecked;
+		private bool CharactersChecked;
+
 		public Form1()
 		{
 			InitializeComponent();
@@ -78,7 +83,7 @@ namespace GenshinGuide
 				mainThread.Abort();
 				// stop weapon/artifact processor thread
 				data.StopImageProcessorWorker();
-				UserInterface.SetProgramStatus("Scan Stopped", true);
+				UserInterface.SetProgramStatus("Scan Stopped");
 				// Reset data
 				data = new GenshinData();
 				Navigation.Reset();
@@ -93,11 +98,10 @@ namespace GenshinGuide
 
 		private void ResetUI()
 		{
-			UserInterface.SetProgramStatus("Finished");
 			// Reset data
 			data = new GenshinData();
 			Navigation.Reset();
-			// Un register ENTER key
+			// Un-register ENTER key. Otherwise you can't hit ENTER in another application
 			hook.Dispose();
 		}
 
@@ -107,13 +111,19 @@ namespace GenshinGuide
 			{
 				//data.StopImageProcessorWorker();
 				//mainThread.Abort();
-				UserInterface.SetProgramStatus(error, true);
+				UserInterface.AddError(error);
 			}
 		}
 
 		private void Form1_Load(object sender, EventArgs e)
 		{
 			GetSettings();
+
+			Delay = ScannerDelay_TrackBar.Value;
+
+			WeaponsChecked = Weapons_CheckBox.Checked;
+			ArtifactsChecked = Artifacts_Checkbox.Checked;
+			CharactersChecked = Characters_CheckBox.Checked;
 		}
 
 		private void GetSettings()
@@ -172,47 +182,58 @@ namespace GenshinGuide
 				mainThread = new Thread(() =>
 				{
 
-					// Get Screen Location and Size
-					Navigation.Initialize("GenshinImpact");
-
-					// Add navigation delay
-					int delay = ScannerDelayValue(ScannerDelay_TrackBar.Value);
-					Navigation.AddDelay(delay);
-
-					// Create boolean array
-					bool[] checkbox = new bool[3];
-					checkbox[0] = Weapons_CheckBox.Checked;
-					checkbox[1] = Artifacts_Checkbox.Checked;
-					checkbox[2] = Characters_CheckBox.Checked;
-
-					// check if screen size is 1280 x 720
-					if (Navigation.GetWidth() == 1280 && Navigation.GetHeight() == 720)
+					try
 					{
+						// Get Screen Location and Size
+						Navigation.Initialize("GenshinImpact");
 
-						// The Data object of json object
-						data.GatherData(checkbox);
+						// Add navigation delay
 
-						// Covert to GOOD format
-						GOOD good = new GOOD(data);
+						Navigation.AddDelay(ScannerDelayValue(Delay));
 
-						// Make Json File
-						Scraper.CreateJsonFile(good, OutputPath_TextBox.Text);
+						// Create boolean array
+						bool[] checkbox = new bool[3];
+						checkbox[0] = WeaponsChecked;
+						checkbox[1] = ArtifactsChecked;
+						checkbox[2] = CharactersChecked;
 
+						// check if screen size is 1280 x 720
+						if (Navigation.GetWidth() == 1280 && Navigation.GetHeight() == 720)
+						{
+							// The Data object of json object
+							data.GatherData(checkbox);
+
+							// Covert to GOOD format
+							GOOD good = new GOOD(data);
+
+							// Make Json File
+							Scraper.CreateJsonFile(good, OutputPath_TextBox.Text);
+
+							// Open GenshinDataFolder
+							Process.Start("explorer.exe", OutputPath_TextBox.Text);
+
+							UserInterface.SetProgramStatus("Finished");
+						}
+						else
+						{
+							data = new GenshinData();
+							UserInterface.AddError("Game Window not set to 1280 x 720 Windowed");
+							Navigation.Reset();
+							// Un register ENTER key
+							hook.Dispose();
+							throw new Exception("Invalid game window size");
+						}
+					}
+					catch (Exception)
+					{
+						Invoke((MethodInvoker)delegate { ProgramStatus_Label.Text = ""; });
+					}
+					// If the scanner crashed
+					finally
+					{
 						// Clear saved data
 						ResetUI();
-
-						// Open GenshinDataFolder
-						Process.Start("explorer.exe", OutputPath_TextBox.Text);
 					}
-					else
-					{
-						data = new GenshinData();
-						UserInterface.AddError("Game Window not set to 1280 x 720 Windowed");
-						Navigation.Reset();
-						// Un register ENTER key
-						hook.Dispose();
-					}
-
 				})
 				{
 					IsBackground = true
@@ -221,9 +242,8 @@ namespace GenshinGuide
 			}
 			else
 			{
-				UserInterface.SetProgramStatus("Set Folder Location", true);
+				UserInterface.AddError("Set Folder Location");
 			}
-
 		}
 
 		private void HandleHotkey()
@@ -279,6 +299,22 @@ namespace GenshinGuide
 		private void SaveSettings(object sender, EventArgs e)
 		{
 			SaveSettings();
+		}
+
+		private void Weapons_CheckBox_CheckedChanged(object sender, EventArgs e)
+		{
+			WeaponsChecked = ((CheckBox)sender).Checked;
+		}
+
+		private void Artifacts_Checkbox_CheckedChanged(object sender, EventArgs e)
+		{
+			ArtifactsChecked = ((CheckBox)sender).Checked;
+		}
+
+		private void Characters_CheckBox_CheckedChanged(object sender, EventArgs e)
+		{
+			CharactersChecked = ((CheckBox)sender).Checked;
+			Console.WriteLine("Check changed");
 		}
 	}
 }

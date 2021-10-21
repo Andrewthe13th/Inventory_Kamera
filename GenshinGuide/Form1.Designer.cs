@@ -78,12 +78,8 @@
 			this.Navigation_Image = new System.Windows.Forms.PictureBox();
 			this.Navigation_Label = new System.Windows.Forms.Label();
 			this.ScannerOutput_Panel = new System.Windows.Forms.Panel();
-			this.ScannerDelay_TrackBar = new System.Windows.Forms.TrackBar();
 			this.ScannerDelay_Label = new System.Windows.Forms.Label();
-			this.Weapons_CheckBox = new System.Windows.Forms.CheckBox();
 			this.ScanItemsList_Label = new System.Windows.Forms.Label();
-			this.Artifacts_Checkbox = new System.Windows.Forms.CheckBox();
-			this.Characters_CheckBox = new System.Windows.Forms.CheckBox();
 			this.FastScannerDelay_Label = new System.Windows.Forms.Label();
 			this.MidScannerDelay_Label = new System.Windows.Forms.Label();
 			this.SlowScannerDelay_Label = new System.Windows.Forms.Label();
@@ -92,9 +88,13 @@
 			this.OutputPath_TextBox = new System.Windows.Forms.TextBox();
 			this.Language_Label = new System.Windows.Forms.Label();
 			this.FormatItemsList_Label = new System.Windows.Forms.Label();
-			this.GOOD_CheckBox = new System.Windows.Forms.CheckBox();
-			this.Materials_CheckBox = new System.Windows.Forms.CheckBox();
 			this.Seelie_CheckBox = new System.Windows.Forms.CheckBox();
+			this.Materials_CheckBox = new System.Windows.Forms.CheckBox();
+			this.GOOD_CheckBox = new System.Windows.Forms.CheckBox();
+			this.Characters_CheckBox = new System.Windows.Forms.CheckBox();
+			this.Artifacts_Checkbox = new System.Windows.Forms.CheckBox();
+			this.Weapons_CheckBox = new System.Windows.Forms.CheckBox();
+			this.ScannerDelay_TrackBar = new System.Windows.Forms.TrackBar();
 			((System.ComponentModel.ISupportInitialize)(this.ArtifactGearSlot_Image)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.ArtifactMainStat_Image)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.ArtifactLevel_Image)).BeginInit();
@@ -499,12 +499,11 @@
 			this.ProgramStatus_Label.AutoSize = true;
 			this.ProgramStatus_Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.ProgramStatus_Label.ForeColor = System.Drawing.Color.Green;
-			this.ProgramStatus_Label.Location = new System.Drawing.Point(44, 278);
+			this.ProgramStatus_Label.Location = new System.Drawing.Point(40, 278);
 			this.ProgramStatus_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
 			this.ProgramStatus_Label.Name = "ProgramStatus_Label";
-			this.ProgramStatus_Label.Size = new System.Drawing.Size(68, 25);
+			this.ProgramStatus_Label.Size = new System.Drawing.Size(0, 25);
 			this.ProgramStatus_Label.TabIndex = 51;
-			this.ProgramStatus_Label.Text = "Status";
 			// 
 			// Github_Label
 			// 
@@ -521,7 +520,8 @@
 			// 
 			// ErrorLog_TextBox
 			// 
-			this.ErrorLog_TextBox.Enabled = false;
+			this.ErrorLog_TextBox.BackColor = System.Drawing.SystemColors.Control;
+			this.ErrorLog_TextBox.ForeColor = System.Drawing.Color.Red;
 			this.ErrorLog_TextBox.Location = new System.Drawing.Point(10, 221);
 			this.ErrorLog_TextBox.Margin = new System.Windows.Forms.Padding(2);
 			this.ErrorLog_TextBox.Multiline = true;
@@ -676,17 +676,6 @@
 			this.ScannerOutput_Panel.Size = new System.Drawing.Size(435, 304);
 			this.ScannerOutput_Panel.TabIndex = 67;
 			// 
-			// ScannerDelay_TrackBar
-			// 
-			this.ScannerDelay_TrackBar.DataBindings.Add(new System.Windows.Forms.Binding("Value", global::GenshinGuide.Properties.Settings.Default, "ScannerDelay", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-			this.ScannerDelay_TrackBar.Location = new System.Drawing.Point(26, 215);
-			this.ScannerDelay_TrackBar.Margin = new System.Windows.Forms.Padding(2);
-			this.ScannerDelay_TrackBar.Maximum = 2;
-			this.ScannerDelay_TrackBar.Name = "ScannerDelay_TrackBar";
-			this.ScannerDelay_TrackBar.Size = new System.Drawing.Size(83, 45);
-			this.ScannerDelay_TrackBar.TabIndex = 68;
-			this.ScannerDelay_TrackBar.Value = global::GenshinGuide.Properties.Settings.Default.ScannerDelay;
-			// 
 			// ScannerDelay_Label
 			// 
 			this.ScannerDelay_Label.AutoSize = true;
@@ -696,22 +685,6 @@
 			this.ScannerDelay_Label.Size = new System.Drawing.Size(77, 13);
 			this.ScannerDelay_Label.TabIndex = 69;
 			this.ScannerDelay_Label.Text = "Scanner Delay";
-			// 
-			// Weapons_CheckBox
-			// 
-			this.Weapons_CheckBox.AutoSize = true;
-			this.Weapons_CheckBox.Checked = global::GenshinGuide.Properties.Settings.Default.ScanWeapons;
-			this.Weapons_CheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.Weapons_CheckBox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::GenshinGuide.Properties.Settings.Default, "ScanWeapons", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-			this.Weapons_CheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.Weapons_CheckBox.Location = new System.Drawing.Point(12, 126);
-			this.Weapons_CheckBox.Margin = new System.Windows.Forms.Padding(2);
-			this.Weapons_CheckBox.Name = "Weapons_CheckBox";
-			this.Weapons_CheckBox.Size = new System.Drawing.Size(70, 17);
-			this.Weapons_CheckBox.TabIndex = 70;
-			this.Weapons_CheckBox.Text = "Weapons";
-			this.Weapons_CheckBox.UseVisualStyleBackColor = true;
-			this.Weapons_CheckBox.Click += new System.EventHandler(this.SaveSettings);
 			// 
 			// ScanItemsList_Label
 			// 
@@ -723,38 +696,6 @@
 			this.ScanItemsList_Label.Size = new System.Drawing.Size(60, 13);
 			this.ScanItemsList_Label.TabIndex = 71;
 			this.ScanItemsList_Label.Text = "Scan Items";
-			// 
-			// Artifacts_Checkbox
-			// 
-			this.Artifacts_Checkbox.AutoSize = true;
-			this.Artifacts_Checkbox.Checked = global::GenshinGuide.Properties.Settings.Default.ScanArtifacts;
-			this.Artifacts_Checkbox.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.Artifacts_Checkbox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::GenshinGuide.Properties.Settings.Default, "ScanArtifacts", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-			this.Artifacts_Checkbox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.Artifacts_Checkbox.Location = new System.Drawing.Point(12, 142);
-			this.Artifacts_Checkbox.Margin = new System.Windows.Forms.Padding(2);
-			this.Artifacts_Checkbox.Name = "Artifacts_Checkbox";
-			this.Artifacts_Checkbox.Size = new System.Drawing.Size(63, 17);
-			this.Artifacts_Checkbox.TabIndex = 72;
-			this.Artifacts_Checkbox.Text = "Artifacts";
-			this.Artifacts_Checkbox.UseVisualStyleBackColor = true;
-			this.Artifacts_Checkbox.Click += new System.EventHandler(this.SaveSettings);
-			// 
-			// Characters_CheckBox
-			// 
-			this.Characters_CheckBox.AutoSize = true;
-			this.Characters_CheckBox.Checked = global::GenshinGuide.Properties.Settings.Default.ScanCharacters;
-			this.Characters_CheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.Characters_CheckBox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::GenshinGuide.Properties.Settings.Default, "ScanCharacters", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-			this.Characters_CheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.Characters_CheckBox.Location = new System.Drawing.Point(12, 158);
-			this.Characters_CheckBox.Margin = new System.Windows.Forms.Padding(2);
-			this.Characters_CheckBox.Name = "Characters_CheckBox";
-			this.Characters_CheckBox.Size = new System.Drawing.Size(76, 17);
-			this.Characters_CheckBox.TabIndex = 73;
-			this.Characters_CheckBox.Text = "Characters";
-			this.Characters_CheckBox.UseVisualStyleBackColor = true;
-			this.Characters_CheckBox.Click += new System.EventHandler(this.SaveSettings);
 			// 
 			// FastScannerDelay_Label
 			// 
@@ -845,6 +786,40 @@
 			this.FormatItemsList_Label.TabIndex = 81;
 			this.FormatItemsList_Label.Text = "Format:";
 			// 
+			// Seelie_CheckBox
+			// 
+			this.Seelie_CheckBox.AutoSize = true;
+			this.Seelie_CheckBox.Checked = global::GenshinGuide.Properties.Settings.Default.FormatSeelie;
+			this.Seelie_CheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.Seelie_CheckBox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::GenshinGuide.Properties.Settings.Default, "FormatSeelie", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+			this.Seelie_CheckBox.Enabled = false;
+			this.Seelie_CheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.Seelie_CheckBox.Location = new System.Drawing.Point(12, 82);
+			this.Seelie_CheckBox.Margin = new System.Windows.Forms.Padding(2);
+			this.Seelie_CheckBox.Name = "Seelie_CheckBox";
+			this.Seelie_CheckBox.Size = new System.Drawing.Size(55, 17);
+			this.Seelie_CheckBox.TabIndex = 84;
+			this.Seelie_CheckBox.Text = "Seelie";
+			this.Seelie_CheckBox.UseVisualStyleBackColor = true;
+			this.Seelie_CheckBox.Click += new System.EventHandler(this.SaveSettings);
+			// 
+			// Materials_CheckBox
+			// 
+			this.Materials_CheckBox.AutoSize = true;
+			this.Materials_CheckBox.Checked = global::GenshinGuide.Properties.Settings.Default.ScanMaterials;
+			this.Materials_CheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.Materials_CheckBox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::GenshinGuide.Properties.Settings.Default, "ScanMaterials", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+			this.Materials_CheckBox.Enabled = false;
+			this.Materials_CheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.Materials_CheckBox.Location = new System.Drawing.Point(12, 174);
+			this.Materials_CheckBox.Margin = new System.Windows.Forms.Padding(2);
+			this.Materials_CheckBox.Name = "Materials_CheckBox";
+			this.Materials_CheckBox.Size = new System.Drawing.Size(68, 17);
+			this.Materials_CheckBox.TabIndex = 83;
+			this.Materials_CheckBox.Text = "Materials";
+			this.Materials_CheckBox.UseVisualStyleBackColor = true;
+			this.Materials_CheckBox.Click += new System.EventHandler(this.SaveSettings);
+			// 
 			// GOOD_CheckBox
 			// 
 			this.GOOD_CheckBox.AutoSize = true;
@@ -861,37 +836,67 @@
 			this.GOOD_CheckBox.UseVisualStyleBackColor = true;
 			this.GOOD_CheckBox.Click += new System.EventHandler(this.SaveSettings);
 			// 
-			// Materials_CheckBox
+			// Characters_CheckBox
 			// 
-			this.Materials_CheckBox.AutoSize = true;
-			this.Materials_CheckBox.Checked = global::GenshinGuide.Properties.Settings.Default.ScanMaterials;
-			this.Materials_CheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.Materials_CheckBox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::GenshinGuide.Properties.Settings.Default, "ScanMaterials", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-			this.Materials_CheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.Materials_CheckBox.Location = new System.Drawing.Point(11, 174);
-			this.Materials_CheckBox.Margin = new System.Windows.Forms.Padding(2);
-			this.Materials_CheckBox.Name = "Materials_CheckBox";
-			this.Materials_CheckBox.Size = new System.Drawing.Size(68, 17);
-			this.Materials_CheckBox.TabIndex = 83;
-			this.Materials_CheckBox.Text = "Materials";
-			this.Materials_CheckBox.UseVisualStyleBackColor = true;
-			this.Materials_CheckBox.Click += new System.EventHandler(this.SaveSettings);
+			this.Characters_CheckBox.AutoSize = true;
+			this.Characters_CheckBox.Checked = global::GenshinGuide.Properties.Settings.Default.ScanCharacters;
+			this.Characters_CheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.Characters_CheckBox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::GenshinGuide.Properties.Settings.Default, "ScanCharacters", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+			this.Characters_CheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.Characters_CheckBox.Location = new System.Drawing.Point(12, 158);
+			this.Characters_CheckBox.Margin = new System.Windows.Forms.Padding(2);
+			this.Characters_CheckBox.Name = "Characters_CheckBox";
+			this.Characters_CheckBox.Size = new System.Drawing.Size(76, 17);
+			this.Characters_CheckBox.TabIndex = 73;
+			this.Characters_CheckBox.Text = "Characters";
+			this.Characters_CheckBox.UseVisualStyleBackColor = true;
+			this.Characters_CheckBox.CheckedChanged += new System.EventHandler(this.Characters_CheckBox_CheckedChanged);
+			this.Characters_CheckBox.Click += new System.EventHandler(this.SaveSettings);
 			// 
-			// Seelie_CheckBox
+			// Artifacts_Checkbox
 			// 
-			this.Seelie_CheckBox.AutoSize = true;
-			this.Seelie_CheckBox.Checked = global::GenshinGuide.Properties.Settings.Default.FormatSeelie;
-			this.Seelie_CheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.Seelie_CheckBox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::GenshinGuide.Properties.Settings.Default, "FormatSeelie", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-			this.Seelie_CheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.Seelie_CheckBox.Location = new System.Drawing.Point(11, 82);
-			this.Seelie_CheckBox.Margin = new System.Windows.Forms.Padding(2);
-			this.Seelie_CheckBox.Name = "Seelie_CheckBox";
-			this.Seelie_CheckBox.Size = new System.Drawing.Size(55, 17);
-			this.Seelie_CheckBox.TabIndex = 84;
-			this.Seelie_CheckBox.Text = "Seelie";
-			this.Seelie_CheckBox.UseVisualStyleBackColor = true;
-			this.Seelie_CheckBox.Click += new System.EventHandler(this.SaveSettings);
+			this.Artifacts_Checkbox.AutoSize = true;
+			this.Artifacts_Checkbox.Checked = global::GenshinGuide.Properties.Settings.Default.ScanArtifacts;
+			this.Artifacts_Checkbox.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.Artifacts_Checkbox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::GenshinGuide.Properties.Settings.Default, "ScanArtifacts", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+			this.Artifacts_Checkbox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.Artifacts_Checkbox.Location = new System.Drawing.Point(12, 142);
+			this.Artifacts_Checkbox.Margin = new System.Windows.Forms.Padding(2);
+			this.Artifacts_Checkbox.Name = "Artifacts_Checkbox";
+			this.Artifacts_Checkbox.Size = new System.Drawing.Size(63, 17);
+			this.Artifacts_Checkbox.TabIndex = 72;
+			this.Artifacts_Checkbox.Text = "Artifacts";
+			this.Artifacts_Checkbox.UseVisualStyleBackColor = true;
+			this.Artifacts_Checkbox.CheckedChanged += new System.EventHandler(this.Artifacts_Checkbox_CheckedChanged);
+			this.Artifacts_Checkbox.Click += new System.EventHandler(this.SaveSettings);
+			// 
+			// Weapons_CheckBox
+			// 
+			this.Weapons_CheckBox.AutoSize = true;
+			this.Weapons_CheckBox.Checked = global::GenshinGuide.Properties.Settings.Default.ScanWeapons;
+			this.Weapons_CheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.Weapons_CheckBox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::GenshinGuide.Properties.Settings.Default, "ScanWeapons", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+			this.Weapons_CheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.Weapons_CheckBox.Location = new System.Drawing.Point(12, 126);
+			this.Weapons_CheckBox.Margin = new System.Windows.Forms.Padding(2);
+			this.Weapons_CheckBox.Name = "Weapons_CheckBox";
+			this.Weapons_CheckBox.Size = new System.Drawing.Size(70, 17);
+			this.Weapons_CheckBox.TabIndex = 70;
+			this.Weapons_CheckBox.Text = "Weapons";
+			this.Weapons_CheckBox.UseVisualStyleBackColor = true;
+			this.Weapons_CheckBox.CheckedChanged += new System.EventHandler(this.Weapons_CheckBox_CheckedChanged);
+			this.Weapons_CheckBox.Click += new System.EventHandler(this.SaveSettings);
+			// 
+			// ScannerDelay_TrackBar
+			// 
+			this.ScannerDelay_TrackBar.DataBindings.Add(new System.Windows.Forms.Binding("Value", global::GenshinGuide.Properties.Settings.Default, "ScannerDelay", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged, null, "N0"));
+			this.ScannerDelay_TrackBar.Location = new System.Drawing.Point(26, 215);
+			this.ScannerDelay_TrackBar.Margin = new System.Windows.Forms.Padding(2);
+			this.ScannerDelay_TrackBar.Maximum = 2;
+			this.ScannerDelay_TrackBar.Name = "ScannerDelay_TrackBar";
+			this.ScannerDelay_TrackBar.Size = new System.Drawing.Size(83, 45);
+			this.ScannerDelay_TrackBar.TabIndex = 68;
+			this.ScannerDelay_TrackBar.Value = global::GenshinGuide.Properties.Settings.Default.ScannerDelay;
 			// 
 			// Form1
 			// 

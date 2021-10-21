@@ -16,22 +16,21 @@ namespace GenshinGuide
 
 		public static void Initialize(string processName)
 		{
-			BringMainWindowToFront(processName);
-
-			IntPtr handle = genshinImpact.MainWindowHandle;
 			try
 			{
-				// Get area and position
-				ClientToScreen(handle, ref position);
-				GetClientRect(handle, ref area);
+				BringMainWindowToFront(processName);
 			}
-			catch (Exception)
+			catch (NullReferenceException)
 			{
-				// Exit if wasn't able to set area and position
-				Debug.Print("Can't initialize Navigation!!!!");
-				Form1.UnexpectedError("Can't initialize Navigation!!!!");
 				throw;
 			}
+			IntPtr handle;
+
+			// Get area and position
+			handle = genshinImpact.MainWindowHandle;
+			ClientToScreen(handle, ref position);
+			GetClientRect(handle, ref area);
+			return;
 		}
 
 		public static void AddDelay(int _delay)
@@ -207,7 +206,8 @@ namespace GenshinGuide
 			else
 			{
 				// the process is not running, so start it
-				Form1.UnexpectedError("Cannot find process");
+				Form1.UnexpectedError("Cannot find Genshin Impact process");
+				throw new NullReferenceException();
 			}
 		}
 		#endregion
