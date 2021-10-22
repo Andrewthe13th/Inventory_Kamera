@@ -71,32 +71,8 @@ namespace GenshinGuide
 
 		public static void SetArtifact_GearSlot(Bitmap bm, string text, bool bWeapon = false)
 		{
-			MethodInvoker imageAction = delegate
-			{
-				gearSlot_PictureBox.Image = bm;
-				gearSlot_PictureBox.Refresh();
-			};
-			MethodInvoker textAction;
-			if (bWeapon)
-			{
-				textAction = delegate
-				{
-					gear_TextBox.AppendText("Weapon: " + text);
-					gear_TextBox.AppendText(Environment.NewLine);
-					gear_TextBox.Refresh();
-				};
-			}
-			else
-			{
-				textAction = delegate
-				{
-					gear_TextBox.AppendText("GearSlot: " + text);
-					gear_TextBox.AppendText(Environment.NewLine);
-					gear_TextBox.Refresh();
-				};
-			}
-			gearSlot_PictureBox.Invoke(imageAction);
-			gear_TextBox.Invoke(textAction);
+			UpdatePictureBox(bm, gearSlot_PictureBox);
+			UpdateTextBox(bWeapon ? $"Weapon: {text}\n" : $"GearSlot: {text}\n", gear_TextBox);
 		}
 
 		private static void UpdateElements(Bitmap bm, string text, PictureBox pictureBox, TextBox textBox)
@@ -142,53 +118,16 @@ namespace GenshinGuide
 
 		public static void SetGear_Level(Bitmap bm, string text, bool bWeapon = false)
 		{
-			MethodInvoker imageAction = delegate
-			{
-				gearLevel_PictureBox.Image = bm;
-				gearLevel_PictureBox.Refresh();
-			};
-			MethodInvoker textAction;
-			if (bWeapon)
-			{
-				textAction = delegate
-				{
-					gear_TextBox.AppendText("Refinement: " + text);
-					gear_TextBox.AppendText(Environment.NewLine);
-					gear_TextBox.Refresh();
-				};
-			}
-			else
-			{
-				textAction = delegate
-				{
-					gear_TextBox.AppendText("Level: " + text);
-					gear_TextBox.AppendText(Environment.NewLine);
-					gear_TextBox.Refresh();
-				};
-			}
-
-			gearLevel_PictureBox.Invoke(imageAction);
-			gear_TextBox.Invoke(textAction);
+			UpdatePictureBox(bm, gearLevel_PictureBox);
+			UpdateTextBox(bWeapon ? $"Refinement: {text}\n" : $"Level: {text}\n", gear_TextBox);
 		}
 
 		public static void SetArtifact_SubStat(Bitmap bm, string text, int i)
 		{
 			if (i > -1 && i < 4)
 			{
-				MethodInvoker imageAction = delegate
-				{
-					gearSubStat_PictureBoxes[i].Image = bm;
-					gearSubStat_PictureBoxes[i].Refresh();
-				};
-				MethodInvoker textAction = delegate
-				{
-					gear_TextBox.AppendText("SubStat " + i.ToString() + ": " + text);
-					gear_TextBox.AppendText(Environment.NewLine);
-					gear_TextBox.Refresh();
-				};
-
-				gearSubStat_PictureBoxes[i].Invoke(imageAction);
-				gear_TextBox.Invoke(textAction);
+				UpdatePictureBox(bm, gearSubStat_PictureBoxes[i]);
+				UpdateTextBox($"SubStat {i}: {text}\n", gear_TextBox);
 			}
 		}
 
@@ -204,33 +143,20 @@ namespace GenshinGuide
 
 		public static void SetCharacter_NameAndElement(Bitmap bm, string name, string element)
 		{
-			string text = $"Name: {name}\nElement: {element}\n";
-			UpdateElements(bm, text, cName_PictureBox, character_TextBox);
+			UpdateElements(bm, $"Name: {name}\nElement: {element}\n", cName_PictureBox, character_TextBox);
 		}
 
 		public static void SetCharacter_Level(Bitmap bm, int level)
 		{
-			UpdateElements(bm, $"Level: {level}", cLevel_PictureBox, character_TextBox);
+			UpdateElements(bm, $"Level: {level}\n", cLevel_PictureBox, character_TextBox);
 		}
 
 		public static void SetCharacter_Talent(Bitmap bm, string text, int i)
 		{
 			if (i > -1 && i < 3)
 			{
-				MethodInvoker imageAction = delegate
-				{
-					cTalent_PictureBoxes[i].Image = bm;
-					cTalent_PictureBoxes[i].Refresh();
-				};
-				MethodInvoker textAction = delegate
-				{
-					character_TextBox.AppendText("Talent " + i.ToString() + ": " + text);
-					character_TextBox.AppendText(Environment.NewLine);
-					character_TextBox.Refresh();
-				};
-
-				cTalent_PictureBoxes[i].Invoke(imageAction);
-				character_TextBox.Invoke(textAction);
+				UpdatePictureBox(bm, cTalent_PictureBoxes[i]);
+				UpdateTextBox($"Talent {i}: {text}\n", character_TextBox);
 			}
 		}
 
@@ -277,14 +203,7 @@ namespace GenshinGuide
 
 		public static void AddError(string error)
 		{
-			MethodInvoker textAction = delegate
-			{
-				error_TextBox.AppendText(error);
-				error_TextBox.AppendText(Environment.NewLine);
-				error_TextBox.Refresh();
-			};
-
-			error_TextBox.Invoke(textAction);
+			UpdateTextBox($"{error}\n", error_TextBox);
 		}
 
 		public static void SetNavigation_Image(Bitmap bm)
