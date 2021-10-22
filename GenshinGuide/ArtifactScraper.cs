@@ -148,7 +148,7 @@ namespace GenshinGuide
 					// check if enchnacement Ore
 					if (artifactCount - currentArtifactCount == 7)
 					{
-						b_EnchancementOre = WeaponScraper.CheckForEnchancementOre();
+						b_EnchancementOre = WeaponScraper.IsEnhancementOre();
 					}
 
 					if (b_EnchancementOre)
@@ -281,7 +281,7 @@ namespace GenshinGuide
 					// check if enhancement Ore
 					if (artifactCount - currentArtifactCount == 7)
 					{
-						b_EnchancementOre = WeaponScraper.CheckForEnchancementOre();
+						b_EnchancementOre = WeaponScraper.IsEnhancementOre();
 					}
 
 					if (b_EnchancementOre)
@@ -683,41 +683,6 @@ namespace GenshinGuide
 			return Scraper.GetGearSlotCode(gearSlot);
 		}
 
-		//private static int ScanArtifactMainStat(Bitmap artifactImage, int max_X, int max_Y, int gearSlot)
-		//{
-		//    // Get Main Stat
-		//    string mainStat = null;
-		//    int yOffset = 100;
-		//    if(gearSlot == 0) // Flower HP
-		//    {
-		//        //UserInterface.SetArtifact_MainStat(artifactImage, "HP");
-		//        return Scraper.GetMainStatCode("hp_flat");
-		//    }
-		//    else if (gearSlot == 1) // Plume ATK
-		//    {
-		//        //UserInterface.SetArtifact_MainStat(artifactImage, "ATK");
-		//        return Scraper.GetMainStatCode("atk_flat");
-		//    }
-		//    else // scan time, cup, hat artifacts only
-		//    {
-		//        Bitmap bm = artifactImage.Clone(new Rectangle(0, yOffset, max_X / 2 + max_X / 28, 20),artifactImage.PixelFormat);
-		//        Scraper.SetContrast(50.0, ref bm);
-		//        Scraper.SetInvert(ref bm);
-
-		//        mainStat = Scraper.AnalyzeText_1(bm);
-		//        mainStat = mainStat.Replace("\n", String.Empty);
-		//        mainStat = Regex.Replace(mainStat, @"[\W_]", "");
-		//        mainStat = mainStat.ToLower();
-		//        mainStat.Trim();
-		//        UserInterface.SetArtifact_MainStat(bm, mainStat);
-
-		//        bm.Dispose();
-
-		//        return Scraper.GetMainStatCode(mainStat);
-		//    }
-		//}
-
-
 		private static int ScanArtifactMainStat(Bitmap bm, int max_X, int max_Y, int gearSlot)
 		{
 			// Get Main Stat
@@ -808,7 +773,7 @@ namespace GenshinGuide
 			text = text.Replace("\n", String.Empty);
 			// Get rid of all non digits
 			text = Regex.Replace(text, @"[\D]", "");
-			UserInterface.SetArtifact_Level(bm, text);
+			UserInterface.SetGear_Level(bm, text);
 
 			if (text != "" && int.TryParse(text, out int level))
 			{
@@ -1211,7 +1176,7 @@ namespace GenshinGuide
 					equippedCharacter = tempString[1].Replace("\n", String.Empty);
 					equippedCharacter = equippedCharacter.Trim();
 					//equippedCharacter = Regex.Replace(equippedCharacter, @"[\/!@#$%^&*()\[\]\-_`~\\+={};:',.<>?‘|]", "");
-					UserInterface.SetArtifact_Equipped(bm, equippedCharacter);
+					UserInterface.SetGear_Equipped(bm, equippedCharacter);
 					equippedCharacter = Regex.Replace(equippedCharacter, @"[^\w_]", "");
 
 					// Used to match with Traveler Name

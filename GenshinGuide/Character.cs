@@ -67,7 +67,7 @@ namespace GenshinGuide
 			return name;
 		}
 
-		public int AscensionCount()
+		public int AscensionLevel()
 		{
 			if (level < 20 || (level == 20 && ascension == false))
 			{

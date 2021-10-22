@@ -36,22 +36,22 @@
 			this.Instructions_Label = new System.Windows.Forms.Label();
 			this.Instructions1_Label = new System.Windows.Forms.Label();
 			this.Language_ComboBox = new System.Windows.Forms.ComboBox();
-			this.ArtifactGearSlot_Image = new System.Windows.Forms.PictureBox();
-			this.ArtifactMainStat_Image = new System.Windows.Forms.PictureBox();
-			this.ArtifactLevel_Image = new System.Windows.Forms.PictureBox();
-			this.ArtifactSubStat1_Image = new System.Windows.Forms.PictureBox();
-			this.ArtifactSubStat2_Image = new System.Windows.Forms.PictureBox();
-			this.ArtifactSubStat3_Image = new System.Windows.Forms.PictureBox();
-			this.ArtifactSubStat4_Image = new System.Windows.Forms.PictureBox();
-			this.ArtifactSetName_Image = new System.Windows.Forms.PictureBox();
+			this.GearSlot_PictureBox = new System.Windows.Forms.PictureBox();
+			this.ArtifactMainStat_PictureBox = new System.Windows.Forms.PictureBox();
+			this.Level_PictureBox = new System.Windows.Forms.PictureBox();
+			this.ArtifactSubStat1_PictureBox = new System.Windows.Forms.PictureBox();
+			this.ArtifactSubStat2_PictureBox = new System.Windows.Forms.PictureBox();
+			this.ArtifactSubStat3_PictureBox = new System.Windows.Forms.PictureBox();
+			this.ArtifactSubStat4_PictureBox = new System.Windows.Forms.PictureBox();
+			this.ArtifactSetName_PictureBox = new System.Windows.Forms.PictureBox();
 			this.ArtifactEquipped_PictureBox = new System.Windows.Forms.PictureBox();
 			this.ArtifactOutput_TextBox = new System.Windows.Forms.TextBox();
 			this.CharacterOutput_TextBox = new System.Windows.Forms.TextBox();
-			this.CharacterTalent3_Image = new System.Windows.Forms.PictureBox();
-			this.CharacterTalent2_Image = new System.Windows.Forms.PictureBox();
-			this.CharacterTalent1_Image = new System.Windows.Forms.PictureBox();
-			this.CharacterLevel_Image = new System.Windows.Forms.PictureBox();
-			this.CharacterName_Image = new System.Windows.Forms.PictureBox();
+			this.CharacterTalent3_PictureBox = new System.Windows.Forms.PictureBox();
+			this.CharacterTalent2_PictureBox = new System.Windows.Forms.PictureBox();
+			this.CharacterTalent1_PictureBox = new System.Windows.Forms.PictureBox();
+			this.CharacterLevel_PictureBox = new System.Windows.Forms.PictureBox();
+			this.CharacterName_PictureBox = new System.Windows.Forms.PictureBox();
 			this.CharacterOutput_TextBox_Label = new System.Windows.Forms.Label();
 			this.Character_Label = new System.Windows.Forms.Label();
 			this.WeaponsScanned_Label = new System.Windows.Forms.Label();
@@ -95,20 +95,20 @@
 			this.Artifacts_Checkbox = new System.Windows.Forms.CheckBox();
 			this.Weapons_CheckBox = new System.Windows.Forms.CheckBox();
 			this.ScannerDelay_TrackBar = new System.Windows.Forms.TrackBar();
-			((System.ComponentModel.ISupportInitialize)(this.ArtifactGearSlot_Image)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.ArtifactMainStat_Image)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.ArtifactLevel_Image)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.ArtifactSubStat1_Image)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.ArtifactSubStat2_Image)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.ArtifactSubStat3_Image)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.ArtifactSubStat4_Image)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.ArtifactSetName_Image)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.GearSlot_PictureBox)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.ArtifactMainStat_PictureBox)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.Level_PictureBox)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.ArtifactSubStat1_PictureBox)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.ArtifactSubStat2_PictureBox)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.ArtifactSubStat3_PictureBox)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.ArtifactSubStat4_PictureBox)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.ArtifactSetName_PictureBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.ArtifactEquipped_PictureBox)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.CharacterTalent3_Image)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.CharacterTalent2_Image)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.CharacterTalent1_Image)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.CharacterLevel_Image)).BeginInit();
-			((System.ComponentModel.ISupportInitialize)(this.CharacterName_Image)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.CharacterTalent3_PictureBox)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.CharacterTalent2_PictureBox)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.CharacterTalent1_PictureBox)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.CharacterLevel_PictureBox)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.CharacterName_PictureBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.Navigation_Image)).BeginInit();
 			this.ScannerOutput_Panel.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.ScannerDelay_TrackBar)).BeginInit();
@@ -194,93 +194,93 @@
 			this.Language_ComboBox.Size = new System.Drawing.Size(57, 21);
 			this.Language_ComboBox.TabIndex = 18;
 			// 
-			// ArtifactGearSlot_Image
+			// GearSlot_PictureBox
 			// 
-			this.ArtifactGearSlot_Image.BackColor = System.Drawing.SystemColors.AppWorkspace;
-			this.ArtifactGearSlot_Image.Location = new System.Drawing.Point(10, 27);
-			this.ArtifactGearSlot_Image.Margin = new System.Windows.Forms.Padding(2);
-			this.ArtifactGearSlot_Image.Name = "ArtifactGearSlot_Image";
-			this.ArtifactGearSlot_Image.Size = new System.Drawing.Size(72, 14);
-			this.ArtifactGearSlot_Image.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-			this.ArtifactGearSlot_Image.TabIndex = 19;
-			this.ArtifactGearSlot_Image.TabStop = false;
+			this.GearSlot_PictureBox.BackColor = System.Drawing.SystemColors.AppWorkspace;
+			this.GearSlot_PictureBox.Location = new System.Drawing.Point(10, 27);
+			this.GearSlot_PictureBox.Margin = new System.Windows.Forms.Padding(2);
+			this.GearSlot_PictureBox.Name = "GearSlot_PictureBox";
+			this.GearSlot_PictureBox.Size = new System.Drawing.Size(72, 14);
+			this.GearSlot_PictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+			this.GearSlot_PictureBox.TabIndex = 19;
+			this.GearSlot_PictureBox.TabStop = false;
 			// 
-			// ArtifactMainStat_Image
+			// ArtifactMainStat_PictureBox
 			// 
-			this.ArtifactMainStat_Image.BackColor = System.Drawing.SystemColors.AppWorkspace;
-			this.ArtifactMainStat_Image.Location = new System.Drawing.Point(10, 46);
-			this.ArtifactMainStat_Image.Margin = new System.Windows.Forms.Padding(2);
-			this.ArtifactMainStat_Image.Name = "ArtifactMainStat_Image";
-			this.ArtifactMainStat_Image.Size = new System.Drawing.Size(72, 17);
-			this.ArtifactMainStat_Image.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-			this.ArtifactMainStat_Image.TabIndex = 20;
-			this.ArtifactMainStat_Image.TabStop = false;
+			this.ArtifactMainStat_PictureBox.BackColor = System.Drawing.SystemColors.AppWorkspace;
+			this.ArtifactMainStat_PictureBox.Location = new System.Drawing.Point(10, 46);
+			this.ArtifactMainStat_PictureBox.Margin = new System.Windows.Forms.Padding(2);
+			this.ArtifactMainStat_PictureBox.Name = "ArtifactMainStat_PictureBox";
+			this.ArtifactMainStat_PictureBox.Size = new System.Drawing.Size(72, 17);
+			this.ArtifactMainStat_PictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+			this.ArtifactMainStat_PictureBox.TabIndex = 20;
+			this.ArtifactMainStat_PictureBox.TabStop = false;
 			// 
-			// ArtifactLevel_Image
+			// Level_PictureBox
 			// 
-			this.ArtifactLevel_Image.BackColor = System.Drawing.SystemColors.AppWorkspace;
-			this.ArtifactLevel_Image.Location = new System.Drawing.Point(10, 68);
-			this.ArtifactLevel_Image.Margin = new System.Windows.Forms.Padding(2);
-			this.ArtifactLevel_Image.Name = "ArtifactLevel_Image";
-			this.ArtifactLevel_Image.Size = new System.Drawing.Size(13, 13);
-			this.ArtifactLevel_Image.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-			this.ArtifactLevel_Image.TabIndex = 21;
-			this.ArtifactLevel_Image.TabStop = false;
+			this.Level_PictureBox.BackColor = System.Drawing.SystemColors.AppWorkspace;
+			this.Level_PictureBox.Location = new System.Drawing.Point(10, 68);
+			this.Level_PictureBox.Margin = new System.Windows.Forms.Padding(2);
+			this.Level_PictureBox.Name = "Level_PictureBox";
+			this.Level_PictureBox.Size = new System.Drawing.Size(13, 13);
+			this.Level_PictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+			this.Level_PictureBox.TabIndex = 21;
+			this.Level_PictureBox.TabStop = false;
 			// 
-			// ArtifactSubStat1_Image
+			// ArtifactSubStat1_PictureBox
 			// 
-			this.ArtifactSubStat1_Image.BackColor = System.Drawing.SystemColors.AppWorkspace;
-			this.ArtifactSubStat1_Image.Location = new System.Drawing.Point(10, 86);
-			this.ArtifactSubStat1_Image.Margin = new System.Windows.Forms.Padding(2);
-			this.ArtifactSubStat1_Image.Name = "ArtifactSubStat1_Image";
-			this.ArtifactSubStat1_Image.Size = new System.Drawing.Size(72, 14);
-			this.ArtifactSubStat1_Image.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-			this.ArtifactSubStat1_Image.TabIndex = 22;
-			this.ArtifactSubStat1_Image.TabStop = false;
+			this.ArtifactSubStat1_PictureBox.BackColor = System.Drawing.SystemColors.AppWorkspace;
+			this.ArtifactSubStat1_PictureBox.Location = new System.Drawing.Point(10, 86);
+			this.ArtifactSubStat1_PictureBox.Margin = new System.Windows.Forms.Padding(2);
+			this.ArtifactSubStat1_PictureBox.Name = "ArtifactSubStat1_PictureBox";
+			this.ArtifactSubStat1_PictureBox.Size = new System.Drawing.Size(72, 14);
+			this.ArtifactSubStat1_PictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+			this.ArtifactSubStat1_PictureBox.TabIndex = 22;
+			this.ArtifactSubStat1_PictureBox.TabStop = false;
 			// 
-			// ArtifactSubStat2_Image
+			// ArtifactSubStat2_PictureBox
 			// 
-			this.ArtifactSubStat2_Image.BackColor = System.Drawing.SystemColors.AppWorkspace;
-			this.ArtifactSubStat2_Image.Location = new System.Drawing.Point(10, 105);
-			this.ArtifactSubStat2_Image.Margin = new System.Windows.Forms.Padding(2);
-			this.ArtifactSubStat2_Image.Name = "ArtifactSubStat2_Image";
-			this.ArtifactSubStat2_Image.Size = new System.Drawing.Size(72, 14);
-			this.ArtifactSubStat2_Image.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-			this.ArtifactSubStat2_Image.TabIndex = 23;
-			this.ArtifactSubStat2_Image.TabStop = false;
+			this.ArtifactSubStat2_PictureBox.BackColor = System.Drawing.SystemColors.AppWorkspace;
+			this.ArtifactSubStat2_PictureBox.Location = new System.Drawing.Point(10, 105);
+			this.ArtifactSubStat2_PictureBox.Margin = new System.Windows.Forms.Padding(2);
+			this.ArtifactSubStat2_PictureBox.Name = "ArtifactSubStat2_PictureBox";
+			this.ArtifactSubStat2_PictureBox.Size = new System.Drawing.Size(72, 14);
+			this.ArtifactSubStat2_PictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+			this.ArtifactSubStat2_PictureBox.TabIndex = 23;
+			this.ArtifactSubStat2_PictureBox.TabStop = false;
 			// 
-			// ArtifactSubStat3_Image
+			// ArtifactSubStat3_PictureBox
 			// 
-			this.ArtifactSubStat3_Image.BackColor = System.Drawing.SystemColors.AppWorkspace;
-			this.ArtifactSubStat3_Image.Location = new System.Drawing.Point(10, 124);
-			this.ArtifactSubStat3_Image.Margin = new System.Windows.Forms.Padding(2);
-			this.ArtifactSubStat3_Image.Name = "ArtifactSubStat3_Image";
-			this.ArtifactSubStat3_Image.Size = new System.Drawing.Size(72, 14);
-			this.ArtifactSubStat3_Image.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-			this.ArtifactSubStat3_Image.TabIndex = 24;
-			this.ArtifactSubStat3_Image.TabStop = false;
+			this.ArtifactSubStat3_PictureBox.BackColor = System.Drawing.SystemColors.AppWorkspace;
+			this.ArtifactSubStat3_PictureBox.Location = new System.Drawing.Point(10, 124);
+			this.ArtifactSubStat3_PictureBox.Margin = new System.Windows.Forms.Padding(2);
+			this.ArtifactSubStat3_PictureBox.Name = "ArtifactSubStat3_PictureBox";
+			this.ArtifactSubStat3_PictureBox.Size = new System.Drawing.Size(72, 14);
+			this.ArtifactSubStat3_PictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+			this.ArtifactSubStat3_PictureBox.TabIndex = 24;
+			this.ArtifactSubStat3_PictureBox.TabStop = false;
 			// 
-			// ArtifactSubStat4_Image
+			// ArtifactSubStat4_PictureBox
 			// 
-			this.ArtifactSubStat4_Image.BackColor = System.Drawing.SystemColors.AppWorkspace;
-			this.ArtifactSubStat4_Image.Location = new System.Drawing.Point(10, 143);
-			this.ArtifactSubStat4_Image.Margin = new System.Windows.Forms.Padding(2);
-			this.ArtifactSubStat4_Image.Name = "ArtifactSubStat4_Image";
-			this.ArtifactSubStat4_Image.Size = new System.Drawing.Size(72, 14);
-			this.ArtifactSubStat4_Image.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-			this.ArtifactSubStat4_Image.TabIndex = 25;
-			this.ArtifactSubStat4_Image.TabStop = false;
+			this.ArtifactSubStat4_PictureBox.BackColor = System.Drawing.SystemColors.AppWorkspace;
+			this.ArtifactSubStat4_PictureBox.Location = new System.Drawing.Point(10, 143);
+			this.ArtifactSubStat4_PictureBox.Margin = new System.Windows.Forms.Padding(2);
+			this.ArtifactSubStat4_PictureBox.Name = "ArtifactSubStat4_PictureBox";
+			this.ArtifactSubStat4_PictureBox.Size = new System.Drawing.Size(72, 14);
+			this.ArtifactSubStat4_PictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+			this.ArtifactSubStat4_PictureBox.TabIndex = 25;
+			this.ArtifactSubStat4_PictureBox.TabStop = false;
 			// 
-			// ArtifactSetName_Image
+			// ArtifactSetName_PictureBox
 			// 
-			this.ArtifactSetName_Image.BackColor = System.Drawing.SystemColors.AppWorkspace;
-			this.ArtifactSetName_Image.Location = new System.Drawing.Point(10, 162);
-			this.ArtifactSetName_Image.Margin = new System.Windows.Forms.Padding(2);
-			this.ArtifactSetName_Image.Name = "ArtifactSetName_Image";
-			this.ArtifactSetName_Image.Size = new System.Drawing.Size(72, 14);
-			this.ArtifactSetName_Image.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-			this.ArtifactSetName_Image.TabIndex = 26;
-			this.ArtifactSetName_Image.TabStop = false;
+			this.ArtifactSetName_PictureBox.BackColor = System.Drawing.SystemColors.AppWorkspace;
+			this.ArtifactSetName_PictureBox.Location = new System.Drawing.Point(10, 162);
+			this.ArtifactSetName_PictureBox.Margin = new System.Windows.Forms.Padding(2);
+			this.ArtifactSetName_PictureBox.Name = "ArtifactSetName_PictureBox";
+			this.ArtifactSetName_PictureBox.Size = new System.Drawing.Size(72, 14);
+			this.ArtifactSetName_PictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+			this.ArtifactSetName_PictureBox.TabIndex = 26;
+			this.ArtifactSetName_PictureBox.TabStop = false;
 			// 
 			// ArtifactEquipped_PictureBox
 			// 
@@ -315,60 +315,60 @@
 			this.CharacterOutput_TextBox.Size = new System.Drawing.Size(106, 170);
 			this.CharacterOutput_TextBox.TabIndex = 40;
 			// 
-			// CharacterTalent3_Image
+			// CharacterTalent3_PictureBox
 			// 
-			this.CharacterTalent3_Image.BackColor = System.Drawing.SystemColors.AppWorkspace;
-			this.CharacterTalent3_Image.Location = new System.Drawing.Point(219, 112);
-			this.CharacterTalent3_Image.Margin = new System.Windows.Forms.Padding(2);
-			this.CharacterTalent3_Image.Name = "CharacterTalent3_Image";
-			this.CharacterTalent3_Image.Size = new System.Drawing.Size(72, 14);
-			this.CharacterTalent3_Image.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-			this.CharacterTalent3_Image.TabIndex = 36;
-			this.CharacterTalent3_Image.TabStop = false;
+			this.CharacterTalent3_PictureBox.BackColor = System.Drawing.SystemColors.AppWorkspace;
+			this.CharacterTalent3_PictureBox.Location = new System.Drawing.Point(219, 112);
+			this.CharacterTalent3_PictureBox.Margin = new System.Windows.Forms.Padding(2);
+			this.CharacterTalent3_PictureBox.Name = "CharacterTalent3_PictureBox";
+			this.CharacterTalent3_PictureBox.Size = new System.Drawing.Size(72, 14);
+			this.CharacterTalent3_PictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+			this.CharacterTalent3_PictureBox.TabIndex = 36;
+			this.CharacterTalent3_PictureBox.TabStop = false;
 			// 
-			// CharacterTalent2_Image
+			// CharacterTalent2_PictureBox
 			// 
-			this.CharacterTalent2_Image.BackColor = System.Drawing.SystemColors.AppWorkspace;
-			this.CharacterTalent2_Image.Location = new System.Drawing.Point(219, 93);
-			this.CharacterTalent2_Image.Margin = new System.Windows.Forms.Padding(2);
-			this.CharacterTalent2_Image.Name = "CharacterTalent2_Image";
-			this.CharacterTalent2_Image.Size = new System.Drawing.Size(72, 14);
-			this.CharacterTalent2_Image.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-			this.CharacterTalent2_Image.TabIndex = 35;
-			this.CharacterTalent2_Image.TabStop = false;
+			this.CharacterTalent2_PictureBox.BackColor = System.Drawing.SystemColors.AppWorkspace;
+			this.CharacterTalent2_PictureBox.Location = new System.Drawing.Point(219, 93);
+			this.CharacterTalent2_PictureBox.Margin = new System.Windows.Forms.Padding(2);
+			this.CharacterTalent2_PictureBox.Name = "CharacterTalent2_PictureBox";
+			this.CharacterTalent2_PictureBox.Size = new System.Drawing.Size(72, 14);
+			this.CharacterTalent2_PictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+			this.CharacterTalent2_PictureBox.TabIndex = 35;
+			this.CharacterTalent2_PictureBox.TabStop = false;
 			// 
-			// CharacterTalent1_Image
+			// CharacterTalent1_PictureBox
 			// 
-			this.CharacterTalent1_Image.BackColor = System.Drawing.SystemColors.AppWorkspace;
-			this.CharacterTalent1_Image.Location = new System.Drawing.Point(219, 74);
-			this.CharacterTalent1_Image.Margin = new System.Windows.Forms.Padding(2);
-			this.CharacterTalent1_Image.Name = "CharacterTalent1_Image";
-			this.CharacterTalent1_Image.Size = new System.Drawing.Size(72, 14);
-			this.CharacterTalent1_Image.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-			this.CharacterTalent1_Image.TabIndex = 34;
-			this.CharacterTalent1_Image.TabStop = false;
+			this.CharacterTalent1_PictureBox.BackColor = System.Drawing.SystemColors.AppWorkspace;
+			this.CharacterTalent1_PictureBox.Location = new System.Drawing.Point(219, 74);
+			this.CharacterTalent1_PictureBox.Margin = new System.Windows.Forms.Padding(2);
+			this.CharacterTalent1_PictureBox.Name = "CharacterTalent1_PictureBox";
+			this.CharacterTalent1_PictureBox.Size = new System.Drawing.Size(72, 14);
+			this.CharacterTalent1_PictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+			this.CharacterTalent1_PictureBox.TabIndex = 34;
+			this.CharacterTalent1_PictureBox.TabStop = false;
 			// 
-			// CharacterLevel_Image
+			// CharacterLevel_PictureBox
 			// 
-			this.CharacterLevel_Image.BackColor = System.Drawing.SystemColors.AppWorkspace;
-			this.CharacterLevel_Image.Location = new System.Drawing.Point(219, 52);
-			this.CharacterLevel_Image.Margin = new System.Windows.Forms.Padding(2);
-			this.CharacterLevel_Image.Name = "CharacterLevel_Image";
-			this.CharacterLevel_Image.Size = new System.Drawing.Size(72, 17);
-			this.CharacterLevel_Image.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-			this.CharacterLevel_Image.TabIndex = 32;
-			this.CharacterLevel_Image.TabStop = false;
+			this.CharacterLevel_PictureBox.BackColor = System.Drawing.SystemColors.AppWorkspace;
+			this.CharacterLevel_PictureBox.Location = new System.Drawing.Point(219, 52);
+			this.CharacterLevel_PictureBox.Margin = new System.Windows.Forms.Padding(2);
+			this.CharacterLevel_PictureBox.Name = "CharacterLevel_PictureBox";
+			this.CharacterLevel_PictureBox.Size = new System.Drawing.Size(72, 17);
+			this.CharacterLevel_PictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+			this.CharacterLevel_PictureBox.TabIndex = 32;
+			this.CharacterLevel_PictureBox.TabStop = false;
 			// 
-			// CharacterName_Image
+			// CharacterName_PictureBox
 			// 
-			this.CharacterName_Image.BackColor = System.Drawing.SystemColors.AppWorkspace;
-			this.CharacterName_Image.Location = new System.Drawing.Point(219, 27);
-			this.CharacterName_Image.Margin = new System.Windows.Forms.Padding(2);
-			this.CharacterName_Image.Name = "CharacterName_Image";
-			this.CharacterName_Image.Size = new System.Drawing.Size(88, 20);
-			this.CharacterName_Image.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-			this.CharacterName_Image.TabIndex = 31;
-			this.CharacterName_Image.TabStop = false;
+			this.CharacterName_PictureBox.BackColor = System.Drawing.SystemColors.AppWorkspace;
+			this.CharacterName_PictureBox.Location = new System.Drawing.Point(219, 27);
+			this.CharacterName_PictureBox.Margin = new System.Windows.Forms.Padding(2);
+			this.CharacterName_PictureBox.Name = "CharacterName_PictureBox";
+			this.CharacterName_PictureBox.Size = new System.Drawing.Size(88, 20);
+			this.CharacterName_PictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+			this.CharacterName_PictureBox.TabIndex = 31;
+			this.CharacterName_PictureBox.TabStop = false;
 			// 
 			// CharacterOutput_TextBox_Label
 			// 
@@ -647,25 +647,25 @@
 			this.ScannerOutput_Panel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(76)))), ((int)(((byte)(86)))), ((int)(((byte)(104)))));
 			this.ScannerOutput_Panel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 			this.ScannerOutput_Panel.Controls.Add(this.WeaponArtifact_Label);
-			this.ScannerOutput_Panel.Controls.Add(this.ArtifactGearSlot_Image);
-			this.ScannerOutput_Panel.Controls.Add(this.CharacterTalent3_Image);
-			this.ScannerOutput_Panel.Controls.Add(this.ArtifactMainStat_Image);
+			this.ScannerOutput_Panel.Controls.Add(this.GearSlot_PictureBox);
+			this.ScannerOutput_Panel.Controls.Add(this.CharacterTalent3_PictureBox);
+			this.ScannerOutput_Panel.Controls.Add(this.ArtifactMainStat_PictureBox);
 			this.ScannerOutput_Panel.Controls.Add(this.CharacterOutput_TextBox);
-			this.ScannerOutput_Panel.Controls.Add(this.ArtifactLevel_Image);
-			this.ScannerOutput_Panel.Controls.Add(this.CharacterTalent2_Image);
-			this.ScannerOutput_Panel.Controls.Add(this.ArtifactSubStat1_Image);
-			this.ScannerOutput_Panel.Controls.Add(this.CharacterTalent1_Image);
-			this.ScannerOutput_Panel.Controls.Add(this.ArtifactSubStat2_Image);
-			this.ScannerOutput_Panel.Controls.Add(this.CharacterLevel_Image);
+			this.ScannerOutput_Panel.Controls.Add(this.Level_PictureBox);
+			this.ScannerOutput_Panel.Controls.Add(this.CharacterTalent2_PictureBox);
+			this.ScannerOutput_Panel.Controls.Add(this.ArtifactSubStat1_PictureBox);
+			this.ScannerOutput_Panel.Controls.Add(this.CharacterTalent1_PictureBox);
+			this.ScannerOutput_Panel.Controls.Add(this.ArtifactSubStat2_PictureBox);
+			this.ScannerOutput_Panel.Controls.Add(this.CharacterLevel_PictureBox);
 			this.ScannerOutput_Panel.Controls.Add(this.IssuesPage_Label);
-			this.ScannerOutput_Panel.Controls.Add(this.CharacterName_Image);
-			this.ScannerOutput_Panel.Controls.Add(this.ArtifactSubStat3_Image);
+			this.ScannerOutput_Panel.Controls.Add(this.CharacterName_PictureBox);
+			this.ScannerOutput_Panel.Controls.Add(this.ArtifactSubStat3_PictureBox);
 			this.ScannerOutput_Panel.Controls.Add(this.CharacterOutput_TextBox_Label);
 			this.ScannerOutput_Panel.Controls.Add(this.ErrorReport_Label);
 			this.ScannerOutput_Panel.Controls.Add(this.Character_Label);
-			this.ScannerOutput_Panel.Controls.Add(this.ArtifactSubStat4_Image);
+			this.ScannerOutput_Panel.Controls.Add(this.ArtifactSubStat4_PictureBox);
 			this.ScannerOutput_Panel.Controls.Add(this.ArtifactOutput_TextBox);
-			this.ScannerOutput_Panel.Controls.Add(this.ArtifactSetName_Image);
+			this.ScannerOutput_Panel.Controls.Add(this.ArtifactSetName_PictureBox);
 			this.ScannerOutput_Panel.Controls.Add(this.WeaponArtifactOutput_TextBox_Label);
 			this.ScannerOutput_Panel.Controls.Add(this.ArtifactEquipped_PictureBox);
 			this.ScannerOutput_Panel.Controls.Add(this.ErrorLog_Label);
@@ -953,20 +953,20 @@
 			this.Text = "Genshin Impact Scanner V0.9";
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
 			this.Load += new System.EventHandler(this.Form1_Load);
-			((System.ComponentModel.ISupportInitialize)(this.ArtifactGearSlot_Image)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.ArtifactMainStat_Image)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.ArtifactLevel_Image)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.ArtifactSubStat1_Image)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.ArtifactSubStat2_Image)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.ArtifactSubStat3_Image)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.ArtifactSubStat4_Image)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.ArtifactSetName_Image)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.GearSlot_PictureBox)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.ArtifactMainStat_PictureBox)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.Level_PictureBox)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.ArtifactSubStat1_PictureBox)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.ArtifactSubStat2_PictureBox)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.ArtifactSubStat3_PictureBox)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.ArtifactSubStat4_PictureBox)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.ArtifactSetName_PictureBox)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.ArtifactEquipped_PictureBox)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.CharacterTalent3_Image)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.CharacterTalent2_Image)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.CharacterTalent1_Image)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.CharacterLevel_Image)).EndInit();
-			((System.ComponentModel.ISupportInitialize)(this.CharacterName_Image)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.CharacterTalent3_PictureBox)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.CharacterTalent2_PictureBox)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.CharacterTalent1_PictureBox)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.CharacterLevel_PictureBox)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.CharacterName_PictureBox)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.Navigation_Image)).EndInit();
 			this.ScannerOutput_Panel.ResumeLayout(false);
 			this.ScannerOutput_Panel.PerformLayout();
@@ -985,22 +985,22 @@
         private System.Windows.Forms.Label Instructions_Label;
         private System.Windows.Forms.Label Instructions1_Label;
         private System.Windows.Forms.ComboBox Language_ComboBox;
-        private System.Windows.Forms.PictureBox ArtifactGearSlot_Image;
-        private System.Windows.Forms.PictureBox ArtifactMainStat_Image;
-        private System.Windows.Forms.PictureBox ArtifactLevel_Image;
-        private System.Windows.Forms.PictureBox ArtifactSubStat1_Image;
-        private System.Windows.Forms.PictureBox ArtifactSubStat2_Image;
-        private System.Windows.Forms.PictureBox ArtifactSubStat3_Image;
-        private System.Windows.Forms.PictureBox ArtifactSubStat4_Image;
-        private System.Windows.Forms.PictureBox ArtifactSetName_Image;
+        private System.Windows.Forms.PictureBox GearSlot_PictureBox;
+        private System.Windows.Forms.PictureBox ArtifactMainStat_PictureBox;
+        private System.Windows.Forms.PictureBox Level_PictureBox;
+        private System.Windows.Forms.PictureBox ArtifactSubStat1_PictureBox;
+        private System.Windows.Forms.PictureBox ArtifactSubStat2_PictureBox;
+        private System.Windows.Forms.PictureBox ArtifactSubStat3_PictureBox;
+        private System.Windows.Forms.PictureBox ArtifactSubStat4_PictureBox;
+        private System.Windows.Forms.PictureBox ArtifactSetName_PictureBox;
         private System.Windows.Forms.PictureBox ArtifactEquipped_PictureBox;
         private System.Windows.Forms.TextBox ArtifactOutput_TextBox;
         private System.Windows.Forms.TextBox CharacterOutput_TextBox;
-        private System.Windows.Forms.PictureBox CharacterTalent3_Image;
-        private System.Windows.Forms.PictureBox CharacterTalent2_Image;
-        private System.Windows.Forms.PictureBox CharacterTalent1_Image;
-        private System.Windows.Forms.PictureBox CharacterLevel_Image;
-        private System.Windows.Forms.PictureBox CharacterName_Image;
+        private System.Windows.Forms.PictureBox CharacterTalent3_PictureBox;
+        private System.Windows.Forms.PictureBox CharacterTalent2_PictureBox;
+        private System.Windows.Forms.PictureBox CharacterTalent1_PictureBox;
+        private System.Windows.Forms.PictureBox CharacterLevel_PictureBox;
+        private System.Windows.Forms.PictureBox CharacterName_PictureBox;
         private System.Windows.Forms.Label CharacterOutput_TextBox_Label;
         private System.Windows.Forms.Label Character_Label;
         private System.Windows.Forms.Label WeaponsScanned_Label;

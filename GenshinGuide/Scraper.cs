@@ -105,11 +105,7 @@ namespace GenshinGuide
 		};
 		private static readonly Dictionary<string, int> characterCode = new Dictionary<string, int>
 		{
-            // Artifact has no one assigned
-            [""] = 0,
-            /////////// Traveler is Assigned at runtime /////////////
-            //["Andross"] = 1,
-            ///////////////////////////////////////////////
+            [""] = -1,
             ["amber"] = ++characterCount,
 			["kaeya"] = ++characterCount,
 			["lisa"] = ++characterCount,
@@ -854,26 +850,7 @@ namespace GenshinGuide
 		}
 
 		#endregion
-		public static string AnalyzeText_Line(Bitmap bitmap)
-		{
-			string text = "";
 
-			using (var page = ocr_live.Process(bitmap, PageSegMode.SingleLine))
-			{
-				using (var iter = page.GetIterator())
-				{
-					iter.Begin();
-					do
-					{
-						text += iter.GetText(PageIteratorLevel.TextLine);
-					}
-					while (iter.Next(PageIteratorLevel.TextLine));
-				}
-			}
-
-
-			return text;
-		}
 
 		#region Multi thread Substats Options
 		public static string AnalyzeText_Line1(Bitmap bitmap)
@@ -938,6 +915,7 @@ namespace GenshinGuide
 
 			return text;
 		}
+
 		public static string AnalyzeText_Line4(Bitmap bitmap)
 		{
 			string text = "";
@@ -960,76 +938,10 @@ namespace GenshinGuide
 		}
 		#endregion
 
-		public static string AnalyzeText_Sparse(Bitmap bitmap)
-		{
-			string text = "";
-
-			using (var page = ocr_live.Process(bitmap, PageSegMode.SparseText))
-			{
-				using (var iter = page.GetIterator())
-				{
-					iter.Begin();
-					do
-					{
-						text += iter.GetText(PageIteratorLevel.TextLine);
-					}
-					while (iter.Next(PageIteratorLevel.TextLine));
-				}
-			}
-
-
-			return text;
-		}
-
-		public static string AnalyzeOneText(Bitmap bitmap)
-		{
-			string text = "";
-
-			using (var page = ocr_live.Process(bitmap, PageSegMode.SingleWord))
-			{
-				using (var iter = page.GetIterator())
-				{
-					iter.Begin();
-					do
-					{
-						text += iter.GetText(PageIteratorLevel.TextLine);
-					}
-					while (iter.Next(PageIteratorLevel.TextLine));
-				}
-			}
-
-
-			return text;
-		}
-
-		public static string AnalyzeWeaponImage(Bitmap img)
-		{
-			string text = "";
-			string dir = Directory.GetCurrentDirectory() + "\\tessdata";
-			using (var ocr = new TesseractEngine(dir, "genshin_eng", EngineMode.LstmOnly))
-			{
-				var page = ocr.Process(img, PageSegMode.SingleBlock);
-				text = page.GetText();
-			}
-			return text;
-		}
-
-		public static string AnalyzeElementAndCharName(Bitmap img)
-		{
-			string text = "";
-			string dir = Directory.GetCurrentDirectory() + "\\tessdata";
-			using (var ocr = new TesseractEngine(dir, "eng", EngineMode.Default, "ElementAndCharacterName"))
-			{
-				var page = ocr.Process(img, PageSegMode.SingleLine);
-				text = page.GetText();
-			}
-			return text;
-		}
-
 		public static string AnalyzeFewText(Bitmap img)
 		{
 			string text = "";
-			using (var ocr = new TesseractEngine("B:/Projects/VisualStudio/GenshinGuide/GenshinGuide/GenshinGuide/bin/Debug/tessdata", "eng", EngineMode.TesseractOnly))
+			using (var ocr = new TesseractEngine(Directory.GetCurrentDirectory() + "\\tessdata", "eng", EngineMode.TesseractOnly))
 			{
 				var page = ocr.Process(img, PageSegMode.SparseText);
 				ocr.SetVariable("tessedit_char_whitelist", "0123456789");
@@ -1105,8 +1017,7 @@ namespace GenshinGuide
 
 		public static int GetCharacterCode(string character, bool bRedo = false)
 		{
-			int code = -1;
-			if (characterCode.TryGetValue(character, out code))
+			if (characterCode.TryGetValue(character, out int code))
 			{
 				return code;
 			}
@@ -1116,11 +1027,9 @@ namespace GenshinGuide
 			}
 			else
 			{
-				Debug.Print("Error: " + character + " is not a valid Character Name");
 				if (!bRedo)
 				{
 					UserInterface.AddError(character + " is not a valid Character Name");
-					//Form1.UnexpectedError(character + " is not a valid Character Name");
 				}
 				return -1;
 			}
@@ -1128,10 +1037,9 @@ namespace GenshinGuide
 
 		public static int GetElementalCode(string element, bool bRedo = false)
 		{
-			int code = -1;
-			if (elementalCode.TryGetValue(element, out code))
+			if (elementalCode.TryGetValue(element, out int code))
 			{
-				return code;
+				return -1;
 			}
 			else
 			{
@@ -1154,7 +1062,7 @@ namespace GenshinGuide
 			}
 			else
 			{
-				Debug.Print(enchancementMaterial + " is not a valid Enchancement Material");
+				UserInterface.AddError(enchancementMaterial + " is not a valid Enchancement Material");
 				return -1;
 			};
 		}
@@ -1176,7 +1084,7 @@ namespace GenshinGuide
 		}
 		#endregion
 
-		public static string FindElement(string name)
+		public static string FindElementByName(string name)
 		{
 			string element = "";
 
@@ -1192,50 +1100,12 @@ namespace GenshinGuide
 			return element;
 		}
 
-		public static void CreateJsonFile(GenshinData data)
+		public static void WriteToJSON(GOOD data, string path)
 		{
-			// write to JSON file
-			string JSONresult = JsonConvert.SerializeObject(data);
-			string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-			path += "\\GenshinData";
-			//string path = @"C:\Users\delaf\Downloads\genshinImpact_Data.json";
-
-			if (!Directory.Exists(path))
-			{
-				// Make Directory
-				Directory.CreateDirectory(path);
-			}
-			// Create file with timestamp in name
-			string fileName = "\\genshinData_" + DateTime.Today.ToString("d") + ".json";
-			fileName = fileName.Replace('/', '_');
-			string filePath = path + fileName;
-
-			// Override previous file if exists
-			if (File.Exists(filePath))
-			{
-				File.Delete(filePath);
-				using (var tw = new StreamWriter(filePath, true))
-				{
-					tw.WriteLine(JSONresult.ToString());
-					tw.Close();
-				}
-			}
-			else if (!File.Exists(filePath))
-			{
-				using (var tw = new StreamWriter(filePath, true))
-				{
-					tw.WriteLine(JSONresult.ToString());
-					tw.Close();
-				}
-			}
-		}
-
-		public static void CreateJsonFile(GOOD data, string path)
-		{
-			// write to JSON file
+			// Create JSON object
 			string JSONresult = JsonConvert.SerializeObject(data);
 
-			// Alter JSON file to have correct names for lock and auto keywords
+			// Conform 'lock' and 'auto' keys to GOOD format
 			JSONresult = JSONresult.Replace("_lock", "lock");
 			JSONresult = JSONresult.Replace("_auto", "auto");
 
@@ -1244,6 +1114,7 @@ namespace GenshinGuide
 			{
 				Directory.CreateDirectory(path);
 			}
+
 			// Create file with timestamp in name
 			string fileName = "\\genshinData_GOOD_" + DateTime.Now.ToString("MM.dd.yyyy_HH.mm.ss") + ".json";
 			fileName = fileName.Replace('/', '_');
@@ -1253,18 +1124,16 @@ namespace GenshinGuide
 			if (File.Exists(filePath))
 			{
 				File.Delete(filePath);
-				using (var tw = new StreamWriter(filePath, true))
+				using (var streamWriter = new StreamWriter(filePath, true))
 				{
-					tw.WriteLine(JSONresult.ToString());
-					tw.Close();
+					streamWriter.WriteLine(JSONresult.ToString());
 				}
 			}
 			else if (!File.Exists(filePath))
 			{
-				using (var tw = new StreamWriter(filePath, true))
+				using (var streamWriter = new StreamWriter(filePath, true))
 				{
-					tw.WriteLine(JSONresult.ToString());
-					tw.Close();
+					streamWriter.WriteLine(JSONresult.ToString());
 				}
 			}
 			else // did not make file
@@ -1280,12 +1149,7 @@ namespace GenshinGuide
 			diff[1] = Math.Abs(a.G - b.G);
 			diff[2] = Math.Abs(a.B - b.B);
 
-			if (diff[0] < 10 && diff[1] < 10 && diff[2] < 10)
-			{
-				return true;
-			}
-
-			return false;
+			return diff[0] < 10 && diff[1] < 10 && diff[2] < 10;
 		}
 
 		#region Image Operations
@@ -1543,7 +1407,5 @@ namespace GenshinGuide
 				Form1.UnexpectedError("Traveler name cannot be empty");
 			}
 		}
-
-
 	}
 }

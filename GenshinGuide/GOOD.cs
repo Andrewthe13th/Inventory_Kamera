@@ -296,7 +296,7 @@ namespace GenshinGuide
 					key = eng_Names[x.name],
 					level = x.level,
 					constellation = x.constellation,
-					ascension = x.AscensionCount()
+					ascension = x.AscensionLevel()
 				};
 				temp.talent._auto = x.GetTalents()[0];
 				temp.talent.skill = x.GetTalents()[1];

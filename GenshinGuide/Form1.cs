@@ -30,16 +30,16 @@ namespace GenshinGuide
 			// register the control + alt + F12 combination as hot key.
 			//hook.RegisterHotKey(Keys.Enter);
 			Language_ComboBox.SelectedItem = "ENG";
-			UserInterface.Init(ArtifactGearSlot_Image,
-					  ArtifactMainStat_Image,
-					  ArtifactLevel_Image,
-					  new[] { ArtifactSubStat1_Image, ArtifactSubStat2_Image, ArtifactSubStat3_Image, ArtifactSubStat4_Image },
-					  ArtifactSetName_Image,
+			UserInterface.Init(GearSlot_PictureBox,
+					  ArtifactMainStat_PictureBox,
+					  Level_PictureBox,
+					  new[] { ArtifactSubStat1_PictureBox, ArtifactSubStat2_PictureBox, ArtifactSubStat3_PictureBox, ArtifactSubStat4_PictureBox },
+					  ArtifactSetName_PictureBox,
 					  ArtifactEquipped_PictureBox,
 					  ArtifactOutput_TextBox,
-					  CharacterName_Image,
-					  CharacterLevel_Image,
-					  new[] { CharacterTalent1_Image, CharacterTalent2_Image, CharacterTalent3_Image },
+					  CharacterName_PictureBox,
+					  CharacterLevel_PictureBox,
+					  new[] { CharacterTalent1_PictureBox, CharacterTalent2_PictureBox, CharacterTalent3_PictureBox },
 					  CharacterOutput_TextBox,
 					  WeaponsScannedCount_Label,
 					  WeaponsMax_Labell,
@@ -128,7 +128,6 @@ namespace GenshinGuide
 
 		private void GetSettings()
 		{
-			Console.WriteLine("Getting Settings");
 			GOOD_CheckBox.Checked = Properties.Settings.Default.FormatGood;
 			Seelie_CheckBox.Checked = Properties.Settings.Default.FormatSeelie;
 
@@ -148,7 +147,6 @@ namespace GenshinGuide
 
 		private void SaveSettings()
 		{
-			Console.WriteLine("Saving Settings");
 			Properties.Settings.Default.FormatGood = GOOD_CheckBox.Checked;
 			Properties.Settings.Default.FormatSeelie = Seelie_CheckBox.Checked;
 
@@ -165,18 +163,16 @@ namespace GenshinGuide
 			}
 
 			Properties.Settings.Default.Save();
-			Console.WriteLine("Settings Saved");
 		}
 
 		private void StartButton_Clicked(object sender, EventArgs e)
 		{
-			Console.WriteLine("Started");
 			SaveSettings();
 			UserInterface.SetProgramStatus("Scanning");
 
 			if (Directory.Exists(OutputPath_TextBox.Text))
 			{
-				UserInterface.Reset_All();
+				UserInterface.ResetAll();
 				hook.RegisterHotKey(Keys.Enter);
 
 				mainThread = new Thread(() =>
@@ -207,7 +203,7 @@ namespace GenshinGuide
 							GOOD good = new GOOD(data);
 
 							// Make Json File
-							Scraper.CreateJsonFile(good, OutputPath_TextBox.Text);
+							Scraper.WriteToJSON(good, OutputPath_TextBox.Text);
 
 							// Open GenshinDataFolder
 							Process.Start("explorer.exe", OutputPath_TextBox.Text);
@@ -285,7 +281,6 @@ namespace GenshinGuide
 
 			if (d.ShowDialog() == CommonFileDialogResult.Ok)
 			{
-				Console.WriteLine($"Selected: {d.FileName}");
 				OutputPath_TextBox.Text = d.FileName;
 				filePath = d.FileName;
 			}
@@ -314,7 +309,6 @@ namespace GenshinGuide
 		private void Characters_CheckBox_CheckedChanged(object sender, EventArgs e)
 		{
 			CharactersChecked = ((CheckBox)sender).Checked;
-			Console.WriteLine("Check changed");
 		}
 	}
 }

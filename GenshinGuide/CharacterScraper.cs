@@ -66,7 +66,7 @@ namespace GenshinGuide
 				}
 				character = null;
 				Navigation.SelectNextCharacter();
-				UserInterface.Reset_Character();
+				UserInterface.ResetCharacterDisplay();
 			}
 
 
@@ -207,8 +207,7 @@ namespace GenshinGuide
 				text = Regex.Replace(text, @"[^\w]", "");
 
 				// search for element in block
-				string elementString = "";
-				elementString = Scraper.FindElement(text);
+				string elementString = Scraper.FindElementByName(text);
 
 				if (elementString != "")
 				{
@@ -308,20 +307,6 @@ namespace GenshinGuide
 					}
 				}
 			}
-			//else
-			//{
-			//    if (temp.Length > 1)
-			//    {
-			//        Debug.Print("Error: Found " + temp[0] + " and " + temp[1] + " instead of level");
-			//        UserInterface.AddError("Found " + temp[0] + " and " + temp[1] + " instead of level");;
-			//    }
-			//    else
-			//    {
-			//        Debug.Print("Error: Found " + temp[0] + " instead of level");
-			//        UserInterface.AddError("Found " + temp[0] + " instead of level");;
-			//    }
-
-			//}
 
 			return level;
 		}

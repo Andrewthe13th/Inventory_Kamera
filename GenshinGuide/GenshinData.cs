@@ -132,7 +132,7 @@ namespace GenshinGuide
 						{
 							weaponCount++;
 							// Scan as weapon
-							UserInterface.Reset_Artifact();
+							UserInterface.ResetGearDisplay();
 							w = WeaponScraper.ScanWeapon(img.bm, img.id);
 
 							if (w.IsValid())
@@ -151,7 +151,7 @@ namespace GenshinGuide
 
 							artifactCount++;
 							// Scan as weapon
-							UserInterface.Reset_Artifact();
+							UserInterface.ResetGearDisplay();
 							a = ArtifactScraper.ScanArtifact(img.bm, img.id);
 
 							if (a.IsValid())

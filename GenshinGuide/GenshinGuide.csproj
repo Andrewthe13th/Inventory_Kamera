@@ -126,7 +126,6 @@
     <Compile Include="Artifact.cs" />
     <Compile Include="ArtifactScraper.cs" />
     <Compile Include="Character.cs" />
-    <Compile Include="CharacterDevelopmentScraper.cs" />
     <Compile Include="CharacterScraper.cs" />
     <Compile Include="GOOD.cs" />
     <Compile Include="Form1.cs">
