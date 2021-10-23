@@ -130,5 +130,29 @@ namespace GenshinGuide.Properties {
                 this["OutputPath"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("66")]
+        public int InventoryKey {
+            get {
+                return ((int)(this["InventoryKey"]));
+            }
+            set {
+                this["InventoryKey"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("67")]
+        public int CharacterKey {
+            get {
+                return ((int)(this["CharacterKey"]));
+            }
+            set {
+                this["CharacterKey"] = value;
+            }
+        }
     }
 }

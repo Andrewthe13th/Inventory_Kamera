@@ -95,15 +95,13 @@ namespace GenshinGuide
 			ImageProcessor.Join();
 
 			if (checkbox[2])
-			{
+			{ 
 				// Assign Artifacts to Characters
 				if (checkbox[1])
 					AssignArtifacts();
 				if (checkbox[0])
 					AssignWeapons();
 			}
-
-			//Console.ReadKey();
 		}
 
 		public static void ImageProcessorWorker()
@@ -116,7 +114,6 @@ namespace GenshinGuide
 			bool b_End = false;
 			while (!b_End)
 			{
-				//b_canCancel = true;
 				if (b_threadCancel)
 				{
 					workerQueue.Clear();

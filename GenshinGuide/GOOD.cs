@@ -8,9 +8,9 @@ namespace GenshinGuide
 		[JsonProperty] private readonly string format;
 		[JsonProperty] private readonly int version;
 		[JsonProperty] private readonly string source;
-		[JsonProperty] private readonly List<ICharacter> characters;
-		[JsonProperty] private readonly List<IArtifact> artifacts;
-		[JsonProperty] private readonly List<IWeapon> weapons;
+		[JsonProperty] public List<ICharacter> characters;
+		[JsonProperty] public List<IArtifact> artifacts;
+		[JsonProperty] public List<IWeapon> weapons;
 		private readonly string[] eng_Names = {
 			"",
 			"Traveler",
@@ -357,7 +357,7 @@ namespace GenshinGuide
 
 		}
 
-		private struct IWeapon
+		public struct IWeapon
 		{
 			[JsonProperty] public string key;
 			[JsonProperty] public int level;
@@ -366,7 +366,7 @@ namespace GenshinGuide
 			[JsonProperty] public string location;
 		}
 
-		private struct IArtifact
+		public struct IArtifact
 		{
 			[JsonProperty] public string setKey;
 			[JsonProperty] public string slotKey;
@@ -379,13 +379,13 @@ namespace GenshinGuide
 			[JsonProperty] public ISubstat[] substats;
 		}
 
-		private struct ISubstat
+		public struct ISubstat
 		{
 			[JsonProperty] public string key;
 			[JsonProperty] public decimal value;
 		}
 
-		private struct ICharacter
+		public struct ICharacter
 		{
 			[JsonProperty] public string key;
 			[JsonProperty] public int level;
@@ -394,7 +394,7 @@ namespace GenshinGuide
 			[JsonProperty] public ITalent talent;
 		}
 
-		private struct ITalent
+		public struct ITalent
 		{
 			// change auto to _auto
 			[JsonProperty] public int _auto;

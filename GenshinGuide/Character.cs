@@ -99,6 +99,5 @@ namespace GenshinGuide
 			}
 			return 0;
 		}
-
 	}
 }

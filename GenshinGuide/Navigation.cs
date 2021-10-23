@@ -3,16 +3,23 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using WindowsInput;
+using WindowsInput.Native;
 
 namespace GenshinGuide
 {
 	public static class Navigation
 	{
+		
 		private static Process genshinImpact;
 		public static InputSimulator sim = new InputSimulator();
 		private static RECT area = new RECT();
 		private static RECT position = new RECT();
 		private static int delay = 0;
+
+		public const VirtualKeyCode escapeKey = VirtualKeyCode.ESCAPE;
+		public static VirtualKeyCode characterKey = VirtualKeyCode.VK_C;
+		public static VirtualKeyCode inventoryKey = VirtualKeyCode.VK_B;
+
 
 		public static void Initialize(string processName)
 		{
@@ -124,8 +131,6 @@ namespace GenshinGuide
 		{
 			int xOffset = 1230;
 			int yOffset = 350;
-			//Navigation.SetCursorPos(Navigation.GetPosition().left + xOffset, Navigation.GetPosition().top + yOffset);
-			//Navigation.SystemRandomWait(); 
 			Navigation.SetCursorPos(Navigation.GetPosition().left + xOffset, Navigation.GetPosition().top + yOffset);
 			Navigation.sim.Mouse.LeftButtonClick();
 			Navigation.SystemRandomWait(Speed.SelectNextCharacter);
@@ -133,25 +138,25 @@ namespace GenshinGuide
 
 		public static void CharacterScreen()
 		{
-			Navigation.sim.Keyboard.KeyPress(WindowsInput.Native.VirtualKeyCode.ESCAPE);
+			Navigation.sim.Keyboard.KeyPress(escapeKey);
 			Navigation.SystemRandomWait(Speed.UI);
-			Navigation.sim.Keyboard.KeyPress(WindowsInput.Native.VirtualKeyCode.VK_C);
+			Navigation.sim.Keyboard.KeyPress(characterKey);
 			Navigation.SystemRandomWait(Speed.UI);
 		}
 
 		public static void InventoryScreen()
 		{
-			Navigation.sim.Keyboard.KeyPress(WindowsInput.Native.VirtualKeyCode.ESCAPE);
+			Navigation.sim.Keyboard.KeyPress(escapeKey);
 			Navigation.SystemRandomWait(Speed.UI);
-			Navigation.sim.Keyboard.KeyPress(WindowsInput.Native.VirtualKeyCode.VK_B);
+			Navigation.sim.Keyboard.KeyPress(inventoryKey);
 			Navigation.SystemRandomWait(Speed.UI);
 		}
 
 		public static void MainMenuScreen()
 		{
-			Navigation.sim.Keyboard.KeyPress(WindowsInput.Native.VirtualKeyCode.ESCAPE);
+			Navigation.sim.Keyboard.KeyPress(escapeKey);
 			Navigation.SystemRandomWait(Speed.UI);
-			Navigation.sim.Keyboard.KeyPress(WindowsInput.Native.VirtualKeyCode.ESCAPE);
+			Navigation.sim.Keyboard.KeyPress(escapeKey);
 			Navigation.SystemRandomWait(Speed.UI);
 		}
 

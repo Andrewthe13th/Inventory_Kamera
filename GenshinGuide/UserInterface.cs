@@ -83,32 +83,47 @@ namespace GenshinGuide
 
 		private static void UpdatePictureBox(Bitmap bm, PictureBox pictureBox)
 		{
-			MethodInvoker pictureBoxAction = delegate
+			try
+			{
+				MethodInvoker pictureBoxAction = delegate
 			{
 				pictureBox.Image = bm;
 				pictureBox.Refresh();
 			};
-			pictureBox.Invoke(pictureBoxAction);
+				pictureBox.Invoke(pictureBoxAction);
+			}
+			catch (Exception)
+			{ }
 		}
 
 		private static void UpdateTextBox(string text, TextBox textBox)
 		{
-			MethodInvoker textBoxAction = delegate
+			try
 			{
-				textBox.AppendText(text);
-				textBox.Refresh();
-			};
-			textBox.Invoke(textBoxAction);
+				MethodInvoker textBoxAction = delegate
+				{
+					textBox.AppendText(text);
+					textBox.Refresh();
+				};
+				textBox.Invoke(textBoxAction);
+			}
+			catch (Exception)
+			{ }
+			
 		}
 
 		private static void UpdateLabel(string text, Label label)
 		{
-			MethodInvoker labelAction =  delegate
+			try
+			{
+				MethodInvoker labelAction =  delegate
 			{
 				label.Text = text;
 				label.Refresh();
 			};
-			label.Invoke(labelAction);
+				label.Invoke(labelAction);
+			}
+			catch (Exception) { }
 		}
 
 		public static void SetArtifact_MainStat(Bitmap bm, string text)

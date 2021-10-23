@@ -18,7 +18,6 @@ namespace GenshinGuide
 			// Get Max artifacts from screen
 			int artifactCount = ScanArtifactCount();
 			Debug.Print("Artifact Count: " + artifactCount);
-			//int artifactCount = 29;
 			int currentArtifactCount = 0;
 			int scrollCount = 0;
 
@@ -37,12 +36,6 @@ namespace GenshinGuide
 			int xOffset = Convert.ToInt32(Navigation.GetArea().right * ((Double)12.25 / 160));
 			int yOffset = Convert.ToInt32(Navigation.GetArea().bottom * ((Double)14.5 / 90));
 
-			// Testing for single artifacts. REMOVE LATER!!!
-			//Artifact a = ScanArtifact(Navigation.GetArea(), Navigation.GetPosition(), imageDisplay, textBox);
-			//a.DebugPrintArtifact();
-			//a.TextBoxPrintArtifact(textBox);
-
-			///*
 			// Go through artifact list
 			while (currentArtifactCount < artifactCount)
 			{
@@ -196,7 +189,6 @@ namespace GenshinGuide
 			int xOffset = Convert.ToInt32(Navigation.GetArea().right * ((Double)12.25 / 160));
 			int yOffset = Convert.ToInt32(Navigation.GetArea().bottom * ((Double)14.5 / 90));
 
-			///*
 			// Go through artifact list
 			while (currentArtifactCount < artifactCount)
 			{
@@ -216,7 +208,7 @@ namespace GenshinGuide
 				Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
 
 				// Scan Artifact
-				ScanArtifactImage(currentArtifactCount);
+				QueueScan(currentArtifactCount);
 				currentArtifactCount++;
 				currentColumn++;
 
@@ -248,11 +240,10 @@ namespace GenshinGuide
 							}
 						}
 					}
-					//Navigation.SystemRandomWait(Navigation.Speed.Fast);
 				}
 			};
 
-			// scroll down as much as possible
+			// Scroll as much as possible
 			for (int i = 0; i < 20; i++)
 			{
 				Navigation.sim.Mouse.VerticalScroll(-1);
@@ -293,7 +284,7 @@ namespace GenshinGuide
 					}
 
 					// Scan Artifact
-					ScanArtifactImage(currentArtifactCount);
+					QueueScan(currentArtifactCount);
 					currentArtifactCount++;
 
 				}
@@ -342,7 +333,7 @@ namespace GenshinGuide
 			return count;
 		}
 
-		public static void ScanArtifactImage(int id)
+		public static void QueueScan(int id)
 		{
 
 			// Grab Image of Entire Artifact on Right
@@ -637,32 +628,6 @@ namespace GenshinGuide
 		}
 
 		#region Threaded Scan Functions
-		//private static int ScanArtifactGearSlot(Bitmap artifactImage, int max_X, int max_Y)
-		//{
-		//    //Init
-		//    string gearSlot = null;
-		//    int offset = 46;
-		//    Bitmap bm = artifactImage.Clone(new Rectangle(3, offset, max_X / 2, 20), artifactImage.PixelFormat);
-
-		//    // Process Img
-		//    Scraper.SetGrayscale(ref bm);
-		//    Scraper.SetContrast(80.0, ref bm);
-		//    Scraper.SetInvert(ref bm);
-
-
-		//    // Analyze
-		//    gearSlot = Scraper.AnalyzeText_1(bm);
-		//    gearSlot = gearSlot.Replace("\n", String.Empty);
-		//    gearSlot = Regex.Replace(gearSlot, @"[\W_]", "");
-		//    gearSlot = gearSlot.ToLower();
-		//    UserInterface.SetArtifact_GearSlot(bm, gearSlot);
-
-
-		//    bm.Dispose();
-
-		//    return Scraper.GetGearSlotCode(gearSlot);
-		//}
-
 		private static int ScanArtifactGearSlot(Bitmap bm, int max_X, int max_Y)
 		{
 			//Init
@@ -714,53 +679,6 @@ namespace GenshinGuide
 				return Scraper.GetMainStatCode(mainStat);
 			}
 		}
-
-		//private static int ScanArtifactLevel(Bitmap artifactImage, int max_X, int max_Y)
-		//{
-		//    int width = 50; int height = 33;
-		//    // Get Level
-		//    Bitmap bm = artifactImage.Clone(new Rectangle(11, 198, width, height), artifactImage.PixelFormat);
-		//    //Bitmap bm = artifactImage.Clone(new Rectangle(18, 206, 36, 18), artifactImage.PixelFormat);
-		//    Graphics g = Graphics.FromImage(bm);
-		//    // Add more padding to be able to read level better
-		//    g.DrawRectangle(new Pen(bm.GetPixel(7, 10), 16), new Rectangle(0, 0, width, height));
-		//    g.DrawRectangle(new Pen(bm.GetPixel(7, 10), 12), new Rectangle(0, 0, width, height));
-		//    // Process Img
-		//    Scraper.SetGrayscale(ref bm);
-		//    //Scraper.SetContrast(60.0, ref bm);
-		//    Scraper.SetInvert(ref bm);
-
-		//    string text = Scraper.AnalyzeText_2(bm);
-		//    text.Trim();
-		//    text = text.Replace("\n", String.Empty);
-		//    // Get rid of all non digits
-		//    text = Regex.Replace(text, @"[\D]", "");
-		//    UserInterface.SetArtifact_Level(bm, text);
-		//    g.Dispose(); bm.Dispose();
-
-		//    int level;
-		//    if (text != "" && int.TryParse(text, out level))
-		//    {
-		//        // Check if level is valid
-		//        if (level <= 20 && level >= 0)
-		//        {
-		//            return level;
-		//        }
-		//        else
-		//        {
-		//            Debug.Print("Error: Found " + level + " for level for artifact");
-		//            Form1.UnexpectedError("Found " + level + " for level for artifact");;
-		//            return -1;
-		//        }
-
-		//    }
-		//    else
-		//    {
-		//        Debug.Print("Error: Found '" + text + "' for level for artifact");
-		//        Form1.UnexpectedError("Found '" + text + "' for level for artifact");;
-		//        return -1;
-		//    }
-		//}
 
 		private static int ScanArtifactLevel(Bitmap bm, int max_X, int max_Y)
 		{
@@ -1200,9 +1118,5 @@ namespace GenshinGuide
 			return 0;
 		}
 		#endregion
-
-
 	}
-
-
 }

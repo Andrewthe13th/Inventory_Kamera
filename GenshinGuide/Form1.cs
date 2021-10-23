@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using WindowsInput.Native;
 
 namespace GenshinGuide
 {
@@ -143,6 +147,22 @@ namespace GenshinGuide
 			{
 				OutputPath_TextBox.Text = Directory.GetCurrentDirectory() + "\\GenshinData";
 			}
+
+			Navigation.inventoryKey = (VirtualKeyCode)Properties.Settings.Default.InventoryKey;
+			Navigation.characterKey = (VirtualKeyCode)Properties.Settings.Default.CharacterKey;
+
+			inventoryToolStripTextBox.Text = new KeysConverter().ConvertToString((Keys)Navigation.inventoryKey);
+			characterToolStripTextBox.Text = new KeysConverter().ConvertToString((Keys)Navigation.characterKey);
+
+			// Make sure text boxes show key glyph and not "OEM..."
+			if (inventoryToolStripTextBox.Text.ToUpper().Contains("OEM"))
+			{
+				inventoryToolStripTextBox.Text = KeyCodeToUnicode((Keys)Navigation.inventoryKey);
+			}
+			if (characterToolStripTextBox.Text.ToUpper().Contains("OEM"))
+			{
+				characterToolStripTextBox.Text = KeyCodeToUnicode((Keys)Navigation.characterKey);
+			}
 		}
 
 		private void SaveSettings()
@@ -161,6 +181,9 @@ namespace GenshinGuide
 			{
 				Properties.Settings.Default.OutputPath = OutputPath_TextBox.Text;
 			}
+
+			Properties.Settings.Default.InventoryKey = (int)Navigation.inventoryKey;
+			Properties.Settings.Default.CharacterKey = (int)Navigation.characterKey;
 
 			Properties.Settings.Default.Save();
 		}
@@ -310,5 +333,99 @@ namespace GenshinGuide
 		{
 			CharactersChecked = ((CheckBox)sender).Checked;
 		}
+
+		private void Exit_MenuItem_Click(object sender, EventArgs e)
+		{
+			Application.Exit();
+		}
+
+		private void bToolStripMenuItem_KeyDown(object sender, KeyEventArgs e)
+		{
+			// Stops windows from making pinging sound
+			e.SuppressKeyPress = true;
+
+			// Menu, Esc, Alt, PrintScreen, ScrollLock, and NumLock are unable to be used
+			VirtualKeyCode[] invalidKeys = new VirtualKeyCode[]{VirtualKeyCode.MENU, VirtualKeyCode.ESCAPE, VirtualKeyCode.SNAPSHOT, VirtualKeyCode.SCROLL, VirtualKeyCode.NUMLOCK };
+
+			if (invalidKeys.Contains((VirtualKeyCode)e.KeyCode) || e.Alt)
+			{
+				return;
+			}
+
+			// Virtual keys for 0-9, A-Z
+			bool vk = e.KeyCode >= Keys.D0 && e.KeyCode <= Keys.Z;
+			// Numpad keys and function keys (internally accepts up to F24)
+			bool np = e.KeyCode >= Keys.NumPad0 && e.KeyCode <= Keys.F24;
+			// OEM keys (Keys that vary depending on keyboard layout)
+			bool oem = e.KeyCode >= Keys.Oem1 && e.KeyCode <= Keys.Oem7;
+			// Arrow keys, spacebar, INS, DEL, HOME, END, PAGEUP, PAGEDOWN 
+			bool misc = e.KeyCode == Keys.Space || (e.KeyCode >= Keys.Left && e.KeyCode <= Keys.Down) || (e.KeyCode >= Keys.Prior && e.KeyCode <= Keys.Home) || e.KeyCode == Keys.Insert || e.KeyCode == Keys.Delete;
+
+			// Validate that key is an acceptable Genshin keybind.
+			if (!vk && !np && !oem && !misc)
+			{
+				Debug.WriteLine($"Invalid {e.KeyCode} key pressed");
+				return;
+			}
+			ToolStripTextBox s = (ToolStripTextBox)sender;
+
+			// Needed to differentiate between NUMPAD numbers and numbers at top of keyboard
+			s.Text = np ? new KeysConverter().ConvertToString(e.KeyCode): KeyCodeToUnicode(e.KeyData);
+
+			// Spacebar or upper navigation keys (INSERT-PAGEDOWN keys) make textbox empty
+			if (s.Text.Equals("") || s.Text.Equals(" "))
+			{
+				s.Text = new KeysConverter().ConvertToString(e.KeyCode);
+			}
+
+			switch (s.Tag)
+			{
+				case "InventoryKey":
+					Navigation.inventoryKey = (VirtualKeyCode)e.KeyCode;
+					Debug.WriteLine($"Inv key set to: {Navigation.inventoryKey}");
+					break;
+				case "CharacterKey":
+					Navigation.characterKey = (VirtualKeyCode)e.KeyCode;
+					Debug.WriteLine($"Char key set to: {Navigation.characterKey}");
+					break;
+				default:
+					break;
+			}
+		}
+
+		// Needed to display OEM keys as glyphs from keyboard. Should work for other languages
+		// and keyboard layouts but only tested with QWERTY layout.
+		private string KeyCodeToUnicode(Keys key)
+		{
+			byte[] keyboardState = new byte[255];
+			bool keyboardStateStatus = GetKeyboardState(keyboardState);
+
+			if (!keyboardStateStatus)
+			{
+				return "";
+			}
+
+			uint virtualKeyCode = (uint)key;
+			uint scanCode = MapVirtualKey(virtualKeyCode, 0);
+			IntPtr inputLocaleIdentifier = GetKeyboardLayout(0);
+
+			StringBuilder result = new StringBuilder();
+			ToUnicodeEx(virtualKeyCode, scanCode, keyboardState, result, (int)5, (uint)0, inputLocaleIdentifier);
+
+			return result.ToString();
+		}
+
+		[DllImport("user32.dll")]
+		static extern bool GetKeyboardState(byte[] lpKeyState);
+
+		[DllImport("user32.dll")]
+		static extern uint MapVirtualKey(uint uCode, uint uMapType);
+
+		[DllImport("user32.dll")]
+		static extern IntPtr GetKeyboardLayout(uint idThread);
+
+		[DllImport("user32.dll")]
+		static extern int ToUnicodeEx(uint wVirtKey, uint wScanCode, byte[] lpKeyState, [Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pwszBuff, int cchBuff, uint wFlags, IntPtr dwhkl);
+
 	}
 }
