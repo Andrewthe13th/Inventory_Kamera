@@ -15,13 +15,13 @@
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="ScanMaterials" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
+      <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="FormatGood" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="FormatSeelie" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
+      <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="ScannerDelay" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>

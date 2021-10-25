@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -92,8 +93,10 @@ namespace GenshinGuide
 			};
 				pictureBox.Invoke(pictureBoxAction);
 			}
-			catch (Exception)
-			{ }
+			catch (Exception e)
+			{
+				Debug.WriteLine(e.StackTrace);
+			}
 		}
 
 		private static void UpdateTextBox(string text, TextBox textBox)
@@ -103,13 +106,16 @@ namespace GenshinGuide
 				MethodInvoker textBoxAction = delegate
 				{
 					textBox.AppendText(text);
+					textBox.AppendText(Environment.NewLine);
 					textBox.Refresh();
 				};
 				textBox.Invoke(textBoxAction);
 			}
-			catch (Exception)
-			{ }
-			
+			catch (Exception e)
+			{
+				Debug.WriteLine(e.StackTrace);
+			}
+
 		}
 
 		private static void UpdateLabel(string text, Label label)
@@ -123,10 +129,13 @@ namespace GenshinGuide
 			};
 				label.Invoke(labelAction);
 			}
-			catch (Exception) { }
+			catch (Exception e)
+			{
+				Debug.WriteLine(e.StackTrace);
+			}
 		}
 
-		public static void SetArtifact_MainStat(Bitmap bm, string text)
+		public static void SetWeapon_Level(Bitmap bm, string text)
 		{
 			UpdateElements(bm, $"MainStat: {text}\n", gearMainStat_PictureBox, gear_TextBox);
 		}
@@ -187,17 +196,17 @@ namespace GenshinGuide
 
 		public static void IncrementArtifactCount()
 		{
-			UpdateLabel($"{artifactCount_Label.Text + 1}", artifactCount_Label);
+			UpdateLabel($"{Int32.Parse(artifactCount_Label.Text) + 1}", artifactCount_Label);
 		}
 
 		public static void IncrementWeaponCount()
 		{
-			UpdateLabel($"{weaponCount_Label.Text + 1}", weaponCount_Label);
+			UpdateLabel($"{Int32.Parse(weaponCount_Label.Text) + 1}", weaponCount_Label);
 		}
 
 		public static void IncrementCharacterCount()
 		{
-			UpdateLabel($"{characterCount_Label.Text + 1}", characterCount_Label);
+			UpdateLabel($"{Int32.Parse(characterCount_Label.Text) + 1}", characterCount_Label);
 		}
 
 		public static void SetProgramStatus(string status)
@@ -326,6 +335,5 @@ namespace GenshinGuide
 
 			error_TextBox.Invoke(textAction);
 		}
-
 	}
 }

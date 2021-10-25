@@ -10,297 +10,71 @@ namespace GenshinGuide
 {
 	public static class ArtifactScraper
 	{
-
-		public static List<Artifact> ScanArtifacts(ref List<Artifact> equipped)
-		{
-			List<Artifact> artifacts = new List<Artifact>();
-
-			// Get Max artifacts from screen
-			int artifactCount = ScanArtifactCount();
-			Debug.Print("Artifact Count: " + artifactCount);
-			int currentArtifactCount = 0;
-			int scrollCount = 0;
-
-			// Where in screen space artifacts are
-			Double artifactLocation_X = Navigation.GetArea().right * (21 / (Double)160);
-			Double artifactLocation_Y = Navigation.GetArea().bottom * (14 / (Double)90);
-			Bitmap bm = new Bitmap(130, 130);
-			Graphics g = Graphics.FromImage(bm);
-			int maxColumns = 7;
-			int maxRows = 4;
-			int totalRows = (int)Math.Ceiling(artifactCount / (decimal)(maxColumns));
-			int currentColumn = 0;
-			int currentRow = 0;
-
-			// offset used to move mouse to other artifacts
-			int xOffset = Convert.ToInt32(Navigation.GetArea().right * ((Double)12.25 / 160));
-			int yOffset = Convert.ToInt32(Navigation.GetArea().bottom * ((Double)14.5 / 90));
-
-			// Go through artifact list
-			while (currentArtifactCount < artifactCount)
-			{
-
-				if (currentArtifactCount % maxColumns == 0)
-				{
-					currentRow++;
-					if (totalRows - currentRow <= maxRows - 1)
-					{
-						break;
-					}
-				}
-				//if ( (artifactCount - currentArtifactCount <= (maxRows * maxColumns)) && (currentColumn == 0))
-				//{
-				//    break;
-				//}
-
-				//if(currentArtifactCount > 23)
-				//{
-				//    Debug.Print("Nice!");
-				//}
-
-				// Select Artifact
-				Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(artifactLocation_X) + (xOffset * (currentArtifactCount % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(artifactLocation_Y));
-				Navigation.sim.Mouse.LeftButtonClick();
-				Navigation.SystemRandomWait(Navigation.Speed.Faster);
-
-				// Scan Artifact
-				Artifact a = ScanArtifact(currentArtifactCount);
-				currentArtifactCount++;
-				currentColumn++;
-
-				// Add artifact to equipped list
-				if (a.GetEquippedCharacter() != 0)
-				{
-					equipped.Add(a);
-				}
-
-				// Add to Artifact List Object
-				artifacts.Add(a);
-				//GC.Collect();
-
-				// reach end of row
-				if (currentColumn == maxColumns)
-				{
-					// reset mouse pointer and scroll down artifact list
-					currentColumn = 0;
-					scrollCount++;
-
-					// scroll down
-					for (int k = 0; k < 10; k++)
-					{
-						Navigation.sim.Mouse.VerticalScroll(-1);
-						// skip a scroll
-						if ((k == 7) && ((scrollCount % 3) == 0))
-						{
-							k++;
-							if (scrollCount % 9 == 0)
-							{
-								if (scrollCount == 18)
-								{
-									scrollCount = 0;
-								}
-								else
-								{
-									Navigation.sim.Mouse.VerticalScroll(-1);
-								}
-							}
-						}
-						Navigation.SystemRandomWait(Navigation.Speed.InventoryScroll);
-					}
-					//Navigation.SystemRandomWait(Navigation.Speed.Fast);
-				}
-			};
-
-			// scroll down as much as possible
-			for (int i = 0; i < 20; i++)
-			{
-				Navigation.sim.Mouse.VerticalScroll(-1);
-				Navigation.SystemRandomWait(Navigation.Speed.InventoryScroll);
-			}
-			Navigation.SystemRandomWait(Navigation.Speed.Normal);
-
-			// Get artifacts on bottom of page
-			int rowsLeft = (int)Math.Ceiling( (artifactCount - currentArtifactCount) / (double)maxColumns);
-			bool b_EnchancementOre = false;
-			int startPostion = 1;
-			for (int i = startPostion; i < (rowsLeft + startPostion); i++)
-			{
-				for (int k = 0; k < maxColumns; k++)
-				{
-					if (artifactCount - currentArtifactCount <= 0)
-					{
-						break;
-					}
-					if (!b_EnchancementOre)
-					{
-						Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(artifactLocation_X) + (xOffset * (k % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(artifactLocation_Y) + (yOffset * (i % (maxRows + 1))));
-						Navigation.sim.Mouse.LeftButtonClick();
-						Navigation.SystemRandomWait(Navigation.Speed.Faster);
-					}
-
-					// check if enchnacement Ore
-					if (artifactCount - currentArtifactCount == 7)
-					{
-						b_EnchancementOre = WeaponScraper.IsEnhancementOre();
-					}
-
-					if (b_EnchancementOre)
-					{
-						// Scan top row instead
-						Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(artifactLocation_X) + (xOffset * (k % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(artifactLocation_Y) + (yOffset * (0 % (maxRows + 1))));
-						Navigation.sim.Mouse.LeftButtonClick();
-						Navigation.SystemRandomWait(Navigation.Speed.Faster);
-					}
-
-					// Scan Artifact
-					Artifact a = ScanArtifact(currentArtifactCount);
-					currentArtifactCount++;
-
-					// Add to Artifact List Object
-					artifacts.Add(a);
-				}
-			}//*/
-
-			return artifacts;
-
-		}
-
-		public static void ScanArtifacts()
+		public static void ScanArtifacts(int count = 50)
 		{
 			// Get Max artifacts from screen
-			int artifactCount = ScanArtifactCount();
+			int artifactCount = count == 0 ? ScanArtifactCount() : count;
 			UserInterface.SetArtifact_Max(artifactCount);
-			//int artifactCount = 29;
-			int currentArtifactCount = 0;
-			int scrollCount = 0;
+			int cardsQueued = 0;
 
 			// Where in screen space artifacts are
-			Double artifactLocation_X = Navigation.GetArea().right * (21 / (Double)160);
-			Double artifactLocation_Y = Navigation.GetArea().bottom * (14 / (Double)90);
-			//Bitmap bm = new Bitmap(130, 130);
-			//Graphics g = Graphics.FromImage(bm);
+			int  itemX = (int) (Navigation.GetArea().Right * (21 / (Double)160));
+			int  itemY = (int) (Navigation.GetArea().Bottom * (14 / (Double)90));
+
+			// Artifact inventory has 7 columns and 5 rows default
 			int maxColumns = 7;
-			int maxRows = 4;
-			int totalRows = (int)Math.Ceiling(artifactCount / (decimal)(maxColumns));
-			int currentColumn = 0;
-			int currentRow = 0;
+			int maxRows = 5;
+			int column = 0;
+			int row = 0;
 
 			// offset used to move mouse to other artifacts
-			int xOffset = Convert.ToInt32(Navigation.GetArea().right * ((Double)12.25 / 160));
-			int yOffset = Convert.ToInt32(Navigation.GetArea().bottom * ((Double)14.5 / 90));
+			int xOffset = Convert.ToInt32(Navigation.GetArea().Right * ((Double)12.25 / 160));
+			int yOffset = Convert.ToInt32(Navigation.GetArea().Bottom * ((Double)14.5 / 90));
 
 			// Go through artifact list
-			while (currentArtifactCount < artifactCount)
+			while (cardsQueued < artifactCount)
 			{
-
-				if (currentArtifactCount % maxColumns == 0)
-				{
-					currentRow++;
-					if (totalRows - currentRow <= maxRows - 1)
-					{
-						break;
-					}
-				}
-
+				int nextOffsetX = (xOffset * (cardsQueued % maxColumns));
+				int nextOffsetY = (yOffset * (row % maxRows));
 				// Select Artifact
-				Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(artifactLocation_X) + (xOffset * (currentArtifactCount % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(artifactLocation_Y));
+				Navigation.SetCursorPos(Navigation.GetPosition().Left + itemX + nextOffsetX, Navigation.GetPosition().Top + itemY + nextOffsetY);
 				Navigation.sim.Mouse.LeftButtonClick();
 				Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
 
 				// Scan Artifact
-				QueueScan(currentArtifactCount);
-				currentArtifactCount++;
-				currentColumn++;
+				QueueScan(cardsQueued);
+				cardsQueued++;
+				column++;
 
 				// reach end of row
-				if (currentColumn == maxColumns)
+				if (column == maxColumns)
 				{
 					// reset mouse pointer and scroll down artifact list
-					currentColumn = 0;
-					scrollCount++;
+					column = 0;
+					row++;
 
-					// scroll down
-					for (int k = 0; k < 10; k++)
+					// Scroll to next chunk
+					if (cardsQueued % (maxRows * maxColumns) == 0)
 					{
-						Navigation.sim.Mouse.VerticalScroll(-1);
-						// skip a scroll
-						if ((k == 7) && ((scrollCount % 3) == 0))
+						for (int i = 0; i < 50; i++)
 						{
-							k++;
-							if (scrollCount % 9 == 0)
-							{
-								if (scrollCount == 18)
-								{
-									scrollCount = 0;
-								}
-								else
-								{
-									Navigation.sim.Mouse.VerticalScroll(-1);
-								}
-							}
+							Navigation.sim.Mouse.VerticalScroll(-1);
+							Navigation.SystemRandomWait(Navigation.Speed.Instant);
 						}
+						row = 0;
 					}
 				}
-			};
-
-			// Scroll as much as possible
-			for (int i = 0; i < 20; i++)
-			{
-				Navigation.sim.Mouse.VerticalScroll(-1);
 			}
-			Navigation.SystemRandomWait(Navigation.Speed.Normal);
-
-			// Get artifacts on bottom of page
-			int rowsLeft = (int)Math.Ceiling((artifactCount - currentArtifactCount) / (double)maxColumns);
-			bool b_EnchancementOre = false;
-			int startPostion = 1;
-			for (int i = startPostion; i < (rowsLeft + startPostion); i++)
-			{
-				for (int k = 0; k < maxColumns; k++)
-				{
-					if (artifactCount - currentArtifactCount <= 0)
-					{
-						break;
-					}
-					if (!b_EnchancementOre)
-					{
-						Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(artifactLocation_X) + (xOffset * (k % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(artifactLocation_Y) + (yOffset * (i % (maxRows + 1))));
-						Navigation.sim.Mouse.LeftButtonClick();
-						Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
-					}
-
-					// check if enhancement Ore
-					if (artifactCount - currentArtifactCount == 7)
-					{
-						b_EnchancementOre = WeaponScraper.IsEnhancementOre();
-					}
-
-					if (b_EnchancementOre)
-					{
-						// Scan top row instead
-						Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(artifactLocation_X) + (xOffset * (k % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(artifactLocation_Y) + (yOffset * (0 % (maxRows + 1))));
-						Navigation.sim.Mouse.LeftButtonClick();
-						Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
-					}
-
-					// Scan Artifact
-					QueueScan(currentArtifactCount);
-					currentArtifactCount++;
-
-				}
-			}//*/
-
-
 		}
 
 		private static int ScanArtifactCount()
 		{
 			//Find artifact count
-			Double weaponCountLocation_X = Navigation.GetArea().right * (130 / (Double)160);
-			Double weaponCountLocation_Y = Navigation.GetArea().bottom * (2 / (Double)90);
+			Double weaponCountLocation_X = Navigation.GetArea().Right * (130 / (Double)160);
+			Double weaponCountLocation_Y = Navigation.GetArea().Bottom * (2 / (Double)90);
 			Bitmap bm = new Bitmap(175, 34);
 			Graphics g = Graphics.FromImage(bm);
-			g.CopyFromScreen(Navigation.GetPosition().left + Convert.ToInt32(weaponCountLocation_X), Navigation.GetPosition().top + Convert.ToInt32(weaponCountLocation_Y), 0, 0, bm.Size);
+			g.CopyFromScreen(Navigation.GetPosition().Left + Convert.ToInt32(weaponCountLocation_X), Navigation.GetPosition().Top + Convert.ToInt32(weaponCountLocation_Y), 0, 0, bm.Size);
 
 			Scraper.SetGrayscale(ref bm);
 			Scraper.SetContrast(60.0, ref bm);
@@ -337,13 +111,13 @@ namespace GenshinGuide
 		{
 
 			// Grab Image of Entire Artifact on Right
-			Double artifactLocation_X = Navigation.GetArea().right * (108 / (Double)160);
-			Double artifactLocation_Y = Navigation.GetArea().bottom * (10 / (Double)90);
+			Double artifactLocation_X = Navigation.GetArea().Right * (108 / (Double)160);
+			Double artifactLocation_Y = Navigation.GetArea().Bottom * (10 / (Double)90);
 			int width = 325; int height = 560;
 			Bitmap bm = new Bitmap(width, height,System.Drawing.Imaging.PixelFormat.Format24bppRgb);
 			Graphics g = Graphics.FromImage(bm);
-			int screenLocation_X = Navigation.GetPosition().left + Convert.ToInt32(artifactLocation_X);
-			int screenLocation_Y = Navigation.GetPosition().top + Convert.ToInt32(artifactLocation_Y);
+			int screenLocation_X = Navigation.GetPosition().Left + Convert.ToInt32(artifactLocation_X);
+			int screenLocation_Y = Navigation.GetPosition().Top + Convert.ToInt32(artifactLocation_Y);
 			g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
 
 			// Separate to all pieces of artifact and add to pics
@@ -361,6 +135,7 @@ namespace GenshinGuide
 			int level_width = 50; int level_height = 33;
 			Bitmap artifactLevel = bm.Clone(new Rectangle(11, 198, 50, level_height), bm.PixelFormat);
 			g = Graphics.FromImage(artifactLevel);
+
 			// Add more padding to be able to read level better
 			g.DrawRectangle(new Pen(artifactLevel.GetPixel(7, 10), 16), new Rectangle(0, 0, level_width, level_height));
 			g.DrawRectangle(new Pen(artifactLevel.GetPixel(7, 10), 12), new Rectangle(0, 0, level_width, level_height));
@@ -521,14 +296,14 @@ namespace GenshinGuide
 
 
 			// Grab Image of Entire Artifact on Right
-			Double artifactLocation_X = Navigation.GetArea().right * (108 / (Double)160);
-			Double artifactLocation_Y = Navigation.GetArea().bottom * (10 / (Double)90);
+			Double artifactLocation_X = Navigation.GetArea().Right * (108 / (Double)160);
+			Double artifactLocation_Y = Navigation.GetArea().Bottom * (10 / (Double)90);
 			int width = 325; int height = 560;
 
 			Bitmap bm = new Bitmap(width, height);
 			Graphics g = Graphics.FromImage(bm);
-			int screenLocation_X = Navigation.GetPosition().left + Convert.ToInt32(artifactLocation_X);
-			int screenLocation_Y = Navigation.GetPosition().top + Convert.ToInt32(artifactLocation_Y);
+			int screenLocation_X = Navigation.GetPosition().Left + Convert.ToInt32(artifactLocation_X);
+			int screenLocation_Y = Navigation.GetPosition().Top + Convert.ToInt32(artifactLocation_Y);
 			g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
 
 			// Get Rarity (Check color)
@@ -548,12 +323,6 @@ namespace GenshinGuide
 			// Check for lock color
 			Color lockColor = Color.FromArgb(255, 255, 138, 117);
 			Color lockStatus = bm.GetPixel(width - 35, 220);
-
-			//Bitmap lock_bm = new Bitmap(15, 15);
-			//Graphics g_1 = Graphics.FromImage(lock_bm);
-			//int screenLocation_X_1 = Navigation.GetPosition().left + Convert.ToInt32(artifactLocation_X);
-			//int screenLocation_Y_1 = Navigation.GetPosition().top + Convert.ToInt32(artifactLocation_Y);
-			//g_1.CopyFromScreen(screenLocation_X_1 + width - 35, screenLocation_Y_1 + 220, 0, 0, lock_bm.Size);
 
 
 			if (Scraper.CompareColors(fiveStar, rarityColor) || Scraper.CompareColors(fourthStar, rarityColor))
@@ -674,7 +443,7 @@ namespace GenshinGuide
 				mainStat = Regex.Replace(mainStat, @"[\W_]", "");
 				mainStat = mainStat.ToLower();
 				mainStat.Trim();
-				UserInterface.SetArtifact_MainStat(bm, mainStat);
+				UserInterface.SetWeapon_Level(bm, mainStat);
 
 				return Scraper.GetMainStatCode(mainStat);
 			}

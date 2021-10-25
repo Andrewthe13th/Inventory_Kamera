@@ -73,7 +73,7 @@ namespace GenshinGuide.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool ScanMaterials {
             get {
                 return ((bool)(this["ScanMaterials"]));
@@ -97,7 +97,7 @@ namespace GenshinGuide.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool FormatSeelie {
             get {
                 return ((bool)(this["FormatSeelie"]));

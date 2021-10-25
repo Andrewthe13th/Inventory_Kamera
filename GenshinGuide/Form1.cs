@@ -243,11 +243,14 @@ namespace GenshinGuide
 							throw new Exception("Invalid game window size");
 						}
 					}
-					catch (Exception)
+					catch (ThreadAbortException ex)
 					{
-						Invoke((MethodInvoker)delegate { ProgramStatus_Label.Text = ""; });
 					}
-					// If the scanner crashed
+					catch (Exception ex)
+					{
+						Debug.WriteLine($"{ex.Message}\n{ex.StackTrace}\n");
+						UserInterface.AddError($"{ex.Message}\n{ ex.StackTrace}\n");
+					}
 					finally
 					{
 						// Clear saved data
@@ -370,7 +373,7 @@ namespace GenshinGuide
 			ToolStripTextBox s = (ToolStripTextBox)sender;
 
 			// Needed to differentiate between NUMPAD numbers and numbers at top of keyboard
-			s.Text = np ? new KeysConverter().ConvertToString(e.KeyCode): KeyCodeToUnicode(e.KeyData);
+			s.Text = np ? new KeysConverter().ConvertToString(e.KeyCode) : KeyCodeToUnicode(e.KeyData);
 
 			// Spacebar or upper navigation keys (INSERT-PAGEDOWN keys) make textbox empty
 			if (s.Text.Equals("") || s.Text.Equals(" "))
@@ -410,7 +413,7 @@ namespace GenshinGuide
 			IntPtr inputLocaleIdentifier = GetKeyboardLayout(0);
 
 			StringBuilder result = new StringBuilder();
-			ToUnicodeEx(virtualKeyCode, scanCode, keyboardState, result, (int)5, (uint)0, inputLocaleIdentifier);
+			ToUnicodeEx(virtualKeyCode, scanCode, keyboardState, result, 5, 0, inputLocaleIdentifier);
 
 			return result.ToString();
 		}

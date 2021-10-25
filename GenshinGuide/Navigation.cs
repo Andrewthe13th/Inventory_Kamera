@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Runtime.InteropServices;
 using WindowsInput;
@@ -9,7 +11,7 @@ namespace GenshinGuide
 {
 	public static class Navigation
 	{
-		
+
 		private static Process genshinImpact;
 		public static InputSimulator sim = new InputSimulator();
 		private static RECT area = new RECT();
@@ -25,7 +27,7 @@ namespace GenshinGuide
 		{
 			try
 			{
-				BringMainWindowToFront(processName);
+				InitializeProcess(processName);
 			}
 			catch (NullReferenceException)
 			{
@@ -39,6 +41,18 @@ namespace GenshinGuide
 			GetClientRect(handle, ref area);
 			return;
 		}
+
+		#region Window Capturing
+		public static Bitmap CaptureRegion(RECT region)
+		{
+			Bitmap bmp = new Bitmap(region.Width, region.Height, PixelFormat.Format24bppRgb);
+			using (Graphics gfxBmp = Graphics.FromImage(bmp))
+			{
+				gfxBmp.CopyFromScreen(position.Left + region.Left, position.Top + region.Top, 0, 0, bmp.Size);
+			}
+			return bmp;
+		}
+		#endregion
 
 		public static void AddDelay(int _delay)
 		{
@@ -60,12 +74,12 @@ namespace GenshinGuide
 
 		public static int GetWidth()
 		{
-			return area.right;
+			return area.Width;
 		}
 
 		public static int GetHeight()
 		{
-			return area.bottom;
+			return area.Height;
 		}
 
 		public static RECT GetPosition()
@@ -73,29 +87,30 @@ namespace GenshinGuide
 			return position;
 		}
 
-		public static void SelectArtifactInventory()
+		#region Game Menu Navigation
+		public static void SelectWeaponInventory()
 		{
-			Double artifactButtonLocation_X = area.right * (57 / (Double)160);
-			Double artifactButtonLocation_Y = area.bottom * (5 / (Double)90);
-			SetCursorPos(position.left + Convert.ToInt32(artifactButtonLocation_X), position.top + Convert.ToInt32(artifactButtonLocation_Y));
+			int artifactButtonLocation_X = (int)(area.Right * (50 / (Double)160));
+			int artifactButtonLocation_Y = (int)(area.Bottom * (5 / (Double)90));
+			SetCursorPos(position.Left + artifactButtonLocation_X, position.Top + artifactButtonLocation_Y);
 			sim.Mouse.LeftButtonClick();
 			SystemRandomWait(Speed.UI);
 		}
 
-		public static void SelectWeaponInventory()
+		public static void SelectArtifactInventory()
 		{
-			Double artifactButtonLocation_X = area.right * (50 / (Double)160);
-			Double artifactButtonLocation_Y = area.bottom * (5 / (Double)90);
-			SetCursorPos(position.left + Convert.ToInt32(artifactButtonLocation_X), position.top + Convert.ToInt32(artifactButtonLocation_Y));
+			int artifactButtonLocation_X = (int)(area.Right * (57 / (Double)160));
+			int artifactButtonLocation_Y = (int)(area.Bottom * (5 / (Double)90));
+			SetCursorPos(position.Left + artifactButtonLocation_X, position.Top + artifactButtonLocation_Y);
 			sim.Mouse.LeftButtonClick();
 			SystemRandomWait(Speed.UI);
 		}
 
 		public static void SelectCharacterDevelopmentItems()
 		{
-			Double artifactButtonLocation_X = area.right * (64 / (Double)160);
-			Double artifactButtonLocation_Y = area.bottom * (5 / (Double)90);
-			SetCursorPos(position.left + Convert.ToInt32(artifactButtonLocation_X), position.top + Convert.ToInt32(artifactButtonLocation_Y));
+			int artifactButtonLocation_X =(int)(area.Right *(64 /(Double) 160));
+			int artifactButtonLocation_Y =(int)(area.Bottom *(5 /(Double) 90));
+			SetCursorPos(position.Left + artifactButtonLocation_X, position.Top + artifactButtonLocation_Y);
 			sim.Mouse.LeftButtonClick();
 			SystemRandomWait(Speed.UI);
 		}
@@ -104,61 +119,62 @@ namespace GenshinGuide
 		{
 			int xOffset = 100;
 			int yOffset = 100;
-			Navigation.SetCursorPos(Navigation.GetPosition().left + xOffset, Navigation.GetPosition().top + yOffset);
-			Navigation.sim.Mouse.LeftButtonClick();
-			Navigation.SystemRandomWait(Speed.CharacterUI);
+			SetCursorPos(GetPosition().Left + xOffset, GetPosition().Top + yOffset);
+			sim.Mouse.LeftButtonClick();
+			SystemRandomWait(Speed.CharacterUI);
 		}
 
 		public static void SelectCharacterConstellation()
 		{
 			int xOffset = 100;
 			int yOffset = 235;
-			Navigation.SetCursorPos(Navigation.GetPosition().left + xOffset, Navigation.GetPosition().top + yOffset);
-			Navigation.sim.Mouse.LeftButtonClick();
-			Navigation.SystemRandomWait(Speed.CharacterUI);
+			SetCursorPos(GetPosition().Left + xOffset, GetPosition().Top + yOffset);
+			sim.Mouse.LeftButtonClick();
+			SystemRandomWait(Speed.CharacterUI);
 		}
 
 		public static void SelectCharacterTalents()
 		{
 			int xOffset = 100;
 			int yOffset = 290;
-			Navigation.SetCursorPos(Navigation.GetPosition().left + xOffset, Navigation.GetPosition().top + yOffset);
-			Navigation.sim.Mouse.LeftButtonClick();
-			Navigation.SystemRandomWait(Speed.CharacterUI);
+			SetCursorPos(GetPosition().Left + xOffset, GetPosition().Top + yOffset);
+			sim.Mouse.LeftButtonClick();
+			SystemRandomWait(Speed.CharacterUI);
 		}
 
 		public static void SelectNextCharacter()
 		{
 			int xOffset = 1230;
 			int yOffset = 350;
-			Navigation.SetCursorPos(Navigation.GetPosition().left + xOffset, Navigation.GetPosition().top + yOffset);
-			Navigation.sim.Mouse.LeftButtonClick();
-			Navigation.SystemRandomWait(Speed.SelectNextCharacter);
+			SetCursorPos(GetPosition().Left + xOffset, GetPosition().Top + yOffset);
+			sim.Mouse.LeftButtonClick();
+			SystemRandomWait(Speed.SelectNextCharacter);
 		}
 
 		public static void CharacterScreen()
 		{
-			Navigation.sim.Keyboard.KeyPress(escapeKey);
-			Navigation.SystemRandomWait(Speed.UI);
-			Navigation.sim.Keyboard.KeyPress(characterKey);
-			Navigation.SystemRandomWait(Speed.UI);
+			sim.Keyboard.KeyPress(escapeKey);
+			SystemRandomWait(Speed.UI);
+			sim.Keyboard.KeyPress(characterKey);
+			SystemRandomWait(Speed.UI);
 		}
 
 		public static void InventoryScreen()
 		{
-			Navigation.sim.Keyboard.KeyPress(escapeKey);
-			Navigation.SystemRandomWait(Speed.UI);
-			Navigation.sim.Keyboard.KeyPress(inventoryKey);
-			Navigation.SystemRandomWait(Speed.UI);
+			sim.Keyboard.KeyPress(escapeKey);
+			SystemRandomWait(Speed.UI);
+			sim.Keyboard.KeyPress(inventoryKey);
+			SystemRandomWait(Speed.UI);
 		}
 
 		public static void MainMenuScreen()
 		{
-			Navigation.sim.Keyboard.KeyPress(escapeKey);
-			Navigation.SystemRandomWait(Speed.UI);
-			Navigation.sim.Keyboard.KeyPress(escapeKey);
-			Navigation.SystemRandomWait(Speed.UI);
+			sim.Keyboard.KeyPress(escapeKey);
+			SystemRandomWait(Speed.UI);
+			sim.Keyboard.KeyPress(escapeKey);
+			SystemRandomWait(Speed.UI);
 		}
+		#endregion
 
 		#region Window size of Genshin Impact
 
@@ -173,11 +189,11 @@ namespace GenshinGuide
 		#endregion
 
 		#region Switch Process into main focus
-		[System.Runtime.InteropServices.DllImport("user32.dll")]
-		[return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
+		[DllImport("user32.dll")]
+		[return: MarshalAs(UnmanagedType.Bool)]
 		private static extern bool ShowWindow(IntPtr hWnd, ShowWindowEnum flags);
 
-		[System.Runtime.InteropServices.DllImport("user32.dll")]
+		[DllImport("user32.dll")]
 		private static extern int SetForegroundWindow(IntPtr hwnd);
 
 		private enum ShowWindowEnum
@@ -189,7 +205,7 @@ namespace GenshinGuide
 			Restore = 9, ShowDefault = 10, ForceMinimized = 11
 		};
 
-		public static void BringMainWindowToFront(string processName)
+		public static void InitializeProcess(string processName)
 		{
 			// get the process
 			genshinImpact = Process.GetProcessesByName(processName).FirstOrDefault();
@@ -211,7 +227,7 @@ namespace GenshinGuide
 			else
 			{
 				// the process is not running, so start it
-				Form1.UnexpectedError("Cannot find Genshin Impact process");
+				UserInterface.AddError("Cannot find Genshin Impact process");
 				throw new NullReferenceException();
 			}
 		}
@@ -228,65 +244,52 @@ namespace GenshinGuide
 			Random r = new Random();
 			int value = 0;
 
-			if (type == Speed.Normal)
+			switch (type)
 			{
-				value = r.Next(320, 500);
-				value += delay;
-			}
-			else if (type == Speed.Instant)
-			{
-				value = 10;
-				value += delay / 10;
-			}
-			else if (type == Speed.Faster)
-			{
-				value = 40;
-				value += delay / 5;
-			}
-			else if (type == Speed.Fast)
-			{
-				value = r.Next(125, 150);
-				value += delay / 2;
-			}
-			else if (type == Speed.CharacterUI)
-			{
-				value = 400;
-				value += delay;
-			}
-			else if (type == Speed.ArtifactIgnore)
-			{
-				value = r.Next(50, 70);
-				value += delay / 5;
-			}
-			else if (type == Speed.Slow)
-			{
-				value = r.Next(1900, 2600);
-				value += 3 * delay;
-			}
-			else if (type == Speed.UI)
-			{
-				value = r.Next(1000, 1200);
-				value += delay;
-			}
-			else if (type == Speed.UI)
-			{
-				value = r.Next(1200, 1500);
-				value += delay;
-			}
-			else if (type == Speed.SelectNextCharacter)
-			{
-				value = 600;
-				value += 2 * delay;
-			}
-			else if (type == Speed.InventoryScroll)
-			{
-				value = 20;
-				value += delay / 5;
-			}
-			else if (type == Speed.SelectNextInventoryItem)
-			{
-				value = 64;
-				value += delay / 4;
+				case Speed.Normal:
+					value = r.Next(320, 500);
+					value += delay;
+					break;
+				case Speed.Instant:
+					value = 10;
+					value += delay / 10;
+					break;
+				case Speed.Faster:
+					value = 40;
+					value += delay / 5;
+					break;
+				case Speed.Fast:
+					value = r.Next(125, 150);
+					value += delay / 2;
+					break;
+				case Speed.CharacterUI:
+					value = 400;
+					value += delay;
+					break;
+				case Speed.ArtifactIgnore:
+					value = r.Next(50, 70);
+					value += delay / 5;
+					break;
+				case Speed.Slow:
+					value = r.Next(1900, 2600);
+					value += 3 * delay;
+					break;
+				case Speed.UI:
+					value = r.Next(1000, 1200);
+					value += delay;
+					break;
+				case Speed.SelectNextCharacter:
+					value = 600;
+					value += 2 * delay;
+					break;
+				case Speed.InventoryScroll:
+					value = 20;
+					value += delay / 5;
+					break;
+				case Speed.SelectNextInventoryItem:
+					value = 64;
+					value += delay / 4;
+					break;
 			}
 
 			System.Threading.Thread.Sleep(value);

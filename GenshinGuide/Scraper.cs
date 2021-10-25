@@ -1,11 +1,11 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using Newtonsoft.Json;
 using Tesseract;
 
 namespace GenshinGuide
@@ -105,8 +105,8 @@ namespace GenshinGuide
 		};
 		private static readonly Dictionary<string, int> characterCode = new Dictionary<string, int>
 		{
-            [""] = -1,
-            ["amber"] = ++characterCount,
+			[""] = -1,
+			["amber"] = ++characterCount,
 			["kaeya"] = ++characterCount,
 			["lisa"] = ++characterCount,
 			["barbara"] = ++characterCount, //5
@@ -703,7 +703,7 @@ namespace GenshinGuide
             //[""] = materialsCount++,
             //[""] = materialsCount++,
         };
-		private static readonly Dictionary<string, int> enchancementMaterialCode = new Dictionary<string, int>
+		private static readonly Dictionary<string, int> enhancementMaterials = new Dictionary<string, int>
 		{
 			["enhancementore"] = 1,
 			["fineenhancementore"] = 2,
@@ -978,7 +978,6 @@ namespace GenshinGuide
 			{
 				Debug.Print("Error: " + mainStat + " is not a valid Main Stat Name");
 				UserInterface.AddError(mainStat + " is not a valid Main Stat Name");
-				//Form1.UnexpectedError(mainStat + " is not a valid Main Stat Name");
 				return -1;
 			};
 		}
@@ -994,7 +993,6 @@ namespace GenshinGuide
 			{
 				Debug.Print("Error: " + gearSlot + " is not a valid Gear Slot");
 				UserInterface.AddError("gearSlot" + " is not a valid Gear Slot");
-				//Form1.UnexpectedError("gearSlot" + " is not a valid Gear Slot");
 				return -1;
 			};
 		}
@@ -1010,7 +1008,6 @@ namespace GenshinGuide
 			{
 				Debug.Print("Error: " + subStat + " is not a valid Sub Stat");
 				UserInterface.AddError(subStat + " is not a valid Sub Stat");
-				//Form1.UnexpectedError(subStat + " is not a valid Sub Stat");
 				return -1;
 			};
 		}
@@ -1039,7 +1036,7 @@ namespace GenshinGuide
 		{
 			if (elementalCode.TryGetValue(element, out int code))
 			{
-				return -1;
+				return code;
 			}
 			else
 			{
@@ -1047,24 +1044,14 @@ namespace GenshinGuide
 				if (!bRedo)
 				{
 					Form1.UnexpectedError(element + " is not a valid Elemental Type");
-					//Form1.UnexpectedError(element + " is not a valid Elemental Type");
 				}
 				return -1;
 			};
 		}
 
-		public static int GetEnhancementMaterialCode(string enchancementMaterial)
+		public static int GetEnhancementMaterialCode(string material)
 		{
-			int code = -1;
-			if (enchancementMaterialCode.TryGetValue(enchancementMaterial, out code))
-			{
-				return code;
-			}
-			else
-			{
-				UserInterface.AddError(enchancementMaterial + " is not a valid Enchancement Material");
-				return -1;
-			};
+			return enhancementMaterials.TryGetValue(material, out int code) ? code : -1; ;
 		}
 
 		public static int GetWeaponCode(string weapon)

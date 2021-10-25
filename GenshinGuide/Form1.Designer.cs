@@ -304,23 +304,23 @@
 			// 
 			// ArtifactOutput_TextBox
 			// 
-			this.ArtifactOutput_TextBox.Enabled = false;
 			this.ArtifactOutput_TextBox.Location = new System.Drawing.Point(102, 46);
 			this.ArtifactOutput_TextBox.Margin = new System.Windows.Forms.Padding(2);
 			this.ArtifactOutput_TextBox.Multiline = true;
 			this.ArtifactOutput_TextBox.Name = "ArtifactOutput_TextBox";
 			this.ArtifactOutput_TextBox.ReadOnly = true;
+			this.ArtifactOutput_TextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
 			this.ArtifactOutput_TextBox.Size = new System.Drawing.Size(106, 170);
 			this.ArtifactOutput_TextBox.TabIndex = 28;
 			// 
 			// CharacterOutput_TextBox
 			// 
-			this.CharacterOutput_TextBox.Enabled = false;
 			this.CharacterOutput_TextBox.Location = new System.Drawing.Point(312, 46);
 			this.CharacterOutput_TextBox.Margin = new System.Windows.Forms.Padding(2);
 			this.CharacterOutput_TextBox.Multiline = true;
 			this.CharacterOutput_TextBox.Name = "CharacterOutput_TextBox";
 			this.CharacterOutput_TextBox.ReadOnly = true;
+			this.CharacterOutput_TextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
 			this.CharacterOutput_TextBox.Size = new System.Drawing.Size(106, 170);
 			this.CharacterOutput_TextBox.TabIndex = 40;
 			// 
@@ -529,6 +529,7 @@
 			// 
 			// ErrorLog_TextBox
 			// 
+			this.ErrorLog_TextBox.AcceptsReturn = true;
 			this.ErrorLog_TextBox.BackColor = System.Drawing.SystemColors.Control;
 			this.ErrorLog_TextBox.ForeColor = System.Drawing.Color.Red;
 			this.ErrorLog_TextBox.Location = new System.Drawing.Point(2, 240);
@@ -536,6 +537,7 @@
 			this.ErrorLog_TextBox.Multiline = true;
 			this.ErrorLog_TextBox.Name = "ErrorLog_TextBox";
 			this.ErrorLog_TextBox.ReadOnly = true;
+			this.ErrorLog_TextBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
 			this.ErrorLog_TextBox.Size = new System.Drawing.Size(429, 60);
 			this.ErrorLog_TextBox.TabIndex = 53;
 			// 
@@ -766,11 +768,11 @@
 			// 
 			this.OutputPath_TextBox.Anchor = System.Windows.Forms.AnchorStyles.None;
 			this.OutputPath_TextBox.BackColor = System.Drawing.Color.White;
-			this.OutputPath_TextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.OutputPath_TextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.OutputPath_TextBox.Location = new System.Drawing.Point(202, 137);
 			this.OutputPath_TextBox.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
 			this.OutputPath_TextBox.Name = "OutputPath_TextBox";
-			this.OutputPath_TextBox.Size = new System.Drawing.Size(386, 20);
+			this.OutputPath_TextBox.Size = new System.Drawing.Size(386, 18);
 			this.OutputPath_TextBox.TabIndex = 79;
 			// 
 			// Language_Label
@@ -834,7 +836,7 @@
 			this.inventoryToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.inventoryToolStripTextBox});
 			this.inventoryToolStripMenuItem.Name = "inventoryToolStripMenuItem";
-			this.inventoryToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.inventoryToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
 			this.inventoryToolStripMenuItem.Text = "Inventory";
 			// 
 			// inventoryToolStripTextBox
@@ -854,7 +856,7 @@
 			this.characterScreenToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.characterToolStripTextBox});
 			this.characterScreenToolStripMenuItem.Name = "characterScreenToolStripMenuItem";
-			this.characterScreenToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+			this.characterScreenToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
 			this.characterScreenToolStripMenuItem.Text = "Character Screen";
 			// 
 			// characterToolStripTextBox
@@ -889,11 +891,10 @@
 			// 
 			this.Seelie_CheckBox.AutoSize = true;
 			this.Seelie_CheckBox.Checked = global::GenshinGuide.Properties.Settings.Default.FormatSeelie;
-			this.Seelie_CheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.Seelie_CheckBox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::GenshinGuide.Properties.Settings.Default, "FormatSeelie", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 			this.Seelie_CheckBox.Enabled = false;
 			this.Seelie_CheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.Seelie_CheckBox.Location = new System.Drawing.Point(12, 101);
+			this.Seelie_CheckBox.Location = new System.Drawing.Point(12, 106);
 			this.Seelie_CheckBox.Margin = new System.Windows.Forms.Padding(2);
 			this.Seelie_CheckBox.Name = "Seelie_CheckBox";
 			this.Seelie_CheckBox.Size = new System.Drawing.Size(55, 17);
@@ -906,7 +907,6 @@
 			// 
 			this.Materials_CheckBox.AutoSize = true;
 			this.Materials_CheckBox.Checked = global::GenshinGuide.Properties.Settings.Default.ScanMaterials;
-			this.Materials_CheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.Materials_CheckBox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::GenshinGuide.Properties.Settings.Default, "ScanMaterials", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 			this.Materials_CheckBox.Enabled = false;
 			this.Materials_CheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));

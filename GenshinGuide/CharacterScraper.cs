@@ -17,8 +17,8 @@ namespace GenshinGuide
 			int yOffset = 26;
 			Bitmap bm = new Bitmap(275, 30);
 			Graphics g = Graphics.FromImage(bm);
-			int screenLocation_X = Navigation.GetPosition().left + xOffset;
-			int screenLocation_Y = Navigation.GetPosition().top + yOffset;
+			int screenLocation_X = Navigation.GetPosition().Left + xOffset;
+			int screenLocation_Y = Navigation.GetPosition().Top + yOffset;
 			g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
 
 			//Image Operations
@@ -26,10 +26,7 @@ namespace GenshinGuide
 			Scraper.SetInvert(ref bm);
 			Scraper.SetGrayscale(ref bm);
 			Scraper.SetContrast(40.0, ref bm);
-			//bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
-			//Scraper.SetGrayscale(ref bm);
-			//Scraper.SetInvert(ref bm);
-			//Scraper.SetContrast(80.0, ref bm);
+
 			UserInterface.SetNavigation_Image(bm);
 
 			string text = Scraper.AnalyzeText(bm);
@@ -187,8 +184,8 @@ namespace GenshinGuide
 
 			Bitmap bm = new Bitmap(220, 54);
 			Graphics g = Graphics.FromImage(bm);
-			int screenLocation_X = Navigation.GetPosition().left + xOffset;
-			int screenLocation_Y = Navigation.GetPosition().top + yOffset;
+			int screenLocation_X = Navigation.GetPosition().Left + xOffset;
+			int screenLocation_Y = Navigation.GetPosition().Top + yOffset;
 			g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
 
 			//Image Operations
@@ -251,8 +248,8 @@ namespace GenshinGuide
 			//Bitmap bm = new Bitmap(80, 24);
 			Bitmap bm = new Bitmap(165, 28);
 			Graphics g = Graphics.FromImage(bm);
-			int screenLocation_X = Navigation.GetPosition().left + xOffset;
-			int screenLocation_Y = Navigation.GetPosition().top + yOffset;
+			int screenLocation_X = Navigation.GetPosition().Left + xOffset;
+			int screenLocation_Y = Navigation.GetPosition().Top + yOffset;
 			g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
 
 			//Image Operations
@@ -319,8 +316,8 @@ namespace GenshinGuide
 			int yOffset = 151;
 			Bitmap bm = new Bitmap(90, 10);
 			Graphics g = Graphics.FromImage(bm);
-			int screenLocation_X = Navigation.GetPosition().left + xOffset;
-			int screenLocation_Y = Navigation.GetPosition().top + yOffset;
+			int screenLocation_X = Navigation.GetPosition().Left + xOffset;
+			int screenLocation_Y = Navigation.GetPosition().Top + yOffset;
 			g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
 
 			//Image Operations
@@ -357,8 +354,8 @@ namespace GenshinGuide
 			int yOffset = 70;
 			Bitmap bm = new Bitmap(1, 1);
 			Graphics g = Graphics.FromImage(bm);
-			int screenLocation_X = Navigation.GetPosition().left + xOffset;
-			int screenLocation_Y = Navigation.GetPosition().top + yOffset;
+			int screenLocation_X = Navigation.GetPosition().Left + xOffset;
+			int screenLocation_Y = Navigation.GetPosition().Top + yOffset;
 			g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
 
 			for (int i = 0; i < 6; i++)
@@ -366,7 +363,7 @@ namespace GenshinGuide
 				Navigation.SystemRandomWait(Navigation.Speed.Faster);
 
 				// Select Constellation
-				Navigation.SetCursorPos(Navigation.GetPosition().left + 1130, Navigation.GetPosition().top + 180 + (i * 75));
+				Navigation.SetCursorPos(Navigation.GetPosition().Left + 1130, Navigation.GetPosition().Top + 180 + (i * 75));
 				Navigation.sim.Mouse.LeftButtonClick();
 
 				// Selecting the first constellation takes a while to show
@@ -394,8 +391,8 @@ namespace GenshinGuide
 						// Check if says activate at bottom
 						Bitmap bm1 = new Bitmap(140, 24);
 						Graphics g1 = Graphics.FromImage(bm1);
-						int screenLocation_X1 = Navigation.GetPosition().left + 100;
-						int screenLocation_Y1 = Navigation.GetPosition().top + 667;
+						int screenLocation_X1 = Navigation.GetPosition().Left + 100;
+						int screenLocation_Y1 = Navigation.GetPosition().Top + 667;
 						g1.CopyFromScreen(screenLocation_X1, screenLocation_Y1, 0, 0, bm1.Size);
 
 						string text = Scraper.AnalyzeText(bm1);
@@ -427,8 +424,8 @@ namespace GenshinGuide
 			int yOffset = 116;
 			int monaOffset = 0;
 			string text = "";
-			int screenLocation_X = Navigation.GetPosition().left + xOffset;
-			int screenLocation_Y = Navigation.GetPosition().top + yOffset;
+			int screenLocation_X = Navigation.GetPosition().Left + xOffset;
+			int screenLocation_Y = Navigation.GetPosition().Top + yOffset;
 
 			// check if character is mona or ayaka
 			if (name == 19 || name == 35)
@@ -443,7 +440,7 @@ namespace GenshinGuide
 
 				Navigation.SystemRandomWait(Navigation.Speed.Faster);
 
-				Navigation.SetCursorPos(Navigation.GetPosition().left + 1130, Navigation.GetPosition().top + 110 + ((i + ((i == 2) ? monaOffset : 0)) * 60));
+				Navigation.SetCursorPos(Navigation.GetPosition().Left + 1130, Navigation.GetPosition().Top + 110 + ((i + ((i == 2) ? monaOffset : 0)) * 60));
 				Navigation.sim.Mouse.LeftButtonClick();
 
 				// Pause for each constellation

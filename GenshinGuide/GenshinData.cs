@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using Newtonsoft.Json;
 
@@ -95,7 +96,7 @@ namespace GenshinGuide
 			ImageProcessor.Join();
 
 			if (checkbox[2])
-			{ 
+			{
 				// Assign Artifacts to Characters
 				if (checkbox[1])
 					AssignArtifacts();
@@ -109,8 +110,6 @@ namespace GenshinGuide
 			Weapon w; Artifact a;
 			int weaponCount = 0;
 			int artifactCount = 0;
-			//List<Weapon> weapons = new List<Weapon>();
-			//List<Artifact> artifacts = new List<Artifact>();
 			bool b_End = false;
 			while (!b_End)
 			{
@@ -122,25 +121,34 @@ namespace GenshinGuide
 
 				if (workerQueue.Count > 0)
 				{
-					OCRImage img = workerQueue.Dequeue();
-					if (img.type != "END" && img.bm != null)
+					OCRImage card = workerQueue.Dequeue();
+					if (card.type != "END" && card.bm != null)
 					{
-						if (img.type == "weapon")
+						if (card.type == "weapon")
 						{
-							weaponCount++;
-							// Scan as weapon
-							UserInterface.ResetGearDisplay();
-							w = WeaponScraper.ScanWeapon(img.bm, img.id);
-
-							if (w.IsValid())
+							if (!WeaponScraper.IsEnhancementOre(card.bm[0]))
 							{
-								UserInterface.IncrementWeaponCount();
-								inventory.AssignWeapon(w);
-								if (w.equippedCharacter != 0)
-									equippedWeapons.Add(w);
+								weaponCount++;
+								// Scan as weapon
+								UserInterface.ResetGearDisplay();
+								w = WeaponScraper.CatalogueFromBitmaps(card.bm, card.id);
+
+								if (w.IsValid())
+								{
+									Debug.WriteLine("Valid weapon scanned");
+									UserInterface.IncrementWeaponCount();
+									inventory.Add(w);
+									if (w.equippedCharacter != 0)
+										equippedWeapons.Add(w);
+								}
+								else
+								{
+									UserInterface.AddError($"Unable to validate information for weapon #{card.id}");
+									// Maybe save bitmaps in some directory to see what an issue might be
+								}
 							}
 						}
-						else if (img.type == "artifact")
+						else if (card.type == "artifact")
 						{
 							// Notify weapon has finished
 							if (!b_ScanWeapons)
@@ -149,12 +157,12 @@ namespace GenshinGuide
 							artifactCount++;
 							// Scan as weapon
 							UserInterface.ResetGearDisplay();
-							a = ArtifactScraper.ScanArtifact(img.bm, img.id);
+							a = ArtifactScraper.ScanArtifact(card.bm, card.id);
 
 							if (a.IsValid())
 							{
 								UserInterface.IncrementArtifactCount();
-								inventory.AssignArtifact(a);
+								inventory.Add(a);
 
 								if (a.equippedCharacter >= 1)
 								{
@@ -172,7 +180,7 @@ namespace GenshinGuide
 						workerQueue.Clear();
 						b_End = true;
 					}
-					img.bm = null; img.type = "";
+					card.bm = null; card.type = "";
 				}
 				else
 				{ // Wait for more images to process

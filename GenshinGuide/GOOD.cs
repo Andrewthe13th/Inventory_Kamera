@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace GenshinGuide
 {
@@ -305,7 +305,7 @@ namespace GenshinGuide
 			}
 
 			// Assign Weapons
-			List<Weapon> _weapons = genshinData.GetInventory().GetWeaponList();
+			List<Weapon> _weapons = genshinData.GetInventory().GetWeapons();
 			foreach (Weapon x in _weapons)
 			{
 				IWeapon temp = new IWeapon
@@ -320,7 +320,7 @@ namespace GenshinGuide
 			}
 
 			// Assign Artifacts
-			List<Artifact> _artifacts = genshinData.GetInventory().GetArtifactList();
+			List<Artifact> _artifacts = genshinData.GetInventory().GetArtifacts();
 			foreach (Artifact x in _artifacts)
 			{
 				// only assign artifact level 5-4
