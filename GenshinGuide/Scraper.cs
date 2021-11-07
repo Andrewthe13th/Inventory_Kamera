@@ -157,6 +157,7 @@ namespace GenshinGuide
             ["aloy"] = ++characterCount, // 40
             ["sangonomiyakokomi"] = ++characterCount,
             ["sangonomiya"] = characterCount,
+            ["thoma"] = ++characterCount,
         };
         public static Dictionary<int, string[]> characterTalentConstellationOrder = new Dictionary<int, string[]>
         {
@@ -203,6 +204,7 @@ namespace GenshinGuide
             [39] = new string[]{ "burst", "skill" }, //Kujou Sara 
             [40] = new string[]{ "burst", "skill" }, //Aloy  Note: has no constellations
             [41] = new string[] { "burst", "skill" }, //Sangonomiya Kokomi 
+            [42] = new string[] { "skill", "burst" }, //Thoma 
         };
         private static Dictionary<string, int> elementalCode = new Dictionary<string, int>
         {
