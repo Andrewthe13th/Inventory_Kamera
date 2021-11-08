@@ -198,8 +198,8 @@ namespace GenshinGuide
             [38] = new string[]{ "burst", "skill" }, //Raiden Shogun 
             [39] = new string[]{ "burst", "skill" }, //Kujou Sara 
             [40] = new string[]{ "burst", "skill" }, //Aloy  Note: has no constellations
-            [41] = new string[]{ "burst", "skill" }, //Sangonomiya Kokomi 
-			[42] = new string[]{ "skill", "burst" },
+            [41] = new string[] { "burst", "skill" }, //Sangonomiya Kokomi 
+            [42] = new string[] { "skill", "burst" }, //Thoma 
         };
 		private static readonly Dictionary<string, int> elementalCode = new Dictionary<string, int>
 		{
