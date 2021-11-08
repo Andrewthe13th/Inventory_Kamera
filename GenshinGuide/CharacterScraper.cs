@@ -17,41 +17,32 @@ namespace GenshinGuide
         private static int firstCharacterName = -1;
         private static int characterMaxLevel = 90;
 
-        public static string ScanMainCharacterName()
-        {
-            int xOffset = 185;
-            int yOffset = 26;
-            Bitmap bm = new Bitmap(275, 30);
-            Graphics g = Graphics.FromImage(bm);
-            int screenLocation_X = Navigation.GetPosition().left + xOffset;
-            int screenLocation_Y = Navigation.GetPosition().top + yOffset;
-            g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
+		public static string ScanMainCharacterName()
+		{
 
-            //Image Operations
-            Scraper.SetGamma(0.2, 0.2, 0.2, ref bm);
-            Scraper.SetInvert(ref bm);
-            Scraper.SetGrayscale(ref bm);
-            Scraper.SetContrast(40.0, ref bm);
-            //bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
-            //Scraper.SetGrayscale(ref bm);
-            //Scraper.SetInvert(ref bm);
-            //Scraper.SetContrast(80.0, ref bm);
-            UserInterface.SetNavigation_Image(bm);
+			Bitmap bm = Navigation.CaptureRegion(new Rectangle(185, 26, 275, 30));
 
-            string text = Scraper.AnalyzeText(bm);
-            text = text.Trim();
+			//Image Operations
+			Scraper.SetGamma(0.2, 0.2, 0.2, ref bm);
+			Scraper.SetInvert(ref bm);
+			Scraper.SetGrayscale(ref bm);
+			Scraper.SetContrast(40.0, ref bm);
 
-            if (text != "")
-            {
-                text = Regex.Replace(text, @"[\W_]", "");
-                text = text.ToLower();
-                // Get rid of space and the text right after it
-                text = Regex.Replace(text, @"\s+\w*", "");
-            }
-            else
-            {
-                UserInterface.AddError(text);;
-            }
+			UserInterface.SetNavigation_Image(bm);
+
+			string text = Scraper.AnalyzeText(bm).Trim();
+
+			if (text != "")
+			{
+				text = Regex.Replace(text, @"[\W_]", "").ToLower();
+
+				// Get rid of space and the text right after it
+				text = Regex.Replace(text, @"\s+\w*", "");
+			}
+			else
+			{
+				UserInterface.AddError(text);
+			}
 
             return text;
         }
@@ -187,16 +178,10 @@ namespace GenshinGuide
             }
         }
 
-        private static void ScanNameAndElement(ref int name, ref int element)
-        {
-            int xOffset = 83;
-            int yOffset = 5;
+		private static void ScanNameAndElement(ref int name, ref int element)
+		{
 
-            Bitmap bm = new Bitmap(220, 54);
-            Graphics g = Graphics.FromImage(bm);
-            int screenLocation_X = Navigation.GetPosition().left + xOffset;
-            int screenLocation_Y = Navigation.GetPosition().top + yOffset;
-            g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
+			Bitmap bm = Navigation.CaptureRegion(new Rectangle(83, 5, 220, 54));
 
             //Image Operations
             Scraper.SetGrayscale(ref bm);
@@ -204,10 +189,7 @@ namespace GenshinGuide
             Scraper.SetContrast(100.0, ref bm);
             bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
 
-            //string text = Scraper.AnalyzeElementAndCharName(bm);
-            string text = Scraper.AnalyzeText(bm);
-            text = text.ToLower();
-            text = text.Trim();
+			string text = Scraper.AnalyzeText(bm).ToLower().Trim();
 
             if(text != "")
             {
@@ -217,26 +199,29 @@ namespace GenshinGuide
                 string elementString = "";
                 elementString = Scraper.FindElement(text);
 
-                if(elementString != "")
-                {
-                    element = Scraper.GetElementalCode(elementString, true);
-                    text = Regex.Replace(text, elementString, "");
-                    if(text != "")
-                    {
-                        string characterName = text; int temp = -1;
-                        // strip each char from name until found in dictionary
-                        while (characterName.Length > 1)
-                        {
-                            temp = Scraper.GetCharacterCode(characterName, true);
-                            if (temp == -1)
-                            {
-                                characterName = characterName.Substring(0, characterName.Length - 1);
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
+				if (elementString != "")
+				{
+					element = Scraper.GetElementalCode(elementString, true);
+					text = Regex.Replace(text, elementString, "");
+
+					if (text != "")
+					{
+						string characterName = text;
+
+						// strip each char from name until found in dictionary
+						while (characterName.Length > 1)
+						{
+							int temp = Scraper.GetCharacterCode(characterName, true);
+
+							if (temp == -1)
+							{
+								characterName = characterName.Substring(0, characterName.Length - 1);
+							}
+							else
+							{
+								break;
+							}
+						}
 
                         if (characterName.Length > 1)
                         {
@@ -252,16 +237,7 @@ namespace GenshinGuide
         {
             int level = -1;
 
-            //int xOffset = 1035;
-            int xOffset = 960;
-            //int yOffset = 138;
-            int yOffset = 135;
-            //Bitmap bm = new Bitmap(80, 24);
-            Bitmap bm = new Bitmap(165, 28);
-            Graphics g = Graphics.FromImage(bm);
-            int screenLocation_X = Navigation.GetPosition().left + xOffset;
-            int screenLocation_Y = Navigation.GetPosition().top + yOffset;
-            g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
+			Bitmap bm = Navigation.CaptureRegion(new Rectangle(960, 135, 165, 28));
 
             //Image Operations
             bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
@@ -269,66 +245,44 @@ namespace GenshinGuide
             Scraper.SetInvert(ref bm);
             Scraper.SetContrast(30.0, ref bm);
 
-            
 
-            //string text = Scraper.AnalyzeFewText(bm);
-            string text = Scraper.AnalyzeText(bm);
-            text = text.Trim();
-            text = Regex.Replace(text, @"(?![0-9/]).", "");
-            text = Regex.Replace(text, @"/", " ");
+			//string text = Scraper.AnalyzeFewText(bm);
+			string text = Scraper.AnalyzeText(bm).Trim();
+			text = Regex.Replace(text, @"(?![0-9/]).", "");
+			text = Regex.Replace(text, @"/", " ");
 
             string[] temp = { text };
 
-            if (Regex.IsMatch(text, " "))
-            {
-                temp = text.Split(' ');
-            }
-            else if (temp.Length == 1)
-            {
-                //int numR = (int)((temp[0].Length/2) + 1);
-                //string[] temp1 = new string[2];
-                //temp1[0] = temp[0].Substring(0, numR - 1);
-                //temp1[1] = temp[0].Substring(temp1[0].Length + 1, numR - 1);
-                //temp = temp1;
-                return level;
-            }
+			if (Regex.IsMatch(text, " "))
+			{
+				temp = text.Split(' ');
+			}
+			else if (temp.Length == 1)
+			{
+				return level;
+			}
 
-            if (temp.Length == 3)
-            {
-                string[] temp1 = new string[2];
-                temp1[0] = temp[0];
-                temp1[1] = temp[2];
-                temp = temp1;
-            }
-            int x = -1;
-            int y = -1;
-            if (int.TryParse(temp[0], out x) && int.TryParse(temp[1], out y))
-            {
-                // level must be within 1-100
-                if (x > 0 && x < 101)
-                {
-                    UserInterface.SetCharacter_Level(bm, x);
-                    level = Convert.ToInt32(temp[0]);
-                    if (level != y && level > 0 && level <= characterMaxLevel)
-                    {
-                        ascension = true;
-                    }
-                }
-            }
-            //else
-            //{
-            //    if (temp.Length > 1)
-            //    {
-            //        Debug.Print("Error: Found " + temp[0] + " and " + temp[1] + " instead of level");
-            //        UserInterface.AddError("Found " + temp[0] + " and " + temp[1] + " instead of level");;
-            //    }
-            //    else
-            //    {
-            //        Debug.Print("Error: Found " + temp[0] + " instead of level");
-            //        UserInterface.AddError("Found " + temp[0] + " instead of level");;
-            //    }
+			if (temp.Length == 3)
+			{
+				string[] temp1 = new string[2];
+				temp1[0] = temp[0];
+				temp1[1] = temp[2];
+				temp = temp1;
+			}
 
-            //}
+			if (int.TryParse(temp[0], out int x) && int.TryParse(temp[1], out int y))
+			{
+				// level must be within 1-100
+				if (x > 0 && x < 101)
+				{
+					UserInterface.SetCharacter_Level(bm, x);
+					level = Convert.ToInt32(temp[0]);
+					if (level != y && level > 0 && level <= characterMaxLevel)
+					{
+						ascension = true;
+					}
+				}
+			}
 
             return level;
         }

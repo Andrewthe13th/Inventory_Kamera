@@ -1,60 +1,64 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace GenshinGuide
 {
-    public class GOOD
-    {
-        [JsonProperty] private string format;
-        [JsonProperty] private int version;
-        [JsonProperty] private string source;
-        [JsonProperty] private List<ICharacter> characters;
-        [JsonProperty] private List<IArtifact> artifacts;
-        [JsonProperty] private List<IWeapon> weapons;
-        private string[] eng_Names = {
-            "",
-            "Traveler",
-            "Amber",
-            "Kaeya",
-            "Lisa",
-            "Barbara",
-            "Razor",
-            "Xiangling",
-            "Beidou",
-            "Xingqiu",
-            "Ningguang",
-            "Fischl",
-            "Bennett",
-            "Noelle",
-            "Chongyun",
-            "Sucrose",
-            "Jean",
-            "Diluc",
-            "Qiqi",
-            "Mona",
-            "Keqing",
-            "Venti",
-            "Klee",
-            "Diona",
-            "Tartaglia",
-            "Xinyan",
-            "Zhongli",
-            "Albedo",
-            "Ganyu",
-            "Xiao",
-            "HuTao",
-            "Rosaria",
-            "Yanfei",
-            "Eula",
-            "KaedeharaKazuha",
-            "KamisatoAyaka",
-            "Yoimiya",
-            "Sayu",
-            "RaidenShogun",
-            "KujouSara",
-            "Aloy",
-            "SangonomiyaKokomi", };
-        private string[] eng_Weapons = {
+	public class GOOD
+	{
+		[JsonProperty] private readonly string format;
+		[JsonProperty] private readonly int version;
+		[JsonProperty] private readonly string source;
+		[JsonProperty] public List<IWeapon> weapons;
+		[JsonProperty] public List<IArtifact> artifacts;
+		[JsonProperty] public List<ICharacter> characters;
+		private readonly string[] eng_Names = {
+			"",
+			"Traveler",
+			"Amber",
+			"Kaeya",
+			"Lisa",
+			"Barbara",
+			"Razor",
+			"Xiangling",
+			"Beidou",
+			"Xingqiu",
+			"Ningguang",
+			"Fischl",
+			"Bennett",
+			"Noelle",
+			"Chongyun",
+			"Sucrose",
+			"Jean",
+			"Diluc",
+			"Qiqi",
+			"Mona",
+			"Keqing",
+			"Venti",
+			"Klee",
+			"Diona",
+			"Tartaglia",
+			"Xinyan",
+			"Zhongli",
+			"Albedo",
+			"Ganyu",
+			"Xiao",
+			"HuTao",
+			"Rosaria",
+			"Yanfei",
+			"Eula",
+			"KaedeharaKazuha",
+			"KamisatoAyaka",
+			"Yoimiya",
+			"Sayu",
+			"RaidenShogun",
+			"KujouSara",
+			"Aloy",
+			"SangonomiyaKokomi", };
+		private readonly string[] eng_Weapons = {
              // 1 Star
             "DullBlade",
             "WasterGreatsword",
@@ -315,50 +319,152 @@ namespace GenshinGuide
                 weapons.Add(temp);
             }
 
-            // Assign Artifacts
-            List<Artifact> _artifacts = genshinData.GetInventory().GetArtifactList();
-            foreach (Artifact x in _artifacts)
-            {
-                // only assign artifact level 5-4
-                if(x.rarity >= 4)
-                {
-                    IArtifact temp = new IArtifact();
-                    temp.setKey = eng_Artifacts[x.setName];
-                    temp.slotKey = eng_ArtifactSlotList[x.gearSlot];
-                    temp.level = x.level;
-                    temp.rarity = x.rarity;
-                    temp.mainStatKey = eng_ArtifactMainStatList[x.mainStat];
-                    temp.location = eng_Names[x.equippedCharacter];
-                    temp._lock = x._lock;
-                    // SubStats
-                    temp.substats = new ISubstat[4];
-                    for(int i = 0; i < 4; i++)
-                    {
-                        if (x.subStats[i].value != 0)
-                        {
-                            temp.substats[i].key = eng_ArtifactSubStatList[x.subStats[i].stat];
-                            temp.substats[i].value = x.subStats[i].value;
-                        }
-                        else
-                        {
-                            temp.substats[i].key = "";
-                            temp.substats[i].value = x.subStats[i].value;
-                        }
-                    }
-                    artifacts.Add(temp);
-                }
-            }
+			// Assign Artifacts
+			List<Artifact> _artifacts = genshinData.GetInventory().GetArtifacts();
+			foreach (Artifact x in _artifacts)
+			{
+				// only assign artifact level 5-4
+				if (x.rarity >= 4)
+				{
+					IArtifact temp = new IArtifact
+					{
+						setKey = eng_Artifacts[x.setName],
+						slotKey = eng_ArtifactSlotList[x.gearSlot],
+						level = x.level,
+						rarity = x.rarity,
+						mainStatKey = eng_ArtifactMainStatList[x.mainStat],
+						location = eng_Names[x.equippedCharacter],
+						_lock = x._lock,
+						// SubStats
+						substats = new ISubstat[4]
+					};
+					for (int i = 0; i < 4; i++)
+					{
+						if (x.subStats[i].value != 0)
+						{
+							temp.substats[i].key = eng_ArtifactSubStatList[x.subStats[i].stat];
+							temp.substats[i].value = x.subStats[i].value;
+						}
+						else
+						{
+							temp.substats[i].key = "";
+							temp.substats[i].value = x.subStats[i].value;
+						}
+					}
+					artifacts.Add(temp);
+				}
+			}
 
-        }
+		}
 
-        private struct IWeapon
-        {
-            [JsonProperty] public string key;
-            [JsonProperty] public int level;
-            [JsonProperty] public int ascension;
-            [JsonProperty] public int refinement;
-            [JsonProperty] public string location;
-        }
+		public void WriteToJSON(string outputDirectory, string oldDataFilePath = "")
+		{
+			// Create JSON object
+			string dataString = JsonConvert.SerializeObject(this);
+
+			// Conform 'lock' and 'auto' keys to GOOD format
+			dataString = dataString.Replace("_lock", "lock");
+			dataString = dataString.Replace("_auto", "auto");
+
+			// Check for output directory
+			if (!Directory.Exists(outputDirectory))
+			{
+				Directory.CreateDirectory(outputDirectory);
+			}
+
+			// Create file with timestamp in name
+			string fileName = "\\genshinData_GOOD_" + DateTime.Now.ToString("MM.dd.yyyy_HH.mm.ss") + ".json";
+			fileName = fileName.Replace('/', '_');
+			string outputFile = outputDirectory + fileName;
+
+			// Try to load external GOOD data to update.
+			// For preserving information at when uploading data to
+			// https://frzyc.github.io/genshin-optimizer 
+			JObject database = null;
+			if (File.Exists(oldDataFilePath))
+			{
+				try
+				{
+					// Load source data
+					using (StreamReader file = File.OpenText(oldDataFilePath))
+					using (JsonTextReader reader = new JsonTextReader(file))
+					{
+						database = (JObject)JToken.ReadFrom(reader);
+					}
+
+					// Characters
+					foreach (ICharacter character in characters)
+					{
+						foreach (JObject dbCharacter in database["characters"])
+						{
+							{
+								if ((string)dbCharacter["key"] == character.key)
+								{
+									dbCharacter["level"] = character.level;
+									dbCharacter["constellation"] = character.constellation;
+									dbCharacter["ascension"] = character.ascension;
+									dbCharacter["talent"] = JObject.FromObject(character.talent);
+									break;
+								}
+							}
+						}
+					}
+					// Weapons
+					foreach (IWeapon weapon in weapons)
+					{
+						foreach (JToken dbWeapon in database["weapons"])
+						{
+							if ((string)dbWeapon["key"] == weapon.key)
+							{
+								break;
+							}
+						}
+					}
+					// Artifacts
+
+
+					using (StreamWriter file = File.CreateText(outputFile))
+					using (JsonWriter writer = new JsonTextWriter(file))
+					{
+						database.WriteTo(writer);
+					}
+					Debug.WriteLine("Successfully merged databases");
+				}
+
+				catch (Exception)
+				{
+					UserInterface.AddError("Unable to create merged database.");
+					WriteStringToFile(dataString, outputFile);
+				}
+			}
+			else
+			{
+				// Write file
+				WriteStringToFile(dataString, outputFile);
+			}
+
+			if (!File.Exists(outputFile)) // did not make file
+			{
+				UserInterface.AddError("Failed to output at : " + outputDirectory);
+			}
+		}
+
+		private static void WriteStringToFile(string dataString, string outputFile)
+		{
+			using (var streamWriter = new StreamWriter(outputFile, true))
+			{
+				streamWriter.WriteLine(dataString.ToString());
+			}
+		}
+
+		public struct IWeapon
+		{
+			[JsonProperty] public string key;
+			[JsonProperty] public int level;
+			[JsonProperty] public int ascension;
+			[JsonProperty] public int refinement;
+			[JsonProperty] public string location;
+		}
 
         private struct IArtifact
         {
@@ -379,14 +485,14 @@ namespace GenshinGuide
             [JsonProperty] public decimal value;
         }
 
-        private struct ICharacter
-        {
-            [JsonProperty] public string key;
-            [JsonProperty] public int level;
-            [JsonProperty] public int constellation;
-            [JsonProperty] public int ascension;
-            [JsonProperty] public ITalent talent;
-        }
+		public struct ICharacter
+		{
+			[JsonProperty] public string key;
+			[JsonProperty] public int level;
+			[JsonProperty] public int ascension;
+			[JsonProperty] public ITalent talent;
+			[JsonProperty] public int constellation;
+		}
 
         private struct ITalent
         {

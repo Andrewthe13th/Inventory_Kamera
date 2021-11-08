@@ -35,5 +35,137 @@ namespace GenshinGuide.Properties {
                 this["Genshin"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ScanWeapons {
+            get {
+                return ((bool)(this["ScanWeapons"]));
+            }
+            set {
+                this["ScanWeapons"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ScanArtifacts {
+            get {
+                return ((bool)(this["ScanArtifacts"]));
+            }
+            set {
+                this["ScanArtifacts"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ScanCharacters {
+            get {
+                return ((bool)(this["ScanCharacters"]));
+            }
+            set {
+                this["ScanCharacters"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ScanMaterials {
+            get {
+                return ((bool)(this["ScanMaterials"]));
+            }
+            set {
+                this["ScanMaterials"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool FormatGood {
+            get {
+                return ((bool)(this["FormatGood"]));
+            }
+            set {
+                this["FormatGood"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool FormatSeelie {
+            get {
+                return ((bool)(this["FormatSeelie"]));
+            }
+            set {
+                this["FormatSeelie"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int ScannerDelay {
+            get {
+                return ((int)(this["ScannerDelay"]));
+            }
+            set {
+                this["ScannerDelay"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string OutputPath {
+            get {
+                return ((string)(this["OutputPath"]));
+            }
+            set {
+                this["OutputPath"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("66")]
+        public int InventoryKey {
+            get {
+                return ((int)(this["InventoryKey"]));
+            }
+            set {
+                this["InventoryKey"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("67")]
+        public int CharacterKey {
+            get {
+                return ((int)(this["CharacterKey"]));
+            }
+            set {
+                this["CharacterKey"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string OldDatabase {
+            get {
+                return ((string)(this["OldDatabase"]));
+            }
+            set {
+                this["OldDatabase"] = value;
+            }
+        }
     }
 }

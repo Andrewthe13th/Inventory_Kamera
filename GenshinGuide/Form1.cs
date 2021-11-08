@@ -23,19 +23,36 @@ namespace GenshinGuide
         static bool bCharacters = true;
 
 
-        public Form1()
-        {
-            InitializeComponent();
-            //ghk = new KeyHandler(Keys.Enter, this);
-            //ghk.Register();
-            // register the event that is fired after the key press.
-            hook.KeyPressed += new EventHandler<KeyPressedEventArgs>(hook_KeyPressed);
-            // register the control + alt + F12 combination as hot key.
-            //hook.RegisterHotKey(Keys.Enter);
-            comboBox1.SelectedItem = "ENG";
-            UserInterface.Init(a_GearSlot_Image,a_MainStat_Image,a_Level_Image,(new []{a_SubStat1_Image,a_SubStat2_Image,a_SubStat3_Image,a_SubStat4_Image }),a_SetName_Image,a_Equipped_Image,a_TextBox,c_Name_Image,c_Level_Image,(new[] { c_Talent_1,c_Talent_2,c_Talent_3}), c_TextBox,weaponCount,maxWeapons,artifactCount,maxArtifacts,characterCount,ProgramStatus,error_TextBox, navigation_Image);
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
+		public Form1()
+		{
+			InitializeComponent();
+
+			// register the event that is fired after the key press.
+			hook.KeyPressed += new EventHandler<KeyPressedEventArgs>(Hook_KeyPressed);
+			
+
+			Language_ComboBox.SelectedItem = "ENG";
+			UserInterface.Init(GearSlot_PictureBox,
+					  ArtifactMainStat_PictureBox,
+					  Level_PictureBox,
+					  new[] { ArtifactSubStat1_PictureBox, ArtifactSubStat2_PictureBox, ArtifactSubStat3_PictureBox, ArtifactSubStat4_PictureBox },
+					  ArtifactSetName_PictureBox,
+					  ArtifactEquipped_PictureBox,
+					  ArtifactOutput_TextBox,
+					  CharacterName_PictureBox,
+					  CharacterLevel_PictureBox,
+					  new[] { CharacterTalent1_PictureBox, CharacterTalent2_PictureBox, CharacterTalent3_PictureBox },
+					  CharacterOutput_TextBox,
+					  WeaponsScannedCount_Label,
+					  WeaponsMax_Labell,
+					  ArtifactsScanned_Label,
+					  ArtifactsMax_Label,
+					  CharactersScanned_Label,
+					  ProgramStatus_Label,
+					  ErrorLog_TextBox,
+					  Navigation_Image);
+			MaximizeBox = false;
+			MinimizeBox = false;
 
             // Initize the file path
             FilePath.Text = "";
@@ -51,102 +68,132 @@ namespace GenshinGuide
                 FilePath.Text = filePath;
             }
 
-            // Initize the delay timer
-            delayLevel = ScannerDelay.Value;
-            ScannerDelay.ValueChanged += trackbar_ValueChanged;
+		private int ScannerDelayValue(int value)
+		{
+			switch (value)
+			{
+				case 0:
+					return 0;
+				case 1:
+					return 50;
+				case 2:
+					return 100;
+				default:
+					return 100;
+			}
+		}
 
-            // Add function to update values for checkboxes for threads
-            w_CheckBox.CheckedChanged += W_Checkbox_ValueChanged;
-            a_CheckBox.CheckedChanged += A_Checkbox_ValueChanged;
-            c_CheckBox.CheckedChanged += C_Checkbox_ValueChanged;
-        }
+		private void Hook_KeyPressed(object sender, KeyPressedEventArgs e)
+		{
+			// show the keys pressed in a label.
+			if (mainThread.IsAlive)
+			{
+				// stop navigating throw weapons/artifacts
+				mainThread.Abort();
+				// stop weapon/artifact processor thread
+				data.StopImageProcessorWorker();
+				UserInterface.SetProgramStatus("Scan Stopped");
+				// Reset data
+				data = new GenshinData();
+				Navigation.Reset();
+			}
+			else
+			{
+				hook.Dispose();
+			}
+		}
 
-        private void trackbar_ValueChanged(object sender, EventArgs e)
-        {
-            delayLevel = ScannerDelay.Value;
-        }
+		private void ResetUI()
+		{
+			// Reset data
+			data = new GenshinData();
 
-        private void W_Checkbox_ValueChanged(object sender, EventArgs e)
-        {
-            bWeapons = w_CheckBox.Checked;
-        }
+			Navigation.Reset();
 
-        private void A_Checkbox_ValueChanged(object sender, EventArgs e)
-        {
-            bArtifacts = a_CheckBox.Checked;
-        }
+			// Un-register ENTER key. Otherwise you can't hit ENTER in another application
+			hook.Dispose();
+		}
 
-        private void C_Checkbox_ValueChanged(object sender, EventArgs e)
-        {
-            bCharacters = c_CheckBox.Checked;
-        }
+		public static void UnexpectedError(string error)
+		{
+			if (mainThread.IsAlive)
+			{
+				UserInterface.AddError(error);
+			}
+		}
 
-        private int ScannerDelayValue(int value)
-        {
-            if(value == 0)
-            {
-                return 0;
-            }
-            else if(value == 1)
-            {
-                return 50;
-            }
-            else if(value == 2)
-            {
-                return 100;
-            }
-            else
-            {
-                return 100;
-            }
-        }
+		private void Form1_Load(object sender, EventArgs e)
+		{
+			GetSettings();
 
-        private void hook_KeyPressed(object sender, KeyPressedEventArgs e)
-        {
-            // show the keys pressed in a label.
-            if (mainThread.IsAlive)
-            {
-                // stop navigating throw weapons/artifacts
-                mainThread.Abort();
-                // stop weapon/artifact processor thread
-                data.StopImageProcessorWorker();
-                UserInterface.SetProgramStatus("Scan Stopped",true);
-                // Reset data
-                data = new GenshinData();
-                Navigation.Reset();
-                // Un register ENTER key
-                //hook.Dispose();
-            }
-            else
-            {
-                hook.Dispose();
-            }
-        }
+			Delay = ScannerDelay_TrackBar.Value;
 
-        private void ResetUI()
-        {
-            UserInterface.SetProgramStatus("Finished");
-            // Reset data
-            data = new GenshinData();
-            Navigation.Reset();
-            // Un register ENTER key
-            hook.Dispose();
-        }
+			WeaponsChecked = Weapons_CheckBox.Checked;
+			ArtifactsChecked = Artifacts_Checkbox.Checked;
+			CharactersChecked = Characters_CheckBox.Checked;
+		}
 
-        public static void UnexpectedError(string error)
-        {
-            if (mainThread.IsAlive)
-            {
-                //data.StopImageProcessorWorker();
-                //mainThread.Abort();
-                UserInterface.SetProgramStatus(error, true);
-            }
-        }
+		private void GetSettings()
+		{
+			GOOD_CheckBox.Checked = Properties.Settings.Default.FormatGood;
+			Seelie_CheckBox.Checked = Properties.Settings.Default.FormatSeelie;
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
+			Weapons_CheckBox.Checked = Properties.Settings.Default.ScanWeapons;
+			Artifacts_Checkbox.Checked = Properties.Settings.Default.ScanArtifacts;
+			Characters_CheckBox.Checked = Properties.Settings.Default.ScanCharacters;
+			Materials_CheckBox.Checked = Properties.Settings.Default.ScanMaterials;
 
-        }
+			ScannerDelay_TrackBar.Value = Properties.Settings.Default.ScannerDelay;
+
+			OutputPath_TextBox.Text = Properties.Settings.Default.OutputPath;
+			if (!Directory.Exists(OutputPath_TextBox.Text))
+			{
+				OutputPath_TextBox.Text = Directory.GetCurrentDirectory() + "\\GenshinData";
+			}
+
+			Navigation.inventoryKey = (VirtualKeyCode)Properties.Settings.Default.InventoryKey;
+			Navigation.characterKey = (VirtualKeyCode)Properties.Settings.Default.CharacterKey;
+
+			inventoryToolStripTextBox.Text = new KeysConverter().ConvertToString((Keys)Navigation.inventoryKey);
+			characterToolStripTextBox.Text = new KeysConverter().ConvertToString((Keys)Navigation.characterKey);
+
+			// Make sure text boxes show key glyph and not "OEM..."
+			if (inventoryToolStripTextBox.Text.ToUpper().Contains("OEM"))
+			{
+				inventoryToolStripTextBox.Text = KeyCodeToUnicode((Keys)Navigation.inventoryKey);
+			}
+			if (characterToolStripTextBox.Text.ToUpper().Contains("OEM"))
+			{
+				characterToolStripTextBox.Text = KeyCodeToUnicode((Keys)Navigation.characterKey);
+			}
+
+			Database_MenuItem.Text = Properties.Settings.Default.OldDatabase;
+		}
+
+		private void SaveSettings()
+		{
+			Properties.Settings.Default.FormatGood = GOOD_CheckBox.Checked;
+			Properties.Settings.Default.FormatSeelie = Seelie_CheckBox.Checked;
+
+			Properties.Settings.Default.ScanWeapons = Weapons_CheckBox.Checked;
+			Properties.Settings.Default.ScanArtifacts = Artifacts_Checkbox.Checked;
+			Properties.Settings.Default.ScanCharacters = Characters_CheckBox.Checked;
+			Properties.Settings.Default.ScanMaterials = Materials_CheckBox.Checked;
+
+			Properties.Settings.Default.ScannerDelay = ScannerDelay_TrackBar.Value;
+
+			if (Directory.Exists(OutputPath_TextBox.Text))
+			{
+				Properties.Settings.Default.OutputPath = OutputPath_TextBox.Text;
+			}
+
+			Properties.Settings.Default.InventoryKey = (int)Navigation.inventoryKey;
+			Properties.Settings.Default.CharacterKey = (int)Navigation.characterKey;
+
+			Properties.Settings.Default.OldDatabase = Database_MenuItem.Text.Trim();
+
+			Properties.Settings.Default.Save();
+		}
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -185,54 +232,47 @@ namespace GenshinGuide
                         // Covert to GOOD format
                         GOOD good = new GOOD(data);
 
-                        // Make Json File
-                        Scraper.CreateJsonFile(good, filePath);
+							// Make Json File
+							good.WriteToJSON(OutputPath_TextBox.Text, Database_MenuItem.Text);
 
                         // Clear saved data
                         ResetUI();
 
-                        // Open GenshinDataFolder
-                        Process.Start("explorer.exe", filePath);
-                    }
-                    else
-                    {
-                        data = new GenshinData();
-                        UserInterface.AddError("Game Window not set to 1280 x 720 Windowed");
-                        Navigation.Reset();
-                    // Un register ENTER key
-                    hook.Dispose();
-                    }
-
-                });
-                mainThread.IsBackground = true;
-                mainThread.Start();
-            }
-            else
-            {
-                UserInterface.SetProgramStatus("Set Folder Location", true);
-            }
-
-        }
-
-        private void txtOutput_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label3_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void picTarget_Click(object sender, EventArgs e)
-        {
-
-        }
+							UserInterface.SetProgramStatus("Finished");
+						}
+						else
+						{
+							data = new GenshinData();
+							UserInterface.AddError("Game Window not set to 1280 x 720 Windowed");
+							Navigation.Reset();
+							// Un register ENTER key
+							hook.Dispose();
+							throw new Exception("Invalid game window size");
+						}
+					}
+					catch (ThreadAbortException)
+					{ }
+					catch (Exception ex)
+					{
+						Debug.WriteLine($"{ex.Message}\n{ex.StackTrace}\n");
+						UserInterface.AddError($"{ex.Message}\n{ ex.StackTrace}\n");
+					}
+					finally
+					{
+						// Clear saved data
+						ResetUI();
+					}
+				})
+				{
+					IsBackground = true
+				};
+				mainThread.Start();
+			}
+			else
+			{
+				UserInterface.AddError("Set Folder Location");
+			}
+		}
 
         private void HandleHotkey()
         {
@@ -331,4 +371,19 @@ namespace GenshinGuide
 
 
 
+		private void databaseMenuItem_Click(object sender, EventArgs e)
+		{
+			CommonOpenFileDialog d = new CommonOpenFileDialog
+			{
+				InitialDirectory = Database_MenuItem.Text,
+			};
+
+			d.Filters.Add(new CommonFileDialogFilter("JSON Files", ".json"));
+
+			if (d.ShowDialog() == CommonFileDialogResult.Ok)
+			{
+				Database_MenuItem.Text = d.FileName;
+			}
+		}
+	}
 }

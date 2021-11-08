@@ -165,6 +165,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="DesignBust_genshin_impact_folder_icon256.ico" />
+    <Content Include="Windows Logo.png" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">

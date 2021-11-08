@@ -717,15 +717,18 @@ namespace GenshinGuide
             ["sanctifyingessence"] = 5, // 4
         };
 
-        private static TesseractEngine ocr_live = new TesseractEngine( (Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
-        private static TesseractEngine ocr_1 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
-        private static TesseractEngine ocr_2 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
-        private static TesseractEngine ocr_3 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
-        private static TesseractEngine ocr_4 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
-        private static TesseractEngine ocr_5 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
-        private static TesseractEngine ocr_6 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
-        private static TesseractEngine ocr_7 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
-        private static TesseractEngine ocr_8 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+		
+		// TODO: Remove static modifier. This could probably cause problems if a scanning crash is caught while an engine is running.
+		// May be ok to create new engines as needed
+		private static readonly TesseractEngine ocr_live = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+		private static readonly TesseractEngine ocr_1 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+		private static readonly TesseractEngine ocr_2 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+		private static readonly TesseractEngine ocr_3 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+		private static readonly TesseractEngine ocr_4 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+		private static readonly TesseractEngine ocr_5 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+		private static readonly TesseractEngine ocr_6 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+		private static readonly TesseractEngine ocr_7 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+		private static readonly TesseractEngine ocr_8 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
 
         //TODO: subStats Dictionaries
 
@@ -1190,89 +1193,8 @@ namespace GenshinGuide
                 }
             }
 
-            return element;
-        }
-
-        public static void CreateJsonFile(GenshinData data)
-        {
-            // write to JSON file
-            string JSONresult = JsonConvert.SerializeObject(data);
-            string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            path += "\\GenshinData";
-            //string path = @"C:\Users\delaf\Downloads\genshinImpact_Data.json";
-
-            if (!Directory.Exists(path))
-            {
-                // Make Directory
-                Directory.CreateDirectory(path);
-            }
-            // Create file with timestamp in name
-            string fileName = "\\genshinData_" + DateTime.Today.ToString("d") + ".json";
-            fileName = fileName.Replace('/', '_');
-            string filePath = path + fileName;
-
-            // Override previous file if exists
-            if (File.Exists(filePath))
-            {
-                File.Delete(filePath);
-                using (var tw = new StreamWriter(filePath, true))
-                {
-                    tw.WriteLine(JSONresult.ToString());
-                    tw.Close();
-                }
-            }
-            else if (!File.Exists(filePath))
-            {
-                using (var tw = new StreamWriter(filePath, true))
-                {
-                    tw.WriteLine(JSONresult.ToString());
-                    tw.Close();
-                }
-            }
-        }
-
-        public static void CreateJsonFile(GOOD data,string path)
-        {
-            // write to JSON file
-            string JSONresult = JsonConvert.SerializeObject(data);
-
-            // Alter JSON file to have correct names for lock and auto keywords
-            JSONresult = JSONresult.Replace("_lock", "lock");
-            JSONresult = JSONresult.Replace("_auto", "auto");
-
-            // Put file in Genshin Data directory
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
-            // Create file with timestamp in name
-            string fileName = "\\genshinData_GOOD_" + DateTime.Today.ToString("d") + ".json";
-            fileName = fileName.Replace('/', '_');
-            string filePath = path + fileName;
-
-            // Override previous file if exists
-            if (File.Exists(filePath))
-            {
-                File.Delete(filePath);
-                using (var tw = new StreamWriter(filePath, true))
-                {
-                    tw.WriteLine(JSONresult.ToString());
-                    tw.Close();
-                }
-            }
-            else if (!File.Exists(filePath))
-            {
-                using (var tw = new StreamWriter(filePath, true))
-                {
-                    tw.WriteLine(JSONresult.ToString());
-                    tw.Close();
-                }
-            }
-            else // did not make file
-            {
-                UserInterface.AddError("Failed to make folder at : " + path);
-            }
-        }
+			return element;
+		}
 
         public static bool CompareColors(Color a, Color b)
         {
@@ -1444,39 +1366,40 @@ namespace GenshinGuide
             bitmap = (Bitmap)bmap.Clone();
         }
 
-        public static void SetColorFilter(string colorFilterType, ref Bitmap bitmap)
-        {
-            Bitmap temp = (Bitmap)bitmap;
-            Bitmap bmap = (Bitmap)temp.Clone();
-            Color c;
-            for (int i = 0; i < bmap.Width; i++)
-            {
-                for (int j = 0; j < bmap.Height; j++)
-                {
-                    c = bmap.GetPixel(i, j);
-                    int nPixelR = 0;
-                    int nPixelG = 0;
-                    int nPixelB = 0;
-                    if (colorFilterType == "red")
-                    {
-                        nPixelR = c.R;
-                        nPixelG = c.G - 255;
-                        nPixelB = c.B - 255;
-                    }
-                    else if (colorFilterType == "green")
-                    {
-                        nPixelR = c.R - 255;
-                        nPixelG = c.G;
-                        nPixelB = c.B - 255;
-                    }
-                    else if (colorFilterType == "blue")
-                    {
-                        nPixelR = c.R - 255;
-                        nPixelG = c.G - 255;
-                        nPixelB = c.B;
-                    }
-                    nPixelR = Math.Max(nPixelR, 0);
-                    nPixelR = Math.Min(255, nPixelR);
+		public static void SetColor
+			(string colorFilterType, ref Bitmap bitmap)
+		{
+			Bitmap temp = bitmap;
+			Bitmap bmap = (Bitmap)temp.Clone();
+			Color c;
+			for (int i = 0; i < bmap.Width; i++)
+			{
+				for (int j = 0; j < bmap.Height; j++)
+				{
+					c = bmap.GetPixel(i, j);
+					int nPixelR = 0;
+					int nPixelG = 0;
+					int nPixelB = 0;
+					if (colorFilterType == "red")
+					{
+						nPixelR = c.R;
+						nPixelG = c.G - 255;
+						nPixelB = c.B - 255;
+					}
+					else if (colorFilterType == "green")
+					{
+						nPixelR = c.R - 255;
+						nPixelG = c.G;
+						nPixelB = c.B - 255;
+					}
+					else if (colorFilterType == "blue")
+					{
+						nPixelR = c.R - 255;
+						nPixelG = c.G - 255;
+						nPixelB = c.B;
+					}
+					nPixelR = Math.Max(nPixelR, 0);
+					nPixelR = Math.Min(255, nPixelR);
 
                     nPixelG = Math.Max(nPixelG, 0);
                     nPixelG = Math.Min(255, nPixelG);

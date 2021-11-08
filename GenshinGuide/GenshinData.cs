@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using Newtonsoft.Json;
 
@@ -147,23 +146,26 @@ namespace GenshinGuide
                             UserInterface.Reset_Artifact();
                             w = WeaponScraper.ScanWeapon(img.bm, img.id);
 
-                            if (w.IsValid())
-                            {
-                                UserInterface.IncrementWeaponCount();
-                                inventory.AssignWeapon(w);
-                                if (w.equippedCharacter != 0)
-                                {
-                                    equippedWeapons.Add(w);
-                                }
-                            }
-                            
-                            
-                        }
-                        else if (img.type == "artifact")
-                        {
-                            // Notify weapon has finished
-                            if (!b_ScanWeapons)
-                                b_ScanWeapons = true;
+								if (w.IsValid())
+								{
+									Debug.WriteLine("Valid weapon scanned");
+									UserInterface.IncrementWeaponCount();
+									inventory.Add(w);
+									if (w.equippedCharacter != 0)
+										equippedWeapons.Add(w);
+								}
+								else if (w.GetName() != -1)
+								{
+									UserInterface.AddError($"Unable to validate information for weapon #{card.id}");
+									// Maybe save bitmaps in some directory to see what an issue might be
+								}
+							}
+						}
+						else if (card.type == "artifact")
+						{
+							// Notify weapon has finished
+							if (!b_ScanWeapons)
+								b_ScanWeapons = true;
 
                             artifactCount++;
                             // Scan as weapon
@@ -175,34 +177,31 @@ namespace GenshinGuide
                                 UserInterface.IncrementArtifactCount();
                                 inventory.AssignArtifact(a);
 
-                                if (a.equippedCharacter >= 1)
-                                {
-                                    equippedArtifacts.Add(a);
-                                }
-                            }
-                        }
-                        else // not supposed to happen
-                        {
-                            Form1.UnexpectedError("Unknown Image type for Image Processor");
-                        }
-                    }
-                    else
-                    {
-                        workerQueue.Clear();
-                        b_End = true;
-                    }
-                    img.bm = null; img.type = "";
-                }
-                else
-                { // Wait for more images to process
-                    System.Threading.Thread.Sleep(500);
-                }
-            }
-            b_threadCancel = false;
-            // Assign weapons and artifacts to inventory
-            //inventory.AssignArtifacts(ref artifacts);
-            //inventory.AssignWeapons(ref weapons);
-        }
+								if (a.equippedCharacter >= 1)
+								{
+									equippedArtifacts.Add(a);
+								}
+							}
+						}
+						else // not supposed to happen
+						{
+							Form1.UnexpectedError("Unknown Image type for Image Processor");
+						}
+					}
+					else
+					{
+						workerQueue.Clear();
+						b_End = true;
+					}
+					card.bm = null; card.type = "";
+				}
+				else
+				{ // Wait for more images to process
+					System.Threading.Thread.Sleep(500);
+				}
+			}
+			b_threadCancel = false;
+		}
 
         public void AssignArtifacts()
         {
@@ -232,7 +231,5 @@ namespace GenshinGuide
             }
         }
 
-        
-
-    }
+	}
 }
