@@ -113,7 +113,7 @@ namespace GenshinGuide
 
 		private void Form1_Load(object sender, EventArgs e)
 		{
-			GetSettings();
+			LoadSettings();
 
 			Delay = ScannerDelay_TrackBar.Value;
 
@@ -122,7 +122,7 @@ namespace GenshinGuide
 			CharactersChecked = Characters_CheckBox.Checked;
 		}
 
-		private void GetSettings()
+		private void LoadSettings()
 		{
 			GOOD_CheckBox.Checked = Properties.Settings.Default.FormatGood;
 			Seelie_CheckBox.Checked = Properties.Settings.Default.FormatSeelie;
@@ -183,64 +183,7 @@ namespace GenshinGuide
 
 			Properties.Settings.Default.Save();
 		}
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            UserInterface.SetProgramStatus("Scanning");
-
-			Weapons_CheckBox.Checked = Properties.Settings.Default.ScanWeapons;
-			Artifacts_Checkbox.Checked = Properties.Settings.Default.ScanArtifacts;
-			Characters_CheckBox.Checked = Properties.Settings.Default.ScanCharacters;
-			Materials_CheckBox.Checked = Properties.Settings.Default.ScanMaterials;
-
-			ScannerDelay_TrackBar.Value = Properties.Settings.Default.ScannerDelay;
-
-			OutputPath_TextBox.Text = Properties.Settings.Default.OutputPath;
-			if (!Directory.Exists(OutputPath_TextBox.Text))
-			{
-				OutputPath_TextBox.Text = Directory.GetCurrentDirectory() + "\\GenshinData";
-			}
-
-			Navigation.inventoryKey = (VirtualKeyCode)Properties.Settings.Default.InventoryKey;
-			Navigation.characterKey = (VirtualKeyCode)Properties.Settings.Default.CharacterKey;
-
-			inventoryToolStripTextBox.Text = new KeysConverter().ConvertToString((Keys)Navigation.inventoryKey);
-			characterToolStripTextBox.Text = new KeysConverter().ConvertToString((Keys)Navigation.characterKey);
-
-			// Make sure text boxes show key glyph and not "OEM..."
-			if (inventoryToolStripTextBox.Text.ToUpper().Contains("OEM"))
-			{
-				inventoryToolStripTextBox.Text = KeyCodeToUnicode((Keys)Navigation.inventoryKey);
-			}
-			if (characterToolStripTextBox.Text.ToUpper().Contains("OEM"))
-			{
-				characterToolStripTextBox.Text = KeyCodeToUnicode((Keys)Navigation.characterKey);
-			}
-		}
-
-		private void SaveSettings()
-		{
-			Properties.Settings.Default.FormatGood = GOOD_CheckBox.Checked;
-			Properties.Settings.Default.FormatSeelie = Seelie_CheckBox.Checked;
-
-			Properties.Settings.Default.ScanWeapons = Weapons_CheckBox.Checked;
-			Properties.Settings.Default.ScanArtifacts = Artifacts_Checkbox.Checked;
-			Properties.Settings.Default.ScanCharacters = Characters_CheckBox.Checked;
-			Properties.Settings.Default.ScanMaterials = Materials_CheckBox.Checked;
-
-			Properties.Settings.Default.ScannerDelay = ScannerDelay_TrackBar.Value;
-
-			if (Directory.Exists(OutputPath_TextBox.Text))
-			{
-				Properties.Settings.Default.OutputPath = OutputPath_TextBox.Text;
-			}
-
-			Properties.Settings.Default.InventoryKey = (int)Navigation.inventoryKey;
-			Properties.Settings.Default.CharacterKey = (int)Navigation.characterKey;
-
-			Properties.Settings.Default.Save();
-		}
-
+        
 		private void StartButton_Clicked(object sender, EventArgs e)
 		{
 			SaveSettings();
@@ -318,19 +261,6 @@ namespace GenshinGuide
 			{
 				UserInterface.AddError("Set Folder Location");
 			}
-		}
-
-		private void HandleHotkey()
-		{
-			// Do stuff...
-			Debug.Print("Key down event captured: Enter Key!!");
-		}
-
-		protected override void WndProc(ref Message m)
-		{
-			if (m.Msg == Constants.WM_HOTKEY_MSG_ID)
-				HandleHotkey();
-			base.WndProc(ref m);
 		}
 
 		private void Github_Label_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -470,7 +400,17 @@ namespace GenshinGuide
 			return result.ToString();
 		}
 
+		[DllImport("user32.dll")]
+		static extern bool GetKeyboardState(byte[] lpKeyState);
 
+		[DllImport("user32.dll")]
+		static extern uint MapVirtualKey(uint uCode, uint uMapType);
+
+		[DllImport("user32.dll")]
+		static extern IntPtr GetKeyboardLayout(uint idThread);
+
+		[DllImport("user32.dll")]
+		static extern int ToUnicodeEx(uint wVirtKey, uint wScanCode, byte[] lpKeyState, [Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pwszBuff, int cchBuff, uint wFlags, IntPtr dwhkl);
 
 		private void databaseMenuItem_Click(object sender, EventArgs e)
 		{

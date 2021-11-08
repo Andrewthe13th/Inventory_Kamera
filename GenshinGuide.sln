@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.30611.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenshinGuide", "GenshinGuide\GenshinGuide.csproj", "{7B7F907E-11F4-4000-B711-8E532A36F8A9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenshinGuideTests", "GenshinGuideTests\GenshinGuideTests.csproj", "{63C6804B-36DC-46EA-BA1C-C2C196146274}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,18 +27,6 @@ Global
 		{7B7F907E-11F4-4000-B711-8E532A36F8A9}.Release|x64.Build.0 = Release|x64
 		{7B7F907E-11F4-4000-B711-8E532A36F8A9}.Release|x86.ActiveCfg = Release|x86
 		{7B7F907E-11F4-4000-B711-8E532A36F8A9}.Release|x86.Build.0 = Release|x86
-		{63C6804B-36DC-46EA-BA1C-C2C196146274}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{63C6804B-36DC-46EA-BA1C-C2C196146274}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{63C6804B-36DC-46EA-BA1C-C2C196146274}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{63C6804B-36DC-46EA-BA1C-C2C196146274}.Debug|x64.Build.0 = Debug|Any CPU
-		{63C6804B-36DC-46EA-BA1C-C2C196146274}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{63C6804B-36DC-46EA-BA1C-C2C196146274}.Debug|x86.Build.0 = Debug|Any CPU
-		{63C6804B-36DC-46EA-BA1C-C2C196146274}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{63C6804B-36DC-46EA-BA1C-C2C196146274}.Release|Any CPU.Build.0 = Release|Any CPU
-		{63C6804B-36DC-46EA-BA1C-C2C196146274}.Release|x64.ActiveCfg = Release|Any CPU
-		{63C6804B-36DC-46EA-BA1C-C2C196146274}.Release|x64.Build.0 = Release|Any CPU
-		{63C6804B-36DC-46EA-BA1C-C2C196146274}.Release|x86.ActiveCfg = Release|Any CPU
-		{63C6804B-36DC-46EA-BA1C-C2C196146274}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
