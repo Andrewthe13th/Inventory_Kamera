@@ -152,6 +152,7 @@ namespace GenshinGuide
 			["aloy"] = ++characterCount, // 40
             ["sangonomiyakokomi"] = ++characterCount,
 			["sangonomiya"] = characterCount,
+			["thoma"] = ++characterCount,
 		};
 		public static Dictionary<int, string[]> characterTalentConstellationOrder = new Dictionary<int, string[]>
 		{
@@ -197,7 +198,8 @@ namespace GenshinGuide
             [38] = new string[]{ "burst", "skill" }, //Raiden Shogun 
             [39] = new string[]{ "burst", "skill" }, //Kujou Sara 
             [40] = new string[]{ "burst", "skill" }, //Aloy  Note: has no constellations
-            [41] = new string[] { "burst", "skill" }, //Sangonomiya Kokomi 
+            [41] = new string[]{ "burst", "skill" }, //Sangonomiya Kokomi 
+			[42] = new string[]{ "skill", "burst" },
         };
 		private static readonly Dictionary<string, int> elementalCode = new Dictionary<string, int>
 		{
@@ -712,7 +714,10 @@ namespace GenshinGuide
 			["sanctifyingessence"] = 5, // 4
         };
 
-		private static readonly TesseractEngine ocr_live = new TesseractEngine( (Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+		
+		// TODO: Remove static modifier. This could probably cause problems if a scanning crash is caught while an engine is running.
+		// May be ok to create new engines as needed
+		private static readonly TesseractEngine ocr_live = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
 		private static readonly TesseractEngine ocr_1 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
 		private static readonly TesseractEngine ocr_2 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
 		private static readonly TesseractEngine ocr_3 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
@@ -1087,54 +1092,12 @@ namespace GenshinGuide
 			return element;
 		}
 
-		public static void WriteToJSON(GOOD data, string path)
-		{
-			// Create JSON object
-			string JSONresult = JsonConvert.SerializeObject(data);
-
-			// Conform 'lock' and 'auto' keys to GOOD format
-			JSONresult = JSONresult.Replace("_lock", "lock");
-			JSONresult = JSONresult.Replace("_auto", "auto");
-
-			// Put file in Genshin Data directory
-			if (!Directory.Exists(path))
-			{
-				Directory.CreateDirectory(path);
-			}
-
-			// Create file with timestamp in name
-			string fileName = "\\genshinData_GOOD_" + DateTime.Now.ToString("MM.dd.yyyy_HH.mm.ss") + ".json";
-			fileName = fileName.Replace('/', '_');
-			string filePath = path + fileName;
-
-			// Override previous file if exists
-			if (File.Exists(filePath))
-			{
-				File.Delete(filePath);
-				using (var streamWriter = new StreamWriter(filePath, true))
-				{
-					streamWriter.WriteLine(JSONresult.ToString());
-				}
-			}
-			else if (!File.Exists(filePath))
-			{
-				using (var streamWriter = new StreamWriter(filePath, true))
-				{
-					streamWriter.WriteLine(JSONresult.ToString());
-				}
-			}
-			else // did not make file
-			{
-				UserInterface.AddError("Failed to make folder at : " + path);
-			}
-		}
-
-		public static bool CompareColors(Color a, Color b)
-		{
-			int[] diff = new int[3];
-			diff[0] = Math.Abs(a.R - b.R);
-			diff[1] = Math.Abs(a.G - b.G);
-			diff[2] = Math.Abs(a.B - b.B);
+        public static bool CompareColors(Color a, Color b)
+        {
+            int[] diff = new int[3];
+            diff[0] = Math.Abs(a.R - b.R);
+            diff[1] = Math.Abs(a.G - b.G);
+            diff[2] = Math.Abs(a.B - b.B);
 
 			return diff[0] < 10 && diff[1] < 10 && diff[2] < 10;
 		}
@@ -1294,7 +1257,8 @@ namespace GenshinGuide
 			bitmap = (Bitmap)bmap.Clone();
 		}
 
-		public static void SetColorFilter(string colorFilterType, ref Bitmap bitmap)
+		public static void SetColor
+			(string colorFilterType, ref Bitmap bitmap)
 		{
 			Bitmap temp = bitmap;
 			Bitmap bmap = (Bitmap)temp.Clone();

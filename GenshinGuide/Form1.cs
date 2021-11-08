@@ -27,12 +27,11 @@ namespace GenshinGuide
 		public Form1()
 		{
 			InitializeComponent();
-			//ghk = new KeyHandler(Keys.Enter, this);
-			//ghk.Register();
+
 			// register the event that is fired after the key press.
 			hook.KeyPressed += new EventHandler<KeyPressedEventArgs>(Hook_KeyPressed);
-			// register the control + alt + F12 combination as hot key.
-			//hook.RegisterHotKey(Keys.Enter);
+			
+
 			Language_ComboBox.SelectedItem = "ENG";
 			UserInterface.Init(GearSlot_PictureBox,
 					  ArtifactMainStat_PictureBox,
@@ -60,21 +59,16 @@ namespace GenshinGuide
 
 		private int ScannerDelayValue(int value)
 		{
-			if (value == 0)
+			switch (value)
 			{
-				return 0;
-			}
-			else if (value == 1)
-			{
-				return 50;
-			}
-			else if (value == 2)
-			{
-				return 100;
-			}
-			else
-			{
-				return 100;
+				case 0:
+					return 0;
+				case 1:
+					return 50;
+				case 2:
+					return 100;
+				default:
+					return 100;
 			}
 		}
 
@@ -91,8 +85,6 @@ namespace GenshinGuide
 				// Reset data
 				data = new GenshinData();
 				Navigation.Reset();
-				// Un register ENTER key
-				//hook.Dispose();
 			}
 			else
 			{
@@ -104,7 +96,9 @@ namespace GenshinGuide
 		{
 			// Reset data
 			data = new GenshinData();
+
 			Navigation.Reset();
+
 			// Un-register ENTER key. Otherwise you can't hit ENTER in another application
 			hook.Dispose();
 		}
@@ -113,8 +107,6 @@ namespace GenshinGuide
 		{
 			if (mainThread.IsAlive)
 			{
-				//data.StopImageProcessorWorker();
-				//mainThread.Abort();
 				UserInterface.AddError(error);
 			}
 		}
@@ -134,6 +126,67 @@ namespace GenshinGuide
 		{
 			GOOD_CheckBox.Checked = Properties.Settings.Default.FormatGood;
 			Seelie_CheckBox.Checked = Properties.Settings.Default.FormatSeelie;
+
+			Weapons_CheckBox.Checked = Properties.Settings.Default.ScanWeapons;
+			Artifacts_Checkbox.Checked = Properties.Settings.Default.ScanArtifacts;
+			Characters_CheckBox.Checked = Properties.Settings.Default.ScanCharacters;
+			Materials_CheckBox.Checked = Properties.Settings.Default.ScanMaterials;
+
+			ScannerDelay_TrackBar.Value = Properties.Settings.Default.ScannerDelay;
+
+			OutputPath_TextBox.Text = Properties.Settings.Default.OutputPath;
+			if (!Directory.Exists(OutputPath_TextBox.Text))
+			{
+				OutputPath_TextBox.Text = Directory.GetCurrentDirectory() + "\\GenshinData";
+			}
+
+			Navigation.inventoryKey = (VirtualKeyCode)Properties.Settings.Default.InventoryKey;
+			Navigation.characterKey = (VirtualKeyCode)Properties.Settings.Default.CharacterKey;
+
+			inventoryToolStripTextBox.Text = new KeysConverter().ConvertToString((Keys)Navigation.inventoryKey);
+			characterToolStripTextBox.Text = new KeysConverter().ConvertToString((Keys)Navigation.characterKey);
+
+			// Make sure text boxes show key glyph and not "OEM..."
+			if (inventoryToolStripTextBox.Text.ToUpper().Contains("OEM"))
+			{
+				inventoryToolStripTextBox.Text = KeyCodeToUnicode((Keys)Navigation.inventoryKey);
+			}
+			if (characterToolStripTextBox.Text.ToUpper().Contains("OEM"))
+			{
+				characterToolStripTextBox.Text = KeyCodeToUnicode((Keys)Navigation.characterKey);
+			}
+
+			Database_MenuItem.Text = Properties.Settings.Default.OldDatabase;
+		}
+
+		private void SaveSettings()
+		{
+			Properties.Settings.Default.FormatGood = GOOD_CheckBox.Checked;
+			Properties.Settings.Default.FormatSeelie = Seelie_CheckBox.Checked;
+
+			Properties.Settings.Default.ScanWeapons = Weapons_CheckBox.Checked;
+			Properties.Settings.Default.ScanArtifacts = Artifacts_Checkbox.Checked;
+			Properties.Settings.Default.ScanCharacters = Characters_CheckBox.Checked;
+			Properties.Settings.Default.ScanMaterials = Materials_CheckBox.Checked;
+
+			Properties.Settings.Default.ScannerDelay = ScannerDelay_TrackBar.Value;
+
+			if (Directory.Exists(OutputPath_TextBox.Text))
+			{
+				Properties.Settings.Default.OutputPath = OutputPath_TextBox.Text;
+			}
+
+			Properties.Settings.Default.InventoryKey = (int)Navigation.inventoryKey;
+			Properties.Settings.Default.CharacterKey = (int)Navigation.characterKey;
+
+			Properties.Settings.Default.OldDatabase = Database_MenuItem.Text.Trim();
+
+			Properties.Settings.Default.Save();
+		}
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            UserInterface.SetProgramStatus("Scanning");
 
 			Weapons_CheckBox.Checked = Properties.Settings.Default.ScanWeapons;
 			Artifacts_Checkbox.Checked = Properties.Settings.Default.ScanArtifacts;
@@ -226,10 +279,10 @@ namespace GenshinGuide
 							GOOD good = new GOOD(data);
 
 							// Make Json File
-							Scraper.WriteToJSON(good, OutputPath_TextBox.Text);
+							good.WriteToJSON(OutputPath_TextBox.Text, Database_MenuItem.Text);
 
-							// Open GenshinDataFolder
-							Process.Start("explorer.exe", OutputPath_TextBox.Text);
+                        // Clear saved data
+                        ResetUI();
 
 							UserInterface.SetProgramStatus("Finished");
 						}
@@ -243,9 +296,8 @@ namespace GenshinGuide
 							throw new Exception("Invalid game window size");
 						}
 					}
-					catch (ThreadAbortException ex)
-					{
-					}
+					catch (ThreadAbortException)
+					{ }
 					catch (Exception ex)
 					{
 						Debug.WriteLine($"{ex.Message}\n{ex.StackTrace}\n");
@@ -418,17 +470,21 @@ namespace GenshinGuide
 			return result.ToString();
 		}
 
-		[DllImport("user32.dll")]
-		static extern bool GetKeyboardState(byte[] lpKeyState);
 
-		[DllImport("user32.dll")]
-		static extern uint MapVirtualKey(uint uCode, uint uMapType);
 
-		[DllImport("user32.dll")]
-		static extern IntPtr GetKeyboardLayout(uint idThread);
+		private void databaseMenuItem_Click(object sender, EventArgs e)
+		{
+			CommonOpenFileDialog d = new CommonOpenFileDialog
+			{
+				InitialDirectory = Database_MenuItem.Text,
+			};
 
-		[DllImport("user32.dll")]
-		static extern int ToUnicodeEx(uint wVirtKey, uint wScanCode, byte[] lpKeyState, [Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pwszBuff, int cchBuff, uint wFlags, IntPtr dwhkl);
+			d.Filters.Add(new CommonFileDialogFilter("JSON Files", ".json"));
 
+			if (d.ShowDialog() == CommonFileDialogResult.Ok)
+			{
+				Database_MenuItem.Text = d.FileName;
+			}
+		}
 	}
 }

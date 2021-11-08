@@ -96,6 +96,7 @@
 			this.inventoryToolStripTextBox = new System.Windows.Forms.ToolStripTextBox();
 			this.characterScreenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.characterToolStripTextBox = new System.Windows.Forms.ToolStripTextBox();
+			this.oldDatabasePathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.GOOD_CheckBox = new System.Windows.Forms.CheckBox();
 			this.Seelie_CheckBox = new System.Windows.Forms.CheckBox();
 			this.Materials_CheckBox = new System.Windows.Forms.CheckBox();
@@ -103,6 +104,7 @@
 			this.Artifacts_Checkbox = new System.Windows.Forms.CheckBox();
 			this.Weapons_CheckBox = new System.Windows.Forms.CheckBox();
 			this.ScannerDelay_TrackBar = new System.Windows.Forms.TrackBar();
+			this.Database_MenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			((System.ComponentModel.ISupportInitialize)(this.GearSlot_PictureBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.ArtifactMainStat_PictureBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.Level_PictureBox)).BeginInit();
@@ -484,7 +486,6 @@
 			// WeaponsMax_Labell
 			// 
 			this.WeaponsMax_Labell.AutoSize = true;
-			this.WeaponsMax_Labell.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.WeaponsMax_Labell.Location = new System.Drawing.Point(126, 405);
 			this.WeaponsMax_Labell.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
 			this.WeaponsMax_Labell.Name = "WeaponsMax_Labell";
@@ -495,7 +496,6 @@
 			// ArtifactsMax_Label
 			// 
 			this.ArtifactsMax_Label.AutoSize = true;
-			this.ArtifactsMax_Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.ArtifactsMax_Label.Location = new System.Drawing.Point(126, 418);
 			this.ArtifactsMax_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
 			this.ArtifactsMax_Label.Name = "ArtifactsMax_Label";
@@ -508,7 +508,7 @@
 			this.ProgramStatus_Label.AutoSize = true;
 			this.ProgramStatus_Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.ProgramStatus_Label.ForeColor = System.Drawing.Color.Green;
-			this.ProgramStatus_Label.Location = new System.Drawing.Point(40, 297);
+			this.ProgramStatus_Label.Location = new System.Drawing.Point(30, 297);
 			this.ProgramStatus_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
 			this.ProgramStatus_Label.Name = "ProgramStatus_Label";
 			this.ProgramStatus_Label.Size = new System.Drawing.Size(0, 25);
@@ -518,7 +518,7 @@
 			// 
 			this.Github_Label.AutoSize = true;
 			this.Github_Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.Github_Label.Location = new System.Drawing.Point(493, 26);
+			this.Github_Label.Location = new System.Drawing.Point(500, 26);
 			this.Github_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
 			this.Github_Label.Name = "Github_Label";
 			this.Github_Label.Size = new System.Drawing.Size(88, 13);
@@ -624,7 +624,7 @@
 			// 
 			this.Releases_Label.AutoSize = true;
 			this.Releases_Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.Releases_Label.Location = new System.Drawing.Point(499, 45);
+			this.Releases_Label.Location = new System.Drawing.Point(500, 45);
 			this.Releases_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
 			this.Releases_Label.Name = "Releases_Label";
 			this.Releases_Label.Size = new System.Drawing.Size(85, 13);
@@ -826,23 +826,23 @@
 			// 
 			this.keysToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.inventoryToolStripMenuItem,
-            this.characterScreenToolStripMenuItem});
+            this.characterScreenToolStripMenuItem,
+            this.oldDatabasePathToolStripMenuItem});
 			this.keysToolStripMenuItem.Name = "keysToolStripMenuItem";
-			this.keysToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
-			this.keysToolStripMenuItem.Text = "Keys";
+			this.keysToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
+			this.keysToolStripMenuItem.Text = "Options";
 			// 
 			// inventoryToolStripMenuItem
 			// 
 			this.inventoryToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.inventoryToolStripTextBox});
 			this.inventoryToolStripMenuItem.Name = "inventoryToolStripMenuItem";
-			this.inventoryToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
-			this.inventoryToolStripMenuItem.Text = "Inventory";
+			this.inventoryToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+			this.inventoryToolStripMenuItem.Text = "Inventory Key";
 			// 
 			// inventoryToolStripTextBox
 			// 
 			this.inventoryToolStripTextBox.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
-			this.inventoryToolStripTextBox.Font = new System.Drawing.Font("Segoe UI", 9F);
 			this.inventoryToolStripTextBox.MaxLength = 2;
 			this.inventoryToolStripTextBox.Name = "inventoryToolStripTextBox";
 			this.inventoryToolStripTextBox.Size = new System.Drawing.Size(90, 23);
@@ -856,13 +856,12 @@
 			this.characterScreenToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.characterToolStripTextBox});
 			this.characterScreenToolStripMenuItem.Name = "characterScreenToolStripMenuItem";
-			this.characterScreenToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
-			this.characterScreenToolStripMenuItem.Text = "Character Screen";
+			this.characterScreenToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+			this.characterScreenToolStripMenuItem.Text = "Character Screen Key";
 			// 
 			// characterToolStripTextBox
 			// 
 			this.characterToolStripTextBox.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
-			this.characterToolStripTextBox.Font = new System.Drawing.Font("Segoe UI", 9F);
 			this.characterToolStripTextBox.MaxLength = 2;
 			this.characterToolStripTextBox.Name = "characterToolStripTextBox";
 			this.characterToolStripTextBox.Size = new System.Drawing.Size(90, 23);
@@ -870,6 +869,14 @@
 			this.characterToolStripTextBox.Text = "C";
 			this.characterToolStripTextBox.ToolTipText = "Key to open character screen";
 			this.characterToolStripTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.bToolStripMenuItem_KeyDown);
+			// 
+			// oldDatabasePathToolStripMenuItem
+			// 
+			this.oldDatabasePathToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.Database_MenuItem});
+			this.oldDatabasePathToolStripMenuItem.Name = "oldDatabasePathToolStripMenuItem";
+			this.oldDatabasePathToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+			this.oldDatabasePathToolStripMenuItem.Text = "Database Path";
 			// 
 			// GOOD_CheckBox
 			// 
@@ -980,6 +987,14 @@
 			this.ScannerDelay_TrackBar.Size = new System.Drawing.Size(83, 45);
 			this.ScannerDelay_TrackBar.TabIndex = 68;
 			this.ScannerDelay_TrackBar.Value = global::GenshinGuide.Properties.Settings.Default.ScannerDelay;
+			// 
+			// databaseMenuItem
+			// 
+			this.Database_MenuItem.Name = "databaseMenuItem";
+			this.Database_MenuItem.Size = new System.Drawing.Size(180, 22);
+			this.Database_MenuItem.Text = " ";
+			this.Database_MenuItem.ToolTipText = "Click to change";
+			this.Database_MenuItem.Click += new System.EventHandler(this.databaseMenuItem_Click);
 			// 
 			// Form1
 			// 
@@ -1139,6 +1154,8 @@
 		private System.Windows.Forms.ToolStripTextBox inventoryToolStripTextBox;
 		private System.Windows.Forms.ToolStripMenuItem characterScreenToolStripMenuItem;
 		private System.Windows.Forms.ToolStripTextBox characterToolStripTextBox;
+		private System.Windows.Forms.ToolStripMenuItem oldDatabasePathToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem Database_MenuItem;
 	}
 }
 

@@ -1,5 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace GenshinGuide
 {
@@ -8,9 +12,9 @@ namespace GenshinGuide
 		[JsonProperty] private readonly string format;
 		[JsonProperty] private readonly int version;
 		[JsonProperty] private readonly string source;
-		[JsonProperty] public List<ICharacter> characters;
-		[JsonProperty] public List<IArtifact> artifacts;
 		[JsonProperty] public List<IWeapon> weapons;
+		[JsonProperty] public List<IArtifact> artifacts;
+		[JsonProperty] public List<ICharacter> characters;
 		private readonly string[] eng_Names = {
 			"",
 			"Traveler",
@@ -53,7 +57,9 @@ namespace GenshinGuide
 			"RaidenShogun",
 			"KujouSara",
 			"Aloy",
-			"SangonomiyaKokomi", };
+			"SangonomiyaKokomi", 
+			"Thoma",
+		};
 		private readonly string[] eng_Weapons = {
              // 1 Star
             "DullBlade",
@@ -357,6 +363,106 @@ namespace GenshinGuide
 
 		}
 
+		public void WriteToJSON(string outputDirectory, string oldDataFilePath = "")
+		{
+			// Create JSON object
+			string dataString = JsonConvert.SerializeObject(this);
+
+			// Conform 'lock' and 'auto' keys to GOOD format
+			dataString = dataString.Replace("_lock", "lock");
+			dataString = dataString.Replace("_auto", "auto");
+
+			// Check for output directory
+			if (!Directory.Exists(outputDirectory))
+			{
+				Directory.CreateDirectory(outputDirectory);
+			}
+
+			// Create file with timestamp in name
+			string fileName = "\\genshinData_GOOD_" + DateTime.Now.ToString("MM.dd.yyyy_HH.mm.ss") + ".json";
+			fileName = fileName.Replace('/', '_');
+			string outputFile = outputDirectory + fileName;
+
+			// Try to load external GOOD data to update.
+			// For preserving information at when uploading data to
+			// https://frzyc.github.io/genshin-optimizer 
+			JObject database = null;
+			if (File.Exists(oldDataFilePath))
+			{
+				try
+				{
+					// Load source data
+					using (StreamReader file = File.OpenText(oldDataFilePath))
+					using (JsonTextReader reader = new JsonTextReader(file))
+					{
+						database = (JObject)JToken.ReadFrom(reader);
+					}
+
+					// Characters
+					foreach (ICharacter character in characters)
+					{
+						foreach (JObject dbCharacter in database["characters"])
+						{
+							{
+								if ((string)dbCharacter["key"] == character.key)
+								{
+									dbCharacter["level"] = character.level;
+									dbCharacter["constellation"] = character.constellation;
+									dbCharacter["ascension"] = character.ascension;
+									dbCharacter["talent"] = JObject.FromObject(character.talent);
+									break;
+								}
+							}
+						}
+					}
+					// Weapons
+					foreach (IWeapon weapon in weapons)
+					{
+						foreach (JToken dbWeapon in database["weapons"])
+						{
+							if ((string)dbWeapon["key"] == weapon.key)
+							{
+								break;
+							}
+						}
+					}
+					// Artifacts
+
+
+					using (StreamWriter file = File.CreateText(outputFile))
+					using (JsonWriter writer = new JsonTextWriter(file))
+					{
+						database.WriteTo(writer);
+					}
+					Debug.WriteLine("Successfully merged databases");
+				}
+
+				catch (Exception)
+				{
+					UserInterface.AddError("Unable to create merged database.");
+					WriteStringToFile(dataString, outputFile);
+				}
+			}
+			else
+			{
+				// Write file
+				WriteStringToFile(dataString, outputFile);
+			}
+
+			if (!File.Exists(outputFile)) // did not make file
+			{
+				UserInterface.AddError("Failed to output at : " + outputDirectory);
+			}
+		}
+
+		private static void WriteStringToFile(string dataString, string outputFile)
+		{
+			using (var streamWriter = new StreamWriter(outputFile, true))
+			{
+				streamWriter.WriteLine(dataString.ToString());
+			}
+		}
+
 		public struct IWeapon
 		{
 			[JsonProperty] public string key;
@@ -389,9 +495,9 @@ namespace GenshinGuide
 		{
 			[JsonProperty] public string key;
 			[JsonProperty] public int level;
-			[JsonProperty] public int constellation;
 			[JsonProperty] public int ascension;
 			[JsonProperty] public ITalent talent;
+			[JsonProperty] public int constellation;
 		}
 
 		public struct ITalent

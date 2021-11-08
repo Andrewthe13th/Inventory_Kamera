@@ -154,5 +154,17 @@ namespace GenshinGuide.Properties {
                 this["CharacterKey"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string OldDatabase {
+            get {
+                return ((string)(this["OldDatabase"]));
+            }
+            set {
+                this["OldDatabase"] = value;
+            }
+        }
     }
 }

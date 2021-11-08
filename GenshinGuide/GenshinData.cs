@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using Newtonsoft.Json;
 
@@ -141,7 +142,7 @@ namespace GenshinGuide
 									if (w.equippedCharacter != 0)
 										equippedWeapons.Add(w);
 								}
-								else
+								else if (w.GetName() != -1)
 								{
 									UserInterface.AddError($"Unable to validate information for weapon #{card.id}");
 									// Maybe save bitmaps in some directory to see what an issue might be
@@ -188,9 +189,6 @@ namespace GenshinGuide
 				}
 			}
 			b_threadCancel = false;
-			// Assign weapons and artifacts to inventory
-			//inventory.AssignArtifacts(ref artifacts);
-			//inventory.AssignWeapons(ref weapons);
 		}
 
 		public void AssignArtifacts()
@@ -220,8 +218,6 @@ namespace GenshinGuide
 				}
 			}
 		}
-
-
 
 	}
 }
