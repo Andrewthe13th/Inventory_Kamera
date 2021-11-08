@@ -52,6 +52,10 @@ namespace GenshinGuide
 			}
 			return bmp;
 		}
+		public static Bitmap CaptureRegion(int x, int y, int width, int height)
+		{
+			return CaptureRegion(new Rectangle(x, y, width, height));
+		}
 		#endregion
 
 		public static void AddDelay(int _delay)

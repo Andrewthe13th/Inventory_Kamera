@@ -209,7 +209,7 @@ namespace GenshinGuide
 			"PrayersForIllumination",
 			"PrayersForDestiny",
 			"PrayersForWisdom",//15
-            "PrayersTheSpringtime",
+            "PrayersToSpringtime",
 			"Thundersoother",
 			"Lavawalker",
 			"MaidenBeloved",
@@ -360,7 +360,6 @@ namespace GenshinGuide
 					artifacts.Add(temp);
 				}
 			}
-
 		}
 
 		public void WriteToJSON(string outputDirectory, string oldDataFilePath = "")

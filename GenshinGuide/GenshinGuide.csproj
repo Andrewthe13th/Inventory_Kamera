@@ -138,7 +138,6 @@
     <Compile Include="OCRImage.cs" />
     <Compile Include="Inventory.cs" />
     <Compile Include="KeyboardHook.cs" />
-    <Compile Include="KeyHandler.cs" />
     <Compile Include="Navigation.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -179,8 +178,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="DesignBust_genshin_impact_folder_icon256.ico" />
-    <Content Include="Windows Logo.png" />
-    <Content Include="Windows Logo.png" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
