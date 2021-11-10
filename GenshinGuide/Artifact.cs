@@ -40,7 +40,7 @@ namespace GenshinGuide
 			// Check subStats
 			for (int i = 0; i < subStatsCount; i++)
 			{
-				if (subStats[i].stat == -1 || subStats[i].value == (decimal)(-1.0))
+				if (subStats[i].stat == -1 || subStats[i].value == (decimal)( -1.0 ))
 				{
 					return false;
 				}
@@ -63,8 +63,5 @@ namespace GenshinGuide
 			public int stat;
 			public decimal value;
 		}
-
 	}
-
-
 }

@@ -13,7 +13,6 @@ namespace GenshinGuide
 
 		public static string ScanMainCharacterName()
 		{
-
 			Bitmap bm = Navigation.CaptureRegion(new Rectangle(185, 26, 275, 30));
 
 			//Image Operations
@@ -60,7 +59,6 @@ namespace GenshinGuide
 				UserInterface.ResetCharacterDisplay();
 			}
 
-
 			return characters;
 		}
 
@@ -82,7 +80,7 @@ namespace GenshinGuide
 				ScanNameAndElement(ref name, ref element);
 				Navigation.SystemRandomWait(Navigation.Speed.Faster);
 				currentRuntimes++;
-			} while ((name < 1 || element < 0) && (currentRuntimes < maxRuntimes));
+			} while (( name < 1 || element < 0 ) && ( currentRuntimes < maxRuntimes ));
 
 			if (name < 1 && element < 0)
 			{
@@ -112,9 +110,7 @@ namespace GenshinGuide
 						LevelComparison.Add(level);
 						level = -1;
 					}
-
 				} while (level == -1 && currentRuntimes < maxRuntimes);
-
 
 				if (level == -1)
 				{
@@ -138,7 +134,7 @@ namespace GenshinGuide
 				{
 					if (Scraper.characterTalentConstellationOrder.TryGetValue(name, out string[] skills))
 					{
-						// get talent if character 
+						// get talent if character
 						string talent = Scraper.characterTalentConstellationOrder[name][0];
 						if (constellation >= 5)
 						{
@@ -173,7 +169,6 @@ namespace GenshinGuide
 
 		private static void ScanNameAndElement(ref int name, ref int element)
 		{
-
 			Bitmap bm = Navigation.CaptureRegion(new Rectangle(83, 5, 220, 54));
 
 			//Image Operations
@@ -236,7 +231,6 @@ namespace GenshinGuide
 			Scraper.SetGrayscale(ref bm);
 			Scraper.SetInvert(ref bm);
 			Scraper.SetContrast(30.0, ref bm);
-
 
 			//string text = Scraper.AnalyzeFewText(bm);
 			string text = Scraper.AnalyzeText(bm).Trim();
@@ -334,7 +328,7 @@ namespace GenshinGuide
 				Navigation.SystemRandomWait(Navigation.Speed.Faster);
 
 				// Select Constellation
-				Navigation.SetCursorPos(Navigation.GetPosition().Left + 1130, Navigation.GetPosition().Top + 180 + (i * 75));
+				Navigation.SetCursorPos(Navigation.GetPosition().Left + 1130, Navigation.GetPosition().Top + 180 + ( i * 75 ));
 				Navigation.sim.Mouse.LeftButtonClick();
 
 				// Selecting the first constellation takes a while to show
@@ -379,7 +373,6 @@ namespace GenshinGuide
 					}
 				}
 				constellation = i + 1;
-
 			}
 
 			Navigation.sim.Keyboard.KeyPress(WindowsInput.Native.VirtualKeyCode.ESCAPE);
@@ -411,7 +404,7 @@ namespace GenshinGuide
 
 				Navigation.SystemRandomWait(Navigation.Speed.Faster);
 
-				Navigation.SetCursorPos(Navigation.GetPosition().Left + 1130, Navigation.GetPosition().Top + 110 + ((i + ((i == 2) ? monaOffset : 0)) * 60));
+				Navigation.SetCursorPos(Navigation.GetPosition().Left + 1130, Navigation.GetPosition().Top + 110 + ( ( i + ( ( i == 2 ) ? monaOffset : 0 ) ) * 60 ));
 				Navigation.sim.Mouse.LeftButtonClick();
 
 				// Pause for each constellation
@@ -460,7 +453,6 @@ namespace GenshinGuide
 						// Try Again
 						i--;
 						UserInterface.AddError(x + " is not a valid Talent Number");
-
 					}
 					Debug.Print("Error: " + x + " is not a valid Talent Number");
 					UserInterface.AddError(x + " is not a valid Talent Number");

@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 using WindowsInput;
 using WindowsInput.Native;
 
@@ -43,6 +44,15 @@ namespace GenshinGuide
 		}
 
 		#region Window Capturing
+		public static Bitmap CaptureWindow(PixelFormat format = PixelFormat.Format24bppRgb)
+		{
+			Bitmap bmp = new Bitmap(GetWidth(), GetHeight(), format);
+			using (Graphics gfxBmp = Graphics.FromImage(bmp))
+			{
+				gfxBmp.CopyFromScreen(position.Left, position.Top, 0, 0, bmp.Size);
+			}
+			return bmp;
+		}
 		public static Bitmap CaptureRegion(RECT region)
 		{
 			Bitmap bmp = new Bitmap(region.Width, region.Height, PixelFormat.Format24bppRgb);
@@ -58,10 +68,28 @@ namespace GenshinGuide
 		}
 		#endregion
 
-		public static void AddDelay(int _delay)
+		#region Image Displaying
+		public static void DisplayBitmap(Bitmap bm, string text = "Image")
 		{
-			delay = _delay;
+			using (Form form = new Form())
+			{
+				form.StartPosition = FormStartPosition.Manual;
+				form.Location = Screen.PrimaryScreen.WorkingArea.Location;
+				form.Size = bm.Size;
+				form.Text = text;
+
+				PictureBox pb = new PictureBox
+				{
+					Dock = DockStyle.Fill,
+					Image = bm
+				};
+
+				form.Controls.Add(pb);
+				form.ShowDialog();
+			}
 		}
+		#endregion
+
 
 		public static void Reset()
 		{
@@ -180,7 +208,7 @@ namespace GenshinGuide
 		}
 		#endregion
 
-		#region Window size of Genshin Impact
+		#region Window Size
 
 		[DllImport("user32.dll", SetLastError = true)]
 		static extern bool GetWindowRect(IntPtr hWnd, ref RECT Rect);
@@ -192,7 +220,7 @@ namespace GenshinGuide
 		static extern bool ClientToScreen(IntPtr hWnd, ref RECT Rect);
 		#endregion
 
-		#region Switch Process into main focus
+		#region Window Focusing
 		[DllImport("user32.dll")]
 		[return: MarshalAs(UnmanagedType.Bool)]
 		private static extern bool ShowWindow(IntPtr hWnd, ShowWindowEnum flags);
@@ -237,12 +265,12 @@ namespace GenshinGuide
 		}
 		#endregion
 
-		#region Mouse Libaries
+		#region Mouse
 		[DllImport("user32.dll")]
 		public static extern bool SetCursorPos(int X, int Y);
 		#endregion
 
-		#region System Sleep
+		#region Delays
 		public static void SystemRandomWait(Speed type = Speed.Normal)
 		{
 			Random r = new Random();
@@ -298,6 +326,11 @@ namespace GenshinGuide
 
 			System.Threading.Thread.Sleep(value);
 
+		}
+		
+		public static void AddDelay(int _delay)
+		{
+			delay = _delay;
 		}
 
 		public enum Speed

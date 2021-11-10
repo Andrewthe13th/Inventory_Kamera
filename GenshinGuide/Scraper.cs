@@ -23,7 +23,7 @@ namespace GenshinGuide
 		private static int weaponCount = 0;
 		private static int characterDevelopmentItemsCount = 0;
 		private static int materialsCount = 0;
-		private static readonly Dictionary<string, int> setNameCode = new Dictionary<string, int>
+		private static readonly Dictionary<string, int> setNames = new Dictionary<string, int>
 		{
 			["adventurer"] = setCount,
 			["luckydog"] = ++setCount,
@@ -61,7 +61,7 @@ namespace GenshinGuide
 			["shimenawasreminiscence"] = ++setCount,
 			["emblemofseveredfate"] = ++setCount,
 		};
-		private static readonly Dictionary<string, int> mainStatCode = new Dictionary<string, int>
+		private static readonly Dictionary<string, int> mainStats = new Dictionary<string, int>
 		{
 			["hp_flat"] = mainStatCount,
 			["atk_flat"] = ++mainStatCount,
@@ -82,7 +82,7 @@ namespace GenshinGuide
 			["anemodmgbonus"] = ++mainStatCount, //15
             ["geodmgbonus"] = ++mainStatCount,
 		};
-		private static readonly Dictionary<string, int> gearSlotCode = new Dictionary<string, int>
+		private static readonly Dictionary<string, int> gearSlots = new Dictionary<string, int>
 		{
 			["floweroflife"] = 0,
 			["plumeofdeath"] = 1,
@@ -90,7 +90,7 @@ namespace GenshinGuide
 			["gobletofeonothem"] = 3,
 			["circletoflogos"] = 4,
 		};
-		private static readonly Dictionary<string, int> subStatCode = new Dictionary<string, int>
+		private static readonly Dictionary<string, int> subStats = new Dictionary<string, int>
 		{
 			["hp"] = 0,
 			["hp%"] = 1,
@@ -103,7 +103,7 @@ namespace GenshinGuide
 			["critrate"] = 8,
 			["critdmg"] = 9,
 		};
-		private static readonly Dictionary<string, int> characterCode = new Dictionary<string, int>
+		private static readonly Dictionary<string, int> characters = new Dictionary<string, int>
 		{
 			[""] = -1,
 			["amber"] = ++characterCount,
@@ -198,10 +198,10 @@ namespace GenshinGuide
             [38] = new string[]{ "burst", "skill" }, //Raiden Shogun 
             [39] = new string[]{ "burst", "skill" }, //Kujou Sara 
             [40] = new string[]{ "burst", "skill" }, //Aloy  Note: has no constellations
-            [41] = new string[] { "burst", "skill" }, //Sangonomiya Kokomi 
-            [42] = new string[] { "skill", "burst" }, //Thoma 
+            [41] = new string[]{ "burst", "skill" }, //Sangonomiya Kokomi 
+            [42] = new string[]{ "skill", "burst" }, //Thoma 
         };
-		private static readonly Dictionary<string, int> elementalCode = new Dictionary<string, int>
+		private static readonly Dictionary<string, int> elements = new Dictionary<string, int>
 		{
 			["pyro"] = 0,
 			["hydro"] = 1,
@@ -211,9 +211,19 @@ namespace GenshinGuide
 			["cryo"] = 5,
 			["geo"] = 6,
 		};
-		private static readonly string[] elementList = { "pyro", "hydro", "dendro", "electro", "anemo", "cryo", "geo" };
-		private static readonly Dictionary<string, int> weaponCode = new Dictionary<string, int>
+		private static readonly List<string> elementList = new List<string>
+		{ 
+			"pyro",
+			"hydro",
+			"dendro",
+			"electro",
+			"anemo",
+			"cryo",
+			"geo" 
+		};
+		private static readonly Dictionary<string, int> weapons = new Dictionary<string, int>
 		{
+			// Release Weapons
             // 1 star
             ["dullblade"] = weaponCount,
 			["wastergreatsword"] = ++weaponCount,
@@ -542,12 +552,6 @@ namespace GenshinGuide
 			["maskoftheonehorned"] = characterDevelopmentItemsCount++,
 			["maskofthetigersbite"] = characterDevelopmentItemsCount++,
 			["maskofthewickedlieutenant"] = characterDevelopmentItemsCount++,
-
-            //[""] = characterDevelopmentItemsCount++,
-            //[""] = characterDevelopmentItemsCount++,
-            //[""] = characterDevelopmentItemsCount++,
-            //[""] = characterDevelopmentItemsCount++,
-            //[""] = characterDevelopmentItemsCount++,
         };
 		private static readonly Dictionary<string, int> materialsCode = new Dictionary<string, int>
 		{
@@ -698,18 +702,12 @@ namespace GenshinGuide
 			["seaganoderma"] = materialsCount++,
 			["sangopearl"] = materialsCount++,
 			["amakumofruit"] = materialsCount++,
-
-            //[""] = materialsCount++,
-            //[""] = materialsCount++,
-            //[""] = materialsCount++,
-            //[""] = materialsCount++,
-            //[""] = materialsCount++,
         };
 		private static readonly Dictionary<string, int> enhancementMaterials = new Dictionary<string, int>
 		{
 			["enhancementore"] = 1,
 			["fineenhancementore"] = 2,
-			["mysticenchnacementore"] = 3,
+			["mysticenhancementore"] = 3,
 			["sanctifyingunction"] = 4,
 			["sanctifyingessence"] = 5, // 4
         };
@@ -732,9 +730,9 @@ namespace GenshinGuide
 
 		public static void AddTravelerToCharacterList(string traveler)
 		{
-			if (!characterCode.ContainsKey(traveler))
+			if (!characters.ContainsKey(traveler))
 			{
-				characterCode.Add(traveler, 1);
+				characters.Add(traveler, 1);
 			}
 		}
 
@@ -959,7 +957,7 @@ namespace GenshinGuide
 		public static int GetSetNameCode(string setName)
 		{
 			int code = -1;
-			if (setNameCode.TryGetValue(setName, out code))
+			if (setNames.TryGetValue(setName, out code))
 			{
 				return code;
 			}
@@ -975,7 +973,7 @@ namespace GenshinGuide
 		public static int GetMainStatCode(string mainStat)
 		{
 			int code = -1;
-			if (mainStatCode.TryGetValue(mainStat, out code))
+			if (mainStats.TryGetValue(mainStat, out code))
 			{
 				return code;
 			}
@@ -990,7 +988,7 @@ namespace GenshinGuide
 		public static int GetGearSlotCode(string gearSlot)
 		{
 			int code = -1;
-			if (gearSlotCode.TryGetValue(gearSlot, out code))
+			if (gearSlots.TryGetValue(gearSlot, out code))
 			{
 				return code;
 			}
@@ -1005,7 +1003,7 @@ namespace GenshinGuide
 		public static int GetSubStatCode(string subStat)
 		{
 			int code = -1;
-			if (subStatCode.TryGetValue(subStat, out code))
+			if (subStats.TryGetValue(subStat, out code))
 			{
 				return code;
 			}
@@ -1019,7 +1017,7 @@ namespace GenshinGuide
 
 		public static int GetCharacterCode(string character, bool bRedo = false)
 		{
-			if (characterCode.TryGetValue(character, out int code))
+			if (characters.TryGetValue(character, out int code))
 			{
 				return code;
 			}
@@ -1039,7 +1037,7 @@ namespace GenshinGuide
 
 		public static int GetElementalCode(string element, bool bRedo = false)
 		{
-			if (elementalCode.TryGetValue(element, out int code))
+			if (elements.TryGetValue(element, out int code))
 			{
 				return code;
 			}
@@ -1062,7 +1060,7 @@ namespace GenshinGuide
 		public static int GetWeaponCode(string weapon)
 		{
 			int code = -1;
-			if (weaponCode.TryGetValue(weapon, out code))
+			if (weapons.TryGetValue(weapon, out code))
 			{
 				return code;
 			}
@@ -1080,11 +1078,11 @@ namespace GenshinGuide
 		{
 			string element = "";
 
-			foreach (string x in elementList)
+			foreach (string e in elementList)
 			{
-				if (name.Contains(x))
+				if (name.Contains(e))
 				{
-					element = x;
+					element = e;
 					break;
 				}
 			}

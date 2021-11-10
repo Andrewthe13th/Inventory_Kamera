@@ -54,7 +54,7 @@ namespace GenshinGuide
 					row++;
 
 					// Scroll to next chunk
-					if (cardsQueued % (maxRows * maxColumns) == 0)
+					if (cardsQueued % ( maxRows * maxColumns ) == 0)
 					{
 						for (int i = 0; i < 50; i++)
 						{
@@ -103,13 +103,11 @@ namespace GenshinGuide
 				count = count / 10;
 			}
 
-
 			return count;
 		}
 
 		public static void QueueScan(int id)
 		{
-
 			// Grab Image of Entire Artifact on Right
 			Double artifactLocation_X = Navigation.GetArea().Right * (108 / (Double)160);
 			Double artifactLocation_Y = Navigation.GetArea().Bottom * (10 / (Double)90);
@@ -210,7 +208,7 @@ namespace GenshinGuide
 				if (Scraper.CompareColors(fiveStar, rarityColor) || Scraper.CompareColors(fourthStar, rarityColor))
 				//if (true)
 				{
-					rarity = (Scraper.CompareColors(fiveStar, rarityColor)) ? 5 : 4;
+					rarity = ( Scraper.CompareColors(fiveStar, rarityColor) ) ? 5 : 4;
 					bool b_equipped = Scraper.CompareColors(equipped, equippedColor);
 					_lock = Scraper.CompareColors(lockColor, lockStatus);
 
@@ -249,7 +247,6 @@ namespace GenshinGuide
 					{
 						x.Dispose();
 					}
-
 				}
 				// Don't fully scan 3 star artifacts and lower
 				else if (Scraper.CompareColors(thirdStar, rarityColor))
@@ -294,7 +291,6 @@ namespace GenshinGuide
 			int equippedCharacter = 0;
 			bool _lock = false;
 
-
 			// Grab Image of Entire Artifact on Right
 			Double artifactLocation_X = Navigation.GetArea().Right * (108 / (Double)160);
 			Double artifactLocation_Y = Navigation.GetArea().Bottom * (10 / (Double)90);
@@ -324,11 +320,10 @@ namespace GenshinGuide
 			Color lockColor = Color.FromArgb(255, 255, 138, 117);
 			Color lockStatus = bm.GetPixel(width - 35, 220);
 
-
 			if (Scraper.CompareColors(fiveStar, rarityColor) || Scraper.CompareColors(fourthStar, rarityColor))
 			//if (true)
 			{
-				rarity = (Scraper.CompareColors(fiveStar, rarityColor)) ? 5 : 4;
+				rarity = ( Scraper.CompareColors(fiveStar, rarityColor) ) ? 5 : 4;
 				bool b_equipped = Scraper.CompareColors(equipped, equippedColor);
 				_lock = Scraper.CompareColors(lockColor, lockStatus);
 
@@ -366,7 +361,6 @@ namespace GenshinGuide
 					thr5.Join();
 				}
 				thr2.Join();
-
 			}
 			// Don't fully scan 3 star artifacts and lower
 			else if (Scraper.CompareColors(thirdStar, rarityColor))
@@ -389,7 +383,6 @@ namespace GenshinGuide
 				rarity = 0;
 			}
 
-
 			Artifact a =  new Artifact(rarity, gearSlot, mainStat, level, subStats, subStatsCount, setName, equippedCharacter, id, _lock);
 			//Artifact a = new Artifact("",0,"",0,0,null,0,"",null);
 
@@ -397,6 +390,7 @@ namespace GenshinGuide
 		}
 
 		#region Threaded Scan Functions
+
 		private static int ScanArtifactGearSlot(Bitmap bm, int max_X, int max_Y)
 		{
 			//Init
@@ -475,7 +469,6 @@ namespace GenshinGuide
 					Form1.UnexpectedError("Found " + level + " for level for artifact"); ;
 					return -1;
 				}
-
 			}
 			else
 			{
@@ -525,7 +518,6 @@ namespace GenshinGuide
 					count = 2;
 				}
 			}
-
 
 			if (count == 4)
 			{
@@ -615,7 +607,6 @@ namespace GenshinGuide
 				bm_1.Dispose(); bm_2.Dispose();
 			}
 
-
 			for (int i = count; i < 5; i++)
 			{
 				Bitmap bm = artifactImage.Clone(new Rectangle(xOffset, (i * subStatSpacing), width - xOffset, 29), pixelFormat);
@@ -627,7 +618,7 @@ namespace GenshinGuide
 				if (text.Contains(":") || i >= 4)
 				{
 					//bm = new Bitmap(max_X - offset, 29);
-					bm = artifactImage.Clone(new Rectangle(0, (i * subStatSpacing), width - offset, 29), pixelFormat);
+					bm = artifactImage.Clone(new Rectangle(0, ( i * subStatSpacing ), width - offset, 29), pixelFormat);
 					Scraper.SetGrayscale(ref bm);
 					text = Scraper.AnalyzeText_3(bm).Trim();
 					text = Regex.Replace(text, @"[^\w:]", "");
@@ -711,7 +702,6 @@ namespace GenshinGuide
 							}
 							else // flat stats
 							{
-
 								subStats[i].stat = Scraper.GetSubStatCode(subStat[0]);
 								subStats[i].value = Convert.ToDecimal(subStat[1].Replace("\n", String.Empty));
 							}
@@ -754,8 +744,6 @@ namespace GenshinGuide
 			{
 				text = Scraper.AnalyzeText_Line1(bm);
 			}
-
-
 
 			text = text.Replace("\n", String.Empty);
 			text = Regex.Replace(text, @"[^\w+%.]", "");
@@ -817,7 +805,6 @@ namespace GenshinGuide
 					}
 					else // flat stats
 					{
-
 						subStats.stat = Scraper.GetSubStatCode(subStat[0]);
 						subStats.value = Convert.ToDecimal(subStat[1].Replace("\n", String.Empty));
 					}
@@ -834,7 +821,6 @@ namespace GenshinGuide
 				subStats.value = Convert.ToDecimal(-1);
 			}
 			return subStats;
-
 		}
 
 		private static int ScanArtifactEquippedCharacter(Bitmap bm, int max_X, int max_Y)
@@ -886,6 +872,7 @@ namespace GenshinGuide
 			// artifact has no equipped character
 			return 0;
 		}
-		#endregion
+
+		#endregion Threaded Scan Functions
 	}
 }

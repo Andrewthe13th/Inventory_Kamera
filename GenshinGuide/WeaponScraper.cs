@@ -5,6 +5,10 @@ using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Windows.Forms;
+using Accord.Imaging;
+using Accord.Imaging.Filters;
+using Point = System.Drawing.Point;
 
 namespace GenshinGuide
 {
@@ -14,66 +18,207 @@ namespace GenshinGuide
 		{
 			// Determine maximum number of weapons to scan
 			int weaponCount = count == 0 ? ScanWeaponCount(): count;
-			UserInterface.SetWeapon_Max(weaponCount);
+			var (rectangles, cols, rows) = GetPageOfItems();
+			int fullPage = cols * rows;
+			int totalRows = weaponCount / cols;
 			int cardsQueued = 0;
+			int rowsQueued = 0;
+			UserInterface.SetWeapon_Max(weaponCount);
 
-			// Where in screen space weapons are
-			int itemX = (int)(Navigation.GetArea().Right * (21 / (Double)160));
-			int itemY = (int)(Navigation.GetArea().Bottom * (14 / (Double)90));
-
-			// Inventory has 7 columns with 5 rows default
-			int maxColumns = 7;
-			int maxRows = 5;
-			int column = 0;
-			int row = 0;
-
-			// offset used to move mouse to other weapons
-			int xOffset = Convert.ToInt32(Navigation.GetArea().Right * (12.25 / 160));
-			int yOffset = Convert.ToInt32(Navigation.GetArea().Bottom * (14.5 / 90));
 
 			// Go through weapon list
 			while (cardsQueued < weaponCount)
 			{
-				// Select item
-				int nextOffsetX = (xOffset * (cardsQueued % maxColumns));
-				int nextOffsetY = (yOffset * (row % maxRows));
-				Navigation.SetCursorPos(Navigation.GetPosition().Left + itemX + nextOffsetX, Navigation.GetPosition().Top + itemY + nextOffsetY);
-				Navigation.sim.Mouse.LeftButtonClick();
-				Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
-
-
-				// Queue card for scanning
-				QueueScan(cardsQueued);
-				cardsQueued++;
-				column++;
-
-
-				// Reach end of row
-				if (column == maxColumns)
+				int cardsRemaining =  weaponCount - cardsQueued ;
+				// Go through each "page" of items and queue. In the event that not a full page of
+				// items are scolled to, offset the index of rectangle to start clicking from
+				for (int i = cardsRemaining < fullPage ? (rows - (totalRows - rowsQueued) - 1) * cols : 0; i < rectangles.Count; i++)
 				{
-					// reset mouse pointer and scroll down weapon list
-					column = 0;
-					row++;
+					Rectangle item = rectangles[i];
+					Navigation.SetCursorPos(Navigation.GetPosition().Left + item.Center().X, Navigation.GetPosition().Top + item.Center().Y);
+					Navigation.sim.Mouse.LeftButtonClick();
+					Navigation.SystemRandomWait(Navigation.Speed.Faster);
 
-					// Scroll to next chunk
-					if (cardsQueued % (maxRows * maxColumns) == 0)
+					// Queue card for scanning
+					QueueScan(cardsQueued);
+					cardsQueued++;
+					if (cardsQueued >= weaponCount)
 					{
-						for (int i = 0; i < 50; i++)
-						{
-							Navigation.sim.Mouse.VerticalScroll(-1);
-							Navigation.SystemRandomWait(Navigation.Speed.Instant);
-						}
-						row = 0;
+						return;
 					}
 				}
+
+				rowsQueued += rows;
+
+				// Page done, now scroll
+				// If the number of remaining scans is shorter than a full page then
+				// only scroll a few rows
+				if (cardsRemaining < fullPage)
+				{
+					for (int i = 0; i < 10 * Math.Ceiling(cardsRemaining / (decimal)cols); i++)
+					{
+						Navigation.sim.Mouse.VerticalScroll(-1);
+					}
+					Navigation.SystemRandomWait(Navigation.Speed.Fast);
+				}
+				else
+				{
+					for (int i = 0; i < 10 * rows - 1; i++)
+					{
+						Navigation.sim.Mouse.VerticalScroll(-1);
+					}
+					Navigation.SystemRandomWait(Navigation.Speed.Fast);
+				}
+				continue;
 			}
 		}
 
+		private static (List<Rectangle> rectangles, int cols, int rows) GetPageOfItems()
+		{
+			// Ratios for converting to 1280x720
+			var xRatio = Navigation.GetWidth() / 1280.0;
+			var yRatio = Navigation.GetHeight() / 720.0;
+
+			var itemDimensions = new Size((int)( 80 * xRatio ), (int)( 100 * yRatio ));
+
+			// Filter for relative size of items in inventory, give or take a few pixels
+			BlobCounter blobCounter = new BlobCounter
+			{
+				FilterBlobs = true,
+				MinHeight = (int)( itemDimensions.Height * yRatio ) - 10,
+				MaxHeight = (int)( itemDimensions.Height * yRatio ) + 10,
+				MinWidth  = (int)( itemDimensions.Width * xRatio ) - 10,
+				MaxWidth  = (int)( itemDimensions.Width * xRatio ) + 10,
+			};
+
+			// Screenshot of inventory
+			Bitmap screenshot = Navigation.CaptureWindow();
+
+			// Image filtering for processing.
+			ContrastCorrection contrast = new ContrastCorrection(80);
+			Grayscale grayscale = new Grayscale(0.2125, 0.7154, 0.0721);
+			Edges edges = new Edges();
+			Threshold threshold = new Threshold(15);
+
+			screenshot = contrast.Apply(screenshot);
+
+			screenshot = edges.Apply(screenshot);
+
+			screenshot = grayscale.Apply(screenshot);
+
+			screenshot = threshold.Apply(screenshot);
+
+			blobCounter.ProcessImage(screenshot);
+			// Note: Processing won't always detect all item rectangles on screen. Since the
+			// background isn't a solid color it's a bit trickier to filter out.
+
+			// Don't save overlapping blobs
+			List<Rectangle> rectangles = new List<Rectangle>();
+			foreach (var rect in blobCounter.GetObjectsRectangles())
+			{
+				bool add = true;
+				foreach (var item in rectangles)
+				{
+					if (item.IntersectsWith(rect))
+					{
+						add = false;
+						break;
+					}
+				}
+				if (add)
+				{
+					rectangles.Add(rect);
+				}
+			}
+
+			// Determine X and Y coordinates for columns and rows, respectively
+			var colCoords = new List<int>();
+			var rowCoords = new List<int>();
+
+			foreach (var item in rectangles)
+			{
+				bool addX = true;
+				bool addY = true;
+				foreach (var x in colCoords)
+				{
+					var xC = item.Center().X;
+					if (x - 10 <= xC && xC <= x + 10)
+					{
+						addX = false;
+						break;
+					}
+				}
+				foreach (var y in rowCoords)
+				{
+					var yC = item.Center().Y;
+					if (y - 10 <= yC && yC <= y + 10)
+					{
+						addY = false;
+						break;
+					}
+				}
+				if (addX)
+				{
+					colCoords.Add(item.Center().X);
+				}
+				if (addY)
+				{
+					rowCoords.Add(item.Center().Y);
+				}
+			}
+
+			// Clear it all because we're going to use X,Y coordinate pairings to build rectangles
+			// around. This won't be perfect but it should algorithmically put rectangles over all
+			// images on the screen. The center of each of these rectangles should be a good enough
+			// spot to click.
+			rectangles.Clear();
+			foreach (var col in colCoords)
+			{
+				foreach (var row in rowCoords)
+				{
+					int x = (int)( col - (itemDimensions.Width * .5) );
+					int y = (int)( row - (itemDimensions.Height * .5) );
+
+					rectangles.Add(new Rectangle(x, y, itemDimensions.Width, itemDimensions.Height));
+				}
+			}
+
+			// Sort rectangles by row then by column so they're organized like we would expect.
+			rectangles = rectangles.OrderBy(r => r.Top).ThenBy(r => r.Left).ToList();
+			
+			// Remove some rectangles that somehow overlap each other. Don't know why this happens
+			// but it doesn't hurt to double check.
+			for (int i = 0; i < rectangles.Count - 1; i++)
+			{
+				for (int j = i + 1; j < rectangles.Count; j++)
+				{
+					Rectangle r1 = rectangles[i];
+					Rectangle r2 = rectangles[j];
+					if (r1.IntersectsWith(r2))
+					{
+						rectangles.RemoveAt(j);
+					}
+				}
+			}
+			
+			return (rectangles, colCoords.Count, rowCoords.Count);
+		}
+
+		
+
 		public static void QueueScan(int id)
 		{
-
 			// Grab image of entire card on Right
-			RECT itemCard = new RECT(new Rectangle(862, 80, 325, 560));
+
+			RECT itemCard = new RECT(new Rectangle(862, 80, 325, 560)); // In 1280x720
+
+			int rX = (int)( itemCard.X / 1280.0 * 1920 );
+			int rY = (int)( itemCard.Y / 720.0  * 1080 );
+			int rW = (int)( itemCard.Right / 1280.0 * 1920 );
+			int rH = (int)( itemCard.Bottom / 720.0 * 1080 );
+
+			RECT itemCard2 = new RECT(rX,rY,rW,rH);
+
 			Bitmap bm = Navigation.CaptureRegion(itemCard);
 
 			// Separate to all pieces of card
@@ -111,7 +256,6 @@ namespace GenshinGuide
 
 		public static Weapon CatalogueFromBitmaps(List<Bitmap> bm, int id)
 		{
-
 			// Init Variables
 			int name = 0;
 			int level = 1;
@@ -135,7 +279,6 @@ namespace GenshinGuide
 
 				if (b_RarityAboveTwo)
 				{
-
 					Thread thr1 = new Thread(() => name = ScanName(bm[w_name]));
 					Thread thr2 = new Thread(() => level = ScanLevel(bm[w_level],ref ascension));
 					Thread thr3 = new Thread(() => refinementLevel = ScanRefinement(bm[w_refinement]));
@@ -210,7 +353,6 @@ namespace GenshinGuide
 				count /= 20;
 			}
 
-
 			return count;
 		}
 
@@ -280,7 +422,6 @@ namespace GenshinGuide
 					}
 					else
 					{
-
 					}
 				}
 			}

@@ -57,7 +57,7 @@ namespace GenshinGuide
 			"RaidenShogun",
 			"KujouSara",
 			"Aloy",
-			"SangonomiyaKokomi", 
+			"SangonomiyaKokomi",
 			"Thoma",
 		};
 		private readonly string[] eng_Weapons = {

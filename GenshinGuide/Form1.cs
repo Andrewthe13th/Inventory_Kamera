@@ -30,7 +30,7 @@ namespace GenshinGuide
 
 			// register the event that is fired after the key press.
 			hook.KeyPressed += new EventHandler<KeyPressedEventArgs>(Hook_KeyPressed);
-			
+
 
 			Language_ComboBox.SelectedItem = "ENG";
 			UserInterface.Init(GearSlot_PictureBox,
@@ -183,7 +183,7 @@ namespace GenshinGuide
 
 			Properties.Settings.Default.Save();
 		}
-        
+
 		private void StartButton_Clicked(object sender, EventArgs e)
 		{
 			SaveSettings();
@@ -224,8 +224,8 @@ namespace GenshinGuide
 							// Make Json File
 							good.WriteToJSON(OutputPath_TextBox.Text, Database_MenuItem.Text);
 
-                        // Clear saved data
-                        ResetUI();
+							// Clear saved data
+							ResetUI();
 
 							UserInterface.SetProgramStatus("Finished");
 						}
