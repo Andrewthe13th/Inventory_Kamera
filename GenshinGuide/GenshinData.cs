@@ -68,9 +68,7 @@ namespace GenshinGuide
 				//inventory.AssignWeapons(ref equippedWeapons);
 				Navigation.MainMenuScreen();
 			}
-			workerQueue.Enqueue(new OCRImage(null, "END", 0));
-			ImageProcessor.Join();
-			return;
+			
 			if (checkbox[1])
 			{
 				// Get Artifacts

@@ -220,7 +220,7 @@ namespace GenshinGuide
 						List<Size> sizes = new List<Size>
 						{ 
 							new Size(16,9),
-							new Size(5,4),
+							new Size(8,5),
 						};
 
 						if (!sizes.Contains(Navigation.GetAspectRatio()))
