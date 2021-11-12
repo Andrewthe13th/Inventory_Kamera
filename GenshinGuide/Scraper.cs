@@ -5,7 +5,6 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
-using Newtonsoft.Json;
 using Tesseract;
 
 namespace GenshinGuide
@@ -15,14 +14,17 @@ namespace GenshinGuide
 #if DEBUG
 		public static bool s_bDoDebugOnlyCode = false;
 #endif
+
 		// GLOBALS
 		public static bool b_AssignedTravelerName = false;
+
 		private static int setCount = 0;
 		private static int mainStatCount = 0;
 		private static int characterCount = 1;
 		private static int weaponCount = 0;
 		private static int characterDevelopmentItemsCount = 0;
 		private static int materialsCount = 0;
+
 		private static readonly Dictionary<string, int> setNames = new Dictionary<string, int>
 		{
 			["adventurer"] = setCount,
@@ -31,57 +33,59 @@ namespace GenshinGuide
 			["resolutionofsojourner"] = ++setCount,
 			["tinymiracle"] = ++setCount,
 			["berserker"] = ++setCount, // 5
-            ["instructor"] = ++setCount,
+			["instructor"] = ++setCount,
 			["theexile"] = ++setCount,
 			["defenderswill"] = ++setCount,
 			["braveheart"] = ++setCount,
 			["martialartist"] = ++setCount, // 10
-            ["gambler"] = ++setCount,
+			["gambler"] = ++setCount,
 			["scholar"] = ++setCount,
 			["prayersforillumination"] = ++setCount,
 			["prayersfordestiny"] = ++setCount,
 			["prayersforwisdom"] = ++setCount, // 15
-            ["prayersthespringtime"] = ++setCount,
+			["prayersthespringtime"] = ++setCount,
 			["thundersoother"] = ++setCount,
 			["lavawalker"] = ++setCount,
 			["maidenbeloved"] = ++setCount,
 			["gladiatorsfinale"] = ++setCount, // 20
-            ["viridescentvenerer"] = ++setCount,
+			["viridescentvenerer"] = ++setCount,
 			["wandererstroupe"] = ++setCount,
 			["thunderingfury"] = ++setCount,
 			["crimsonwitchofflames"] = ++setCount,
 			["noblesseoblige"] = ++setCount, // 25
-            ["bloodstainedchivalry"] = ++setCount,
+			["bloodstainedchivalry"] = ++setCount,
 			["archaicpetra"] = ++setCount,
 			["retracingbolide"] = ++setCount,
 			["heartofdepth"] = ++setCount,
 			["blizzardstrayer"] = ++setCount, // 30
-            ["paleflame"] = ++setCount,
+			["paleflame"] = ++setCount,
 			["tenacityofthemillelith"] = ++setCount,
 			["shimenawasreminiscence"] = ++setCount,
 			["emblemofseveredfate"] = ++setCount,
 		};
+
 		private static readonly Dictionary<string, int> mainStats = new Dictionary<string, int>
 		{
 			["hp_flat"] = mainStatCount,
 			["atk_flat"] = ++mainStatCount,
-            // these are %
-            ["hp"] = ++mainStatCount,
+			// these are %
+			["hp"] = ++mainStatCount,
 			["atk"] = ++mainStatCount,
 			["def"] = ++mainStatCount,
 			["energyrecharge"] = ++mainStatCount, //5
-            ["elementalmastery"] = ++mainStatCount,
+			["elementalmastery"] = ++mainStatCount,
 			["healingbonus"] = ++mainStatCount,
 			["critrate"] = ++mainStatCount,
 			["critdmg"] = ++mainStatCount,
 			["physicaldmgbonus"] = ++mainStatCount, //10
-            ["pyrodmgbonus"] = ++mainStatCount,
+			["pyrodmgbonus"] = ++mainStatCount,
 			["electrodmgbonus"] = ++mainStatCount,
 			["cryodmgbonus"] = ++mainStatCount,
 			["hydrodmgbonus"] = ++mainStatCount,
 			["anemodmgbonus"] = ++mainStatCount, //15
-            ["geodmgbonus"] = ++mainStatCount,
+			["geodmgbonus"] = ++mainStatCount,
 		};
+
 		private static readonly Dictionary<string, int> gearSlots = new Dictionary<string, int>
 		{
 			["floweroflife"] = 0,
@@ -90,6 +94,7 @@ namespace GenshinGuide
 			["gobletofeonothem"] = 3,
 			["circletoflogos"] = 4,
 		};
+
 		private static readonly Dictionary<string, int> subStats = new Dictionary<string, int>
 		{
 			["hp"] = 0,
@@ -103,6 +108,7 @@ namespace GenshinGuide
 			["critrate"] = 8,
 			["critdmg"] = 9,
 		};
+
 		private static readonly Dictionary<string, int> characters = new Dictionary<string, int>
 		{
 			[""] = -1,
@@ -110,97 +116,99 @@ namespace GenshinGuide
 			["kaeya"] = ++characterCount,
 			["lisa"] = ++characterCount,
 			["barbara"] = ++characterCount, //5
-            ["razor"] = ++characterCount,
+			["razor"] = ++characterCount,
 			["xiangling"] = ++characterCount,
 			["beidou"] = ++characterCount,
 			["xingqiu"] = ++characterCount,
 			["ningguang"] = ++characterCount, // 10
-            ["fischl"] = ++characterCount,
+			["fischl"] = ++characterCount,
 			["bennett"] = ++characterCount,
 			["noelle"] = ++characterCount,
 			["chongyun"] = ++characterCount,
 			["sucrose"] = ++characterCount, // 15
-            ["jean"] = ++characterCount,
+			["jean"] = ++characterCount,
 			["diluc"] = ++characterCount,
 			["qiqi"] = ++characterCount,
 			["mona"] = ++characterCount,
 			["keqing"] = ++characterCount, // 20
-            ["venti"] = ++characterCount,
+			["venti"] = ++characterCount,
 			["klee"] = ++characterCount,
 			["diona"] = ++characterCount,
 			["tartaglia"] = ++characterCount,
 			["xinyan"] = ++characterCount, // 25
-            ["zhongli"] = ++characterCount,
+			["zhongli"] = ++characterCount,
 			["albedo"] = ++characterCount,
 			["ganyu"] = ++characterCount,
 			["xiao"] = ++characterCount,
 			["hutao"] = ++characterCount, // 30
-            ["hutao"] = characterCount, // 30
-            ["rosaria"] = ++characterCount,
+			["hutao"] = characterCount, // 30
+			["rosaria"] = ++characterCount,
 			["yanfei"] = ++characterCount,
 			["eula"] = ++characterCount,
 			["kaedeharakazuha"] = ++characterCount,
 			["kaedehara"] = characterCount,
 			["kamisatoayaka"] = ++characterCount, //35
-            ["kamisato"] = characterCount, //35
-            ["yoimiya"] = ++characterCount,
+			["kamisato"] = characterCount, //35
+			["yoimiya"] = ++characterCount,
 			["sayu"] = ++characterCount,
 			["raidenshogun"] = ++characterCount,
 			["raiden"] = characterCount,
 			["kujousara"] = ++characterCount,
 			["kujou"] = characterCount,
 			["aloy"] = ++characterCount, // 40
-            ["sangonomiyakokomi"] = ++characterCount,
+			["sangonomiyakokomi"] = ++characterCount,
 			["sangonomiya"] = characterCount,
 			["thoma"] = ++characterCount,
 		};
+
 		public static Dictionary<int, string[]> characterTalentConstellationOrder = new Dictionary<int, string[]>
 		{
-            /////////// Traveler is Assigned at runtime /////////////
-            [1] = new string[]{ "burst", "skill" }, // Traveler
-            ///////////////////////////////////////////////
-            [2] = new string[]{ "burst", "skill" }, //Amber 
-            [3] = new string[]{ "skill", "burst" }, //Kaeya 
-            [4] = new string[]{ "burst", "skill" }, //Lisa 
-            [5] = new string[]{ "burst", "skill" }, //Barbara  
-            [6] = new string[]{ "burst", "skill" }, //Razor 
-            [7] = new string[]{ "burst", "skill" }, //Xiangling 
-            [8] = new string[]{ "skill", "burst" }, //Beidou 
-            [9] = new string[]{ "burst", "skill" }, //Xingqiu 
-            [10] = new string[]{ "burst", "skill" }, //Ningguang  
-            [11] = new string[]{ "skill", "burst" }, //Fischl 
-            [12] = new string[]{ "skill", "burst" }, //Bennett 
-            [13] = new string[]{ "skill", "burst" }, //Noelle 
-            [14] = new string[]{ "burst", "skill" }, //Chongyun 
-            [15] = new string[]{ "skill", "burst" }, //Sucrose  
-            [16] = new string[]{ "burst", "skill" }, //Jean 
-            [17] = new string[]{ "skill", "burst" }, //Diluc 
-            [18] = new string[]{ "burst", "skill" }, //Qiqi 
-            [19] = new string[]{ "burst", "skill" }, //Mona 
-            [20] = new string[]{ "burst", "skill" }, //Keqing  
-            [21] = new string[]{ "burst", "skill" }, //Venti 
-            [22] = new string[]{ "skill", "burst" }, //Klee 
-            [23] = new string[]{ "burst", "skill" }, //Diona 
-            [24] = new string[]{ "skill", "burst" }, //Tartaglia 
-            [25] = new string[]{ "skill", "burst" }, //Xinyan  
-            [26] = new string[]{ "skill", "burst" }, //Zhongli 
-            [27] = new string[]{ "skill", "burst" }, //Albedo 
-            [28] = new string[]{ "burst", "skill" }, //Ganyu 
-            [29] = new string[]{ "skill", "burst" }, //Xiao 
-            [30] = new string[]{ "skill", "burst" }, //Hu Tao  
-            [31] = new string[]{ "skill", "burst" }, //Rosaria 
-            [32] = new string[]{ "skill", "burst" }, //Yanfei 
-            [33] = new string[]{ "burst", "skill" }, //Eula 
-            [34] = new string[]{ "skill", "burst" }, //Kaedehara Kazuha 
-            [35] = new string[]{ "burst", "skill" }, //Kamisato Ayaka  
-            [36] = new string[]{ "skill", "burst" }, //Yoimiya 
-            [37] = new string[]{ "burst", "skill" }, //Sayu 
-            [38] = new string[]{ "burst", "skill" }, //Raiden Shogun 
-            [39] = new string[]{ "burst", "skill" }, //Kujou Sara 
-            [40] = new string[]{ "burst", "skill" }, //Aloy  Note: has no constellations
-            [41] = new string[]{ "burst", "skill" }, //Sangonomiya Kokomi 
-            [42] = new string[]{ "skill", "burst" }, //Thoma 
-        };
+			/////////// Traveler is Assigned at runtime /////////////
+			[1] = new string[] { "burst", "skill" }, // Traveler
+													 ///////////////////////////////////////////////
+			[2] = new string[] { "burst", "skill" }, //Amber
+			[3] = new string[] { "skill", "burst" }, //Kaeya
+			[4] = new string[] { "burst", "skill" }, //Lisa
+			[5] = new string[] { "burst", "skill" }, //Barbara
+			[6] = new string[] { "burst", "skill" }, //Razor
+			[7] = new string[] { "burst", "skill" }, //Xiangling
+			[8] = new string[] { "skill", "burst" }, //Beidou
+			[9] = new string[] { "burst", "skill" }, //Xingqiu
+			[10] = new string[] { "burst", "skill" }, //Ningguang
+			[11] = new string[] { "skill", "burst" }, //Fischl
+			[12] = new string[] { "skill", "burst" }, //Bennett
+			[13] = new string[] { "skill", "burst" }, //Noelle
+			[14] = new string[] { "burst", "skill" }, //Chongyun
+			[15] = new string[] { "skill", "burst" }, //Sucrose
+			[16] = new string[] { "burst", "skill" }, //Jean
+			[17] = new string[] { "skill", "burst" }, //Diluc
+			[18] = new string[] { "burst", "skill" }, //Qiqi
+			[19] = new string[] { "burst", "skill" }, //Mona
+			[20] = new string[] { "burst", "skill" }, //Keqing
+			[21] = new string[] { "burst", "skill" }, //Venti
+			[22] = new string[] { "skill", "burst" }, //Klee
+			[23] = new string[] { "burst", "skill" }, //Diona
+			[24] = new string[] { "skill", "burst" }, //Tartaglia
+			[25] = new string[] { "skill", "burst" }, //Xinyan
+			[26] = new string[] { "skill", "burst" }, //Zhongli
+			[27] = new string[] { "skill", "burst" }, //Albedo
+			[28] = new string[] { "burst", "skill" }, //Ganyu
+			[29] = new string[] { "skill", "burst" }, //Xiao
+			[30] = new string[] { "skill", "burst" }, //Hu Tao
+			[31] = new string[] { "skill", "burst" }, //Rosaria
+			[32] = new string[] { "skill", "burst" }, //Yanfei
+			[33] = new string[] { "burst", "skill" }, //Eula
+			[34] = new string[] { "skill", "burst" }, //Kaedehara Kazuha
+			[35] = new string[] { "burst", "skill" }, //Kamisato Ayaka
+			[36] = new string[] { "skill", "burst" }, //Yoimiya
+			[37] = new string[] { "burst", "skill" }, //Sayu
+			[38] = new string[] { "burst", "skill" }, //Raiden Shogun
+			[39] = new string[] { "burst", "skill" }, //Kujou Sara
+			[40] = new string[] { "burst", "skill" }, //Aloy  Note: has no constellations
+			[41] = new string[] { "burst", "skill" }, //Sangonomiya Kokomi
+			[42] = new string[] { "skill", "burst" }, //Thoma
+		};
+
 		private static readonly Dictionary<string, int> elements = new Dictionary<string, int>
 		{
 			["pyro"] = 0,
@@ -211,160 +219,164 @@ namespace GenshinGuide
 			["cryo"] = 5,
 			["geo"] = 6,
 		};
+
 		private static readonly List<string> elementList = new List<string>
-		{ 
+		{
 			"pyro",
 			"hydro",
 			"dendro",
 			"electro",
 			"anemo",
 			"cryo",
-			"geo" 
+			"geo"
 		};
+
 		private static readonly Dictionary<string, int> weapons = new Dictionary<string, int>
 		{
 			// Release Weapons
-            // 1 star
-            ["dullblade"] = weaponCount,
+			// 1 star
+			["dullblade"] = weaponCount,
 			["wastergreatsword"] = ++weaponCount,
 			["beginnersprotector"] = ++weaponCount,
 			["apprenticesnotes"] = ++weaponCount,
 			["huntersbow"] = ++weaponCount, // 4
-            // 2 stars
-            ["silversword"] = ++weaponCount,
+											// 2 stars
+			["silversword"] = ++weaponCount,
 			["oldmercspal"] = ++weaponCount,
 			["ironpoint"] = ++weaponCount,
 			["pocketgrimoire"] = ++weaponCount,
 			["seasonedhuntersbow"] = ++weaponCount, // 9
-            // 3 star
-            ["coolsteel"] = ++weaponCount, // 10
-            ["harbingerofdawn"] = ++weaponCount,
+													// 3 star
+			["coolsteel"] = ++weaponCount, // 10
+			["harbingerofdawn"] = ++weaponCount,
 			["travelershandysword"] = ++weaponCount,
 			["filletblade"] = ++weaponCount,
 			["skyridersword"] = ++weaponCount,
 			["ferrousshadow"] = ++weaponCount, // 15
-            ["bloodtaintedgreatsword"] = ++weaponCount,
+			["bloodtaintedgreatsword"] = ++weaponCount,
 			["whiteirongreatsword"] = ++weaponCount,
 			["debateclub"] = ++weaponCount,
 			["skyridergreatsword"] = ++weaponCount,
 			["whitetassel"] = ++weaponCount, // 20
-            ["halberd"] = ++weaponCount,
+			["halberd"] = ++weaponCount,
 			["blacktassel"] = ++weaponCount,
 			["magicguide"] = ++weaponCount,
 			["thrillingtalesofdragonslayers"] = ++weaponCount,
 			["otherworldlystory"] = ++weaponCount, // 25
-            ["emeraldorb"] = ++weaponCount,
+			["emeraldorb"] = ++weaponCount,
 			["twinnephrite"] = ++weaponCount,
 			["ravenbow"] = ++weaponCount,
 			["sharpshootersoath"] = ++weaponCount,
 			["recurvebow"] = ++weaponCount, // 30
-            ["slingshot"] = ++weaponCount,
+			["slingshot"] = ++weaponCount,
 			["messenger"] = ++weaponCount,
-            // 4 star
-            ["favoniussword"] = ++weaponCount,
+			// 4 star
+			["favoniussword"] = ++weaponCount,
 			["theflute"] = ++weaponCount,
 			["sacrificialsword"] = ++weaponCount, // 35
-            ["royallongsword"] = ++weaponCount,
+			["royallongsword"] = ++weaponCount,
 			["lionsroar"] = ++weaponCount,
 			["prototyperancour"] = ++weaponCount,
 			["ironsting"] = ++weaponCount,
 			["blackclifflongsword"] = ++weaponCount, // 40
-            ["theblacksword"] = ++weaponCount,
+			["theblacksword"] = ++weaponCount,
 			["swordofdescension"] = ++weaponCount,
 			["festeringdesire"] = ++weaponCount,
 			["thealleyflash"] = ++weaponCount,
 			["favoniusgreatsword"] = ++weaponCount, // 45
-            ["thebell"] = ++weaponCount,
+			["thebell"] = ++weaponCount,
 			["sacrificialgreatsword"] = ++weaponCount,
 			["royalgreatsword"] = ++weaponCount,
 			["rainslasher"] = ++weaponCount,
 			["prototypearchaic"] = ++weaponCount, // 50
-            ["whiteblind"] = ++weaponCount,
+			["whiteblind"] = ++weaponCount,
 			["blackcliffslasher"] = ++weaponCount,
 			["serpentspine"] = ++weaponCount,
 			["snowtombedstarsilver"] = ++weaponCount,
 			["lithicblade"] = ++weaponCount, // 55
-            ["dragonsbane"] = ++weaponCount,
+			["dragonsbane"] = ++weaponCount,
 			["prototypestarglitter"] = ++weaponCount,
 			["crescentpike"] = ++weaponCount,
 			["blackcliffpole"] = ++weaponCount,
 			["deathmatch"] = ++weaponCount, // 60
-            ["favoniuslance"] = ++weaponCount,
+			["favoniuslance"] = ++weaponCount,
 			["royalspear"] = ++weaponCount,
 			["dragonspinespear"] = ++weaponCount,
 			["lithicspear"] = ++weaponCount,
 			["favoniuscodex"] = ++weaponCount, // 65
-            ["thewidsith"] = ++weaponCount,
+			["thewidsith"] = ++weaponCount,
 			["sacrificialfragments"] = ++weaponCount,
 			["royalgrimoire"] = ++weaponCount,
 			["solarpearl"] = ++weaponCount,
 			["prototypeamber"] = ++weaponCount, // 70
-            ["mappamare"] = ++weaponCount,
+			["mappamare"] = ++weaponCount,
 			["blackcliffagate"] = ++weaponCount,
 			["eyeofperception"] = ++weaponCount,
 			["frostbearer"] = ++weaponCount,
 			["wineandsong"] = ++weaponCount, // 75
-            ["favoniuswarbow"] = ++weaponCount,
+			["favoniuswarbow"] = ++weaponCount,
 			["thestringless"] = ++weaponCount,
 			["sacrificialbow"] = ++weaponCount,
 			["royalbow"] = ++weaponCount,
 			["rust"] = ++weaponCount, // 80
-            ["prototypecrescent"] = ++weaponCount,
+			["prototypecrescent"] = ++weaponCount,
 			["compoundbow"] = ++weaponCount,
 			["blackcliffwarbow"] = ++weaponCount,
 			["theviridescenthunt"] = ++weaponCount,
 			["alleyhunter"] = ++weaponCount, // 85
-            ["windblumeode"] = ++weaponCount,
+			["windblumeode"] = ++weaponCount,
 			["aquilafavonia"] = ++weaponCount,
 			["skywardblade"] = ++weaponCount,
 			["summitshaper"] = ++weaponCount,
 			["primordialjadecutter"] = ++weaponCount, // 90
-            ["skywardpride"] = ++weaponCount,
+			["skywardpride"] = ++weaponCount,
 			["wolfsgravestone"] = ++weaponCount,
 			["theunforged"] = ++weaponCount,
 			["primordialjadewingedspear"] = ++weaponCount,
 			["skywardspine"] = ++weaponCount, // 95
-            ["vortexvanquisher"] = ++weaponCount,
+			["vortexvanquisher"] = ++weaponCount,
 			["staffofhoma"] = ++weaponCount,
 			["skywardatlas"] = ++weaponCount,
 			["lostprayertothesacredwinds"] = ++weaponCount,
 			["memoryofdust"] = ++weaponCount, // 100
-            ["skywardharp"] = ++weaponCount,
+			["skywardharp"] = ++weaponCount,
 			["amosbow"] = ++weaponCount,
 			["elegyfortheend"] = ++weaponCount,
 			["songofbrokenpines"] = ++weaponCount,
 			["mitternachtswaltz"] = ++weaponCount, // 105
-            ["freedomsworn"] = ++weaponCount,
+			["freedomsworn"] = ++weaponCount,
 			["dodocotales"] = ++weaponCount,
-            // 2.0 inazuma patch
-            ["amenomakageuchi"] = ++weaponCount,
+			// 2.0 inazuma patch
+			["amenomakageuchi"] = ++weaponCount,
 			["katsuragikirinagamasa"] = ++weaponCount,
 			["kitaincrossspear"] = ++weaponCount, // 110
-            ["hamayumi"] = ++weaponCount,
+			["hamayumi"] = ++weaponCount,
 			["hakushinring"] = ++weaponCount,
 			["mistsplitterreforged"] = ++weaponCount,
 			["thunderingpulse"] = ++weaponCount,
-            // 2.1
-            ["predator"] = ++weaponCount, // 115
-            ["luxurioussealord"] = ++weaponCount,
+			// 2.1
+			["predator"] = ++weaponCount, // 115
+			["luxurioussealord"] = ++weaponCount,
 			["thecatch"] = ++weaponCount,
 			["engulfinglightning"] = ++weaponCount,
 			["everlastingmoonglow"] = ++weaponCount,
 			["darkironsword"] = ++weaponCount, // 120
-            // 2.2
-            ["polarstar"] = ++weaponCount,
+											   // 2.2
+			["polarstar"] = ++weaponCount,
 			["akuoumaru"] = ++weaponCount,
-
+			["mouunsmoon"] = ++weaponCount,
+			["wavebreakersfin"] = ++weaponCount
 		};
+
 		private static readonly Dictionary<string, int> characterDevelopmentItemsCode = new Dictionary<string, int>
 		{
-            // character exp materials
-            ["heroswit"] = characterDevelopmentItemsCount++,
+			// character exp materials
+			["heroswit"] = characterDevelopmentItemsCount++,
 			["adventurersexperience"] = characterDevelopmentItemsCount++,
 			["wanderersadvice"] = characterDevelopmentItemsCount++,
 
-            // character level-up materials
-            ["slimeconcentrate"] = characterDevelopmentItemsCount++,
+			// character level-up materials
+			["slimeconcentrate"] = characterDevelopmentItemsCount++,
 			["secretions"] = characterDevelopmentItemsCount++,
 			["slimecondensate"] = characterDevelopmentItemsCount++,
 			["ominousmask"] = characterDevelopmentItemsCount++,
@@ -446,8 +458,8 @@ namespace GenshinGuide
 			["smolderingpearl"] = characterDevelopmentItemsCount++,
 			["dewofrepudiation"] = characterDevelopmentItemsCount++,
 			["stormbeads"] = characterDevelopmentItemsCount++,
-            // gemstones
-            ["agnidusagategemstone"] = characterDevelopmentItemsCount++,
+			// gemstones
+			["agnidusagategemstone"] = characterDevelopmentItemsCount++,
 			["agnidusagatechunk"] = characterDevelopmentItemsCount++,
 			["agnidusagatefragment"] = characterDevelopmentItemsCount++,
 			["agnidusagatesliver"] = characterDevelopmentItemsCount++,
@@ -477,8 +489,8 @@ namespace GenshinGuide
 			["prithivatopazfragment"] = characterDevelopmentItemsCount++,
 			["prithivatopazsliver"] = characterDevelopmentItemsCount++,
 
-            // talent level-up materials
-            ["philosophiesoffreedom"] = characterDevelopmentItemsCount++,
+			// talent level-up materials
+			["philosophiesoffreedom"] = characterDevelopmentItemsCount++,
 			["guidetofreedom"] = characterDevelopmentItemsCount++,
 			["teachingsoffreedom"] = characterDevelopmentItemsCount++,
 			["philosophiesofresistance"] = characterDevelopmentItemsCount++,
@@ -507,8 +519,8 @@ namespace GenshinGuide
 			["teachingsoflight"] = characterDevelopmentItemsCount++,
 			["crownofinsight"] = characterDevelopmentItemsCount++,
 
-            // weapon ascension materials
-            ["scatteredpieceofdecarabiansdream"] = characterDevelopmentItemsCount++,
+			// weapon ascension materials
+			["scatteredpieceofdecarabiansdream"] = characterDevelopmentItemsCount++,
 			["fragmentofdecarabiansepic"] = characterDevelopmentItemsCount++,
 			["debrisofdecarabianscity"] = characterDevelopmentItemsCount++,
 			["tileofdecarabianstower"] = characterDevelopmentItemsCount++,
@@ -552,11 +564,12 @@ namespace GenshinGuide
 			["maskoftheonehorned"] = characterDevelopmentItemsCount++,
 			["maskofthetigersbite"] = characterDevelopmentItemsCount++,
 			["maskofthewickedlieutenant"] = characterDevelopmentItemsCount++,
-        };
+		};
+
 		private static readonly Dictionary<string, int> materialsCode = new Dictionary<string, int>
 		{
-            // material
-            ["strangetooth"] = materialsCount++,
+			// material
+			["strangetooth"] = materialsCount++,
 			["vitalizeddragontooth"] = materialsCount++,
 			["horsetail"] = materialsCount++,
 			["mistflowercorolla"] = materialsCount++,
@@ -569,14 +582,14 @@ namespace GenshinGuide
 			["crystalcore"] = materialsCount++,
 			["loachpearl"] = materialsCount++,
 
-            // furnishings
-            ["bluedye"] = materialsCount++,
+			// furnishings
+			["bluedye"] = materialsCount++,
 			["yellowdye"] = materialsCount++,
 			["reddye"] = materialsCount++,
 			["fabric"] = materialsCount++,
 
-            // wood
-            ["birch"] = materialsCount++,
+			// wood
+			["birch"] = materialsCount++,
 			["cuihua"] = materialsCount++,
 			["pine"] = materialsCount++,
 			["cedar"] = materialsCount++,
@@ -589,29 +602,29 @@ namespace GenshinGuide
 			["otogi"] = materialsCount++,
 			["aralia"] = materialsCount++,
 
-            // forging ore
-            ["ironchunk"] = materialsCount++,
+			// forging ore
+			["ironchunk"] = materialsCount++,
 			["whiteironchunk"] = materialsCount++,
 			["crystalchunk"] = materialsCount++,
 			["magicalcrystalchunk"] = materialsCount++,
 			["starsilver"] = materialsCount++,
 			["amethystlump"] = materialsCount++,
 
-            // billets
-            ["northlanderswordbillet"] = materialsCount++,
+			// billets
+			["northlanderswordbillet"] = materialsCount++,
 			["northlanderbowbillet"] = materialsCount++,
 			["northlanderclaymorebillet"] = materialsCount++,
 			["northlandercatalystbillet"] = materialsCount++,
 			["northlanderpolearmbillet"] = materialsCount++,
 
-            // fishbait
-            ["fruitpastebait"] = materialsCount++,
+			// fishbait
+			["fruitpastebait"] = materialsCount++,
 			["redrotbait"] = materialsCount++,
 			["falsewormbait"] = materialsCount++,
 			["fakeflybait"] = materialsCount++,
 
-            // fish
-            ["medaka"] = materialsCount++,
+			// fish
+			["medaka"] = materialsCount++,
 			["glazemedaka"] = materialsCount++,
 			["sweetflowermedaka"] = materialsCount++,
 			["aizenmedake"] = materialsCount++,
@@ -632,8 +645,8 @@ namespace GenshinGuide
 			["pufferfish"] = materialsCount++,
 			["bitterpufferfish"] = materialsCount++,
 
-            // cooking ingredient
-            ["mushroom"] = materialsCount++,
+			// cooking ingredient
+			["mushroom"] = materialsCount++,
 			["sweetflower"] = materialsCount++,
 			["carrot"] = materialsCount++,
 			["radish"] = materialsCount++,
@@ -677,8 +690,8 @@ namespace GenshinGuide
 			["sausage"] = materialsCount++,
 			["lotushead"] = materialsCount++,
 
-            // local specialty
-            ["callalily"] = materialsCount++,
+			// local specialty
+			["callalily"] = materialsCount++,
 			["wolfhook"] = materialsCount++,
 			["valberry"] = materialsCount++,
 			["cecilia"] = materialsCount++,
@@ -702,7 +715,8 @@ namespace GenshinGuide
 			["seaganoderma"] = materialsCount++,
 			["sangopearl"] = materialsCount++,
 			["amakumofruit"] = materialsCount++,
-        };
+		};
+
 		private static readonly Dictionary<string, int> enhancementMaterials = new Dictionary<string, int>
 		{
 			["enhancementore"] = 1,
@@ -710,23 +724,22 @@ namespace GenshinGuide
 			["mysticenhancementore"] = 3,
 			["sanctifyingunction"] = 4,
 			["sanctifyingessence"] = 5, // 4
-        };
+		};
 
-		
 		// TODO: Remove static modifier. This could probably cause problems if a scanning crash is caught while an engine is running.
 		// May be ok to create new engines as needed
-		private static readonly TesseractEngine ocr_live = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
-		private static readonly TesseractEngine ocr_1 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
-		private static readonly TesseractEngine ocr_2 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
-		private static readonly TesseractEngine ocr_3 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
-		private static readonly TesseractEngine ocr_4 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
-		private static readonly TesseractEngine ocr_5 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
-		private static readonly TesseractEngine ocr_6 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
-		private static readonly TesseractEngine ocr_7 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
-		private static readonly TesseractEngine ocr_8 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+		private static readonly TesseractEngine ocr_live = new TesseractEngine(( Directory.GetCurrentDirectory() ) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+
+		private static readonly TesseractEngine ocr_1 = new TesseractEngine(( Directory.GetCurrentDirectory() ) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+		private static readonly TesseractEngine ocr_2 = new TesseractEngine(( Directory.GetCurrentDirectory() ) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+		private static readonly TesseractEngine ocr_3 = new TesseractEngine(( Directory.GetCurrentDirectory() ) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+		private static readonly TesseractEngine ocr_4 = new TesseractEngine(( Directory.GetCurrentDirectory() ) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+		private static readonly TesseractEngine ocr_5 = new TesseractEngine(( Directory.GetCurrentDirectory() ) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+		private static readonly TesseractEngine ocr_6 = new TesseractEngine(( Directory.GetCurrentDirectory() ) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+		private static readonly TesseractEngine ocr_7 = new TesseractEngine(( Directory.GetCurrentDirectory() ) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+		private static readonly TesseractEngine ocr_8 = new TesseractEngine(( Directory.GetCurrentDirectory() ) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
 
 		//TODO: subStats Dictionaries
-
 
 		public static void AddTravelerToCharacterList(string traveler)
 		{
@@ -766,11 +779,11 @@ namespace GenshinGuide
 				}
 			}
 
-
 			return text;
 		}
 
 		#region Multi threaded Options
+
 		public static string AnalyzeText_1(Bitmap bitmap)
 		{
 			string text = "";
@@ -788,9 +801,9 @@ namespace GenshinGuide
 				}
 			}
 
-
 			return text;
 		}
+
 		public static string AnalyzeText_2(Bitmap bitmap)
 		{
 			string text = "";
@@ -808,9 +821,9 @@ namespace GenshinGuide
 				}
 			}
 
-
 			return text;
 		}
+
 		public static string AnalyzeText_3(Bitmap bitmap)
 		{
 			string text = "";
@@ -828,9 +841,9 @@ namespace GenshinGuide
 				}
 			}
 
-
 			return text;
 		}
+
 		public static string AnalyzeText_4(Bitmap bitmap)
 		{
 			string text = "";
@@ -848,14 +861,13 @@ namespace GenshinGuide
 				}
 			}
 
-
 			return text;
 		}
 
-		#endregion
-
+		#endregion Multi threaded Options
 
 		#region Multi thread Substats Options
+
 		public static string AnalyzeText_Line1(Bitmap bitmap)
 		{
 			string text = "";
@@ -872,7 +884,6 @@ namespace GenshinGuide
 					while (iter.Next(PageIteratorLevel.TextLine));
 				}
 			}
-
 
 			return text;
 		}
@@ -894,7 +905,6 @@ namespace GenshinGuide
 				}
 			}
 
-
 			return text;
 		}
 
@@ -914,7 +924,6 @@ namespace GenshinGuide
 					while (iter.Next(PageIteratorLevel.TextLine));
 				}
 			}
-
 
 			return text;
 		}
@@ -936,10 +945,10 @@ namespace GenshinGuide
 				}
 			}
 
-
 			return text;
 		}
-		#endregion
+
+		#endregion Multi thread Substats Options
 
 		public static string AnalyzeFewText(Bitmap img)
 		{
@@ -954,6 +963,7 @@ namespace GenshinGuide
 		}
 
 		#region Get Dictionary Codes
+
 		public static int GetSetNameCode(string setName)
 		{
 			int code = -1;
@@ -1072,7 +1082,8 @@ namespace GenshinGuide
 				return -1;
 			};
 		}
-		#endregion
+
+		#endregion Get Dictionary Codes
 
 		public static string FindElementByName(string name)
 		{
@@ -1090,17 +1101,18 @@ namespace GenshinGuide
 			return element;
 		}
 
-        public static bool CompareColors(Color a, Color b)
-        {
-            int[] diff = new int[3];
-            diff[0] = Math.Abs(a.R - b.R);
-            diff[1] = Math.Abs(a.G - b.G);
-            diff[2] = Math.Abs(a.B - b.B);
+		public static bool CompareColors(Color a, Color b)
+		{
+			int[] diff = new int[3];
+			diff[0] = Math.Abs(a.R - b.R);
+			diff[1] = Math.Abs(a.G - b.G);
+			diff[2] = Math.Abs(a.B - b.B);
 
 			return diff[0] < 10 && diff[1] < 10 && diff[2] < 10;
 		}
 
 		#region Image Operations
+
 		public static Bitmap ResizeImage(Image image, int width, int height)
 		{
 			var destRect = new Rectangle(0, 0, width, height);
@@ -1168,7 +1180,7 @@ namespace GenshinGuide
 			Bitmap bmap = (Bitmap)temp.Clone();
 			if (contrast < -100) contrast = -100;
 			if (contrast > 100) contrast = 100;
-			contrast = (100.0 + contrast) / 100.0;
+			contrast = ( 100.0 + contrast ) / 100.0;
 			contrast *= contrast;
 			Color c;
 			for (int i = 0; i < bmap.Width; i++)
@@ -1233,7 +1245,7 @@ namespace GenshinGuide
 			for (int i = 0; i < 256; ++i)
 			{
 				gammaArray[i] = (byte)Math.Min(255,
-		(int)((255.0 * Math.Pow(i / 255.0, 1.0 / color)) + 0.5));
+		(int)( ( 255.0 * Math.Pow(i / 255.0, 1.0 / color) ) + 0.5 ));
 			}
 			return gammaArray;
 		}
@@ -1334,7 +1346,8 @@ namespace GenshinGuide
 			}
 			bitmap = (Bitmap)bmap.Clone();
 		}
-		#endregion
+
+		#endregion Image Operations
 
 		public static void AssignTravelerName(string name)
 		{

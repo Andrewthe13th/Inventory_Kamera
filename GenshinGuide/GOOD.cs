@@ -191,6 +191,8 @@ namespace GenshinGuide
             // 2.2
             "PolarStar",
 			"Akuoumaru",
+			"MouunsMoon",
+			"WavebreakersFin"
 		};
 		private readonly string[] eng_Artifacts = {
 			"Adventurer",

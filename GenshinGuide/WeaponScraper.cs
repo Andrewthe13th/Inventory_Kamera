@@ -5,26 +5,30 @@ using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Windows.Forms;
 using Accord.Imaging;
 using Accord.Imaging.Filters;
-using Point = System.Drawing.Point;
+using Accord.Math.Geometry;
 
 namespace GenshinGuide
 {
 	public static class WeaponScraper
 	{
+		static WeaponScraper()
+		{
+
+		}
+
 		public static void ScanWeapons(int count = 0)
 		{
 			// Determine maximum number of weapons to scan
 			int weaponCount = count == 0 ? ScanWeaponCount(): count;
 			var (rectangles, cols, rows) = GetPageOfItems();
 			int fullPage = cols * rows;
-			int totalRows = weaponCount / cols;
+			int totalRows = (int)Math.Ceiling(weaponCount / (decimal)cols);
 			int cardsQueued = 0;
 			int rowsQueued = 0;
+			int offset = 0;
 			UserInterface.SetWeapon_Max(weaponCount);
-
 
 			// Go through weapon list
 			while (cardsQueued < weaponCount)
@@ -32,12 +36,12 @@ namespace GenshinGuide
 				int cardsRemaining =  weaponCount - cardsQueued ;
 				// Go through each "page" of items and queue. In the event that not a full page of
 				// items are scolled to, offset the index of rectangle to start clicking from
-				for (int i = cardsRemaining < fullPage ? (rows - (totalRows - rowsQueued) - 1) * cols : 0; i < rectangles.Count; i++)
+				for (int i = cardsRemaining < fullPage ? ( rows - ( totalRows - rowsQueued ) ) * cols : 0; i < rectangles.Count; i++)
 				{
 					Rectangle item = rectangles[i];
-					Navigation.SetCursorPos(Navigation.GetPosition().Left + item.Center().X, Navigation.GetPosition().Top + item.Center().Y);
+					Navigation.SetCursorPos(Navigation.GetPosition().Left + item.Center().X, Navigation.GetPosition().Top + item.Center().Y + offset);
 					Navigation.sim.Mouse.LeftButtonClick();
-					Navigation.SystemRandomWait(Navigation.Speed.Faster);
+					Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
 
 					// Queue card for scanning
 					QueueScan(cardsQueued);
@@ -53,13 +57,17 @@ namespace GenshinGuide
 				// Page done, now scroll
 				// If the number of remaining scans is shorter than a full page then
 				// only scroll a few rows
-				if (cardsRemaining < fullPage)
+				if (totalRows - rowsQueued < rows)
 				{
-					for (int i = 0; i < 10 * Math.Ceiling(cardsRemaining / (decimal)cols); i++)
+					if (Navigation.GetAspectRatio() == new Size(8,5))
+					{
+						offset = 35; // Lazy fix
+					}
+					for (int i = 0; i < 10 * ( totalRows - rowsQueued ) - 1; i++)
 					{
 						Navigation.sim.Mouse.VerticalScroll(-1);
 					}
-					Navigation.SystemRandomWait(Navigation.Speed.Fast);
+					Navigation.SystemRandomWait(Navigation.Speed.Normal);
 				}
 				else
 				{
@@ -75,51 +83,73 @@ namespace GenshinGuide
 
 		private static (List<Rectangle> rectangles, int cols, int rows) GetPageOfItems()
 		{
-			// Ratios for converting to 1280x720
-			var xRatio = Navigation.GetWidth() / 1280.0;
-			var yRatio = Navigation.GetHeight() / 720.0;
-
-			var itemDimensions = new Size((int)( 80 * xRatio ), (int)( 100 * yRatio ));
+			var card = new RECT(
+				Left: 0,
+				Top: 0,
+				Right: (int)(80 / 1280.0 * Navigation.GetWidth()),
+				Bottom: (int)(100 / 720.0 * Navigation.GetHeight()));
 
 			// Filter for relative size of items in inventory, give or take a few pixels
 			BlobCounter blobCounter = new BlobCounter
 			{
 				FilterBlobs = true,
-				MinHeight = (int)( itemDimensions.Height * yRatio ) - 10,
-				MaxHeight = (int)( itemDimensions.Height * yRatio ) + 10,
-				MinWidth  = (int)( itemDimensions.Width * xRatio ) - 10,
-				MaxWidth  = (int)( itemDimensions.Width * xRatio ) + 10,
+				MinHeight = card.Height - 15,
+				MaxHeight = card.Height + 15,
+				MinWidth  = card.Width - 15,
+				MaxWidth  = card.Width + 15,
 			};
 
 			// Screenshot of inventory
 			Bitmap screenshot = Navigation.CaptureWindow();
+			Bitmap output = new Bitmap(screenshot); // Copy used to overlay onto in testing
 
-			// Image filtering for processing.
+			// Image pre-processing
 			ContrastCorrection contrast = new ContrastCorrection(80);
 			Grayscale grayscale = new Grayscale(0.2125, 0.7154, 0.0721);
 			Edges edges = new Edges();
 			Threshold threshold = new Threshold(15);
+			FillHoles holes = new FillHoles
+			{
+				CoupledSizeFiltering = true,
+				MaxHoleWidth = card.Width + 10,
+				MaxHoleHeight = card.Height + 10
+			};
+			SobelEdgeDetector sobel = new SobelEdgeDetector();
 
 			screenshot = contrast.Apply(screenshot);
-
-			screenshot = edges.Apply(screenshot);
-
+			screenshot = edges.Apply(screenshot); // Quick way to find ~75% of edges
 			screenshot = grayscale.Apply(screenshot);
+			screenshot = threshold.Apply(screenshot); // Convert to black and white only based on pixel intensity
 
-			screenshot = threshold.Apply(screenshot);
+			screenshot = sobel.Apply(screenshot); // Find some more edges
+			screenshot = holes.Apply(screenshot); // Fill shapes
+			screenshot = sobel.Apply(screenshot); // Find edges of those shapes. A second pass removes edges within item card
+												  //Navigation.DisplayBitmap(screenshot);
 
 			blobCounter.ProcessImage(screenshot);
 			// Note: Processing won't always detect all item rectangles on screen. Since the
 			// background isn't a solid color it's a bit trickier to filter out.
 
+			if (blobCounter.ObjectsCount < 1)
+			{
+				throw new Exception("No items detected in inventory");
+			}
+
 			// Don't save overlapping blobs
 			List<Rectangle> rectangles = new List<Rectangle>();
-			foreach (var rect in blobCounter.GetObjectsRectangles())
+			List<Rectangle> blobRects = blobCounter.GetObjectsRectangles().ToList();
+
+			int sWidth = blobRects[0].Width;
+			int sHeight = blobRects[0].Height;
+			foreach (var rect in blobRects)
 			{
 				bool add = true;
 				foreach (var item in rectangles)
 				{
-					if (item.IntersectsWith(rect))
+					Rectangle r1 = rect;
+					Rectangle r2 = item;
+					Rectangle intersect = Rectangle.Intersect(r1, r2);
+					if (intersect.Width > r1.Width * .2)
 					{
 						add = false;
 						break;
@@ -127,6 +157,8 @@ namespace GenshinGuide
 				}
 				if (add)
 				{
+					sWidth = Math.Min(sWidth, rect.Width);
+					sHeight = Math.Min(sHeight, rect.Height);
 					rectangles.Add(rect);
 				}
 			}
@@ -172,21 +204,20 @@ namespace GenshinGuide
 			// images on the screen. The center of each of these rectangles should be a good enough
 			// spot to click.
 			rectangles.Clear();
-			foreach (var col in colCoords)
+			colCoords.Sort();
+			rowCoords.Sort();
+			foreach (var row in rowCoords)
 			{
-				foreach (var row in rowCoords)
+				foreach (var col in colCoords)
 				{
-					int x = (int)( col - (itemDimensions.Width * .5) );
-					int y = (int)( row - (itemDimensions.Height * .5) );
+					int x = (int)( col - (sWidth * .5) );
+					int y = (int)( row - (sHeight * .5) );
 
-					rectangles.Add(new Rectangle(x, y, itemDimensions.Width, itemDimensions.Height));
+					rectangles.Add(new Rectangle(x, y, sWidth, sHeight));
 				}
 			}
 
-			// Sort rectangles by row then by column so they're organized like we would expect.
-			rectangles = rectangles.OrderBy(r => r.Top).ThenBy(r => r.Left).ToList();
-			
-			// Remove some rectangles that somehow overlap each other. Don't know why this happens
+			// Remove some rectangles that somehow overlap each other. Don't think this happens
 			// but it doesn't hurt to double check.
 			for (int i = 0; i < rectangles.Count - 1; i++)
 			{
@@ -194,55 +225,104 @@ namespace GenshinGuide
 				{
 					Rectangle r1 = rectangles[i];
 					Rectangle r2 = rectangles[j];
-					if (r1.IntersectsWith(r2))
+					Rectangle intersect = Rectangle.Intersect(r1, r2);
+					if (intersect.Width > r1.Width * .2)
 					{
 						rectangles.RemoveAt(j);
 					}
 				}
 			}
-			
+
+			// Sort by row then by column within each row
+			rectangles = rectangles.OrderBy(r => r.Top).ThenBy(r => r.Left).ToList();
+
+			Debug.WriteLine($"{colCoords.Count} columns");
+			Debug.WriteLine($"{rowCoords.Count} rows");
+			Debug.WriteLine($"{rectangles.Count} rectangles");
+
+			//new RectanglesMarker(rectangles, Color.Green).ApplyInPlace(output);
+			//Navigation.DisplayBitmap(output, "Rectangles");
+
 			return (rectangles, colCoords.Count, rowCoords.Count);
 		}
 
-		
-
 		public static void QueueScan(int id)
 		{
-			// Grab image of entire card on Right
-
-			RECT itemCard = new RECT(new Rectangle(862, 80, 325, 560)); // In 1280x720
-
-			int rX = (int)( itemCard.X / 1280.0 * 1920 );
-			int rY = (int)( itemCard.Y / 720.0  * 1080 );
-			int rW = (int)( itemCard.Right / 1280.0 * 1920 );
-			int rH = (int)( itemCard.Bottom / 720.0 * 1080 );
-
-			RECT itemCard2 = new RECT(rX,rY,rW,rH);
-
-			Bitmap bm = Navigation.CaptureRegion(itemCard);
+			int width = Navigation.GetWidth();
+			int height = Navigation.GetHeight();
 
 			// Separate to all pieces of card
 			List<Bitmap> weaponImages = new List<Bitmap>();
 
+			Bitmap card;
+			RECT reference;
+			Bitmap name, level, refinement, equipped;
+
+			if (Navigation.GetAspectRatio() == new Size(16, 9))
+			{
+				// Grab image of entire card on Right
+				reference = new RECT(new Rectangle(862, 80, 327, 560)); // In 1280x720
+
+				int left = (int)Math.Round(reference.Left / 1280.0 * width, MidpointRounding.AwayFromZero);
+				int top = (int)Math.Round(reference.Top / 720.0 * height, MidpointRounding.AwayFromZero);
+				int right = (int)Math.Round(reference.Right / 1280.0 * width, MidpointRounding.AwayFromZero);
+				int bottom = (int)Math.Round(reference.Bottom / 720.0 * height, MidpointRounding.AwayFromZero);
+
+				RECT itemCard = new RECT(left, top, right, bottom);
+
+				card = Navigation.CaptureRegion(itemCard);
+
+				// Equipped Character
+				equipped = card.Clone(new RECT(
+				Left: (int)(52.0 / reference.Width * card.Width),
+				Top: (int)(522.0 / reference.Height * card.Height),
+				Right: card.Width,
+				Bottom: card.Height), card.PixelFormat);
+				Navigation.DisplayBitmap(equipped, "equipped");
+
+			}
+			else // if (Navigation.GetAspectRatio() == new Size(8, 5))
+			{
+				// Grab image of entire card on Right
+				reference = new RECT(new Rectangle(862, 80, 328, 640)); // In 1280x720
+
+				int left = (int)Math.Round(reference.Left / 1280.0 * width, MidpointRounding.AwayFromZero);
+				int top = (int)Math.Round(reference.Top / 800.0 * height, MidpointRounding.AwayFromZero);
+				int right = (int)Math.Round(reference.Right / 1280.0 * width, MidpointRounding.AwayFromZero);
+				int bottom = (int)Math.Round(reference.Bottom / 800.0 * height, MidpointRounding.AwayFromZero);
+
+				RECT itemCard = new RECT(left, top, right, bottom);
+
+			    card = Navigation.CaptureRegion(itemCard);
+				
+				// Equipped Character
+				equipped = card.Clone(new RECT(
+					Left: (int)( 52.0 / reference.Width * card.Width ),
+					Top: (int)( 602.0 / reference.Height * card.Height ),
+					Right: card.Width,
+					Bottom: card.Height), card.PixelFormat);
+			}
+
 			// Name
-			int xOffset = 10;
-			int yOffset = 7;
-			Bitmap name = bm.Clone(new Rectangle(xOffset, yOffset, itemCard.Width - 2 * xOffset, 25), bm.PixelFormat);
+			name = card.Clone(new RECT(
+				Left: 0,
+				Top: 0,
+				Right: card.Width,
+				Bottom: (int)(38.0 / reference.Height * card.Height)), card.PixelFormat);
 
 			// Level
-			xOffset = 19;
-			yOffset = 206;
-			Bitmap level = bm.Clone(new Rectangle(xOffset, yOffset, 88, 19), bm.PixelFormat);
+			level = card.Clone(new RECT(
+				Left: (int)( 19.0 / reference.Width * card.Width ),
+				Top: (int)( 206.0 / reference.Height * card.Height ),
+				Right: (int)( 107.0 / reference.Width * card.Width ),
+				Bottom: (int)( 225.0 / reference.Height * card.Height )), card.PixelFormat);
 
 			// Refinement
-			xOffset = 19;
-			yOffset = 234;
-			Bitmap refinement = bm.Clone(new Rectangle(xOffset, yOffset, 24, 20), bm.PixelFormat);
-
-			// Equipped Character
-			xOffset = 50;
-			yOffset = 529;
-			Bitmap equipped = bm.Clone(new Rectangle(xOffset, yOffset, itemCard.Width - xOffset, 25), bm.PixelFormat);
+			refinement = card.Clone(new RECT(
+				Left: (int)(18.0 / reference.Width * card.Width),
+				Top: (int)(234.0 / reference.Height * card.Height),
+				Right: (int)(42.0 / reference.Width * card.Width),
+				Bottom: (int)(254.0 / reference.Height * card.Height)), card.PixelFormat);
 
 			// Assign to List
 			weaponImages.Add(name);
@@ -250,7 +330,6 @@ namespace GenshinGuide
 			weaponImages.Add(refinement);
 			weaponImages.Add(equipped);
 
-			// Send Image to Worker Queue
 			GenshinData.workerQueue.Enqueue(new OCRImage(weaponImages, "weapon", id));
 		}
 
@@ -325,18 +404,23 @@ namespace GenshinGuide
 		public static int ScanWeaponCount()
 		{
 			//Find weapon count
-			Bitmap bm = Navigation.CaptureRegion(new Rectangle(1060,20,145,25));
+			Bitmap countBitmap = Navigation.CaptureRegion(new Rectangle(x: (int)(1030 / 1280.0 * Navigation.GetWidth()),
+															   y: (int)(20 / 720.0 * Navigation.GetHeight()),
+															   width: (int)(175 / 1280.0 * Navigation.GetWidth()),
+															   height: (int)(25 / 720.0 * Navigation.GetHeight())));
 
-			Scraper.SetGrayscale(ref bm);
-			Scraper.SetContrast(60.0, ref bm);
-			Scraper.SetInvert(ref bm);
-			UserInterface.SetNavigation_Image(bm);
+			Scraper.SetGrayscale(ref countBitmap);
+			Scraper.SetContrast(60.0, ref countBitmap);
+			Scraper.SetInvert(ref countBitmap);
+			UserInterface.SetNavigation_Image(countBitmap);
 
-			string text = Scraper.AnalyzeText(bm);
+			string text = Scraper.AnalyzeText(countBitmap);
+
+			// Remove any non-numeric and '/' characters
 			text = Regex.Replace(text, @"[^\d/]", "");
 
 			int count;
-			// Check for dash
+			// Check for slash
 			if (Regex.IsMatch(text, "/"))
 			{
 				count = Int32.Parse(text.Split('/')[0]);
@@ -352,7 +436,6 @@ namespace GenshinGuide
 			{
 				count /= 20;
 			}
-
 			return count;
 		}
 
@@ -367,8 +450,6 @@ namespace GenshinGuide
 			text = text.Trim();
 			text = Regex.Replace(text, @"[\W]", "");
 			text = text.ToLower();
-
-			Debug.WriteLine($"Weapon name: {text} scanned");
 
 			UserInterface.SetArtifact_GearSlot(bm, text, true);
 

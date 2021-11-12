@@ -9,6 +9,7 @@ namespace GenshinGuide
 	{
 		[JsonProperty]
 		private static List<Character> characters = new List<Character>();
+
 		[JsonProperty]
 		private static Inventory inventory = new Inventory();
 
@@ -55,11 +56,8 @@ namespace GenshinGuide
 
 			// Scan Main character Name
 			string mainCharacterName = CharacterScraper.ScanMainCharacterName();
-			if (Scraper.b_AssignedTravelerName == false && Scraper.GetCharacterCode(mainCharacterName) == 1)
-			{
-				Scraper.AssignTravelerName(mainCharacterName);
-				Scraper.b_AssignedTravelerName = true;
-			}
+			Scraper.AssignTravelerName(mainCharacterName);
+			Scraper.b_AssignedTravelerName = true;
 
 			if (checkbox[0])
 			{
@@ -70,7 +68,9 @@ namespace GenshinGuide
 				//inventory.AssignWeapons(ref equippedWeapons);
 				Navigation.MainMenuScreen();
 			}
-
+			workerQueue.Enqueue(new OCRImage(null, "END", 0));
+			ImageProcessor.Join();
+			return;
 			if (checkbox[1])
 			{
 				// Get Artifacts
@@ -217,6 +217,5 @@ namespace GenshinGuide
 				}
 			}
 		}
-
 	}
 }

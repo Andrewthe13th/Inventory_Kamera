@@ -13,23 +13,36 @@ namespace GenshinGuide
 
 		public static string ScanMainCharacterName()
 		{
-			Bitmap bm = Navigation.CaptureRegion(new Rectangle(185, 26, 275, 30));
+			var xReference = 1280.0;
+			var yReference = 720.0;
+			if (Navigation.GetAspectRatio() == new Size(8,5))
+			{
+				yReference = 800.0;
+			}
+
+			int left = (int)Math.Round(185 / xReference * Navigation.GetWidth(), MidpointRounding.AwayFromZero);
+			int top  = (int)Math.Round(26 / yReference * Navigation.GetHeight(), MidpointRounding.AwayFromZero);
+			int right = (int)Math.Round(( 275 + 185 ) / xReference * Navigation.GetWidth(), MidpointRounding.AwayFromZero);
+			int bottom = (int)Math.Round(( 35 + 26 ) / yReference * Navigation.GetHeight(), MidpointRounding.AwayFromZero);
+
+			Bitmap nameBitmap = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
 
 			//Image Operations
-			Scraper.SetGamma(0.2, 0.2, 0.2, ref bm);
-			Scraper.SetInvert(ref bm);
-			Scraper.SetGrayscale(ref bm);
-			Scraper.SetContrast(40.0, ref bm);
+			Scraper.SetGamma(0.2, 0.2, 0.2, ref nameBitmap);
+			Scraper.SetInvert(ref nameBitmap);
+			Scraper.SetGrayscale(ref nameBitmap);
+			Scraper.SetContrast(40.0, ref nameBitmap);
 
-			UserInterface.SetNavigation_Image(bm);
+			UserInterface.SetNavigation_Image(nameBitmap);
 
-			string text = Scraper.AnalyzeText(bm).Trim();
+			string text = Scraper.AnalyzeText(nameBitmap).Trim();
 
 			if (text != "")
 			{
+				// Only keep a-Z and 0-9
 				text = Regex.Replace(text, @"[\W_]", "").ToLower();
 
-				// Get rid of space and the text right after it
+				// Only keep text up until first space
 				text = Regex.Replace(text, @"\s+\w*", "");
 			}
 			else

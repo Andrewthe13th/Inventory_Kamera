@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -14,15 +16,18 @@ namespace GenshinGuide
 	public partial class Form1 : Form
 	{
 		//private KeyHandler ghk;
-		static Thread mainThread;
-		static GenshinData data = new GenshinData();
-		static public KeyboardHook hook = new KeyboardHook();
-		static string filePath = "";
+		private static Thread mainThread;
+
+		private static GenshinData data = new GenshinData();
+		public static KeyboardHook hook = new KeyboardHook();
+		private static string filePath = "";
 
 		private int Delay;
 		private bool WeaponsChecked;
 		private bool ArtifactsChecked;
 		private bool CharactersChecked;
+
+		private bool running = false;
 
 		public Form1()
 		{
@@ -30,7 +35,6 @@ namespace GenshinGuide
 
 			// register the event that is fired after the key press.
 			hook.KeyPressed += new EventHandler<KeyPressedEventArgs>(Hook_KeyPressed);
-
 
 			Language_ComboBox.SelectedItem = "ENG";
 			UserInterface.Init(GearSlot_PictureBox,
@@ -54,7 +58,6 @@ namespace GenshinGuide
 					  Navigation_Image);
 			MaximizeBox = false;
 			MinimizeBox = false;
-
 		}
 
 		private int ScannerDelayValue(int value)
@@ -63,10 +66,13 @@ namespace GenshinGuide
 			{
 				case 0:
 					return 0;
+
 				case 1:
 					return 50;
+
 				case 2:
 					return 100;
+
 				default:
 					return 100;
 			}
@@ -187,23 +193,42 @@ namespace GenshinGuide
 		private void StartButton_Clicked(object sender, EventArgs e)
 		{
 			SaveSettings();
+			
+			
 			UserInterface.SetProgramStatus("Scanning");
 
 			if (Directory.Exists(OutputPath_TextBox.Text))
 			{
 				UserInterface.ResetAll();
 				hook.RegisterHotKey(Keys.Enter);
+				if (running)
+				{
+					Debug.WriteLine("Already running");
+					ResetUI();
+					return;
+				}
 
+				running = true;
 				mainThread = new Thread(() =>
 				{
-
 					try
 					{
 						// Get Screen Location and Size
 						Navigation.Initialize("GenshinImpact");
 
-						// Add navigation delay
+						
+						List<Size> sizes = new List<Size>
+						{ 
+							new Size(16,9),
+							new Size(5,4),
+						};
 
+						if (!sizes.Contains(Navigation.GetAspectRatio()))
+						{
+							throw new Exception($"{Navigation.GetAspectRatio()} is an invalid aspect ratio.");
+						}
+
+						// Add navigation delay
 						Navigation.AddDelay(ScannerDelayValue(Delay));
 
 						// Create boolean array
@@ -212,44 +237,34 @@ namespace GenshinGuide
 						checkbox[1] = ArtifactsChecked;
 						checkbox[2] = CharactersChecked;
 
-						// check if screen size is 1280 x 720
-						if (Navigation.GetWidth() == 1280 && Navigation.GetHeight() == 720)
-						{
-							// The Data object of json object
-							data.GatherData(checkbox);
+						// The Data object of json object
+						data.GatherData(checkbox);
 
-							// Covert to GOOD format
-							GOOD good = new GOOD(data);
+						// Covert to GOOD format
+						GOOD good = new GOOD(data);
 
-							// Make Json File
-							good.WriteToJSON(OutputPath_TextBox.Text, Database_MenuItem.Text);
+						// Make Json File
+						good.WriteToJSON(OutputPath_TextBox.Text, Database_MenuItem.Text);
 
-							// Clear saved data
-							ResetUI();
+						// Clear saved data
+						ResetUI();
 
-							UserInterface.SetProgramStatus("Finished");
-						}
-						else
-						{
-							data = new GenshinData();
-							UserInterface.AddError("Game Window not set to 1280 x 720 Windowed");
-							Navigation.Reset();
-							// Un register ENTER key
-							hook.Dispose();
-							throw new Exception("Invalid game window size");
-						}
+						UserInterface.SetProgramStatus("Finished");
 					}
 					catch (ThreadAbortException)
 					{ }
 					catch (Exception ex)
 					{
 						Debug.WriteLine($"{ex.Message}\n{ex.StackTrace}\n");
-						UserInterface.AddError($"{ex.Message}\n{ ex.StackTrace}\n");
+						UserInterface.AddError($"{ex.Message}"); 
+						UserInterface.AddError($"{ex.StackTrace}");
 					}
 					finally
 					{
 						// Clear saved data
 						ResetUI();
+						running = false;
+						Debug.WriteLine("No longer running");
 					}
 				})
 				{
@@ -306,17 +321,17 @@ namespace GenshinGuide
 
 		private void Weapons_CheckBox_CheckedChanged(object sender, EventArgs e)
 		{
-			WeaponsChecked = ((CheckBox)sender).Checked;
+			WeaponsChecked = ( (CheckBox)sender ).Checked;
 		}
 
 		private void Artifacts_Checkbox_CheckedChanged(object sender, EventArgs e)
 		{
-			ArtifactsChecked = ((CheckBox)sender).Checked;
+			ArtifactsChecked = ( (CheckBox)sender ).Checked;
 		}
 
 		private void Characters_CheckBox_CheckedChanged(object sender, EventArgs e)
 		{
-			CharactersChecked = ((CheckBox)sender).Checked;
+			CharactersChecked = ( (CheckBox)sender ).Checked;
 		}
 
 		private void Exit_MenuItem_Click(object sender, EventArgs e)
@@ -343,7 +358,7 @@ namespace GenshinGuide
 			bool np = e.KeyCode >= Keys.NumPad0 && e.KeyCode <= Keys.F24;
 			// OEM keys (Keys that vary depending on keyboard layout)
 			bool oem = e.KeyCode >= Keys.Oem1 && e.KeyCode <= Keys.Oem7;
-			// Arrow keys, spacebar, INS, DEL, HOME, END, PAGEUP, PAGEDOWN 
+			// Arrow keys, spacebar, INS, DEL, HOME, END, PAGEUP, PAGEDOWN
 			bool misc = e.KeyCode == Keys.Space || (e.KeyCode >= Keys.Left && e.KeyCode <= Keys.Down) || (e.KeyCode >= Keys.Prior && e.KeyCode <= Keys.Home) || e.KeyCode == Keys.Insert || e.KeyCode == Keys.Delete;
 
 			// Validate that key is an acceptable Genshin keybind.
@@ -369,10 +384,12 @@ namespace GenshinGuide
 					Navigation.inventoryKey = (VirtualKeyCode)e.KeyCode;
 					Debug.WriteLine($"Inv key set to: {Navigation.inventoryKey}");
 					break;
+
 				case "CharacterKey":
 					Navigation.characterKey = (VirtualKeyCode)e.KeyCode;
 					Debug.WriteLine($"Char key set to: {Navigation.characterKey}");
 					break;
+
 				default:
 					break;
 			}
@@ -401,16 +418,16 @@ namespace GenshinGuide
 		}
 
 		[DllImport("user32.dll")]
-		static extern bool GetKeyboardState(byte[] lpKeyState);
+		private static extern bool GetKeyboardState(byte[] lpKeyState);
 
 		[DllImport("user32.dll")]
-		static extern uint MapVirtualKey(uint uCode, uint uMapType);
+		private static extern uint MapVirtualKey(uint uCode, uint uMapType);
 
 		[DllImport("user32.dll")]
-		static extern IntPtr GetKeyboardLayout(uint idThread);
+		private static extern IntPtr GetKeyboardLayout(uint idThread);
 
 		[DllImport("user32.dll")]
-		static extern int ToUnicodeEx(uint wVirtKey, uint wScanCode, byte[] lpKeyState, [Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pwszBuff, int cchBuff, uint wFlags, IntPtr dwhkl);
+		private static extern int ToUnicodeEx(uint wVirtKey, uint wScanCode, byte[] lpKeyState, [Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pwszBuff, int cchBuff, uint wFlags, IntPtr dwhkl);
 
 		private void databaseMenuItem_Click(object sender, EventArgs e)
 		{
