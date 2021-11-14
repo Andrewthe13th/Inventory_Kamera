@@ -95,6 +95,10 @@ namespace GenshinGuide
             {
                 return 100;
             }
+            else if (value == 3)
+            {
+                return 200;
+            }
             else
             {
                 return 100;

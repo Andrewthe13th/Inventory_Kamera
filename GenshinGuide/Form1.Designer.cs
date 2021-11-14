@@ -87,6 +87,7 @@
             this.label24 = new System.Windows.Forms.Label();
             this.label25 = new System.Windows.Forms.Label();
             this.label26 = new System.Windows.Forms.Label();
+            this.label30 = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
             this.label27 = new System.Windows.Forms.Label();
             this.FilePath = new System.Windows.Forms.Label();
@@ -631,9 +632,9 @@
             // ScannerDelay
             // 
             this.ScannerDelay.Location = new System.Drawing.Point(32, 269);
-            this.ScannerDelay.Maximum = 2;
+            this.ScannerDelay.Maximum = 3;
             this.ScannerDelay.Name = "ScannerDelay";
-            this.ScannerDelay.Size = new System.Drawing.Size(104, 56);
+            this.ScannerDelay.Size = new System.Drawing.Size(114, 56);
             this.ScannerDelay.TabIndex = 68;
             // 
             // label22
@@ -708,7 +709,7 @@
             // 
             this.label25.AutoSize = true;
             this.label25.Font = new System.Drawing.Font("Microsoft Sans Serif", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label25.Location = new System.Drawing.Point(71, 305);
+            this.label25.Location = new System.Drawing.Point(62, 305);
             this.label25.Name = "label25";
             this.label25.Size = new System.Drawing.Size(32, 13);
             this.label25.TabIndex = 75;
@@ -718,11 +719,21 @@
             // 
             this.label26.AutoSize = true;
             this.label26.Font = new System.Drawing.Font("Microsoft Sans Serif", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label26.Location = new System.Drawing.Point(103, 305);
+            this.label26.Location = new System.Drawing.Point(88, 305);
             this.label26.Name = "label26";
             this.label26.Size = new System.Drawing.Size(38, 13);
             this.label26.TabIndex = 76;
             this.label26.Text = "100ms";
+            // 
+            // label30
+            // 
+            this.label30.AutoSize = true;
+            this.label30.Font = new System.Drawing.Font("Microsoft Sans Serif", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label30.Location = new System.Drawing.Point(118, 305);
+            this.label30.Name = "label30";
+            this.label30.Size = new System.Drawing.Size(38, 13);
+            this.label30.TabIndex = 76;
+            this.label30.Text = "200ms";
             // 
             // button1
             // 
@@ -830,6 +841,7 @@
             this.Controls.Add(this.FilePath);
             this.Controls.Add(this.label27);
             this.Controls.Add(this.button1);
+            this.Controls.Add(this.label30);
             this.Controls.Add(this.label26);
             this.Controls.Add(this.label25);
             this.Controls.Add(this.label24);
@@ -952,6 +964,7 @@
         private System.Windows.Forms.Label label24;
         private System.Windows.Forms.Label label25;
         private System.Windows.Forms.Label label26;
+        private System.Windows.Forms.Label label30;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Label label27;
         private System.Windows.Forms.Label FilePath;
