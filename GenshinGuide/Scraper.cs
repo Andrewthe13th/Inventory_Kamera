@@ -354,7 +354,8 @@ namespace GenshinGuide
             // 2.2
             ["polarstar"] = ++weaponCount,
 			["akuoumaru"] = ++weaponCount,
-
+			["mouunsmoon"] = ++weaponCount,
+			["wavebreakersfin"] = ++weaponCount,
 		};
 		private static readonly Dictionary<string, int> characterDevelopmentItemsCode = new Dictionary<string, int>
 		{
