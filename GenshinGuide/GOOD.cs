@@ -386,7 +386,7 @@ namespace GenshinGuide
 			// For preserving information at when uploading data to
 			// https://frzyc.github.io/genshin-optimizer 
 			JObject database = null;
-			if (File.Exists(oldDataFilePath))
+			if (File.Exists(oldDataFilePath) && false) // && false hack. TODO: add support for data merging)
 			{
 				try
 				{
