@@ -4,65 +4,78 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
+using System.Threading.Tasks;
+using Accord.Imaging;
+using Accord.Imaging.Filters;
+using static GenshinGuide.Artifact;
 
 namespace GenshinGuide
 {
 	public static class ArtifactScraper
 	{
-		public static void ScanArtifacts(int count = 50)
+		public static void ScanArtifacts(int count = 524)
 		{
 			// Get Max artifacts from screen
 			int artifactCount = count == 0 ? ScanArtifactCount() : count;
-			UserInterface.SetArtifact_Max(artifactCount);
+			var (rectangles, cols, rows) = GetPageOfItems();
+			int fullPage = cols * rows;
+			int totalRows = (int)Math.Ceiling(artifactCount / (decimal)cols);
 			int cardsQueued = 0;
-
-			// Where in screen space artifacts are
-			int  itemX = (int) (Navigation.GetArea().Right * (21 / (Double)160));
-			int  itemY = (int) (Navigation.GetArea().Bottom * (14 / (Double)90));
-
-			// Artifact inventory has 7 columns and 5 rows default
-			int maxColumns = 7;
-			int maxRows = 5;
-			int column = 0;
-			int row = 0;
-
-			// offset used to move mouse to other artifacts
-			int xOffset = Convert.ToInt32(Navigation.GetArea().Right * ((Double)12.25 / 160));
-			int yOffset = Convert.ToInt32(Navigation.GetArea().Bottom * ((Double)14.5 / 90));
+			int rowsQueued = 0;
+			int offset = 0;
+			UserInterface.SetArtifact_Max(artifactCount);
 
 			// Go through artifact list
 			while (cardsQueued < artifactCount)
 			{
-				int nextOffsetX = (xOffset * (cardsQueued % maxColumns));
-				int nextOffsetY = (yOffset * (row % maxRows));
-				// Select Artifact
-				Navigation.SetCursorPos(Navigation.GetPosition().Left + itemX + nextOffsetX, Navigation.GetPosition().Top + itemY + nextOffsetY);
-				Navigation.sim.Mouse.LeftButtonClick();
-				Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
-
-				// Scan Artifact
-				QueueScan(cardsQueued);
-				cardsQueued++;
-				column++;
-
-				// reach end of row
-				if (column == maxColumns)
+				int cardsRemaining = artifactCount - cardsQueued;
+				for (int i = cardsRemaining < fullPage ? ( rows - ( totalRows - rowsQueued ) ) * cols : 0; i < rectangles.Count; i++)
 				{
-					// reset mouse pointer and scroll down artifact list
-					column = 0;
-					row++;
+					Rectangle item = rectangles[i];
+					Navigation.SetCursorPos(Navigation.GetPosition().Left + item.Center().X, Navigation.GetPosition().Top + item.Center().Y + offset);
+					Navigation.sim.Mouse.LeftButtonClick();
+					Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
 
-					// Scroll to next chunk
-					if (cardsQueued % ( maxRows * maxColumns ) == 0)
+					// Queue card for scanning
+					QueueScan(cardsQueued);
+					cardsQueued++;
+					if (cardsQueued >= artifactCount)
 					{
-						for (int i = 0; i < 50; i++)
-						{
-							Navigation.sim.Mouse.VerticalScroll(-1);
-							Navigation.SystemRandomWait(Navigation.Speed.Instant);
-						}
-						row = 0;
+						return;
 					}
+				}
+
+				rowsQueued += rows;
+
+				// Page done, now scroll
+				// If the number of remaining scans is shorter than a full page then
+				// only scroll a few rows
+				if (totalRows - rowsQueued <= rows)
+				{
+					if (Navigation.GetAspectRatio() == new Size(8, 5))
+					{
+						offset = 35; // Lazy fix
+					}
+					for (int i = 0; i < 10 * ( totalRows - rowsQueued ) - 1; i++)
+					{
+						Navigation.sim.Mouse.VerticalScroll(-1);
+						Navigation.SystemRandomWait(Navigation.Speed.InventoryScroll);
+					}
+					Navigation.SystemRandomWait(Navigation.Speed.Normal);
+				}
+				else
+				{
+					// Scroll back one to keep it from getting too crazy
+					if (rowsQueued % 15 == 0)
+					{
+						Navigation.sim.Mouse.VerticalScroll(1);
+					}
+					for (int i = 0; i < 10 * rows - 1; i++)
+					{
+						Navigation.sim.Mouse.VerticalScroll(-1);
+						Navigation.SystemRandomWait(Navigation.Speed.InventoryScroll);
+					}
+					Navigation.SystemRandomWait(Navigation.Speed.Faster);
 				}
 			}
 		}
@@ -70,22 +83,24 @@ namespace GenshinGuide
 		private static int ScanArtifactCount()
 		{
 			//Find artifact count
-			Double weaponCountLocation_X = Navigation.GetArea().Right * (130 / (Double)160);
-			Double weaponCountLocation_Y = Navigation.GetArea().Bottom * (2 / (Double)90);
-			Bitmap bm = new Bitmap(175, 34);
-			Graphics g = Graphics.FromImage(bm);
-			g.CopyFromScreen(Navigation.GetPosition().Left + Convert.ToInt32(weaponCountLocation_X), Navigation.GetPosition().Top + Convert.ToInt32(weaponCountLocation_Y), 0, 0, bm.Size);
+			int left = (int)(1028 / 1280.0 * Navigation.GetWidth());
+			int top = (int)(20 / 720.0 * Navigation.GetHeight());
+			int right = (int)(1208 / 1280.0 * Navigation.GetWidth());
+			int bottom = (int)(45 / 720.0 * Navigation.GetHeight());
+
+			Bitmap bm = Navigation.CaptureRegion(new RECT(left,top,right,bottom));
+			UserInterface.SetNavigation_Image(bm);
 
 			Scraper.SetGrayscale(ref bm);
 			Scraper.SetContrast(60.0, ref bm);
 			Scraper.SetInvert(ref bm);
-			UserInterface.SetNavigation_Image(bm);
 
 			string text = Scraper.AnalyzeText(bm);
+			bm.Dispose();
 			text = Regex.Replace(text, @"[^\d/]", "");
 			text = text.Trim();
 
-			int count = 0;
+			int count;
 			// Check for dash
 			if (Regex.IsMatch(text, "/"))
 			{
@@ -94,785 +109,554 @@ namespace GenshinGuide
 			else
 			{
 				// divide by the number on the right if both numbers fused
-				count = Int32.Parse(text) / 1000;
+				count = Int32.Parse(text) / 1500;
 			}
 
-			// Check if larger than 1000
-			while (count > 1600)
+			// Check if larger than 1500
+			while (count > 1500)
 			{
-				count = count / 10;
+				count /= 10;
 			}
 
 			return count;
 		}
 
+		private static (List<Rectangle> rectangles, int cols, int rows) GetPageOfItems()
+		{
+			var card = new RECT(
+				Left: 0,
+				Top: 0,
+				Right: (int)(80 / 1280.0 * Navigation.GetWidth()),
+				Bottom: (int)(100 / 720.0 * Navigation.GetHeight()));
+
+			// Filter for relative size of items in inventory, give or take a few pixels
+			BlobCounter blobCounter = new BlobCounter
+			{
+				FilterBlobs = true,
+				MinHeight = card.Height - 15,
+				MaxHeight = card.Height + 15,
+				MinWidth  = card.Width - 15,
+				MaxWidth  = card.Width + 15,
+			};
+
+			// Screenshot of inventory
+			Bitmap screenshot = Navigation.CaptureWindow();
+			Bitmap output = new Bitmap(screenshot); // Copy used to overlay onto in testing
+
+			// Image pre-processing
+			ContrastCorrection contrast = new ContrastCorrection(80);
+			Grayscale grayscale = new Grayscale(0.2125, 0.7154, 0.0721);
+			Edges edges = new Edges();
+			Threshold threshold = new Threshold(15);
+			FillHoles holes = new FillHoles
+			{
+				CoupledSizeFiltering = true,
+				MaxHoleWidth = card.Width + 10,
+				MaxHoleHeight = card.Height + 10
+			};
+			SobelEdgeDetector sobel = new SobelEdgeDetector();
+
+			screenshot = contrast.Apply(screenshot);
+			screenshot = edges.Apply(screenshot); // Quick way to find ~75% of edges
+			screenshot = grayscale.Apply(screenshot);
+			screenshot = threshold.Apply(screenshot); // Convert to black and white only based on pixel intensity
+
+			screenshot = sobel.Apply(screenshot); // Find some more edges
+			screenshot = holes.Apply(screenshot); // Fill shapes
+			screenshot = sobel.Apply(screenshot); // Find edges of those shapes. A second pass removes edges within item card
+
+			blobCounter.ProcessImage(screenshot);
+			// Note: Processing won't always detect all item rectangles on screen. Since the
+			// background isn't a solid color it's a bit trickier to filter out.
+
+			if (blobCounter.ObjectsCount < 1)
+			{
+				throw new Exception("No items detected in inventory");
+			}
+
+			// Don't save overlapping blobs
+			List<Rectangle> rectangles = new List<Rectangle>();
+			List<Rectangle> blobRects = blobCounter.GetObjectsRectangles().ToList();
+
+			int sWidth = blobRects[0].Width;
+			int sHeight = blobRects[0].Height;
+			foreach (var rect in blobRects)
+			{
+				bool add = true;
+				foreach (var item in rectangles)
+				{
+					Rectangle r1 = rect;
+					Rectangle r2 = item;
+					Rectangle intersect = Rectangle.Intersect(r1, r2);
+					if (intersect.Width > r1.Width * .2)
+					{
+						add = false;
+						break;
+					}
+				}
+				if (add)
+				{
+					sWidth = Math.Min(sWidth, rect.Width);
+					sHeight = Math.Min(sHeight, rect.Height);
+					rectangles.Add(rect);
+				}
+			}
+
+			// Determine X and Y coordinates for columns and rows, respectively
+			var colCoords = new List<int>();
+			var rowCoords = new List<int>();
+
+			foreach (var item in rectangles)
+			{
+				bool addX = true;
+				bool addY = true;
+				foreach (var x in colCoords)
+				{
+					var xC = item.Center().X;
+					if (x - 10 <= xC && xC <= x + 10)
+					{
+						addX = false;
+						break;
+					}
+				}
+				foreach (var y in rowCoords)
+				{
+					var yC = item.Center().Y;
+					if (y - 10 <= yC && yC <= y + 10)
+					{
+						addY = false;
+						break;
+					}
+				}
+				if (addX)
+				{
+					colCoords.Add(item.Center().X);
+				}
+				if (addY)
+				{
+					rowCoords.Add(item.Center().Y);
+				}
+			}
+
+			// Clear it all because we're going to use X,Y coordinate pairings to build rectangles
+			// around. This won't be perfect but it should algorithmically put rectangles over all
+			// images on the screen. The center of each of these rectangles should be a good enough
+			// spot to click.
+			rectangles.Clear();
+			colCoords.Sort();
+			rowCoords.Sort();
+			foreach (var row in rowCoords)
+			{
+				foreach (var col in colCoords)
+				{
+					int x = (int)( col - (sWidth * .5) );
+					int y = (int)( row - (sHeight * .5) );
+
+					rectangles.Add(new Rectangle(x, y, sWidth, sHeight));
+				}
+			}
+
+			// Remove some rectangles that somehow overlap each other. Don't think this happens
+			// but it doesn't hurt to double check.
+			for (int i = 0; i < rectangles.Count - 1; i++)
+			{
+				for (int j = i + 1; j < rectangles.Count; j++)
+				{
+					Rectangle r1 = rectangles[i];
+					Rectangle r2 = rectangles[j];
+					Rectangle intersect = Rectangle.Intersect(r1, r2);
+					if (intersect.Width > r1.Width * .2)
+					{
+						rectangles.RemoveAt(j);
+					}
+				}
+			}
+
+			// Sort by row then by column within each row
+			rectangles = rectangles.OrderBy(r => r.Top).ThenBy(r => r.Left).ToList();
+
+			Debug.WriteLine($"{colCoords.Count} columns");
+			Debug.WriteLine($"{rowCoords.Count} rows");
+			Debug.WriteLine($"{rectangles.Count} rectangles");
+
+			//new RectanglesMarker(rectangles, Color.Green).ApplyInPlace(output);
+			//Navigation.DisplayBitmap(output, "Rectangles");
+			//screenshot.Dispose();
+			//output.Dispose();
+
+			return (rectangles, colCoords.Count, rowCoords.Count);
+		}
+
 		public static void QueueScan(int id)
 		{
-			// Grab Image of Entire Artifact on Right
-			Double artifactLocation_X = Navigation.GetArea().Right * (108 / (Double)160);
-			Double artifactLocation_Y = Navigation.GetArea().Bottom * (10 / (Double)90);
-			int width = 325; int height = 560;
-			Bitmap bm = new Bitmap(width, height,System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-			Graphics g = Graphics.FromImage(bm);
-			int screenLocation_X = Navigation.GetPosition().Left + Convert.ToInt32(artifactLocation_X);
-			int screenLocation_Y = Navigation.GetPosition().Top + Convert.ToInt32(artifactLocation_Y);
-			g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
+			int width = Navigation.GetWidth();
+			int height = Navigation.GetHeight();
 
 			// Separate to all pieces of artifact and add to pics
 			List<Bitmap> artifactImages = new List<Bitmap>();
 
-			// GearSlot
-			int offset = 46;
-			Bitmap artifactGearSlot = bm.Clone(new Rectangle(3, offset, width / 2, 20), bm.PixelFormat);
+			Bitmap name, gearSlot, mainStat, subStats, level, equipped, rarity, locked;
+			RECT reference;
 
-			// MainStat
-			int yOffset = 100;
-			Bitmap artifactMainStat = bm.Clone(new Rectangle(0, yOffset, width / 2 + width / 28, 20), bm.PixelFormat);
+			//if (Navigation.GetAspectRatio() == new Size(16,9))
+			//{
+			reference = new RECT(new Rectangle(862, 80, 327, 565));
 
-			// Level
-			int level_width = 50; int level_height = 33;
-			Bitmap artifactLevel = bm.Clone(new Rectangle(11, 198, 50, level_height), bm.PixelFormat);
-			g = Graphics.FromImage(artifactLevel);
+			int left = (int)Math.Round(reference.Left / 1280.0 * width, MidpointRounding.AwayFromZero);
+			int top = (int)Math.Round(reference.Top / 720.0 * height, MidpointRounding.AwayFromZero);
+			int right = (int)Math.Round(reference.Right / 1280.0 * width, MidpointRounding.AwayFromZero);
+			int bottom = (int)Math.Round(reference.Bottom / 720.0 * height, MidpointRounding.AwayFromZero);
 
-			// Add more padding to be able to read level better
-			g.DrawRectangle(new Pen(artifactLevel.GetPixel(7, 10), 16), new Rectangle(0, 0, level_width, level_height));
-			g.DrawRectangle(new Pen(artifactLevel.GetPixel(7, 10), 12), new Rectangle(0, 0, level_width, level_height));
+			using (Bitmap card = Navigation.CaptureRegion(new RECT(left, top, right, bottom)))
+			{
+				// Equipped Character
+				//{
+				equipped = card.Clone(new RECT(
+					Left: (int)( 50.0 / reference.Width * card.Width ),
+					Top: (int)( 522.0 / reference.Height * card.Height ),
+					Right: card.Width,
+					Bottom: card.Height), card.PixelFormat);
+				//}
 
-			// SubStats
-			int xOffset = 0; yOffset = 235; int subStatSpacing = 27;
-			Bitmap artifactSubStats = bm.Clone(new Rectangle(0, yOffset + (0 * subStatSpacing), width - xOffset, 29*5), bm.PixelFormat);
+				//Navigation.DisplayBitmap(equipped);
 
-			// Equipped Character
-			xOffset = 30; yOffset = 532;
-			Bitmap artifactEquippedCharacter = bm.Clone(new Rectangle(xOffset, yOffset, width - xOffset, 20), bm.PixelFormat);
-			g = Graphics.FromImage(artifactEquippedCharacter);
-			// Gets rid of character head on Left
-			g.DrawRectangle(new Pen(artifactEquippedCharacter.GetPixel(width - xOffset - 1, 10), 14), new Rectangle(0, 0, 13, height));
+				name = card.Clone(new RECT(
+					Left: 0,
+					Top: 0,
+					Right: card.Width,
+					Bottom: (int)( 38.0 / reference.Height * card.Height )), card.PixelFormat);
+				//Navigation.DisplayBitmap(name);
 
-			// Rarity
-			Bitmap artifactRarity = bm.Clone(new Rectangle(12, 10, 1, 1),bm.PixelFormat);
+				// GearSlot
+				gearSlot = card.Clone(new RECT(
+					Left: (int)( 3.0 / reference.Width * card.Width ),
+					Top: (int)( 46.0 / reference.Height * card.Height ),
+					Right: (int)( ( ( reference.Width / 2.0 ) + 20 ) / reference.Width * card.Width ),
+					Bottom: (int)( 66.0 / reference.Height * card.Height )), card.PixelFormat);
+				//Navigation.DisplayBitmap(gearSlot);
 
-			// Locked Status
-			Bitmap artifactLocked = bm.Clone(new Rectangle(width-35, 220, 1, 1), bm.PixelFormat);
+				// MainStat
+				mainStat = card.Clone(new RECT(
+					Left: 0,
+					Top: (int)( 100.0 / reference.Height * card.Height ),
+					Right: (int)( ( ( reference.Width / 2.0 ) + 20 ) / reference.Width * card.Width ),
+					Bottom: (int)( 120.0 / reference.Height * card.Height )), card.PixelFormat);
+				//Navigation.DisplayBitmap(mainStat);
 
+				// Level
+				level = card.Clone(new RECT(
+					Left: (int)( 18.0 / reference.Width * card.Width ),
+					Top: (int)( 203.0 / reference.Height * card.Height ),
+					Right: (int)( 61.0 / reference.Width * card.Width ),
+					Bottom: (int)( 228.0 / reference.Height * card.Height )), card.PixelFormat);
+				//Navigation.DisplayBitmap(level);
+
+				// SubStats
+				subStats = card.Clone(new RECT(
+					Left: 0,
+					Top: (int)( 235.0 / reference.Height * card.Height ),
+					Right: card.Width,
+					Bottom: (int)( 373.0 / reference.Height * card.Height )), card.PixelFormat);
+				//Navigation.DisplayBitmap(subStats);
+
+				// Rarity
+				rarity = card.Clone(new RECT(
+					Left: 1,
+					Top: 0,
+					Right: card.Width,
+					Bottom: 1), card.PixelFormat);
+				//Navigation.DisplayBitmap(rarity);
+
+				// Locked Status
+				locked = card.Clone(new RECT(
+					Left: (int)( 284.0 / reference.Width * card.Width ),
+					Top: (int)( 201.0 / reference.Height * card.Height ),
+					Right: (int)( 312.0 / reference.Width * card.Width ),
+					Bottom: (int)( 228.0 / reference.Height * card.Height )), card.PixelFormat);
+			}
 			// Add all to artifact Images
-			artifactImages.Add(artifactGearSlot); // 0
-			artifactImages.Add(artifactMainStat);
-			artifactImages.Add(artifactLevel);
-			artifactImages.Add(artifactSubStats);
-			artifactImages.Add(artifactEquippedCharacter);
-			artifactImages.Add(artifactRarity);
-			artifactImages.Add(artifactLocked); //6
+			artifactImages.Add(gearSlot); // 0
+			artifactImages.Add(mainStat);
+			artifactImages.Add(level);
+			artifactImages.Add(subStats);
+			artifactImages.Add(equipped);
+			artifactImages.Add(rarity);
+			artifactImages.Add(locked); //6
 
 			// Send Image to Worker Queue
 			GenshinData.workerQueue.Enqueue(new OCRImage(artifactImages, "artifact", id));
-			g.Dispose();
 		}
 
-		public static Artifact ScanArtifact(List<Bitmap> bm, int id)
+		public static async Task<Artifact> CatalogueFromBitmapsAsync(List<Bitmap> bm, int id)
 		{
 			// Init Variables
-			int gearSlot = 0;
-			int mainStat = 0;
+			string gearSlot = null;
+			string mainStat = null;
+
 			int rarity = 0;
-			//decimal mainStatValue = 0;
+
 			int level = 0;
-			Artifact.SubStat[] subStats = new Artifact.SubStat[4];
-			int subStatsCount = 0;
-			int setName = 0;
-			int equippedCharacter = 0;
+
+			List<SubStat> subStats = new List<SubStat>();
+
+			string setName = null;
+
+			string equippedCharacter = null;
+
 			bool _lock = false;
-			int width = 325; int height = 560;
 
 			if (bm.Count == 7)
 			{
 				int a_gearSlot = 0; int a_mainStat = 1; int a_level = 2; int a_subStats = 3; int a_equippedCharacter = 4; int a_rarity = 5; int a_lock = 6;
-				// Get Rarity (Check color)
+
+				// Get Rarity
 				Color rarityColor = bm[a_rarity].GetPixel(0, 0);
-				//textBox.Text = rarityColor.A + " " + rarityColor.R + " " + rarityColor.G + " " + rarityColor.B;
+
 				Color fiveStar = Color.FromArgb(255, 188, 105, 50);
-				Color fourthStar = Color.FromArgb(255, 161, 86, 224);
-				Color thirdStar = Color.FromArgb(255, 81, 127, 203);
+				Color fourStar = Color.FromArgb(255, 161, 86, 224);
+				Color threeStar = Color.FromArgb(255, 81, 127, 203);
 				Color twoStar = Color.FromArgb(255, 42, 143, 114);
-				Color firstStar = Color.FromArgb(255, 114, 119, 138);
+				Color oneStar = Color.FromArgb(255, 114, 119, 138);
 
 				// Check for equipped color
-				Color equipped = Color.FromArgb(255, 255, 231, 187);
-				Color equippedColor = bm[a_equippedCharacter].GetPixel(5, 5);
+				Color equippedColor = Color.FromArgb(255, 255, 231, 187);
+				Color equippedStatus = bm[a_equippedCharacter].GetPixel(5, 5);
 
 				// Check for lock color
-				Color lockColor = Color.FromArgb(255, 255, 138, 117);
-				Color lockStatus = bm[a_lock].GetPixel(0, 0);
+				Color lockedColor = Color.FromArgb(255, 70, 80, 100); // Dark area around red lock
+				Color lockStatus = bm[a_lock].GetPixel(5, 5);
 
-				// Remove artifacts lower than 3 star
-				if (Scraper.CompareColors(fiveStar, rarityColor) || Scraper.CompareColors(fourthStar, rarityColor))
-				//if (true)
+				// Only scan 4 and 5-star artifacts
+				if (Scraper.CompareColors(fiveStar, rarityColor) || Scraper.CompareColors(fourStar, rarityColor))
 				{
-					rarity = ( Scraper.CompareColors(fiveStar, rarityColor) ) ? 5 : 4;
-					bool b_equipped = Scraper.CompareColors(equipped, equippedColor);
-					_lock = Scraper.CompareColors(lockColor, lockStatus);
+					rarity = Scraper.CompareColors(fiveStar, rarityColor) ? 5 : 4;
+					bool b_equipped = Scraper.CompareColors(equippedColor, equippedStatus);
+					_lock = Scraper.CompareColors(lockedColor, lockStatus);
 
 					// Improved Scanning using multi threading
-					Thread thr1 = new Thread(() => gearSlot = ScanArtifactGearSlot(bm[a_gearSlot], width, height));
-					Thread thr2 = new Thread(() => mainStat = ScanArtifactMainStat(bm[a_mainStat], width, height, gearSlot));
-					Thread thr3 = new Thread(() => level = ScanArtifactLevel(bm[a_level], width, height));
-					Thread thr4 = new Thread(() => subStats = ScanArtifactSubStats(bm[a_subStats], rarity, level, ref subStatsCount, ref setName));
-					Thread thr5 = new Thread(() => equippedCharacter = ScanArtifactEquippedCharacter(bm[a_equippedCharacter], width, height));
+					List<Task> tasks = new List<Task>();
 
-					thr1.Start();
-					thr3.Start();
+					var taskGear  = Task.Run(() => gearSlot = ScanArtifactGearSlot(bm[a_gearSlot]));
+					var taskMain  = taskGear.ContinueWith( (antecedent) => mainStat = ScanArtifactMainStat(bm[a_mainStat], antecedent.Result));
+					var taskLevel = Task.Run(() => level = ScanArtifactLevel(bm[a_level]));
+					var taskSubs  = Task.Run(() => subStats = ScanArtifactSubStats(bm[a_subStats], ref setName));
+					var taskEquip = Task.Run(() => equippedCharacter = ScanArtifactEquippedCharacter(bm[a_equippedCharacter]));
+
+					tasks.Add(taskGear);
+					tasks.Add(taskMain);
+					tasks.Add(taskLevel);
+					tasks.Add(taskSubs);
 					if (b_equipped)
 					{
-						thr5.Start();
+						tasks.Add(taskEquip);
 					}
 
-					//  sub stats will check level and rarity
-					thr3.Join();
-					thr4.Start();
-
-					// main stat will check gearslot
-					thr1.Join();
-					thr2.Start();
-
-					// 2-5 join back
-					thr4.Join();
-					if (b_equipped)
-					{
-						thr5.Join();
-					}
-					thr2.Join();
-
-					// dispose the list
-					foreach (Bitmap x in bm)
-					{
-						x.Dispose();
-					}
+					await Task.WhenAll(tasks.ToArray());
 				}
-				// Don't fully scan 3 star artifacts and lower
-				else if (Scraper.CompareColors(thirdStar, rarityColor))
+				else if (Scraper.CompareColors(threeStar, rarityColor))
 				{
-					rarity = 0; equippedCharacter = -1; setName = -1; level = -1; gearSlot = -1;
+					rarity = 3; equippedCharacter = null; setName = null; level = -1; gearSlot = null;
 					//rarity = 3;
-					//gearSlot == -1 || level == -1 || setName == -1 || equippedCharacter < 0 || rarity == 0
 				}
 				else if (Scraper.CompareColors(twoStar, rarityColor))
 				{
-					rarity = 0; equippedCharacter = -1; setName = -1; level = -1; gearSlot = -1;
+					rarity = 2; equippedCharacter = null; setName = null; level = -1; gearSlot = null;
 					//rarity = 2;
 				}
-				else if (Scraper.CompareColors(firstStar, rarityColor))
+				else if (Scraper.CompareColors(oneStar, rarityColor))
 				{
-					rarity = 0; equippedCharacter = -1; setName = -1; level = -1; gearSlot = -1;
+					rarity = 1; equippedCharacter = null; setName = null; level = -1; gearSlot = null;
 					//rarity = 1;
 				}
 				else
-				{ // Not found
-					rarity = 0; equippedCharacter = -1; setName = -1; level = -1; gearSlot = -1;
+				{
+					// Not found
+					rarity = 0; equippedCharacter = null; setName = null; level = -1; gearSlot = null;
 					//rarity = 0;
-					UserInterface.AddError("Couldn't find rarity for artifact");
+					UserInterface.AddError("Couldn't determine rarity for artifact");
 				}
 			}
 
-			Artifact a = new Artifact(rarity, gearSlot, mainStat, level, subStats, subStatsCount, setName, equippedCharacter, id, _lock);
-
-			return a;
+			return new Artifact(rarity, gearSlot, mainStat, level, subStats.ToArray(), subStats.Count, setName, equippedCharacter, id, _lock);
 		}
 
-		public static Artifact ScanArtifact(int id)
+		#region Threaded Functions
+
+		private static string ScanArtifactGearSlot(Bitmap bm)
 		{
-			// Init Variables
-			int gearSlot = 0;
-			int mainStat = 0;
-			//decimal mainStatValue = 0;
-			int level = 0;
-			Artifact.SubStat[] subStats = new Artifact.SubStat[4];
-			int subStatsCount = 0;
-			int setName = 0;
-			int equippedCharacter = 0;
-			bool _lock = false;
-
-			// Grab Image of Entire Artifact on Right
-			Double artifactLocation_X = Navigation.GetArea().Right * (108 / (Double)160);
-			Double artifactLocation_Y = Navigation.GetArea().Bottom * (10 / (Double)90);
-			int width = 325; int height = 560;
-
-			Bitmap bm = new Bitmap(width, height);
-			Graphics g = Graphics.FromImage(bm);
-			int screenLocation_X = Navigation.GetPosition().Left + Convert.ToInt32(artifactLocation_X);
-			int screenLocation_Y = Navigation.GetPosition().Top + Convert.ToInt32(artifactLocation_Y);
-			g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
-
-			// Get Rarity (Check color)
-			int rarity = 0;
-			Color rarityColor = bm.GetPixel(12, 10);
-			//textBox.Text = rarityColor.A + " " + rarityColor.R + " " + rarityColor.G + " " + rarityColor.B;
-			Color fiveStar = Color.FromArgb(255, 188, 105, 50);
-			Color fourthStar = Color.FromArgb(255, 161, 86, 224);
-			Color thirdStar = Color.FromArgb(255, 81, 127, 203);
-			Color twoStar = Color.FromArgb(255, 42, 143, 114);
-			Color firstStar = Color.FromArgb(255, 114, 119, 138);
-
-			// Check for equipped color
-			Color equipped = Color.FromArgb(255, 255, 231, 187);
-			Color equippedColor = bm.GetPixel(5, height - 10);
-
-			// Check for lock color
-			Color lockColor = Color.FromArgb(255, 255, 138, 117);
-			Color lockStatus = bm.GetPixel(width - 35, 220);
-
-			if (Scraper.CompareColors(fiveStar, rarityColor) || Scraper.CompareColors(fourthStar, rarityColor))
-			//if (true)
-			{
-				rarity = ( Scraper.CompareColors(fiveStar, rarityColor) ) ? 5 : 4;
-				bool b_equipped = Scraper.CompareColors(equipped, equippedColor);
-				_lock = Scraper.CompareColors(lockColor, lockStatus);
-
-				Bitmap bm_1 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
-				Bitmap bm_2 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
-				Bitmap bm_3 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
-				Bitmap bm_4 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
-
-				// Improved Scanning using multi threading
-				Thread thr1 = new Thread(() => gearSlot = ScanArtifactGearSlot(bm_1, width, height));
-				Thread thr2 = new Thread(() => mainStat = ScanArtifactMainStat(bm_1, width, height, gearSlot));
-				Thread thr3 = new Thread(() => level = ScanArtifactLevel(bm_2, width, height));
-				Thread thr4 = new Thread(() => subStats = ScanArtifactSubStats(bm_3, rarity, level, ref subStatsCount, ref setName));
-				Thread thr5 = new Thread(() => equippedCharacter = ScanArtifactEquippedCharacter(bm_4, width, height));
-
-				thr1.Start();
-				thr3.Start();
-				if (b_equipped)
-				{
-					thr5.Start();
-				}
-
-				//  sub stats will check level and rarity
-				thr3.Join();
-				thr4.Start();
-
-				// main stat will check gearslot
-				thr1.Join();
-				thr2.Start();
-
-				// 2-5 join back
-				thr4.Join();
-				if (b_equipped)
-				{
-					thr5.Join();
-				}
-				thr2.Join();
-			}
-			// Don't fully scan 3 star artifacts and lower
-			else if (Scraper.CompareColors(thirdStar, rarityColor))
-			{
-				rarity = 3;
-				Navigation.SystemRandomWait(Navigation.Speed.ArtifactIgnore);
-			}
-			else if (Scraper.CompareColors(twoStar, rarityColor))
-			{
-				rarity = 2;
-				Navigation.SystemRandomWait(Navigation.Speed.ArtifactIgnore);
-			}
-			else if (Scraper.CompareColors(firstStar, rarityColor))
-			{
-				rarity = 1;
-				Navigation.SystemRandomWait(Navigation.Speed.ArtifactIgnore);
-			}
-			else
-			{ // Not found
-				rarity = 0;
-			}
-
-			Artifact a =  new Artifact(rarity, gearSlot, mainStat, level, subStats, subStatsCount, setName, equippedCharacter, id, _lock);
-			//Artifact a = new Artifact("",0,"",0,0,null,0,"",null);
-
-			return a;
-		}
-
-		#region Threaded Scan Functions
-
-		private static int ScanArtifactGearSlot(Bitmap bm, int max_X, int max_Y)
-		{
-			//Init
-			string gearSlot = "";
-
 			// Process Img
 			Scraper.SetGrayscale(ref bm);
 			Scraper.SetContrast(80.0, ref bm);
 			Scraper.SetInvert(ref bm);
 
-			// Analyze
-			gearSlot = Scraper.AnalyzeText_1(bm);
-			gearSlot = gearSlot.Replace("\n", String.Empty);
+			string gearSlot = Scraper.AnalyzeText(bm).Trim().ToLower();
 			gearSlot = Regex.Replace(gearSlot, @"[\W_]", "");
-			gearSlot = gearSlot.ToLower();
-			UserInterface.SetArtifact_GearSlot(bm, gearSlot);
-
-			return Scraper.GetGearSlotCode(gearSlot);
+			return gearSlot;
 		}
 
-		private static int ScanArtifactMainStat(Bitmap bm, int max_X, int max_Y, int gearSlot)
+		private static string ScanArtifactMainStat(Bitmap bm, string gearSlot)
 		{
-			// Get Main Stat
-			string mainStat = "";
-			if (gearSlot == 0) // Flower HP
+			switch (gearSlot)
 			{
-				//UserInterface.SetArtifact_MainStat(artifactImage, "HP");
-				return Scraper.GetMainStatCode("hp_flat");
-			}
-			else if (gearSlot == 1) // Plume ATK
-			{
-				//UserInterface.SetArtifact_MainStat(artifactImage, "ATK");
-				return Scraper.GetMainStatCode("atk_flat");
-			}
-			else // scan time, cup, hat artifacts only
-			{
-				Scraper.SetContrast(100.0, ref bm);
-				Scraper.SetGamma(0.1, 0.1, 0.1, ref bm);
-				Scraper.SetInvert(ref bm);
-				Scraper.SetGrayscale(ref bm);
+				// Flower of Life. Flat HP
+				case "floweroflife":
+					//Debug.WriteLine($"ScanArtifactMainStat runtime: {ts.Milliseconds}ms");
 
-				mainStat = Scraper.AnalyzeText_1(bm);
-				mainStat = mainStat.Replace("\n", String.Empty);
-				mainStat = Regex.Replace(mainStat, @"[\W_]", "");
-				mainStat = mainStat.ToLower();
-				mainStat.Trim();
-				UserInterface.SetWeapon_Level(bm, mainStat);
+					return "hp_flat";
 
-				return Scraper.GetMainStatCode(mainStat);
+				// Plume of Death. Flat ATK
+				case "plumeofdeath":
+					//Debug.WriteLine($"ScanArtifactMainStat runtime: {ts.Milliseconds}ms");
+					return "atk_flat";
+
+				// Otherwise it's either sands, goblet or circlet.
+				default:
+
+					Scraper.SetContrast(100.0, ref bm);
+					Scraper.SetGamma(0.1, 0.1, 0.1, ref bm);
+					Scraper.SetInvert(ref bm);
+					Scraper.SetGrayscale(ref bm);
+					Scraper.SetThreshold(127, ref bm);
+
+					// Get Main Stat
+					string mainStat = Scraper.AnalyzeText(bm).ToLower().Trim();
+					mainStat = Regex.Replace(mainStat, @"[\W_]", "");
+
+					//Debug.WriteLine($"ScanArtifactMainStat runtime: {ts.Milliseconds}ms");
+
+					return mainStat;
 			}
 		}
 
-		private static int ScanArtifactLevel(Bitmap bm, int max_X, int max_Y)
+		private static int ScanArtifactLevel(Bitmap bm)
 		{
 			// Process Img
 			Scraper.SetGrayscale(ref bm);
+			Scraper.SetContrast(80.0, ref bm);
 			Scraper.SetInvert(ref bm);
 
-			string text = Scraper.AnalyzeText_2(bm);
-			text.Trim();
-			text = text.Replace("\n", String.Empty);
+			// numbersOnly = true => seems to interpret the '+' as a '4'
+			string text = Scraper.AnalyzeText(bm, Tesseract.PageSegMode.SingleWord, numbersOnly: false).Trim().ToLower();
+
 			// Get rid of all non digits
 			text = Regex.Replace(text, @"[\D]", "");
-			UserInterface.SetGear_Level(bm, text);
 
-			if (text != "" && int.TryParse(text, out int level))
-			{
-				// Check if level is valid
-				if (level <= 20 && level >= 0)
-				{
-					return level;
-				}
-				else
-				{
-					Debug.Print("Error: Found " + level + " for level for artifact");
-					Form1.UnexpectedError("Found " + level + " for level for artifact"); ;
-					return -1;
-				}
-			}
-			else
-			{
-				Debug.Print("Error: Found '" + text + "' for level for artifact");
-				Form1.UnexpectedError("Found '" + text + "' for level for artifact"); ;
-				return -1;
-			}
+			//Debug.WriteLine($"ScanArtifactLevel runtime: {ts.Milliseconds}ms");
+
+			return int.TryParse(text, out int level) ? level : -1;
 		}
 
-		private static Artifact.SubStat[] ScanArtifactSubStats(Bitmap artifactImage, int rarity, int level, ref int subStatsCount, ref int setName)
+		private static List<SubStat> ScanArtifactSubStats(Bitmap artifactImage, ref string setName)
 		{
-			// Get SubStats
-			Artifact.SubStat[] subStats = new Artifact.SubStat[4];
-			int offset = 26;
-			//int yOffset = 235;
-			int xOffset = 30;
-			int subStatSpacing = 27;
-			string text = "";
-			int width = artifactImage.Width;
-			System.Drawing.Imaging.PixelFormat pixelFormat = artifactImage.PixelFormat;
-
-			// Get Substats Count
-			int count = 2;
-			if (rarity == 5)
+			if (Navigation.GetAspectRatio() == new Size(8, 5))
 			{
-				if (level >= 4)
-				{
-					count = 4;
-				}
-				else
-				{
-					count = 3;
-				}
-			}
-			if (rarity == 4)
-			{
-				if (level >= 8)
-				{
-					count = 4;
-				}
-				else if (level >= 4)
-				{
-					count = 3;
-				}
-				else
-				{
-					count = 2;
-				}
+				throw new Exception("Need to implement artifact substat scraping in 16:10 aspect ratio");
 			}
 
-			if (count == 4)
+			var text = Scraper.AnalyzeText(artifactImage, Tesseract.PageSegMode.Auto).ToLower();
+			List<string> lines = new List<string>(text.Split('\n'));
+			lines.RemoveAll(line => string.IsNullOrWhiteSpace(line) || line.Contains("set:"));
+
+			SubStat[] substats = new SubStat[4];
+			List<Task<string>> tasks = new List<Task<string>>();
+
+			for (int i = 0; i < lines.Count; i++)
 			{
-				subStatsCount = 4;
-				//Do first two substats using threads
-				Bitmap bm_1 = artifactImage.Clone(new Rectangle(xOffset, (0 * subStatSpacing), width - xOffset, 29), pixelFormat);
-				Bitmap bm_2 = artifactImage.Clone(new Rectangle(xOffset, (1 * subStatSpacing), width - xOffset, 29), pixelFormat);
-				Bitmap bm_3 = artifactImage.Clone(new Rectangle(xOffset, (2 * subStatSpacing), width - xOffset, 29), pixelFormat);
-				Bitmap bm_4 = artifactImage.Clone(new Rectangle(xOffset, (3 * subStatSpacing), width - xOffset, 29), pixelFormat);
-
-				Thread thr1 = new Thread(() => subStats[0] = ScanArtifactSubStat(bm_1, 1));
-				Thread thr2 = new Thread(() => subStats[1] = ScanArtifactSubStat(bm_2, 2));
-				Thread thr3 = new Thread(() => subStats[2] = ScanArtifactSubStat(bm_3, 3));
-				Thread thr4 = new Thread(() => subStats[3] = ScanArtifactSubStat(bm_4, 4));
-
-				thr1.Start();
-				thr2.Start();
-				thr3.Start();
-				thr4.Start();
-				thr1.Join();
-				thr2.Join();
-				thr3.Join();
-				thr4.Join();
-
-				bm_1.Dispose(); bm_2.Dispose(); bm_3.Dispose(); bm_4.Dispose();
-
-				Bitmap bm = artifactImage.Clone(new Rectangle(0, (4 * subStatSpacing), width - offset, 29), pixelFormat);
-				Scraper.SetGrayscale(ref bm);
-				text = Scraper.AnalyzeText_Line1(bm).Trim();
-				text = Regex.Replace(text, @"[^\w:]", "");
-				text = text.ToLower();
-
-				if (text.Contains(':'))
+				int j = i;
+				var task = Task.Factory.StartNew(() =>
 				{
-					text = text.Split(':')[0];
-					//text = Regex.Replace(text, @"(?![A-Za-z\s]).", "");
-					text = Regex.Replace(text, @"[^\w]", "");
-					text = text.Trim();
-					UserInterface.SetArtifact_SetName(bm, text);
-					setName = Scraper.GetSetNameCode(text);
-					return subStats;
-				}
-				else
-				{
-					Debug.Print("Error: " + text + " is not a valid SET NAME");
-					Form1.UnexpectedError(text + " is not a valid SET NAME"); ;
-					setName = -1;
-					return subStats;
-				}
-			}
-			else if (count == 3)
-			{
-				subStatsCount = 3;
-				//Do first two substats using threads
-				Bitmap bm_1 = artifactImage.Clone(new Rectangle(xOffset, (0 * subStatSpacing), width - xOffset, 29), pixelFormat);
-				Bitmap bm_2 = artifactImage.Clone(new Rectangle(xOffset, (1 * subStatSpacing), width - xOffset, 29), pixelFormat);
-				Bitmap bm_3 = artifactImage.Clone(new Rectangle(xOffset, (2 * subStatSpacing), width - xOffset, 29), pixelFormat);
+					var line = Regex.Replace(lines[j], @"(?:^[^a-zA-Z]*)", "").Replace(" ", "");
 
-				Thread thr1 = new Thread(() => subStats[0] = ScanArtifactSubStat(bm_1, 1));
-				Thread thr2 = new Thread(() => subStats[1] = ScanArtifactSubStat(bm_2, 2));
-				Thread thr3 = new Thread(() => subStats[2] = ScanArtifactSubStat(bm_3, 3));
-
-				thr1.Start();
-				thr2.Start();
-				thr3.Start();
-				thr1.Join();
-				thr2.Join();
-				thr3.Join();
-
-				bm_1.Dispose(); bm_2.Dispose(); bm_3.Dispose();
-			}
-			else
-			{
-				subStatsCount = 2;
-				//Do first two substats using threads
-				Bitmap bm_1 = artifactImage.Clone(new Rectangle(xOffset, (0 * subStatSpacing), width - xOffset, 29), pixelFormat);
-				Bitmap bm_2 = artifactImage.Clone(new Rectangle(xOffset, (1 * subStatSpacing), width - xOffset, 29), pixelFormat);
-
-				Thread thr1 = new Thread(() => subStats[0] = ScanArtifactSubStat(bm_1, 1));
-				Thread thr2 = new Thread(() => subStats[1] = ScanArtifactSubStat(bm_2, 2));
-
-				thr1.Start();
-				thr2.Start();
-				thr1.Join();
-				thr2.Join();
-
-				bm_1.Dispose(); bm_2.Dispose();
-			}
-
-			for (int i = count; i < 5; i++)
-			{
-				Bitmap bm = artifactImage.Clone(new Rectangle(xOffset, (i * subStatSpacing), width - xOffset, 29), pixelFormat);
-
-				text = Scraper.AnalyzeText_Line1(bm);
-				text = text.Replace("\n", String.Empty);
-
-				// Check if Scanned Set Name
-				if (text.Contains(":") || i >= 4)
-				{
-					//bm = new Bitmap(max_X - offset, 29);
-					bm = artifactImage.Clone(new Rectangle(0, ( i * subStatSpacing ), width - offset, 29), pixelFormat);
-					Scraper.SetGrayscale(ref bm);
-					text = Scraper.AnalyzeText_3(bm).Trim();
-					text = Regex.Replace(text, @"[^\w:]", "");
-					text = text.ToLower();
-					UserInterface.SetArtifact_SetName(bm, text);
-
-					if (text.Contains(':'))
+					if (line.Contains("+"))
 					{
-						text = text.Split(':')[0];
-						text = Regex.Replace(text, @"[^\w]", "");
-						text = text.Trim();
-						setName = Scraper.GetSetNameCode(text);
-					}
-					else
-					{
-						Debug.Print("Error: " + text + " is not a valid SET NAME");
-						Form1.UnexpectedError(text + " is not a valid SET NAME"); ;
-						setName = -1;
-						return subStats;
-					}
-					break;
-				}
-				else // Get SubStat
-				{
-					UserInterface.SetArtifact_SubStat(bm, text, count - 1);
-					if (text.Contains("+"))
-					{
-						//text = Regex.Replace(text, @"(?![A-Za-z0-9+%\s/.]).", "");
-						text = Regex.Replace(text, @"[^\w.+%]", "");
-						text = text.ToLower();
-						string[] subStat = text.Split('+');
-						subStat[0] = subStat[0].Trim();
+						SubStat stat;
 
-						if (subStat.Length > 1)
-						{
-							// Percentage Based
-							if (subStat[1].Contains('%'))
-							{
-								string optional = "";
-
-								if (subStat[0] == "atk" || subStat[0] == "def" || subStat[0] == "hp")
-								{
-									optional = "%";
-								}
-
-								subStats[i].stat = Scraper.GetSubStatCode(subStat[0] + optional);
-
-								// Check if subStat has space (when value is not detected with a deciminal)
-								if (subStat[1].Contains(' ') && !subStat[1].Contains('.'))
-								{
-									subStat[1] = subStat[1].Replace(' ', '.');
-								}
-
-								// check if value has no deciminal
-								if (!subStat[1].Contains('.'))
-								{
-									string temp = subStat[1].Split('%')[0];
-									if (Decimal.TryParse(temp, System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.CreateSpecificCulture("en-US"), out decimal value))
-									{
-										subStats[i].value = value / 10;
-									}
-									else
-									{
-										subStats[i].value = -1;
-										UserInterface.AddError("Substat " + temp + " is not a valid substat");
-									}
-								}
-								else
-								{
-									string temp = subStat[1].Split('%')[0];
-									if (Decimal.TryParse(temp, System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.CreateSpecificCulture("en-US"), out decimal value))
-									{
-										subStats[i].value = value;
-									}
-									else
-									{
-										subStats[i].value = -1;
-										UserInterface.AddError("Substat " + temp + " is not a valid substat");
-									}
-								}
-							}
-							else // flat stats
-							{
-								subStats[i].stat = Scraper.GetSubStatCode(subStat[0]);
-								subStats[i].value = Convert.ToDecimal(subStat[1].Replace("\n", String.Empty));
-							}
-						}
-						else
-						{
-							subStats[i].stat = -1;
-							subStats[i].value = -1;
-						}
-					}
-					else
-					{
-						subStats[i].value = Convert.ToDecimal(-1);
-					}
-					subStatsCount++;
-				}
-				bm.Dispose();
-			}
-
-			return subStats;
-		}
-
-		private static Artifact.SubStat ScanArtifactSubStat(Bitmap bm, int ocr)
-		{
-			Artifact.SubStat subStats = new Artifact.SubStat();
-			string text = "";
-			if (ocr == 4)
-			{
-				text = Scraper.AnalyzeText_Line4(bm);
-			}
-			else if (ocr == 3)
-			{
-				text = Scraper.AnalyzeText_Line3(bm);
-			}
-			else if (ocr == 2)
-			{
-				text = Scraper.AnalyzeText_Line2(bm);
-			}
-			else
-			{
-				text = Scraper.AnalyzeText_Line1(bm);
-			}
-
-			text = text.Replace("\n", String.Empty);
-			text = Regex.Replace(text, @"[^\w+%.]", "");
-			text = text.ToLower();
-			UserInterface.SetArtifact_SubStat(bm, text, ocr - 1);
-
-			if (text.Contains("+"))
-			{
-				string[] subStat = text.Split('+');
-				subStat[0] = subStat[0].Trim();
-
-				if (subStat.Length > 1)
-				{
-					// Percentage Based
-					if (subStat[1].Contains('%'))
-					{
+						var split = line.Split('+');
 						string optional = "";
-
-						if (subStat[0] == "atk" || subStat[0] == "def" || subStat[0] == "hp")
+						if (split[1].Contains('%'))
 						{
-							optional = "%";
-						}
-
-						subStats.stat = Scraper.GetSubStatCode(subStat[0] + optional);
-
-						// Check if subStat has space (when value is not detected with a deciminal)
-						if (subStat[1].Contains(' ') && !subStat[1].Contains('.'))
-						{
-							subStat[1] = subStat[1].Replace(' ', '.');
-						}
-
-						// check if value has no deciminal
-						if (!subStat[1].Contains('.'))
-						{
-							string temp = subStat[1].Split('%')[0];
-							if (Decimal.TryParse(temp, System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.CreateSpecificCulture("en-US"), out decimal value))
+							split[1] = split[1].Replace("%", "");
+							if (split[0] == "atk" || split[0] == "def" || split[0] == "hp")
 							{
-								subStats.value = value / 10;
-							}
-							else
-							{
-								subStats.value = -1;
-								UserInterface.AddError("Substat " + temp + " is not a valid substat");
+								optional = "%";
 							}
 						}
-						else
+						stat.stat = split[0] + optional;
+						if (!decimal.TryParse(split[1], out stat.value))
 						{
-							string temp = subStat[1].Split('%')[0];
-							if (Decimal.TryParse(temp, System.Globalization.NumberStyles.Number, System.Globalization.CultureInfo.CreateSpecificCulture("en-US"), out decimal value))
-							{
-								subStats.value = value;
-							}
-							else
-							{
-								subStats.value = -1;
-								UserInterface.AddError("Substat " + temp + " is not a valid substat");
-							}
+							stat.value = -1;
+							//UserInterface.AddError($"Failed to parse stat value for {stat.stat}");
 						}
+						substats[j] = stat;
+						return null;
 					}
-					else // flat stats
+					else if (line.Contains(":"))
 					{
-						subStats.stat = Scraper.GetSubStatCode(subStat[0]);
-						subStats.value = Convert.ToDecimal(subStat[1].Replace("\n", String.Empty));
+						var name = line.Split(':')[0].Trim().ToLower();
+
+						name = Regex.Replace(name, @"[^\w]", "");
+
+						return name;
+					}
+					else
+					{
+						return null;
+					}
+				});
+				tasks.Add(task);
+			}
+
+			while (tasks.Count > 0)
+			{
+				for (int i = 0; i < tasks.Count; i++)
+				{
+					Task<string> task = tasks[i];
+					if (!task.IsCompleted)
+					{
+						continue;
+					}
+					if (!task.IsFaulted && task.Result != null)
+					{
+						setName = task.Result;
+					}
+					if (task.IsCompleted)
+					{
+						tasks.Remove(task);
+						break;
 					}
 				}
-				else
-				{
-					subStats.stat = -1;
-					subStats.value = -1;
-				}
 			}
-			else
-			{
-				subStats.stat = -1;
-				subStats.value = Convert.ToDecimal(-1);
-			}
-			return subStats;
+
+			//Debug.WriteLine($"ScanArtifactSubStats runtime: {ts.Milliseconds}ms");
+			return substats.ToList();
 		}
 
-		private static int ScanArtifactEquippedCharacter(Bitmap bm, int max_X, int max_Y)
+		private static string ScanArtifactEquippedCharacter(Bitmap bm)
 		{
-			int xOffset = 30;
-			//int yOffset = 532;
-
-			Graphics g = Graphics.FromImage(bm);
-			// Gets rid of character head on Left
-			g.DrawRectangle(new Pen(bm.GetPixel(max_X - xOffset - 1, 10), 14), new Rectangle(0, 0, 13, bm.Height));
 			Scraper.SetGrayscale(ref bm);
 			Scraper.SetContrast(60.0, ref bm);
 
-			string equippedCharacter = Scraper.AnalyzeText_4(bm);
-			equippedCharacter = Regex.Replace(equippedCharacter, @"[^\w:_]", "");
-			equippedCharacter = equippedCharacter.ToLower();
-			equippedCharacter.Trim();
-			//bm.Dispose();
+			string equippedCharacter = Scraper.AnalyzeText(bm).ToLower().Trim();
+			equippedCharacter = Regex.Replace(equippedCharacter, @"[^\w]", "");
 
 			if (equippedCharacter != "")
 			{
-				var regexItem = new Regex("equipped:");
-				if (regexItem.IsMatch(equippedCharacter))
+				if (equippedCharacter.Contains(":"))
 				{
-					string[] tempString = equippedCharacter.Split(':');
-					equippedCharacter = tempString[1].Replace("\n", String.Empty);
-					equippedCharacter = equippedCharacter.Trim();
-					//equippedCharacter = Regex.Replace(equippedCharacter, @"[\/!@#$%^&*()\[\]\-_`~\\+={};:',.<>?‘|]", "");
-					UserInterface.SetGear_Equipped(bm, equippedCharacter);
+					equippedCharacter = equippedCharacter.Split(':')[1].Trim();
+					//UserInterface.SetGear_Equipped(bm, equippedCharacter);
 					equippedCharacter = Regex.Replace(equippedCharacter, @"[^\w_]", "");
 
-					// Used to match with Traveler Name
-					while (equippedCharacter.Length > 1)
-					{
-						int temp = Scraper.GetCharacterCode(equippedCharacter, true);
-						if (temp == -1)
-						{
-							equippedCharacter = equippedCharacter.Substring(0, equippedCharacter.Length - 1);
-						}
-						else
-						{
-							break;
-						}
-					}
-
-					return Scraper.GetCharacterCode(equippedCharacter);
+					//Debug.WriteLine($"ScanArtifactEquippedCharacter runtime: {ts.Milliseconds}ms");
+					return equippedCharacter;
 				}
 			}
 			// artifact has no equipped character
-			return 0;
+
+			//Debug.WriteLine($"ScanArtifactEquippedCharacter runtime: {ts.Milliseconds}ms");
+			return null;
 		}
 
-		#endregion Threaded Scan Functions
+		#endregion Threaded Functions
 	}
 }

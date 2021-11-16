@@ -1,226 +1,202 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using Accord.Imaging.Filters;
 using Tesseract;
 
 namespace GenshinGuide
 {
 	public static class Scraper
 	{
+		private const int numEngines = 2;
 #if DEBUG
 		public static bool s_bDoDebugOnlyCode = false;
 #endif
+		private static readonly string tesseractDatapath = $"{Directory.GetCurrentDirectory()}\\tessdata";
+		private static readonly string tesseractLanguage = "genshin_fast_09_04_21";
 
 		// GLOBALS
 		public static bool b_AssignedTravelerName = false;
 
-		private static int setCount = 0;
-		private static int mainStatCount = 0;
-		private static int characterCount = 1;
-		private static int weaponCount = 0;
-		private static int characterDevelopmentItemsCount = 0;
-		private static int materialsCount = 0;
-
-		private static readonly Dictionary<string, int> setNames = new Dictionary<string, int>
+		public static readonly List<string> setNames = new List<string>
 		{
-			["adventurer"] = setCount,
-			["luckydog"] = ++setCount,
-			["travelingdoctor"] = ++setCount,
-			["resolutionofsojourner"] = ++setCount,
-			["tinymiracle"] = ++setCount,
-			["berserker"] = ++setCount, // 5
-			["instructor"] = ++setCount,
-			["theexile"] = ++setCount,
-			["defenderswill"] = ++setCount,
-			["braveheart"] = ++setCount,
-			["martialartist"] = ++setCount, // 10
-			["gambler"] = ++setCount,
-			["scholar"] = ++setCount,
-			["prayersforillumination"] = ++setCount,
-			["prayersfordestiny"] = ++setCount,
-			["prayersforwisdom"] = ++setCount, // 15
-			["prayersthespringtime"] = ++setCount,
-			["thundersoother"] = ++setCount,
-			["lavawalker"] = ++setCount,
-			["maidenbeloved"] = ++setCount,
-			["gladiatorsfinale"] = ++setCount, // 20
-			["viridescentvenerer"] = ++setCount,
-			["wandererstroupe"] = ++setCount,
-			["thunderingfury"] = ++setCount,
-			["crimsonwitchofflames"] = ++setCount,
-			["noblesseoblige"] = ++setCount, // 25
-			["bloodstainedchivalry"] = ++setCount,
-			["archaicpetra"] = ++setCount,
-			["retracingbolide"] = ++setCount,
-			["heartofdepth"] = ++setCount,
-			["blizzardstrayer"] = ++setCount, // 30
-			["paleflame"] = ++setCount,
-			["tenacityofthemillelith"] = ++setCount,
-			["shimenawasreminiscence"] = ++setCount,
-			["emblemofseveredfate"] = ++setCount,
+			"adventurer",
+			"luckydog",
+			"travelingdoctor",
+			"resolutionofsojourner",
+			"tinymiracle",
+			"berserker",
+			"instructor",
+			"theexile",
+			"defenderswill",
+			"braveheart",
+			"martialartist",
+			"gambler",
+			"scholar",
+			"prayersforillumination",
+			"prayersfordestiny",
+			"prayersforwisdom",
+			"prayersthespringtime",
+			"thundersoother",
+			"lavawalker",
+			"maidenbeloved",
+			"gladiatorsfinale",
+			"viridescentvenerer",
+			"wandererstroupe",
+			"thunderingfury",
+			"crimsonwitchofflames",
+			"noblesseoblige",
+			"bloodstainedchivalry",
+			"archaicpetra",
+			"retracingbolide",
+			"heartofdepth",
+			"blizzardstrayer",
+			"paleflame",
+			"tenacityofthemillelith",
+			"shimenawasreminiscence",
+			"emblemofseveredfate",
 		};
 
-		private static readonly Dictionary<string, int> mainStats = new Dictionary<string, int>
+		public static readonly List<string> stats = new List<string>
 		{
-			["hp_flat"] = mainStatCount,
-			["atk_flat"] = ++mainStatCount,
-			// these are %
-			["hp"] = ++mainStatCount,
-			["atk"] = ++mainStatCount,
-			["def"] = ++mainStatCount,
-			["energyrecharge"] = ++mainStatCount, //5
-			["elementalmastery"] = ++mainStatCount,
-			["healingbonus"] = ++mainStatCount,
-			["critrate"] = ++mainStatCount,
-			["critdmg"] = ++mainStatCount,
-			["physicaldmgbonus"] = ++mainStatCount, //10
-			["pyrodmgbonus"] = ++mainStatCount,
-			["electrodmgbonus"] = ++mainStatCount,
-			["cryodmgbonus"] = ++mainStatCount,
-			["hydrodmgbonus"] = ++mainStatCount,
-			["anemodmgbonus"] = ++mainStatCount, //15
-			["geodmgbonus"] = ++mainStatCount,
+			"hp",
+			"hp_flat",
+			"hp%",
+			"atk",
+			"atk_flat",
+			"atk%",
+			"def",
+			"def%",
+			"energyrecharge",
+			"elementalmastery",
+			"healingbonus",
+			"critrate",
+			"critdmg",
+			"physicaldmgbonus",
+			"pyrodmgbonus",
+			"electrodmgbonus",
+			"cryodmgbonus",
+			"hydrodmgbonus",
+			"anemodmgbonus",
+			"geodmgbonus",
 		};
 
-		private static readonly Dictionary<string, int> gearSlots = new Dictionary<string, int>
+		public static readonly List<string> gearSlots = new List<string>
 		{
-			["floweroflife"] = 0,
-			["plumeofdeath"] = 1,
-			["sandsofeon"] = 2,
-			["gobletofeonothem"] = 3,
-			["circletoflogos"] = 4,
+			"floweroflife",
+			"plumeofdeath",
+			"sandsofeon",
+			"gobletofeonothem",
+			"circletoflogos",
 		};
 
-		private static readonly Dictionary<string, int> subStats = new Dictionary<string, int>
+		public static readonly List<string> characters = new List<string>
 		{
-			["hp"] = 0,
-			["hp%"] = 1,
-			["atk"] = 2,
-			["atk%"] = 3,
-			["def"] = 4,
-			["def%"] = 5,
-			["energyrecharge"] = 6,
-			["elementalmastery"] = 7,
-			["critrate"] = 8,
-			["critdmg"] = 9,
+			"amber",
+			"kaeya",
+			"lisa",
+			"barbara",
+			"razor",
+			"xiangling",
+			"beidou",
+			"xingqiu",
+			"ningguang",
+			"fischl",
+			"bennett",
+			"noelle",
+			"chongyun",
+			"sucrose",
+			"jean",
+			"diluc",
+			"qiqi",
+			"mona",
+			"keqing",
+			"venti",
+			"klee",
+			"diona",
+			"tartaglia",
+			"xinyan",
+			"zhongli",
+			"albedo",
+			"ganyu",
+			"xiao",
+			"hutao",
+			"rosaria",
+			"yanfei",
+			"eula",
+			"kaedeharakazuha",
+			"kaedehara",
+			"kamisatoayaka",
+			"kamisato",
+			"yoimiya",
+			"sayu",
+			"raidenshogun",
+			"raiden",
+			"kujousara",
+			"kujou",
+			"aloy",
+			"sangonomiyakokomi",
+			"sangonomiya",
+			"thoma",
 		};
 
-		private static readonly Dictionary<string, int> characters = new Dictionary<string, int>
-		{
-			[""] = -1,
-			["amber"] = ++characterCount,
-			["kaeya"] = ++characterCount,
-			["lisa"] = ++characterCount,
-			["barbara"] = ++characterCount, //5
-			["razor"] = ++characterCount,
-			["xiangling"] = ++characterCount,
-			["beidou"] = ++characterCount,
-			["xingqiu"] = ++characterCount,
-			["ningguang"] = ++characterCount, // 10
-			["fischl"] = ++characterCount,
-			["bennett"] = ++characterCount,
-			["noelle"] = ++characterCount,
-			["chongyun"] = ++characterCount,
-			["sucrose"] = ++characterCount, // 15
-			["jean"] = ++characterCount,
-			["diluc"] = ++characterCount,
-			["qiqi"] = ++characterCount,
-			["mona"] = ++characterCount,
-			["keqing"] = ++characterCount, // 20
-			["venti"] = ++characterCount,
-			["klee"] = ++characterCount,
-			["diona"] = ++characterCount,
-			["tartaglia"] = ++characterCount,
-			["xinyan"] = ++characterCount, // 25
-			["zhongli"] = ++characterCount,
-			["albedo"] = ++characterCount,
-			["ganyu"] = ++characterCount,
-			["xiao"] = ++characterCount,
-			["hutao"] = ++characterCount, // 30
-			["hutao"] = characterCount, // 30
-			["rosaria"] = ++characterCount,
-			["yanfei"] = ++characterCount,
-			["eula"] = ++characterCount,
-			["kaedeharakazuha"] = ++characterCount,
-			["kaedehara"] = characterCount,
-			["kamisatoayaka"] = ++characterCount, //35
-			["kamisato"] = characterCount, //35
-			["yoimiya"] = ++characterCount,
-			["sayu"] = ++characterCount,
-			["raidenshogun"] = ++characterCount,
-			["raiden"] = characterCount,
-			["kujousara"] = ++characterCount,
-			["kujou"] = characterCount,
-			["aloy"] = ++characterCount, // 40
-			["sangonomiyakokomi"] = ++characterCount,
-			["sangonomiya"] = characterCount,
-			["thoma"] = ++characterCount,
-		};
-
-		public static Dictionary<int, string[]> characterTalentConstellationOrder = new Dictionary<int, string[]>
+		public static Dictionary<string, string[]> characterTalentConstellationOrder = new Dictionary<string, string[]>
 		{
 			/////////// Traveler is Assigned at runtime /////////////
-			[1] = new string[] { "burst", "skill" }, // Traveler
-													 ///////////////////////////////////////////////
-			[2] = new string[] { "burst", "skill" }, //Amber
-			[3] = new string[] { "skill", "burst" }, //Kaeya
-			[4] = new string[] { "burst", "skill" }, //Lisa
-			[5] = new string[] { "burst", "skill" }, //Barbara
-			[6] = new string[] { "burst", "skill" }, //Razor
-			[7] = new string[] { "burst", "skill" }, //Xiangling
-			[8] = new string[] { "skill", "burst" }, //Beidou
-			[9] = new string[] { "burst", "skill" }, //Xingqiu
-			[10] = new string[] { "burst", "skill" }, //Ningguang
-			[11] = new string[] { "skill", "burst" }, //Fischl
-			[12] = new string[] { "skill", "burst" }, //Bennett
-			[13] = new string[] { "skill", "burst" }, //Noelle
-			[14] = new string[] { "burst", "skill" }, //Chongyun
-			[15] = new string[] { "skill", "burst" }, //Sucrose
-			[16] = new string[] { "burst", "skill" }, //Jean
-			[17] = new string[] { "skill", "burst" }, //Diluc
-			[18] = new string[] { "burst", "skill" }, //Qiqi
-			[19] = new string[] { "burst", "skill" }, //Mona
-			[20] = new string[] { "burst", "skill" }, //Keqing
-			[21] = new string[] { "burst", "skill" }, //Venti
-			[22] = new string[] { "skill", "burst" }, //Klee
-			[23] = new string[] { "burst", "skill" }, //Diona
-			[24] = new string[] { "skill", "burst" }, //Tartaglia
-			[25] = new string[] { "skill", "burst" }, //Xinyan
-			[26] = new string[] { "skill", "burst" }, //Zhongli
-			[27] = new string[] { "skill", "burst" }, //Albedo
-			[28] = new string[] { "burst", "skill" }, //Ganyu
-			[29] = new string[] { "skill", "burst" }, //Xiao
-			[30] = new string[] { "skill", "burst" }, //Hu Tao
-			[31] = new string[] { "skill", "burst" }, //Rosaria
-			[32] = new string[] { "skill", "burst" }, //Yanfei
-			[33] = new string[] { "burst", "skill" }, //Eula
-			[34] = new string[] { "skill", "burst" }, //Kaedehara Kazuha
-			[35] = new string[] { "burst", "skill" }, //Kamisato Ayaka
-			[36] = new string[] { "skill", "burst" }, //Yoimiya
-			[37] = new string[] { "burst", "skill" }, //Sayu
-			[38] = new string[] { "burst", "skill" }, //Raiden Shogun
-			[39] = new string[] { "burst", "skill" }, //Kujou Sara
-			[40] = new string[] { "burst", "skill" }, //Aloy  Note: has no constellations
-			[41] = new string[] { "burst", "skill" }, //Sangonomiya Kokomi
-			[42] = new string[] { "skill", "burst" }, //Thoma
+			["amber"] = new string[] { "burst", "skill" }, //Amber
+			["kaeya"] = new string[] { "skill", "burst" }, //Kaeya
+			["lisa"] = new string[] { "burst", "skill" }, //Lisa
+			["barbara"] = new string[] { "burst", "skill" }, //Barbara
+			["razor"] = new string[] { "burst", "skill" }, //Razor
+			["xiangling"] = new string[] { "burst", "skill" }, //Xiangling
+			["beidou"] = new string[] { "skill", "burst" }, //Beidou
+			["xingqiu"] = new string[] { "burst", "skill" }, //Xingqiu
+			["ningguang"] = new string[] { "burst", "skill" }, //Ningguang
+			["fischl"] = new string[] { "skill", "burst" }, //Fischl
+			["bennett"] = new string[] { "skill", "burst" }, //Bennett
+			["noelle"] = new string[] { "skill", "burst" }, //Noelle
+			["chongyun"] = new string[] { "burst", "skill" }, //Chongyun
+			["sucrose"] = new string[] { "skill", "burst" }, //Sucrose
+			["jean"] = new string[] { "burst", "skill" }, //Jean
+			["diluc"] = new string[] { "skill", "burst" }, //Diluc
+			["qiqi"] = new string[] { "burst", "skill" }, //Qiqi
+			["mona"] = new string[] { "burst", "skill" }, //Mona
+			["keqing"] = new string[] { "burst", "skill" }, //Keqing
+			["venti"] = new string[] { "burst", "skill" }, //Venti
+			["klee"] = new string[] { "skill", "burst" }, //Klee
+			["diona"] = new string[] { "burst", "skill" }, //Diona
+			["tartaglia"] = new string[] { "skill", "burst" }, //Tartaglia
+			["xinyan"] = new string[] { "skill", "burst" }, //Xinyan
+			["zhongli"] = new string[] { "skill", "burst" }, //Zhongli
+			["albedo"] = new string[] { "skill", "burst" }, //Albedo
+			["ganyu"] = new string[] { "burst", "skill" }, //Ganyu
+			["xiao"] = new string[] { "skill", "burst" }, //Xiao
+			["hutao"] = new string[] { "skill", "burst" }, //Hu Tao
+			["rosaria"] = new string[] { "skill", "burst" }, //Rosaria
+			["yanfei"] = new string[] { "skill", "burst" }, //Yanfei
+			["eula"] = new string[] { "burst", "skill" }, //Eula
+			["kaedharakazuha"] = new string[] { "skill", "burst" }, //Kaedehara Kazuha
+			["kaedhara"] = new string[] { "skill", "burst" }, //Kaedehara Kazuha
+			["kamisatoayaka"] = new string[] { "burst", "skill" }, //Kamisato Ayaka
+			["kamisato"] = new string[] { "burst", "skill" }, //Kamisato Ayaka
+			["yoimiya"] = new string[] { "skill", "burst" }, //Yoimiya
+			["sayu"] = new string[] { "burst", "skill" }, //Sayu
+			["raidenshogun"] = new string[] { "burst", "skill" }, //Raiden Shogun
+			["raiden"] = new string[] { "burst", "skill" }, //Raiden Shogun
+			["kujousara"] = new string[] { "burst", "skill" }, //Kujou Sara
+			["kujou"] = new string[] { "burst", "skill" }, //Kujou Sara
+			["alloy"] = new string[] { "burst", "skill" }, //Aloy  Note: has no constellations
+			["sangonomiyakokomi"] = new string[] { "burst", "skill" }, //Sangonomiya Kokomi
+			["sangonomiya"] = new string[] { "burst", "skill" }, //Sangonomiya Kokomi
+			["thoma"] = new string[] { "skill", "burst" }, //Thoma
 		};
 
-		private static readonly Dictionary<string, int> elements = new Dictionary<string, int>
-		{
-			["pyro"] = 0,
-			["hydro"] = 1,
-			["dendro"] = 2,
-			["electro"] = 3,
-			["anemo"] = 4,
-			["cryo"] = 5,
-			["geo"] = 6,
-		};
-
-		private static readonly List<string> elementList = new List<string>
+		public static readonly HashSet<string> elements = new HashSet<string>
 		{
 			"pyro",
 			"hydro",
@@ -228,545 +204,570 @@ namespace GenshinGuide
 			"electro",
 			"anemo",
 			"cryo",
-			"geo"
+			"geo",
 		};
 
-		private static readonly Dictionary<string, int> weapons = new Dictionary<string, int>
+		public static readonly HashSet<string> weapons = new HashSet<string>
 		{
 			// Release Weapons
 			// 1 star
-			["dullblade"] = weaponCount,
-			["wastergreatsword"] = ++weaponCount,
-			["beginnersprotector"] = ++weaponCount,
-			["apprenticesnotes"] = ++weaponCount,
-			["huntersbow"] = ++weaponCount, // 4
-											// 2 stars
-			["silversword"] = ++weaponCount,
-			["oldmercspal"] = ++weaponCount,
-			["ironpoint"] = ++weaponCount,
-			["pocketgrimoire"] = ++weaponCount,
-			["seasonedhuntersbow"] = ++weaponCount, // 9
-													// 3 star
-			["coolsteel"] = ++weaponCount, // 10
-			["harbingerofdawn"] = ++weaponCount,
-			["travelershandysword"] = ++weaponCount,
-			["filletblade"] = ++weaponCount,
-			["skyridersword"] = ++weaponCount,
-			["ferrousshadow"] = ++weaponCount, // 15
-			["bloodtaintedgreatsword"] = ++weaponCount,
-			["whiteirongreatsword"] = ++weaponCount,
-			["debateclub"] = ++weaponCount,
-			["skyridergreatsword"] = ++weaponCount,
-			["whitetassel"] = ++weaponCount, // 20
-			["halberd"] = ++weaponCount,
-			["blacktassel"] = ++weaponCount,
-			["magicguide"] = ++weaponCount,
-			["thrillingtalesofdragonslayers"] = ++weaponCount,
-			["otherworldlystory"] = ++weaponCount, // 25
-			["emeraldorb"] = ++weaponCount,
-			["twinnephrite"] = ++weaponCount,
-			["ravenbow"] = ++weaponCount,
-			["sharpshootersoath"] = ++weaponCount,
-			["recurvebow"] = ++weaponCount, // 30
-			["slingshot"] = ++weaponCount,
-			["messenger"] = ++weaponCount,
+			"dullblade",
+			"wastergreatsword",
+			"beginnersprotector",
+			"apprenticesnotes",
+			"huntersbow",
+
+			// 2 stars
+			"silversword",
+			"oldmercspal",
+			"ironpoint",
+			"pocketgrimoire",
+			"seasonedhuntersbow",
+
+			// 3 star
+			"coolsteel",
+			"harbingerofdawn",
+			"travelershandysword",
+			"filletblade",
+			"skyridersword",
+			"ferrousshadow",
+			"bloodtaintedgreatsword",
+			"whiteirongreatsword",
+			"debateclub",
+			"skyridergreatsword",
+			"whitetassel",
+			"halberd",
+			"blacktassel",
+			"magicguide",
+			"thrillingtalesofdragonslayers",
+			"otherworldlystory",
+			"emeraldorb",
+			"twinnephrite",
+			"ravenbow",
+			"sharpshootersoath",
+			"recurvebow",
+			"slingshot",
+			"messenger",
+
 			// 4 star
-			["favoniussword"] = ++weaponCount,
-			["theflute"] = ++weaponCount,
-			["sacrificialsword"] = ++weaponCount, // 35
-			["royallongsword"] = ++weaponCount,
-			["lionsroar"] = ++weaponCount,
-			["prototyperancour"] = ++weaponCount,
-			["ironsting"] = ++weaponCount,
-			["blackclifflongsword"] = ++weaponCount, // 40
-			["theblacksword"] = ++weaponCount,
-			["swordofdescension"] = ++weaponCount,
-			["festeringdesire"] = ++weaponCount,
-			["thealleyflash"] = ++weaponCount,
-			["favoniusgreatsword"] = ++weaponCount, // 45
-			["thebell"] = ++weaponCount,
-			["sacrificialgreatsword"] = ++weaponCount,
-			["royalgreatsword"] = ++weaponCount,
-			["rainslasher"] = ++weaponCount,
-			["prototypearchaic"] = ++weaponCount, // 50
-			["whiteblind"] = ++weaponCount,
-			["blackcliffslasher"] = ++weaponCount,
-			["serpentspine"] = ++weaponCount,
-			["snowtombedstarsilver"] = ++weaponCount,
-			["lithicblade"] = ++weaponCount, // 55
-			["dragonsbane"] = ++weaponCount,
-			["prototypestarglitter"] = ++weaponCount,
-			["crescentpike"] = ++weaponCount,
-			["blackcliffpole"] = ++weaponCount,
-			["deathmatch"] = ++weaponCount, // 60
-			["favoniuslance"] = ++weaponCount,
-			["royalspear"] = ++weaponCount,
-			["dragonspinespear"] = ++weaponCount,
-			["lithicspear"] = ++weaponCount,
-			["favoniuscodex"] = ++weaponCount, // 65
-			["thewidsith"] = ++weaponCount,
-			["sacrificialfragments"] = ++weaponCount,
-			["royalgrimoire"] = ++weaponCount,
-			["solarpearl"] = ++weaponCount,
-			["prototypeamber"] = ++weaponCount, // 70
-			["mappamare"] = ++weaponCount,
-			["blackcliffagate"] = ++weaponCount,
-			["eyeofperception"] = ++weaponCount,
-			["frostbearer"] = ++weaponCount,
-			["wineandsong"] = ++weaponCount, // 75
-			["favoniuswarbow"] = ++weaponCount,
-			["thestringless"] = ++weaponCount,
-			["sacrificialbow"] = ++weaponCount,
-			["royalbow"] = ++weaponCount,
-			["rust"] = ++weaponCount, // 80
-			["prototypecrescent"] = ++weaponCount,
-			["compoundbow"] = ++weaponCount,
-			["blackcliffwarbow"] = ++weaponCount,
-			["theviridescenthunt"] = ++weaponCount,
-			["alleyhunter"] = ++weaponCount, // 85
-			["windblumeode"] = ++weaponCount,
-			["aquilafavonia"] = ++weaponCount,
-			["skywardblade"] = ++weaponCount,
-			["summitshaper"] = ++weaponCount,
-			["primordialjadecutter"] = ++weaponCount, // 90
-			["skywardpride"] = ++weaponCount,
-			["wolfsgravestone"] = ++weaponCount,
-			["theunforged"] = ++weaponCount,
-			["primordialjadewingedspear"] = ++weaponCount,
-			["skywardspine"] = ++weaponCount, // 95
-			["vortexvanquisher"] = ++weaponCount,
-			["staffofhoma"] = ++weaponCount,
-			["skywardatlas"] = ++weaponCount,
-			["lostprayertothesacredwinds"] = ++weaponCount,
-			["memoryofdust"] = ++weaponCount, // 100
-			["skywardharp"] = ++weaponCount,
-			["amosbow"] = ++weaponCount,
-			["elegyfortheend"] = ++weaponCount,
-			["songofbrokenpines"] = ++weaponCount,
-			["mitternachtswaltz"] = ++weaponCount, // 105
-			["freedomsworn"] = ++weaponCount,
-			["dodocotales"] = ++weaponCount,
-			// 2.0 inazuma patch
-			["amenomakageuchi"] = ++weaponCount,
-			["katsuragikirinagamasa"] = ++weaponCount,
-			["kitaincrossspear"] = ++weaponCount, // 110
-			["hamayumi"] = ++weaponCount,
-			["hakushinring"] = ++weaponCount,
-			["mistsplitterreforged"] = ++weaponCount,
-			["thunderingpulse"] = ++weaponCount,
+			"favoniussword",
+			"theflute",
+			"sacrificialsword",
+			"royallongsword",
+			"lionsroar",
+			"prototyperancour",
+			"ironsting",
+			"blackclifflongsword",
+			"theblacksword",
+			"swordofdescension",
+			"festeringdesire",
+			"thealleyflash",
+			"favoniusgreatsword",
+			"thebell",
+			"sacrificialgreatsword",
+			"royalgreatsword",
+			"rainslasher",
+			"prototypearchaic",
+			"whiteblind",
+			"blackcliffslasher",
+			"serpentspine",
+			"snowtombedstarsilver",
+			"lithicblade",
+			"dragonsbane",
+			"prototypestarglitter",
+			"crescentpike",
+			"blackcliffpole",
+			"deathmatch",
+			"favoniuslance",
+			"royalspear",
+			"dragonspinespear",
+			"lithicspear",
+			"favoniuscodex",
+			"thewidsith",
+			"sacrificialfragments",
+			"royalgrimoire",
+			"solarpearl",
+			"prototypeamber",
+			"mappamare",
+			"blackcliffagate",
+			"eyeofperception",
+			"frostbearer",
+			"wineandsong",
+			"favoniuswarbow",
+			"thestringless",
+			"sacrificialbow",
+			"royalbow",
+			"rust",
+			"prototypecrescent",
+			"compoundbow",
+			"blackcliffwarbow",
+			"theviridescenthunt",
+			"alleyhunter",
+			"windblumeode",
+			"aquilafavonia",
+			"skywardblade",
+			"summitshaper",
+			"primordialjadecutter",
+			"skywardpride",
+			"wolfsgravestone",
+			"theunforged",
+			"primordialjadewingedspear",
+			"skywardspine",
+			"vortexvanquisher",
+			"staffofhoma",
+			"skywardatlas",
+			"lostprayertothesacredwinds",
+			"memoryofdust",
+			"skywardharp",
+			"amosbow",
+			"elegyfortheend",
+			"songofbrokenpines",
+			"mitternachtswaltz",
+			"freedomsworn",
+			"dodocotales",
+
+			// 2.0 Inazuma Patch
+			"amenomakageuchi",
+			"katsuragikirinagamasa",
+			"kitaincrossspear",
+			"hamayumi",
+			"hakushinring",
+			"mistsplitterreforged",
+			"thunderingpulse",
+
 			// 2.1
-			["predator"] = ++weaponCount, // 115
-			["luxurioussealord"] = ++weaponCount,
-			["thecatch"] = ++weaponCount,
-			["engulfinglightning"] = ++weaponCount,
-			["everlastingmoonglow"] = ++weaponCount,
-			["darkironsword"] = ++weaponCount, // 120
-											   // 2.2
-			["polarstar"] = ++weaponCount,
-			["akuoumaru"] = ++weaponCount,
-			["mouunsmoon"] = ++weaponCount,
-			["wavebreakersfin"] = ++weaponCount
+			"predator",
+			"luxurioussealord",
+			"thecatch",
+			"engulfinglightning",
+			"everlastingmoonglow",
+			"darkironsword",
+
+			// 2.2
+			"polarstar",
+			"akuoumaru",
+			"mouunsmoon",
+			"wavebreakersfin",
 		};
 
-		private static readonly Dictionary<string, int> characterDevelopmentItemsCode = new Dictionary<string, int>
+		public static readonly HashSet<string> characterDevelopmentItemsCode = new HashSet<string>
 		{
 			// character exp materials
-			["heroswit"] = characterDevelopmentItemsCount++,
-			["adventurersexperience"] = characterDevelopmentItemsCount++,
-			["wanderersadvice"] = characterDevelopmentItemsCount++,
+			"heroswit",
+			"adventurersexperience",
+			"wanderersadvice",
 
 			// character level-up materials
-			["slimeconcentrate"] = characterDevelopmentItemsCount++,
-			["secretions"] = characterDevelopmentItemsCount++,
-			["slimecondensate"] = characterDevelopmentItemsCount++,
-			["ominousmask"] = characterDevelopmentItemsCount++,
-			["stainedmask"] = characterDevelopmentItemsCount++,
-			["damagedmask"] = characterDevelopmentItemsCount++,
-			["forbiddencursescroll"] = characterDevelopmentItemsCount++,
-			["sealedscroll"] = characterDevelopmentItemsCount++,
-			["diviningscroll"] = characterDevelopmentItemsCount++,
-			["weatheredarrowhead"] = characterDevelopmentItemsCount++,
-			["sharparrowhead"] = characterDevelopmentItemsCount++,
-			["firmarrowhead"] = characterDevelopmentItemsCount++,
-			["blackcrystalhorn"] = characterDevelopmentItemsCount++,
-			["blackbronzehorn"] = characterDevelopmentItemsCount++,
-			["heavyhorn"] = characterDevelopmentItemsCount++,
-			["leylinesprout"] = characterDevelopmentItemsCount++,
-			["deadleylineleaves"] = characterDevelopmentItemsCount++,
-			["deadleylinebranch"] = characterDevelopmentItemsCount++,
-			["chaoscore"] = characterDevelopmentItemsCount++,
-			["chaoscircuit"] = characterDevelopmentItemsCount++,
-			["chaosdevice"] = characterDevelopmentItemsCount++,
-			["mistgrasswick"] = characterDevelopmentItemsCount++,
-			["mistgrass"] = characterDevelopmentItemsCount++,
-			["mistgrasspollen"] = characterDevelopmentItemsCount++,
-			["inspectorssacrificialknife"] = characterDevelopmentItemsCount++,
-			["agentssacrificialknife"] = characterDevelopmentItemsCount++,
-			["hunterssacrificialknife"] = characterDevelopmentItemsCount++,
-			["lieutenantsinsignia"] = characterDevelopmentItemsCount++,
-			["sergeantsinsignia"] = characterDevelopmentItemsCount++,
-			["recruitsinsignia"] = characterDevelopmentItemsCount++,
-			["goldenraveninsignia"] = characterDevelopmentItemsCount++,
-			["silverraveninsignia"] = characterDevelopmentItemsCount++,
-			["treasurehoarderinsignia"] = characterDevelopmentItemsCount++,
-			["energynectar"] = characterDevelopmentItemsCount++,
-			["shimmeringnectar"] = characterDevelopmentItemsCount++,
-			["whopperflowernectar"] = characterDevelopmentItemsCount++,
-			["fossilizedboneshard"] = characterDevelopmentItemsCount++,
-			["sturdyboneshard"] = characterDevelopmentItemsCount++,
-			["fragileboneshard"] = characterDevelopmentItemsCount++,
-			["famedhandguard"] = characterDevelopmentItemsCount++,
-			["kageuchihandguard"] = characterDevelopmentItemsCount++,
-			["oldhandguard"] = characterDevelopmentItemsCount++,
-			["chaosoculus"] = characterDevelopmentItemsCount++,
-			["chaosaxis"] = characterDevelopmentItemsCount++,
-			["chaosgear"] = characterDevelopmentItemsCount++,
-			["polarizingprism"] = characterDevelopmentItemsCount++,
-			["crystalprism"] = characterDevelopmentItemsCount++,
-			["dismalprism"] = characterDevelopmentItemsCount++,
-			["spectralnucleus"] = characterDevelopmentItemsCount++,
-			["spectralheart"] = characterDevelopmentItemsCount++,
-			["spectralhusk"] = characterDevelopmentItemsCount++,
+			"slimeconcentrate",
+			"secretions",
+			"slimecondensate",
+			"ominousmask",
+			"stainedmask",
+			"damagedmask",
+			"forbiddencursescroll",
+			"sealedscroll",
+			"diviningscroll",
+			"weatheredarrowhead",
+			"sharparrowhead",
+			"firmarrowhead",
+			"blackcrystalhorn",
+			"blackbronzehorn",
+			"heavyhorn",
+			"leylinesprout",
+			"deadleylineleaves",
+			"deadleylinebranch",
+			"chaoscore",
+			"chaoscircuit",
+			"chaosdevice",
+			"mistgrasswick",
+			"mistgrass",
+			"mistgrasspollen",
+			"inspectorssacrificialknife",
+			"agentssacrificialknife",
+			"hunterssacrificialknife",
+			"lieutenantsinsignia",
+			"sergeantsinsignia",
+			"recruitsinsignia",
+			"goldenraveninsignia",
+			"silverraveninsignia",
+			"treasurehoarderinsignia",
+			"energynectar",
+			"shimmeringnectar",
+			"whopperflowernectar",
+			"fossilizedboneshard",
+			"sturdyboneshard",
+			"fragileboneshard",
+			"famedhandguard",
+			"kageuchihandguard",
+			"oldhandguard",
+			"chaosoculus",
+			"chaosaxis",
+			"chaosgear",
+			"polarizingprism",
+			"crystalprism",
+			"dismalprism",
+			"spectralnucleus",
+			"spectralheart",
+			"spectralhusk",
 
-			["dvalinsplume"] = characterDevelopmentItemsCount++,
-			["dvalinsclaw"] = characterDevelopmentItemsCount++,
-			["dvalinssigh"] = characterDevelopmentItemsCount++,
-			["tailofboreas"] = characterDevelopmentItemsCount++,
-			["ringofboreas"] = characterDevelopmentItemsCount++,
-			["spiritlocketofboreas"] = characterDevelopmentItemsCount++,
-			["tuskofmonoceroscaeli"] = characterDevelopmentItemsCount++,
-			["shardofafoullegacy"] = characterDevelopmentItemsCount++,
-			["shadowofthewarrior"] = characterDevelopmentItemsCount++,
-			["dragonlordscrown"] = characterDevelopmentItemsCount++,
-			["bloodjadebranch"] = characterDevelopmentItemsCount++,
-			["gildedscale"] = characterDevelopmentItemsCount++,
-			["moltenmoment"] = characterDevelopmentItemsCount++,
-			["hellfirebutterfly"] = characterDevelopmentItemsCount++,
-			["ashenheart"] = characterDevelopmentItemsCount++,
+			"dvalinsplume",
+			"dvalinsclaw",
+			"dvalinssigh",
+			"tailofboreas",
+			"ringofboreas",
+			"spiritlocketofboreas",
+			"tuskofmonoceroscaeli",
+			"shardofafoullegacy",
+			"shadowofthewarrior",
+			"dragonlordscrown",
+			"bloodjadebranch",
+			"gildedscale",
+			"moltenmoment",
+			"hellfirebutterfly",
+			"ashenheart",
 
-			["everflameseed"] = characterDevelopmentItemsCount++,
-			["cleansinghearth"] = characterDevelopmentItemsCount++,
-			["lightningprism"] = characterDevelopmentItemsCount++,
-			["hoarfrostcore"] = characterDevelopmentItemsCount++,
-			["hurricaneseed"] = characterDevelopmentItemsCount++,
-			["basaltpillar"] = characterDevelopmentItemsCount++,
-			["juvenilejade"] = characterDevelopmentItemsCount++,
-			["crystallinebloom"] = characterDevelopmentItemsCount++,
-			["dreamsolvent"] = characterDevelopmentItemsCount++,
-			["marionettecore"] = characterDevelopmentItemsCount++,
-			["perpetualheart"] = characterDevelopmentItemsCount++,
-			["smolderingpearl"] = characterDevelopmentItemsCount++,
-			["dewofrepudiation"] = characterDevelopmentItemsCount++,
-			["stormbeads"] = characterDevelopmentItemsCount++,
+			"everflameseed",
+			"cleansinghearth",
+			"lightningprism",
+			"hoarfrostcore",
+			"hurricaneseed",
+			"basaltpillar",
+			"juvenilejade",
+			"crystallinebloom",
+			"dreamsolvent",
+			"marionettecore",
+			"perpetualheart",
+			"smolderingpearl",
+			"dewofrepudiation",
+			"stormbeads",
+
 			// gemstones
-			["agnidusagategemstone"] = characterDevelopmentItemsCount++,
-			["agnidusagatechunk"] = characterDevelopmentItemsCount++,
-			["agnidusagatefragment"] = characterDevelopmentItemsCount++,
-			["agnidusagatesliver"] = characterDevelopmentItemsCount++,
+			"agnidusagategemstone",
+			"agnidusagatechunk",
+			"agnidusagatefragment",
+			"agnidusagatesliver",
 
-			["varunadalazuritegemstone"] = characterDevelopmentItemsCount++,
-			["varunadalazuritechunk"] = characterDevelopmentItemsCount++,
-			["varunadalazuritefragment"] = characterDevelopmentItemsCount++,
-			["varunadalazuritesliver"] = characterDevelopmentItemsCount++,
+			"varunadalazuritegemstone",
+			"varunadalazuritechunk",
+			"varunadalazuritefragment",
+			"varunadalazuritesliver",
 
-			["vajradaamethystgemstone"] = characterDevelopmentItemsCount++,
-			["vajradaamethystchunk"] = characterDevelopmentItemsCount++,
-			["vajradaamethystfragment"] = characterDevelopmentItemsCount++,
-			["vajradaamethystsliver"] = characterDevelopmentItemsCount++,
+			"vajradaamethystgemstone",
+			"vajradaamethystchunk",
+			"vajradaamethystfragment",
+			"vajradaamethystsliver",
 
-			["vayudaturquoisefragmentgemstone"] = characterDevelopmentItemsCount++,
-			["vayudaturquoisefragmentchunk"] = characterDevelopmentItemsCount++,
-			["vayudaturquoisefragmentfragment"] = characterDevelopmentItemsCount++,
-			["vayudaturquoisefragmentsliver"] = characterDevelopmentItemsCount++,
+			"vayudaturquoisefragmentgemstone",
+			"vayudaturquoisefragmentchunk",
+			"vayudaturquoisefragmentfragment",
+			"vayudaturquoisefragmentsliver",
 
-			["shivadajadegemstone"] = characterDevelopmentItemsCount++,
-			["shivadajadechunk"] = characterDevelopmentItemsCount++,
-			["shivadajadefragment"] = characterDevelopmentItemsCount++,
-			["shivadajadesliver"] = characterDevelopmentItemsCount++,
+			"shivadajadegemstone",
+			"shivadajadechunk",
+			"shivadajadefragment",
+			"shivadajadesliver",
 
-			["prithivatopazgemstone"] = characterDevelopmentItemsCount++,
-			["prithivatopazchunk"] = characterDevelopmentItemsCount++,
-			["prithivatopazfragment"] = characterDevelopmentItemsCount++,
-			["prithivatopazsliver"] = characterDevelopmentItemsCount++,
+			"prithivatopazgemstone",
+			"prithivatopazchunk",
+			"prithivatopazfragment",
+			"prithivatopazsliver",
 
 			// talent level-up materials
-			["philosophiesoffreedom"] = characterDevelopmentItemsCount++,
-			["guidetofreedom"] = characterDevelopmentItemsCount++,
-			["teachingsoffreedom"] = characterDevelopmentItemsCount++,
-			["philosophiesofresistance"] = characterDevelopmentItemsCount++,
-			["guidetoresistance"] = characterDevelopmentItemsCount++,
-			["teachingsofresistance"] = characterDevelopmentItemsCount++,
-			["philosophiesofballad"] = characterDevelopmentItemsCount++,
-			["guidetoballad"] = characterDevelopmentItemsCount++,
-			["teachingsofballad"] = characterDevelopmentItemsCount++,
-			["philosophiesofprosperity"] = characterDevelopmentItemsCount++,
-			["guidetoprosperity"] = characterDevelopmentItemsCount++,
-			["teachingsofprosperity"] = characterDevelopmentItemsCount++,
-			["philosophiesofdiligence"] = characterDevelopmentItemsCount++,
-			["guidetodiligence"] = characterDevelopmentItemsCount++,
-			["teachingsofdiligence"] = characterDevelopmentItemsCount++,
-			["philosophiesofgold"] = characterDevelopmentItemsCount++,
-			["guidetogold"] = characterDevelopmentItemsCount++,
-			["teachingsofgold"] = characterDevelopmentItemsCount++,
-			["philosophiesoftransience"] = characterDevelopmentItemsCount++,
-			["guidetotransience"] = characterDevelopmentItemsCount++,
-			["teachingsoftransience"] = characterDevelopmentItemsCount++,
-			["philosophiesofelegance"] = characterDevelopmentItemsCount++,
-			["guidetoelegance"] = characterDevelopmentItemsCount++,
-			["teachingsofelegance"] = characterDevelopmentItemsCount++,
-			["philosophiesoflight"] = characterDevelopmentItemsCount++,
-			["guidetolight"] = characterDevelopmentItemsCount++,
-			["teachingsoflight"] = characterDevelopmentItemsCount++,
-			["crownofinsight"] = characterDevelopmentItemsCount++,
+			"philosophiesoffreedom",
+			"guidetofreedom",
+			"teachingsoffreedom",
+			"philosophiesofresistance",
+			"guidetoresistance",
+			"teachingsofresistance",
+			"philosophiesofballad",
+			"guidetoballad",
+			"teachingsofballad",
+			"philosophiesofprosperity",
+			"guidetoprosperity",
+			"teachingsofprosperity",
+			"philosophiesofdiligence",
+			"guidetodiligence",
+			"teachingsofdiligence",
+			"philosophiesofgold",
+			"guidetogold",
+			"teachingsofgold",
+			"philosophiesoftransience",
+			"guidetotransience",
+			"teachingsoftransience",
+			"philosophiesofelegance",
+			"guidetoelegance",
+			"teachingsofelegance",
+			"philosophiesoflight",
+			"guidetolight",
+			"teachingsoflight",
+			"crownofinsight",
 
 			// weapon ascension materials
-			["scatteredpieceofdecarabiansdream"] = characterDevelopmentItemsCount++,
-			["fragmentofdecarabiansepic"] = characterDevelopmentItemsCount++,
-			["debrisofdecarabianscity"] = characterDevelopmentItemsCount++,
-			["tileofdecarabianstower"] = characterDevelopmentItemsCount++,
+			"scatteredpieceofdecarabiansdream",
+			"fragmentofdecarabiansepic",
+			"debrisofdecarabianscity",
+			"tileofdecarabianstower",
 
-			["borealwolfsnostalgia"] = characterDevelopmentItemsCount++,
-			["borealwolfsbrokenfang"] = characterDevelopmentItemsCount++,
-			["borealwolfscrackedtooth"] = characterDevelopmentItemsCount++,
-			["borealwolfsmilktooth"] = characterDevelopmentItemsCount++,
+			"borealwolfsnostalgia",
+			"borealwolfsbrokenfang",
+			"borealwolfscrackedtooth",
+			"borealwolfsmilktooth",
 
-			["dreamofthedandeliongladiator"] = characterDevelopmentItemsCount++,
-			["shacklesofthedandeliongladiator"] = characterDevelopmentItemsCount++,
-			["chainsofthedandeliongladiator"] = characterDevelopmentItemsCount++,
-			["fettersofthedandeliongladiator"] = characterDevelopmentItemsCount++,
+			"dreamofthedandeliongladiator",
+			"shacklesofthedandeliongladiator",
+			"chainsofthedandeliongladiator",
+			"fettersofthedandeliongladiator",
 
-			["divinebodyfromguyun"] = characterDevelopmentItemsCount++,
-			["relicfromguyun"] = characterDevelopmentItemsCount++,
-			["lustrousstonefromguyun"] = characterDevelopmentItemsCount++,
-			["luminoussandsfromguyun"] = characterDevelopmentItemsCount++,
+			"divinebodyfromguyun",
+			"relicfromguyun",
+			"lustrousstonefromguyun",
+			"luminoussandsfromguyun",
 
-			["mistveiledprimoelixir"] = characterDevelopmentItemsCount++,
-			["mistveiledgoldelixir"] = characterDevelopmentItemsCount++,
-			["mistveiledmercuryelixir"] = characterDevelopmentItemsCount++,
-			["mistveiledleadelixir"] = characterDevelopmentItemsCount++,
+			"mistveiledprimoelixir",
+			"mistveiledgoldelixir",
+			"mistveiledmercuryelixir",
+			"mistveiledleadelixir",
 
-			["chunkofaerosiderite"] = characterDevelopmentItemsCount++,
-			["bitofaerosiderite"] = characterDevelopmentItemsCount++,
-			["pieceofaerosiderite"] = characterDevelopmentItemsCount++,
-			["grainofaerosiderite"] = characterDevelopmentItemsCount++,
+			"chunkofaerosiderite",
+			"bitofaerosiderite",
+			"pieceofaerosiderite",
+			"grainofaerosiderite",
 
-			["goldenbranchofadistantsea"] = characterDevelopmentItemsCount++,
-			["jadebranchofadistantsea"] = characterDevelopmentItemsCount++,
-			["jeweledbranchofadistantsea"] = characterDevelopmentItemsCount++,
-			["coralbranchofadistantsea"] = characterDevelopmentItemsCount++,
+			"goldenbranchofadistantsea",
+			"jadebranchofadistantsea",
+			"jeweledbranchofadistantsea",
+			"coralbranchofadistantsea",
 
-			["narukamisvalor"] = characterDevelopmentItemsCount++,
-			["narukamisaffection"] = characterDevelopmentItemsCount++,
-			["narukamisjoy"] = characterDevelopmentItemsCount++,
-			["narukamiswisdom"] = characterDevelopmentItemsCount++,
+			"narukamisvalor",
+			"narukamisaffection",
+			"narukamisjoy",
+			"narukamiswisdom",
 
-			["maskofthekijin"] = characterDevelopmentItemsCount++,
-			["maskoftheonehorned"] = characterDevelopmentItemsCount++,
-			["maskofthetigersbite"] = characterDevelopmentItemsCount++,
-			["maskofthewickedlieutenant"] = characterDevelopmentItemsCount++,
+			"maskofthekijin",
+			"maskoftheonehorned",
+			"maskofthetigersbite",
+			"maskofthewickedlieutenant",
 		};
 
-		private static readonly Dictionary<string, int> materialsCode = new Dictionary<string, int>
+		public static readonly HashSet<string> materialsCode = new HashSet<string>
 		{
 			// material
-			["strangetooth"] = materialsCount++,
-			["vitalizeddragontooth"] = materialsCount++,
-			["horsetail"] = materialsCount++,
-			["mistflowercorolla"] = materialsCount++,
-			["flamingflowerstamen"] = materialsCount++,
-			["electrocrystal"] = materialsCount++,
-			["butterflywings"] = materialsCount++,
-			["frog"] = materialsCount++,
-			["luminescentspine"] = materialsCount++,
-			["lizardtail"] = materialsCount++,
-			["crystalcore"] = materialsCount++,
-			["loachpearl"] = materialsCount++,
+			"strangetooth",
+			"vitalizeddragontooth",
+			"horsetail",
+			"mistflowercorolla",
+			"flamingflowerstamen",
+			"electrocrystal",
+			"butterflywings",
+			"frog",
+			"luminescentspine",
+			"lizardtail",
+			"crystalcore",
+			"loachpearl",
 
 			// furnishings
-			["bluedye"] = materialsCount++,
-			["yellowdye"] = materialsCount++,
-			["reddye"] = materialsCount++,
-			["fabric"] = materialsCount++,
+			"bluedye",
+			"yellowdye",
+			"reddye",
+			"fabric",
 
 			// wood
-			["birch"] = materialsCount++,
-			["cuihua"] = materialsCount++,
-			["pine"] = materialsCount++,
-			["cedar"] = materialsCount++,
-			["firwood"] = materialsCount++,
-			["sandbearer"] = materialsCount++,
-			["bamboo"] = materialsCount++,
-			["firwood"] = materialsCount++,
-			["yumemiru"] = materialsCount++,
-			["maple"] = materialsCount++,
-			["otogi"] = materialsCount++,
-			["aralia"] = materialsCount++,
+			"birch",
+			"cuihua",
+			"pine",
+			"cedar",
+			"firwood",
+			"sandbearer",
+			"bamboo",
+			"firwood",
+			"yumemiru",
+			"maple",
+			"otogi",
+			"aralia",
 
 			// forging ore
-			["ironchunk"] = materialsCount++,
-			["whiteironchunk"] = materialsCount++,
-			["crystalchunk"] = materialsCount++,
-			["magicalcrystalchunk"] = materialsCount++,
-			["starsilver"] = materialsCount++,
-			["amethystlump"] = materialsCount++,
+			"ironchunk",
+			"whiteironchunk",
+			"crystalchunk",
+			"magicalcrystalchunk",
+			"starsilver",
+			"amethystlump",
 
 			// billets
-			["northlanderswordbillet"] = materialsCount++,
-			["northlanderbowbillet"] = materialsCount++,
-			["northlanderclaymorebillet"] = materialsCount++,
-			["northlandercatalystbillet"] = materialsCount++,
-			["northlanderpolearmbillet"] = materialsCount++,
+			"northlanderswordbillet",
+			"northlanderbowbillet",
+			"northlanderclaymorebillet",
+			"northlandercatalystbillet",
+			"northlanderpolearmbillet",
 
 			// fishbait
-			["fruitpastebait"] = materialsCount++,
-			["redrotbait"] = materialsCount++,
-			["falsewormbait"] = materialsCount++,
-			["fakeflybait"] = materialsCount++,
+			"fruitpastebait",
+			"redrotbait",
+			"falsewormbait",
+			"fakeflybait",
 
 			// fish
-			["medaka"] = materialsCount++,
-			["glazemedaka"] = materialsCount++,
-			["sweetflowermedaka"] = materialsCount++,
-			["aizenmedake"] = materialsCount++,
-			["dawncatcher"] = materialsCount++,
-			["crystalfish"] = materialsCount++,
-			["lungedstickleback"] = materialsCount++,
-			["betta"] = materialsCount++,
-			["venomspinefish"] = materialsCount++,
-			["akaimaou"] = materialsCount++,
-			["snowstrider"] = materialsCount++,
-			["goldenkoi"] = materialsCount++,
-			["rustykoi"] = materialsCount++,
-			["brownshirakodai"] = materialsCount++,
-			["purpleshirakodai"] = materialsCount++,
-			["teacoloredshirakodai"] = materialsCount++,
-			["abidingangelfish"] = materialsCount++,
-			["raimeiangelfish"] = materialsCount++,
-			["pufferfish"] = materialsCount++,
-			["bitterpufferfish"] = materialsCount++,
+			"medaka",
+			"glazemedaka",
+			"sweetflowermedaka",
+			"aizenmedake",
+			"dawncatcher",
+			"crystalfish",
+			"lungedstickleback",
+			"betta",
+			"venomspinefish",
+			"akaimaou",
+			"snowstrider",
+			"goldenkoi",
+			"rustykoi",
+			"brownshirakodai",
+			"purpleshirakodai",
+			"teacoloredshirakodai",
+			"abidingangelfish",
+			"raimeiangelfish",
+			"pufferfish",
+			"bitterpufferfish",
 
 			// cooking ingredient
-			["mushroom"] = materialsCount++,
-			["sweetflower"] = materialsCount++,
-			["carrot"] = materialsCount++,
-			["radish"] = materialsCount++,
-			["snapdragon"] = materialsCount++,
-			["mint"] = materialsCount++,
-			["wheat"] = materialsCount++,
-			["cabbage"] = materialsCount++,
-			["pinecone"] = materialsCount++,
-			["berry"] = materialsCount++,
-			["rawmeat"] = materialsCount++,
-			["birdegg"] = materialsCount++,
-			["matsutake"] = materialsCount++,
-			["fowl"] = materialsCount++,
-			["crab"] = materialsCount++,
-			["crabroe"] = materialsCount++,
-			["salt"] = materialsCount++,
-			["onion"] = materialsCount++,
-			["pepper"] = materialsCount++,
-			["milk"] = materialsCount++,
-			["tomato"] = materialsCount++,
-			["potato"] = materialsCount++,
-			["fish"] = materialsCount++,
-			["tofu"] = materialsCount++,
-			["almond"] = materialsCount++,
-			["bambooshoot"] = materialsCount++,
-			["rice"] = materialsCount++,
-			["shrimpmeat"] = materialsCount++,
-			["chilledmeat"] = materialsCount++,
-			["unagimeat"] = materialsCount++,
-			["seagrass"] = materialsCount++,
-			["lavendermelon"] = materialsCount++,
-			["flour"] = materialsCount++,
-			["cream"] = materialsCount++,
-			["smokedfowl"] = materialsCount++,
-			["butter"] = materialsCount++,
-			["ham"] = materialsCount++,
-			["sugar"] = materialsCount++,
-			["jam"] = materialsCount++,
-			["cheese"] = materialsCount++,
-			["bacon"] = materialsCount++,
-			["sausage"] = materialsCount++,
-			["lotushead"] = materialsCount++,
+			"mushroom",
+			"sweetflower",
+			"carrot",
+			"radish",
+			"snapdragon",
+			"mint",
+			"wheat",
+			"cabbage",
+			"pinecone",
+			"berry",
+			"rawmeat",
+			"birdegg",
+			"matsutake",
+			"fowl",
+			"crab",
+			"crabroe",
+			"salt",
+			"onion",
+			"pepper",
+			"milk",
+			"tomato",
+			"potato",
+			"fish",
+			"tofu",
+			"almond",
+			"bambooshoot",
+			"rice",
+			"shrimpmeat",
+			"chilledmeat",
+			"unagimeat",
+			"seagrass",
+			"lavendermelon",
+			"flour",
+			"cream",
+			"smokedfowl",
+			"butter",
+			"ham",
+			"sugar",
+			"jam",
+			"cheese",
+			"bacon",
+			"sausage",
+			"lotushead",
 
 			// local specialty
-			["callalily"] = materialsCount++,
-			["wolfhook"] = materialsCount++,
-			["valberry"] = materialsCount++,
-			["cecilia"] = materialsCount++,
-			["windwheelaster"] = materialsCount++,
-			["philanemomushroom"] = materialsCount++,
-			["jueyunchili"] = materialsCount++,
-			["noctilucousjade"] = materialsCount++,
-			["silkflower"] = materialsCount++,
-			["glazelily"] = materialsCount++,
-			["qingxin"] = materialsCount++,
-			["starconch"] = materialsCount++,
-			["violetgrass"] = materialsCount++,
-			["smalllampgrass"] = materialsCount++,
-			["dandelionseed"] = materialsCount++,
-			["corlapis"] = materialsCount++,
-			["onikabuto"] = materialsCount++,
-			["sakurabloom"] = materialsCount++,
-			["crystalmarrow"] = materialsCount++,
-			["dendrobium"] = materialsCount++,
-			["nakuweed"] = materialsCount++,
-			["seaganoderma"] = materialsCount++,
-			["sangopearl"] = materialsCount++,
-			["amakumofruit"] = materialsCount++,
+			"callalily",
+			"wolfhook",
+			"valberry",
+			"cecilia",
+			"windwheelaster",
+			"philanemomushroom",
+			"jueyunchili",
+			"noctilucousjade",
+			"silkflower",
+			"glazelily",
+			"qingxin",
+			"starconch",
+			"violetgrass",
+			"smalllampgrass",
+			"dandelionseed",
+			"corlapis",
+			"onikabuto",
+			"sakurabloom",
+			"crystalmarrow",
+			"dendrobium",
+			"nakuweed",
+			"seaganoderma",
+			"sangopearl",
+			"amakumofruit",
 		};
 
-		private static readonly Dictionary<string, int> enhancementMaterials = new Dictionary<string, int>
+		public static readonly HashSet<string> enhancementMaterials = new HashSet<string>
 		{
-			["enhancementore"] = 1,
-			["fineenhancementore"] = 2,
-			["mysticenhancementore"] = 3,
-			["sanctifyingunction"] = 4,
-			["sanctifyingessence"] = 5, // 4
+			"enhancementore",
+			"fineenhancementore",
+			"mysticenhancementore",
+			"sanctifyingunction",
+			"sanctifyingessence",
 		};
 
-		// TODO: Remove static modifier. This could probably cause problems if a scanning crash is caught while an engine is running.
-		// May be ok to create new engines as needed
-		private static readonly TesseractEngine ocr_live = new TesseractEngine(( Directory.GetCurrentDirectory() ) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+		public static ConcurrentBag<TesseractEngine> engines = new ConcurrentBag<TesseractEngine>();
 
-		private static readonly TesseractEngine ocr_1 = new TesseractEngine(( Directory.GetCurrentDirectory() ) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
-		private static readonly TesseractEngine ocr_2 = new TesseractEngine(( Directory.GetCurrentDirectory() ) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
-		private static readonly TesseractEngine ocr_3 = new TesseractEngine(( Directory.GetCurrentDirectory() ) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
-		private static readonly TesseractEngine ocr_4 = new TesseractEngine(( Directory.GetCurrentDirectory() ) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
-		private static readonly TesseractEngine ocr_5 = new TesseractEngine(( Directory.GetCurrentDirectory() ) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
-		private static readonly TesseractEngine ocr_6 = new TesseractEngine(( Directory.GetCurrentDirectory() ) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
-		private static readonly TesseractEngine ocr_7 = new TesseractEngine(( Directory.GetCurrentDirectory() ) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
-		private static readonly TesseractEngine ocr_8 = new TesseractEngine(( Directory.GetCurrentDirectory() ) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
-
-		//TODO: subStats Dictionaries
+		static Scraper()
+		{
+			for (int i = 0; i < numEngines; i++)
+			{
+				engines.Add(new TesseractEngine(tesseractDatapath, tesseractLanguage, EngineMode.LstmOnly));
+			}
+		}
 
 		public static void AddTravelerToCharacterList(string traveler)
 		{
-			if (!characters.ContainsKey(traveler))
+			if (!characters.Contains(traveler))
 			{
-				characters.Add(traveler, 1);
+				characters.Add(traveler);
+				characterTalentConstellationOrder.Add(traveler, new string[] { "burst", "skill" });
+			}
+		}
+
+		public static void AssignTravelerName(string traveler)
+		{
+			if (!string.IsNullOrEmpty(traveler))
+			{
+				AddTravelerToCharacterList(traveler);
+				Debug.WriteLine($"Parsed traveler name {traveler}");
+			}
+			else
+			{
+				UserInterface.AddError("Could not parse Traveler's username");
+			}
+		}
+
+		#region OCR
+
+		public static void RestartEngines()
+		{
+			lock (engines)
+			{
+				while (!engines.IsEmpty)
+				{
+					engines.TryTake(out TesseractEngine _);
+				}
+
+				for (int i = 0; i < numEngines; i++)
+				{
+					engines.Add(new TesseractEngine(tesseractDatapath, tesseractLanguage, EngineMode.LstmOnly));
+				}
 			}
 		}
 
 		/// <summary> Use Tesseract OCR to find words on picture to string </summary>
-		//public static string AnalyzeTextWithLiveTesseract(Bitmap img)
-		//{
-		//    string text = "";
-		//    string dir = Directory.GetCurrentDirectory() + "\\tessdata";
-		//    using (var ocr = new TesseractEngine(dir, "genshin_eng", EngineMode.LstmOnly))
-		//    {
-		//        var page = ocr.Process(img, PageSegMode.SingleLine);
-		//        text = page.GetText();
-		//    }
-		//    return text;
-		//}
-
-		public static string AnalyzeText(Bitmap bitmap)
+		public static string AnalyzeText(Bitmap bitmap, PageSegMode pageMode = PageSegMode.SingleLine, bool numbersOnly = false)
 		{
 			string text = "";
+			TesseractEngine e;
+			while (!engines.TryTake(out e)) { }
 
-			using (var page = ocr_live.Process(bitmap, PageSegMode.SingleBlock))
+			if (numbersOnly) e.SetVariable("tessedit_char_whitelist", "0123456789");
+			using (var page = e.Process(bitmap, pageMode))
 			{
 				using (var iter = page.GetIterator())
 				{
@@ -778,182 +779,15 @@ namespace GenshinGuide
 					while (iter.Next(PageIteratorLevel.TextLine));
 				}
 			}
+			engines.Add(e);
 
 			return text;
 		}
-
-		#region Multi threaded Options
-
-		public static string AnalyzeText_1(Bitmap bitmap)
-		{
-			string text = "";
-
-			using (var page = ocr_1.Process(bitmap, PageSegMode.SingleBlock))
-			{
-				using (var iter = page.GetIterator())
-				{
-					iter.Begin();
-					do
-					{
-						text += iter.GetText(PageIteratorLevel.TextLine);
-					}
-					while (iter.Next(PageIteratorLevel.TextLine));
-				}
-			}
-
-			return text;
-		}
-
-		public static string AnalyzeText_2(Bitmap bitmap)
-		{
-			string text = "";
-
-			using (var page = ocr_2.Process(bitmap, PageSegMode.SingleBlock))
-			{
-				using (var iter = page.GetIterator())
-				{
-					iter.Begin();
-					do
-					{
-						text += iter.GetText(PageIteratorLevel.TextLine);
-					}
-					while (iter.Next(PageIteratorLevel.TextLine));
-				}
-			}
-
-			return text;
-		}
-
-		public static string AnalyzeText_3(Bitmap bitmap)
-		{
-			string text = "";
-
-			using (var page = ocr_3.Process(bitmap, PageSegMode.SingleBlock))
-			{
-				using (var iter = page.GetIterator())
-				{
-					iter.Begin();
-					do
-					{
-						text += iter.GetText(PageIteratorLevel.TextLine);
-					}
-					while (iter.Next(PageIteratorLevel.TextLine));
-				}
-			}
-
-			return text;
-		}
-
-		public static string AnalyzeText_4(Bitmap bitmap)
-		{
-			string text = "";
-
-			using (var page = ocr_4.Process(bitmap, PageSegMode.SingleBlock))
-			{
-				using (var iter = page.GetIterator())
-				{
-					iter.Begin();
-					do
-					{
-						text += iter.GetText(PageIteratorLevel.TextLine);
-					}
-					while (iter.Next(PageIteratorLevel.TextLine));
-				}
-			}
-
-			return text;
-		}
-
-		#endregion Multi threaded Options
-
-		#region Multi thread Substats Options
-
-		public static string AnalyzeText_Line1(Bitmap bitmap)
-		{
-			string text = "";
-
-			using (var page = ocr_5.Process(bitmap, PageSegMode.SingleLine))
-			{
-				using (var iter = page.GetIterator())
-				{
-					iter.Begin();
-					do
-					{
-						text += iter.GetText(PageIteratorLevel.TextLine);
-					}
-					while (iter.Next(PageIteratorLevel.TextLine));
-				}
-			}
-
-			return text;
-		}
-
-		public static string AnalyzeText_Line2(Bitmap bitmap)
-		{
-			string text = "";
-
-			using (var page = ocr_6.Process(bitmap, PageSegMode.SingleLine))
-			{
-				using (var iter = page.GetIterator())
-				{
-					iter.Begin();
-					do
-					{
-						text += iter.GetText(PageIteratorLevel.TextLine);
-					}
-					while (iter.Next(PageIteratorLevel.TextLine));
-				}
-			}
-
-			return text;
-		}
-
-		public static string AnalyzeText_Line3(Bitmap bitmap)
-		{
-			string text = "";
-
-			using (var page = ocr_7.Process(bitmap, PageSegMode.SingleLine))
-			{
-				using (var iter = page.GetIterator())
-				{
-					iter.Begin();
-					do
-					{
-						text += iter.GetText(PageIteratorLevel.TextLine);
-					}
-					while (iter.Next(PageIteratorLevel.TextLine));
-				}
-			}
-
-			return text;
-		}
-
-		public static string AnalyzeText_Line4(Bitmap bitmap)
-		{
-			string text = "";
-
-			using (var page = ocr_8.Process(bitmap, PageSegMode.SingleLine))
-			{
-				using (var iter = page.GetIterator())
-				{
-					iter.Begin();
-					do
-					{
-						text += iter.GetText(PageIteratorLevel.TextLine);
-					}
-					while (iter.Next(PageIteratorLevel.TextLine));
-				}
-			}
-
-			return text;
-		}
-
-		#endregion Multi thread Substats Options
 
 		public static string AnalyzeFewText(Bitmap img)
 		{
 			string text = "";
-			using (var ocr = new TesseractEngine(Directory.GetCurrentDirectory() + "\\tessdata", "eng", EngineMode.TesseractOnly))
+			using (var ocr = new TesseractEngine(tesseractDatapath, "eng", EngineMode.TesseractOnly))
 			{
 				var page = ocr.Process(img, PageSegMode.SparseText);
 				ocr.SetVariable("tessedit_char_whitelist", "0123456789");
@@ -962,124 +796,102 @@ namespace GenshinGuide
 			return text;
 		}
 
+		#endregion OCR
+
 		#region Get Dictionary Codes
 
-		public static int GetSetNameCode(string setName)
+		public static bool IsValidSetName(string setName)
 		{
-			int code = -1;
-			if (setNames.TryGetValue(setName, out code))
+			if (setNames.Contains(setName))
 			{
-				return code;
+				return true;
 			}
 			else
 			{
-				Debug.Print("Error: " + setName + " is not a valid Set Name");
-				UserInterface.AddError("Error: " + setName + " is not a valid Set Name");
-				//Form1.UnexpectedError(setName + " is not a valid Set Name");
-				return -1;
+				Debug.WriteLine($"Error: {setName} is not a valid set name");
+				UserInterface.AddError($"{setName} is not a valid set name");
+				return false;
 			};
 		}
 
-		public static int GetMainStatCode(string mainStat)
+		public static bool IsValidStat(string stat)
 		{
-			int code = -1;
-			if (mainStats.TryGetValue(mainStat, out code))
+			if (string.IsNullOrEmpty(stat)) return false;
+			if (stat.Contains("critr")) stat = "critrate"; // Fix for the 't' in 'rate' being read as an 'l'
+			if (stat.Contains("mastery")) stat = "elementalmastery"; // Fix for the 't' in 'elemental' being read as an 'l'
+			if (stats.Contains(stat))
 			{
-				return code;
+				return true;
 			}
 			else
 			{
-				Debug.Print("Error: " + mainStat + " is not a valid Main Stat Name");
-				UserInterface.AddError(mainStat + " is not a valid Main Stat Name");
-				return -1;
+				Debug.WriteLine($"Error: {stat} is not a valid stat name");
+				UserInterface.AddError($"{stat} is not a valid stat name");
+				return false;
 			};
 		}
 
-		public static int GetGearSlotCode(string gearSlot)
+		public static bool IsValidSlot(string gearSlot)
 		{
-			int code = -1;
-			if (gearSlots.TryGetValue(gearSlot, out code))
+			if (gearSlots.Contains(gearSlot))
 			{
-				return code;
+				return true;
 			}
 			else
 			{
-				Debug.Print("Error: " + gearSlot + " is not a valid Gear Slot");
-				UserInterface.AddError("gearSlot" + " is not a valid Gear Slot");
-				return -1;
+				Debug.WriteLine($"Error: {gearSlot} is not a valid gear slot");
+				UserInterface.AddError($"{gearSlot} is not a valid gear slot");
+				return false;
 			};
 		}
 
-		public static int GetSubStatCode(string subStat)
+		public static bool IsValidCharacter(string character)
 		{
-			int code = -1;
-			if (subStats.TryGetValue(subStat, out code))
+			if (characters.Contains(character))
 			{
-				return code;
+				return true;
 			}
 			else
 			{
-				Debug.Print("Error: " + subStat + " is not a valid Sub Stat");
-				UserInterface.AddError(subStat + " is not a valid Sub Stat");
-				return -1;
-			};
+				Debug.WriteLine($"{character} is not a valid character name");
+				UserInterface.AddError($"{character} is not a valid character name");
+				return false;
+			}
 		}
 
-		public static int GetCharacterCode(string character, bool bRedo = false)
+		public static bool IsValidElement(string element, bool bRedo = false)
 		{
-			if (characters.TryGetValue(character, out int code))
+			if (elements.Contains(element))
 			{
-				return code;
-			}
-			else if (Scraper.b_AssignedTravelerName == false)
-			{
-				return 1;
+				return true;
 			}
 			else
 			{
 				if (!bRedo)
 				{
-					UserInterface.AddError(character + " is not a valid Character Name");
+					Debug.Print($"Error: {element} is not a valid elemental type");
+					Form1.UnexpectedError($"{element} is not a valid elemental type");
 				}
-				return -1;
-			}
-		}
-
-		public static int GetElementalCode(string element, bool bRedo = false)
-		{
-			if (elements.TryGetValue(element, out int code))
-			{
-				return code;
-			}
-			else
-			{
-				Debug.Print("Error: " + element + " is not a valid Elemental Type");
-				if (!bRedo)
-				{
-					Form1.UnexpectedError(element + " is not a valid Elemental Type");
-				}
-				return -1;
+				return false;
 			};
 		}
 
-		public static int GetEnhancementMaterialCode(string material)
+		public static bool IsEnhancementMaterial(string material)
 		{
-			return enhancementMaterials.TryGetValue(material, out int code) ? code : -1; ;
+			return enhancementMaterials.Contains(material);
 		}
 
-		public static int GetWeaponCode(string weapon)
+		public static bool IsValidWeapon(string weapon)
 		{
-			int code = -1;
-			if (weapons.TryGetValue(weapon, out code))
+			if (weapons.Contains(weapon))
 			{
-				return code;
+				return true;
 			}
 			else
 			{
-				Debug.Print("Error: " + weapon + " is not a valid Weapon Name");
-				UserInterface.AddError(weapon + " is not a valid Weapon Name");
-				//Form1.UnexpectedError(weapon + " is not a valid Weapon Name");
-				return -1;
+				Debug.Print($"Error: {weapon} is not a valid weapon name");
+				UserInterface.AddError($"{weapon} is not a valid weapon name");
+				return false;
 			};
 		}
 
@@ -1087,18 +899,7 @@ namespace GenshinGuide
 
 		public static string FindElementByName(string name)
 		{
-			string element = "";
-
-			foreach (string e in elementList)
-			{
-				if (name.Contains(e))
-				{
-					element = e;
-					break;
-				}
-			}
-
-			return element;
+			return elements.Contains(name) ? name : "";
 		}
 
 		public static bool CompareColors(Color a, Color b)
@@ -1153,7 +954,7 @@ namespace GenshinGuide
 					bmap.SetPixel(i, j, Color.FromArgb(gray, gray, gray));
 				}
 			}
-			return bitmap = (Bitmap)bmap.Clone();
+			return (Bitmap)bmap.Clone();
 		}
 
 		public static void SetGrayscale(ref Bitmap bitmap)
@@ -1166,7 +967,7 @@ namespace GenshinGuide
 				for (int j = 0; j < bmap.Height; j++)
 				{
 					c = bmap.GetPixel(i, j);
-					byte gray = (byte)(.299 * c.R + .587 * c.G + .114 * c.B);
+					byte gray = (byte)(0.2125 * c.R + 0.7154 * c.G + 0.0721 * c.B);
 
 					bmap.SetPixel(i, j, Color.FromArgb(gray, gray, gray));
 				}
@@ -1347,27 +1148,14 @@ namespace GenshinGuide
 			bitmap = (Bitmap)bmap.Clone();
 		}
 
-		#endregion Image Operations
-
-		public static void AssignTravelerName(string name)
+		public static void SetThreshold(int threshold, ref Bitmap bitmap)
 		{
-			string traveler = name;
-			if (traveler != "")
-			{
-				if (traveler.Length > 7)
-				{
-					traveler = traveler.Substring(0, 7);
-					Scraper.AddTravelerToCharacterList(traveler);
-				}
-				else
-				{
-					Scraper.AddTravelerToCharacterList(traveler);
-				}
-			}
-			else
-			{
-				Form1.UnexpectedError("Traveler name cannot be empty");
-			}
+			Grayscale grayscale = new Grayscale( 0.2125, 0.7154, 0.0721 );
+			Bitmap g = grayscale.Apply(bitmap);
+			new Threshold(threshold).ApplyInPlace(g);
+			bitmap = g;
 		}
+
+		#endregion Image Operations
 	}
 }

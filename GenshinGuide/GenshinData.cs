@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using Newtonsoft.Json;
@@ -13,29 +14,27 @@ namespace GenshinGuide
 		[JsonProperty]
 		private static Inventory inventory = new Inventory();
 
-		private static List<Artifact> equippedArtifacts = new List<Artifact>();
-		private static List<Weapon> equippedWeapons = new List<Weapon>();
+		private static HashSet<Artifact> equippedArtifacts = new HashSet<Artifact>();
+		private static HashSet<Weapon> equippedWeapons = new HashSet<Weapon>();
 		public static Queue<OCRImage> workerQueue = new Queue<OCRImage>();
-		private static volatile bool b_ScanWeapons = false;
-		private static Thread ImageProcessor = new Thread(() => { ImageProcessorWorker(); });
+		private static List<Thread> ImageProcessors = new List<Thread>();
 		private static volatile bool b_threadCancel = false;
+		private static int maxProcessors = 2; // TODO: Add support for more processors
 		// TODO add language option
 
 		public GenshinData()
 		{
 			characters = new List<Character>();
 			inventory = new Inventory();
-			equippedArtifacts = new List<Artifact>();
-			equippedWeapons = new List<Weapon>();
+			equippedArtifacts = new HashSet<Artifact>();
+			equippedWeapons = new HashSet<Weapon>();
 		}
 
-		public void StopImageProcessorWorker()
+		public void StopImageProcessorWorkers()
 		{
-			if (ImageProcessor.IsAlive)
-			{
-				b_threadCancel = true;
-				workerQueue = new Queue<OCRImage>();
-			}
+			b_threadCancel = true;
+			AwaitProcessors();
+			workerQueue = new Queue<OCRImage>();
 		}
 
 		public List<Character> GetCharacters()
@@ -50,9 +49,13 @@ namespace GenshinGuide
 
 		public void GatherData(bool[] checkbox)
 		{
-			// Initize Image Processor Queue
-			ImageProcessor = new Thread(() => { ImageProcessorWorker(); }) { IsBackground = true };
-			ImageProcessor.Start();
+			// Initize Image Processors
+			for (int i = 0; i < maxProcessors; i++)
+			{
+				Thread processor = new Thread(ImageProcessorWorker){ IsBackground = true };
+				processor.Start();
+				ImageProcessors.Add(processor);
+			}
 
 			// Scan Main character Name
 			string mainCharacterName = CharacterScraper.ScanMainCharacterName();
@@ -68,7 +71,7 @@ namespace GenshinGuide
 				//inventory.AssignWeapons(ref equippedWeapons);
 				Navigation.MainMenuScreen();
 			}
-			
+
 			if (checkbox[1])
 			{
 				// Get Artifacts
@@ -80,7 +83,6 @@ namespace GenshinGuide
 			}
 
 			workerQueue.Enqueue(new OCRImage(null, "END", 0));
-
 			if (checkbox[2])
 			{
 				// Get characters
@@ -90,8 +92,8 @@ namespace GenshinGuide
 				Navigation.MainMenuScreen();
 			}
 
-			// Wait for Image Processor to finish
-			ImageProcessor.Join();
+			// Wait for Image Processors to finish
+			AwaitProcessors();
 
 			if (checkbox[2])
 			{
@@ -103,70 +105,89 @@ namespace GenshinGuide
 			}
 		}
 
-		public static void ImageProcessorWorker()
+		private void AwaitProcessors()
 		{
-			Weapon w; Artifact a;
-			int weaponCount = 0;
-			int artifactCount = 0;
-			bool b_End = false;
-			while (!b_End)
+			while (ImageProcessors.Count > 0)
+			{
+				ImageProcessors.RemoveAll(process => !process.IsAlive);
+			}
+		}
+
+		public void ImageProcessorWorker()
+		{
+			Thread.CurrentThread.Priority = ThreadPriority.BelowNormal;
+			var threadPriority = Thread.CurrentThread.Priority;
+			Debug.WriteLine($"Thread #{Thread.CurrentThread.ManagedThreadId} priority: {threadPriority}");
+			while (true)
 			{
 				if (b_threadCancel)
 				{
 					workerQueue.Clear();
-					b_End = true;
+					break;
 				}
 
-				if (workerQueue.Count > 0)
+				if (workerQueue.TryDequeue(out OCRImage image))
 				{
-					OCRImage card = workerQueue.Dequeue();
-					if (card.type != "END" && card.bm != null)
+					if (image.type != "END" && image.bm != null)
 					{
-						if (card.type == "weapon")
+						if (image.type == "weapon")
 						{
-							if (!WeaponScraper.IsEnhancementOre(card.bm[0]))
+							if (!WeaponScraper.IsEnhancementOre(image.bm[0]))
 							{
-								weaponCount++;
 								// Scan as weapon
 								UserInterface.ResetGearDisplay();
-								w = WeaponScraper.CatalogueFromBitmaps(card.bm, card.id);
-
+								Weapon w = WeaponScraper.CatalogueFromBitmaps(image.bm, image.id);
 								if (w.IsValid())
 								{
-									Debug.WriteLine("Valid weapon scanned");
 									UserInterface.IncrementWeaponCount();
 									inventory.Add(w);
-									if (w.equippedCharacter != 0)
+									if (!string.IsNullOrEmpty(w.equippedCharacter))
 										equippedWeapons.Add(w);
 								}
-								else if (w.GetName() != -1)
+								else //if (!string.IsNullOrEmpty(w.GetName()))
 								{
-									UserInterface.AddError($"Unable to validate information for weapon #{card.id}");
+									UserInterface.AddError($"Unable to validate information for weapon #{image.id}");
 									// Maybe save bitmaps in some directory to see what an issue might be
 								}
 							}
 						}
-						else if (card.type == "artifact")
+						else if (image.type == "artifact")
 						{
-							// Notify weapon has finished
-							if (!b_ScanWeapons)
-								b_ScanWeapons = true;
-
-							artifactCount++;
-							// Scan as weapon
+							// Scan as artifact
 							UserInterface.ResetGearDisplay();
-							a = ArtifactScraper.ScanArtifact(card.bm, card.id);
 
-							if (a.IsValid())
+							Stopwatch stopwatch = new Stopwatch();
+							stopwatch.Start();
+
+							Artifact a= ArtifactScraper.CatalogueFromBitmapsAsync(image.bm, image.id).Result;
+
+							stopwatch.Stop();
+							TimeSpan ts = stopwatch.Elapsed;
+							Debug.WriteLine($"Time to process artifact #{image.id}: {ts.Seconds}.{ts.Milliseconds / 10}");
+
+							if (a.rarity >= 4)
 							{
-								UserInterface.IncrementArtifactCount();
-								inventory.Add(a);
-
-								if (a.equippedCharacter >= 1)
+								if (a.IsValid())
 								{
-									equippedArtifacts.Add(a);
+									UserInterface.IncrementArtifactCount();
+
+									inventory.Add(a);
+
+									if (!string.IsNullOrEmpty(a.equippedCharacter))
+										equippedArtifacts.Add(a);
+									Debug.WriteLine($"Inventory size: {inventory.size}");
+								}
+								else //if (!string.IsNullOrEmpty(a.setName))
+								{
+									UserInterface.AddError($"Unable to validate information for artifact #{image.id}");
+									// Maybe save bitmaps in some directory to see what an issue might be
+
+									continue;
 								}
 							}
+
+							// Dispose of everything
+							image.bm.ForEach(b => b.Dispose());
 						}
 						else // not supposed to happen
 						{
@@ -175,17 +196,16 @@ namespace GenshinGuide
 					}
 					else
 					{
-						workerQueue.Clear();
-						b_End = true;
+						b_threadCancel = true;
 					}
-					card.bm = null; card.type = "";
 				}
 				else
-				{ // Wait for more images to process
-					System.Threading.Thread.Sleep(500);
+				{
+					// Wait for more images to process
+					Thread.Sleep(250);
 				}
 			}
-			b_threadCancel = false;
+			Debug.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId} exit");
 		}
 
 		public void AssignArtifacts()

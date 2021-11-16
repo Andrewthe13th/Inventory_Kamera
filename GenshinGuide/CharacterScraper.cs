@@ -8,14 +8,14 @@ namespace GenshinGuide
 {
 	public static class CharacterScraper
 	{
-		private static int firstCharacterName = -1;
+		private static string firstCharacterName = null;
 		private static readonly int characterMaxLevel = 90;
 
 		public static string ScanMainCharacterName()
 		{
 			var xReference = 1280.0;
 			var yReference = 720.0;
-			if (Navigation.GetAspectRatio() == new Size(8,5))
+			if (Navigation.GetAspectRatio() == new Size(8, 5))
 			{
 				yReference = 800.0;
 			}
@@ -36,7 +36,6 @@ namespace GenshinGuide
 			UserInterface.SetNavigation_Image(nameBitmap);
 
 			string text = Scraper.AnalyzeText(nameBitmap).Trim();
-
 			if (text != "")
 			{
 				// Only keep a-Z and 0-9
@@ -77,12 +76,18 @@ namespace GenshinGuide
 
 		private static bool ScanCharacter(out Character character)
 		{
-			int name = -1;
-			int element = -1;
+			string name = null;
+
+			string element = null;
+
 			int level = -1;
+
 			bool ascension = false;
+
 			int experience = 0;
+
 			int constellation = 0;
+
 			int[] talents = new int[3];
 
 			// Scan the Name and element of Character
@@ -93,9 +98,9 @@ namespace GenshinGuide
 				ScanNameAndElement(ref name, ref element);
 				Navigation.SystemRandomWait(Navigation.Speed.Faster);
 				currentRuntimes++;
-			} while (( name < 1 || element < 0 ) && ( currentRuntimes < maxRuntimes ));
+			} while (( string.IsNullOrEmpty(name) || string.IsNullOrEmpty(element) ) && ( currentRuntimes < maxRuntimes ));
 
-			if (name < 1 && element < 0)
+			if (string.IsNullOrEmpty(name) && string.IsNullOrEmpty(element))
 			{
 				UserInterface.AddError("Character Name and Element are wrong");
 			}
@@ -104,7 +109,7 @@ namespace GenshinGuide
 			if (name != firstCharacterName)
 			{
 				// assign the first name to serve as first index
-				if (firstCharacterName == -1 && name >= 1)
+				if (string.IsNullOrEmpty(firstCharacterName) && string.IsNullOrEmpty(name))
 					firstCharacterName = name;
 
 				// Scan Level and ascension
@@ -145,7 +150,7 @@ namespace GenshinGuide
 				// Scale down talents due to constellations
 				if (constellation >= 3)
 				{
-					if (Scraper.characterTalentConstellationOrder.TryGetValue(name, out string[] skills))
+					if (Scraper.characterTalentConstellationOrder.ContainsKey(name))
 					{
 						// get talent if character
 						string talent = Scraper.characterTalentConstellationOrder[name][0];
@@ -175,12 +180,12 @@ namespace GenshinGuide
 			}
 			else
 			{
-				character = new Character(-1, -1, -1, ascension, experience, constellation, talents);
+				character = new Character(null, null, -1, ascension, experience, constellation, talents);
 				return false;
 			}
 		}
 
-		private static void ScanNameAndElement(ref int name, ref int element)
+		private static void ScanNameAndElement(ref string name, ref string element)
 		{
 			Bitmap bm = Navigation.CaptureRegion(new Rectangle(83, 5, 220, 54));
 
@@ -201,7 +206,7 @@ namespace GenshinGuide
 
 				if (elementString != "")
 				{
-					element = Scraper.GetElementalCode(elementString, true);
+					element = elementString;
 					text = Regex.Replace(text, elementString, "");
 
 					if (text != "")
@@ -211,9 +216,7 @@ namespace GenshinGuide
 						// strip each char from name until found in dictionary
 						while (characterName.Length > 1)
 						{
-							int temp = Scraper.GetCharacterCode(characterName, true);
-
-							if (temp == -1)
+							if (string.IsNullOrEmpty(characterName))
 							{
 								characterName = characterName.Substring(0, characterName.Length - 1);
 							}
@@ -226,7 +229,7 @@ namespace GenshinGuide
 						if (characterName.Length > 1)
 						{
 							UserInterface.SetCharacter_NameAndElement(bm, characterName, elementString);
-							name = Scraper.GetCharacterCode(characterName, false);
+							name = characterName;
 						}
 					}
 				}
@@ -322,7 +325,7 @@ namespace GenshinGuide
 			return experience;
 		}
 
-		private static int ScanConstellations(int name)
+		private static int ScanConstellations(string name)
 		{
 			int constellation = 0;
 			Color lockColor = Color.FromArgb(255,255,255,255);
@@ -363,8 +366,7 @@ namespace GenshinGuide
 				if (constellationColor == lockColor)
 				{
 					// Check for character like Noelle with pure white in her constellation
-
-					if (name == 13 && i == 1)
+					if (name == "noelle" && i == 1)
 					{
 						// Check if says activate at bottom
 						Bitmap bm1 = new Bitmap(140, 24);
@@ -393,7 +395,7 @@ namespace GenshinGuide
 			return constellation;
 		}
 
-		private static int[] ScanTalents(int name)
+		private static int[] ScanTalents(string name)
 		{
 			int[] talents = {-1,-1,-1};
 
@@ -405,7 +407,7 @@ namespace GenshinGuide
 			int screenLocation_Y = Navigation.GetPosition().Top + yOffset;
 
 			// check if character is mona or ayaka
-			if (name == 19 || name == 35)
+			if (name == "mona" || name == "ayaka")
 			{
 				monaOffset = 1;
 			}

@@ -1,20 +1,21 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace GenshinGuide
 {
 	public class Character
 	{
-		[JsonProperty] public int name { get; private set; }
-		[JsonProperty] public int element { get; private set; }
+		[JsonProperty] public string name { get; private set; }
+		[JsonProperty] public string element { get; private set; }
 		[JsonProperty] public int level { get; private set; }
 		[JsonProperty] public bool ascension { get; private set; }
 		[JsonProperty] public int experience { get; private set; }
 		[JsonProperty] public Weapon weapon { get; private set; }
-		[JsonProperty] private readonly Artifact[] artifacts = new Artifact[5];
+		[JsonProperty] private readonly Dictionary<string, Artifact> artifacts = new Dictionary<string, Artifact>();
 		[JsonProperty] public int constellation { get; private set; }
 		[JsonProperty] private readonly int[] talents = new int[3];
 
-		public Character(int _name, int _element, int _level, bool _ascension, int _experience, int _constellation, int[] _talents)
+		public Character(string _name, string _element, int _level, bool _ascension, int _experience, int _constellation, int[] _talents)
 		{
 			name = _name;
 			element = _element;
@@ -35,14 +36,10 @@ namespace GenshinGuide
 				}
 			}
 
-			if (name == -1 || level == -1 || element == -1 || constellation == -1)
-			{
-				return false;
-			}
-			return true;
+			return Scraper.IsValidCharacter(name) && level != -1 && Scraper.IsValidElement(element) && constellation != -1;
 		}
 
-		public Artifact[] GetArtifacts()
+		public Dictionary<string, Artifact> GetArtifacts()
 		{
 			return artifacts;
 		}
@@ -62,7 +59,7 @@ namespace GenshinGuide
 			artifacts[artifact.GetGearSlot()] = artifact;
 		}
 
-		public int GetName()
+		public string GetName()
 		{
 			return name;
 		}

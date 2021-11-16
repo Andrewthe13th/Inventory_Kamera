@@ -7,17 +7,11 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using Accord.Imaging;
 using Accord.Imaging.Filters;
-using Accord.Math.Geometry;
 
 namespace GenshinGuide
 {
 	public static class WeaponScraper
 	{
-		static WeaponScraper()
-		{
-
-		}
-
 		public static void ScanWeapons(int count = 0)
 		{
 			// Determine maximum number of weapons to scan
@@ -57,9 +51,9 @@ namespace GenshinGuide
 				// Page done, now scroll
 				// If the number of remaining scans is shorter than a full page then
 				// only scroll a few rows
-				if (totalRows - rowsQueued < rows)
+				if (totalRows - rowsQueued <= rows)
 				{
-					if (Navigation.GetAspectRatio() == new Size(8,5))
+					if (Navigation.GetAspectRatio() == new Size(8, 5))
 					{
 						offset = 35; // Lazy fix
 					}
@@ -77,7 +71,6 @@ namespace GenshinGuide
 					}
 					Navigation.SystemRandomWait(Navigation.Speed.Fast);
 				}
-				continue;
 			}
 		}
 
@@ -268,18 +261,14 @@ namespace GenshinGuide
 				int right = (int)Math.Round(reference.Right / 1280.0 * width, MidpointRounding.AwayFromZero);
 				int bottom = (int)Math.Round(reference.Bottom / 720.0 * height, MidpointRounding.AwayFromZero);
 
-				RECT itemCard = new RECT(left, top, right, bottom);
-
-				card = Navigation.CaptureRegion(itemCard);
+				card = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
 
 				// Equipped Character
 				equipped = card.Clone(new RECT(
-				Left: (int)(52.0 / reference.Width * card.Width),
-				Top: (int)(522.0 / reference.Height * card.Height),
+				Left: (int)( 52.0 / reference.Width * card.Width ),
+				Top: (int)( 522.0 / reference.Height * card.Height ),
 				Right: card.Width,
 				Bottom: card.Height), card.PixelFormat);
-				Navigation.DisplayBitmap(equipped, "equipped");
-
 			}
 			else // if (Navigation.GetAspectRatio() == new Size(8, 5))
 			{
@@ -293,8 +282,8 @@ namespace GenshinGuide
 
 				RECT itemCard = new RECT(left, top, right, bottom);
 
-			    card = Navigation.CaptureRegion(itemCard);
-				
+				card = Navigation.CaptureRegion(itemCard);
+
 				// Equipped Character
 				equipped = card.Clone(new RECT(
 					Left: (int)( 52.0 / reference.Width * card.Width ),
@@ -308,7 +297,7 @@ namespace GenshinGuide
 				Left: 0,
 				Top: 0,
 				Right: card.Width,
-				Bottom: (int)(38.0 / reference.Height * card.Height)), card.PixelFormat);
+				Bottom: (int)( 38.0 / reference.Height * card.Height )), card.PixelFormat);
 
 			// Level
 			level = card.Clone(new RECT(
@@ -319,10 +308,10 @@ namespace GenshinGuide
 
 			// Refinement
 			refinement = card.Clone(new RECT(
-				Left: (int)(18.0 / reference.Width * card.Width),
-				Top: (int)(234.0 / reference.Height * card.Height),
-				Right: (int)(42.0 / reference.Width * card.Width),
-				Bottom: (int)(254.0 / reference.Height * card.Height)), card.PixelFormat);
+				Left: (int)( 18.0 / reference.Width * card.Width ),
+				Top: (int)( 234.0 / reference.Height * card.Height ),
+				Right: (int)( 42.0 / reference.Width * card.Width ),
+				Bottom: (int)( 254.0 / reference.Height * card.Height )), card.PixelFormat);
 
 			// Assign to List
 			weaponImages.Add(name);
@@ -336,11 +325,11 @@ namespace GenshinGuide
 		public static Weapon CatalogueFromBitmaps(List<Bitmap> bm, int id)
 		{
 			// Init Variables
-			int name = 0;
+			string name = null;
 			int level = 1;
 			bool ascension = false;
 			int refinementLevel = 1;
-			int equippedCharacter = 0;
+			string equippedCharacter = null;
 
 			if (bm.Count == 4)
 			{
@@ -377,28 +366,16 @@ namespace GenshinGuide
 				}
 				else
 				{
-					name = -1; refinementLevel = -1; equippedCharacter = -1;
+					name = null; refinementLevel = -1; equippedCharacter = null;
 				}
 			}
 
 			return new Weapon(name, level, ascension, refinementLevel, equippedCharacter, id);
 		}
 
-		public static bool IsEnhancementOre()
-		{
-			// Grab image of card on right side of screen
-			int width = 325; int height = 560;
-
-			Rectangle card = new Rectangle(865, 83, width, height);
-			using (var cardBitMap = Navigation.CaptureRegion(card))
-			{
-				return ScanEnchancementOreName(cardBitMap) > 0;
-			}
-		}
-
 		public static bool IsEnhancementOre(Bitmap nameBitmap)
 		{
-			return ScanEnchancementOreName(nameBitmap) > 0;
+			return !string.IsNullOrEmpty(ScanEnchancementOreName(nameBitmap));
 		}
 
 		public static int ScanWeaponCount()
@@ -439,14 +416,14 @@ namespace GenshinGuide
 			return count;
 		}
 
-		public static int ScanName(Bitmap bm)
+		public static string ScanName(Bitmap bm)
 		{
 			Scraper.SetGamma(0.2, 0.2, 0.2, ref bm);
 			Scraper.SetGrayscale(ref bm);
 			Scraper.SetInvert(ref bm);
 
 			// Analyze
-			string text = Scraper.AnalyzeText_1(bm);
+			string text = Scraper.AnalyzeText(bm);
 			text = text.Trim();
 			text = Regex.Replace(text, @"[\W]", "");
 			text = text.ToLower();
@@ -454,11 +431,10 @@ namespace GenshinGuide
 			UserInterface.SetArtifact_GearSlot(bm, text, true);
 
 			// Check in Dictionary
-			int name = Scraper.GetWeaponCode(text);
-			return name;
+			return text;
 		}
 
-		public static int ScanEnchancementOreName(Bitmap bm)
+		public static string ScanEnchancementOreName(Bitmap bm)
 		{
 			Scraper.SetGamma(0.2, 0.2, 0.2, ref bm);
 			Scraper.SetGrayscale(ref bm);
@@ -473,7 +449,7 @@ namespace GenshinGuide
 			text = Regex.Replace(text, @"[\W_]", "");
 			text = text.ToLower();
 
-			return Scraper.GetEnhancementMaterialCode(text);
+			return text;
 		}
 
 		public static int ScanLevel(Bitmap bm, ref bool ascension)
@@ -482,7 +458,7 @@ namespace GenshinGuide
 			Scraper.SetInvert(ref bm);
 			Scraper.SetContrast(100.0, ref bm);
 
-			string text = Scraper.AnalyzeText_2(bm);
+			string text = Scraper.AnalyzeText(bm);
 			text = Regex.Replace(text, @"(?![\d/]).", "");
 			text = text.Trim();
 
@@ -514,7 +490,7 @@ namespace GenshinGuide
 			Scraper.SetInvert(ref bm);
 			Scraper.SetGrayscale(ref bm);
 
-			string text = Scraper.AnalyzeText_3(bm);
+			string text = Scraper.AnalyzeText(bm);
 			text = text.Trim();
 			text = Regex.Replace(text, @"[^\d]", "");
 
@@ -528,12 +504,12 @@ namespace GenshinGuide
 			return -1;
 		}
 
-		public static int ScanEquippedCharacter(Bitmap bm)
+		public static string ScanEquippedCharacter(Bitmap bm)
 		{
 			Scraper.SetGrayscale(ref bm);
 			Scraper.SetContrast(60.0, ref bm);
 
-			string extractedString = Scraper.AnalyzeText_4(bm);
+			string extractedString = Scraper.AnalyzeText(bm);
 			extractedString.Trim();
 
 			if (extractedString != "")
@@ -548,8 +524,8 @@ namespace GenshinGuide
 					extractedString = extractedString.ToLower();
 
 					// Assign Traveler Name if not found
-					int character = Scraper.GetCharacterCode(extractedString);
-					if (Scraper.b_AssignedTravelerName == false && character == 1)
+					string character = extractedString;
+					if (Scraper.b_AssignedTravelerName == false && character != null)
 					{
 						Scraper.AssignTravelerName(extractedString);
 						Scraper.b_AssignedTravelerName = true;
@@ -558,8 +534,7 @@ namespace GenshinGuide
 					// Used to match with Traveler Name
 					while (extractedString.Length > 1)
 					{
-						int temp = Scraper.GetCharacterCode(extractedString, true);
-						if (temp == -1)
+						if (string.IsNullOrEmpty(extractedString))
 						{
 							extractedString = extractedString.Substring(0, extractedString.Length - 1);
 						}
@@ -568,11 +543,11 @@ namespace GenshinGuide
 							break;
 						}
 					}
-					return extractedString.Length > 0 ? Scraper.GetCharacterCode(extractedString) : 0;
+					return extractedString.Length > 0 ? extractedString : null;
 				}
 			}
 			// artifact has no equipped character
-			return 0;
+			return null;
 		}
 	}
 }

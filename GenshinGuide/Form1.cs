@@ -86,7 +86,7 @@ namespace GenshinGuide
 				// stop navigating throw weapons/artifacts
 				mainThread.Abort();
 				// stop weapon/artifact processor thread
-				data.StopImageProcessorWorker();
+				data.StopImageProcessorWorkers();
 				UserInterface.SetProgramStatus("Scan Stopped");
 				// Reset data
 				data = new GenshinData();

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using Newtonsoft.Json;
 
 namespace GenshinGuide
@@ -9,6 +8,12 @@ namespace GenshinGuide
 		[JsonProperty] private List<Weapon> weapons;
 		[JsonProperty] private List<Artifact> artifacts;
 
+		public int size
+		{
+			get => weapons.Count + artifacts.Count;
+			set => size = weapons.Count + artifacts.Count;
+		}
+
 		public Inventory()
 		{
 			weapons = new List<Weapon>();
@@ -17,13 +22,11 @@ namespace GenshinGuide
 
 		public void Add(Weapon w)
 		{
-			Debug.WriteLine("Weapon scanned to inventory");
 			weapons.Add(w);
 		}
 
 		public void Add(Artifact a)
 		{
-			Debug.WriteLine("Artifact scanned to inventory");
 			artifacts.Add(a);
 		}
 

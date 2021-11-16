@@ -1,22 +1,36 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
 
 namespace GenshinGuide
 {
 	public class Artifact
 	{
-		[JsonProperty] public int gearSlot { get; private set; }
+		[JsonProperty] public string gearSlot { get; private set; }
 		[JsonProperty] public int rarity { get; private set; }
-		[JsonProperty] public int mainStat { get; private set; }
+		[JsonProperty] public string mainStat { get; private set; }
 		[JsonProperty] public int level { get; private set; }
 		[JsonProperty] public SubStat[] subStats { get; private set; }
 		[JsonProperty] public int subStatsCount { get; private set; }
-		[JsonProperty] public int setName { get; private set; }
-		[JsonProperty] public int equippedCharacter { get; private set; }
-
+		[JsonProperty] public string setName { get; private set; }
+		[JsonProperty] public string equippedCharacter { get; private set; }
 		[JsonProperty] public bool _lock { get; private set; }
 		[JsonProperty] public int id { get; private set; }
 
-		public Artifact(int _rarity, int _gearSlot, int _mainStat, int _level, SubStat[] _subStats, int _subStatsCount, int _setName, int _equippedCharacter = 0, int _id = 0, bool _Lock = false)
+		public Artifact()
+		{
+			rarity = -1;
+			gearSlot = null;
+			mainStat = null;
+			level = -1;
+			subStats = new SubStat[4];
+			subStatsCount = 4;
+			setName = null;
+			equippedCharacter = null;
+			_lock = false;
+			id = 0;
+		}
+
+		public Artifact(int _rarity, string _gearSlot, string _mainStat, int _level, SubStat[] _subStats, int _subStatsCount, string _setName, string _equippedCharacter = null, int _id = 0, bool _Lock = false)
 		{
 			gearSlot = _gearSlot;
 			rarity = _rarity;
@@ -30,7 +44,7 @@ namespace GenshinGuide
 			id = _id;
 		}
 
-		public int GetGearSlot()
+		public string GetGearSlot()
 		{
 			return gearSlot;
 		}
@@ -40,28 +54,77 @@ namespace GenshinGuide
 			// Check subStats
 			for (int i = 0; i < subStatsCount; i++)
 			{
-				if (subStats[i].stat == -1 || subStats[i].value == (decimal)( -1.0 ))
+				if (subStats[i].stat == null)
+				{
+					continue;
+				}
+				if (!Scraper.IsValidStat(subStats[i].stat) || subStats[i].value == (decimal)( -1.0 ))
 				{
 					return false;
 				}
 			}
 
-			if (gearSlot == -1 || level == -1 || setName == -1 || equippedCharacter < 0 || rarity == 0)
-			{
-				return false;
-			}
-			return true;
+			return Scraper.IsValidSlot(gearSlot) && level >= 0 && level <= 20 && Scraper.IsValidSetName(setName) && rarity != 0;
 		}
 
-		public int GetEquippedCharacter()
+		public string GetEquippedCharacter()
 		{
 			return equippedCharacter;
 		}
 
 		public struct SubStat
 		{
-			public int stat;
+			public string stat;
 			public decimal value;
 		}
+
+		public override bool Equals(object obj) => this.Equals(obj as Artifact);
+
+		public bool Equals(Artifact artifact)
+		{
+			if (artifact is null)
+			{
+				return false;
+			}
+
+			if (Object.ReferenceEquals(this, artifact))
+			{
+				return true;
+			}
+
+			if (GetType() != artifact.GetType())
+			{
+				return false;
+			}
+
+			return gearSlot == artifact.gearSlot
+				&& rarity == artifact.rarity
+				&& mainStat == artifact.mainStat
+				&& level == artifact.level
+				&& subStats == artifact.subStats
+				&& subStatsCount == artifact.subStatsCount
+				&& setName == artifact.setName
+				&& equippedCharacter == artifact.equippedCharacter
+				&& _lock == artifact._lock;
+		}
+
+		public override int GetHashCode() => (gearSlot, rarity, mainStat, level, subStats, subStatsCount, setName, equippedCharacter, _lock).GetHashCode();
+
+		public static bool operator ==(Artifact lhs, Artifact rhs)
+		{
+			if (lhs is null)
+			{
+				if (rhs is null)
+				{
+					return true;
+				}
+
+				return false;
+			}
+
+			return lhs.Equals(rhs);
+		}
+
+		public static bool operator !=(Artifact lhs, Artifact rhs) => !( lhs == rhs );
 	}
 }

@@ -15,9 +15,8 @@ namespace GenshinGuide
 		[JsonProperty] public List<IWeapon> weapons;
 		[JsonProperty] public List<IArtifact> artifacts;
 		[JsonProperty] public List<ICharacter> characters;
-		private readonly string[] eng_Names = {
-			"",
-			"Traveler",
+
+		private readonly List<string> eng_Names = new List<string> {
 			"Amber",
 			"Kaeya",
 			"Lisa",
@@ -51,149 +50,162 @@ namespace GenshinGuide
 			"Yanfei",
 			"Eula",
 			"KaedeharaKazuha",
+			"KaedeharaKazuha",
+			"KamisatoAyaka",
 			"KamisatoAyaka",
 			"Yoimiya",
 			"Sayu",
 			"RaidenShogun",
+			"RaidenShogun",
+			"KujouSara",
 			"KujouSara",
 			"Aloy",
 			"SangonomiyaKokomi",
+			"SangonomiyaKokomi",
 			"Thoma",
 		};
+
 		private readonly string[] eng_Weapons = {
              // 1 Star
             "DullBlade",
 			"WasterGreatsword",
 			"BeginnersProtector",
 			"ApprenticesNotes",
-			"HuntersBow",//4
-            //2Stars
+			"HuntersBow",
+
+            // 2 Stars
             "SilverSword",
 			"OldMercsPal",
 			"IronPoint",
 			"PocketGrimoire",
-			"SeasonedHuntersBow",//9
-            //3Star
-            "CoolSteel",//10
-            "HarbingerOfDawn",
+			"SeasonedHuntersBow",
+
+            // 3 Star
+            "CoolSteel",
+			"HarbingerOfDawn",
 			"TravelersHandySword",
 			"FilletBlade",
 			"SkyriderSword",
-			"FerrousShadow",//15
-            "BloodtaintedGreatsword",
+			"FerrousShadow",
+			"BloodtaintedGreatsword",
 			"WhiteIronGreatsword",
 			"DebateClub",
 			"SkyriderGreatsword",
-			"WhiteTassel",//20
-            "Halberd",
+			"WhiteTassel",
+			"Halberd",
 			"BlackTassel",
 			"MagicGuide",
 			"ThrillingTalesOfDragonSlayers",
-			"OtherworldlyStory",//25
-            "EmeraldOrb",
+			"OtherworldlyStory",
+			"EmeraldOrb",
 			"TwinNephrite",
 			"RavenBow",
 			"SharpshootersOath",
-			"RecurveBow",//30
-            "Slingshot",
+			"RecurveBow",
+			"Slingshot",
 			"Messenger",
-            //4star
+
+            // 4 star
             "FavoniusSword",
 			"TheFlute",
-			"SacrificialSword",//35
-            "RoyalLongsword",
+			"SacrificialSword",
+			"RoyalLongsword",
 			"LionsRoar",
 			"PrototypeRancour",
 			"IronSting",
-			"BlackcliffLongsword",//40
-            "TheBlackSword",
+			"BlackcliffLongsword",
+			"TheBlackSword",
 			"SwordOfDescension",
 			"FesteringDesire",
 			"TheAlleyFlash",
-			"FavoniusGreatsword",//45
-            "TheBell",
+			"FavoniusGreatsword",
+			"TheBell",
 			"SacrificialGreatsword",
 			"RoyalGreatsword",
 			"Rainslasher",
-			"PrototypeArchaic",//50
-            "Whiteblind",
+			"PrototypeArchaic",
+			"Whiteblind",
 			"BlackcliffSlasher",
 			"SerpentSpine",
 			"SnowTombedStarsilver",
-			"LithicBlade",//55
-            "DragonsBane",
+			"LithicBlade",
+			"DragonsBane",
 			"PrototypeStarglitter",
 			"CrescentPike",
 			"BlackcliffPole",
-			"Deathmatch",//60
-            "FavoniusLance",
+			"Deathmatch",
+			"FavoniusLance",
 			"RoyalSpear",
 			"DragonspineSpear",
 			"LithicSpear",
-			"FavoniusCodex",//65
-            "TheWidsith",
+			"FavoniusCodex",
+			"TheWidsith",
 			"SacrificialFragments",
 			"RoyalGrimoire",
 			"SolarPearl",
-			"PrototypeAmber",//70
-            "MappaMare",
+			"PrototypeAmber",
+			"MappaMare",
 			"BlackcliffAgate",
 			"EyeOfPerception",
 			"Frostbearer",
-			"WineAndSong",//75
-            "FavoniusWarbow",
+			"WineAndSong",
+			"FavoniusWarbow",
 			"TheStringless",
 			"SacrificialBow",
 			"RoyalBow",
-			"Rust",//80
-            "PrototypeCrescent",
+			"Rust",
+			"PrototypeCrescent",
 			"CompoundBow",
 			"BlackcliffWarbow",
 			"TheViridescentHunt",
-			"AlleyHunter",//85
-            "WindblumeOde",
+			"AlleyHunter",
+			"WindblumeOde",
 			"AquilaFavonia",
 			"SkywardBlade",
 			"SummitShaper",
-			"PrimordialJadeCutter",//90
-            "SkywardPride",
+			"PrimordialJadeCutter",
+			"SkywardPride",
 			"WolfsGravestone",
 			"TheUnforged",
 			"PrimordialJadeWingedSpear",
-			"SkywardSpine",//95
-            "VortextVanquisher",
+			"SkywardSpine",
+			"VortextVanquisher",
 			"StaffOfHoma",
 			"SkywardAtlas",
 			"LostPrayerToTheSacredWinds",
-			"MemoryOfDust",//100
-            "SkywardHarp",
+			"MemoryOfDust",
+			"SkywardHarp",
 			"AmosBow",
 			"ElegyForTheEnd",
 			"SongOfBrokenPines",
-			"MitternachtsWaltz",//105
-            "Freedom-Sworn",
+			"MitternachtsWaltz",
+			"Freedom-Sworn",
 			"DodocoTales",
-            //InazumaPatch
+
+            // 2.0 Inazuma Patch
             "AmenomaKageuchi",
 			"KatsuragikiriNagamasa",
-			"KitainCrossSpear",//110
-            "Hamayumi",
+			"KitainCrossSpear",
+			"Hamayumi",
 			"HakushinRing",
 			"MistsplitterReforged",
 			"ThunderingPulse",
+
             // 2.1
-            "Predator", // 115
-            "LuxuriousSeaLord",
+            "Predator",
+			"LuxuriousSeaLord",
 			"TheCatch",
 			"EngulfingLightning",
 			"EverlastingMoonglow",
 			"DarkIronSword",
+
             // 2.2
             "PolarStar",
 			"Akuoumaru",
 			"MouunsMoon",
-			"WavebreakersFin"
+			"WavebreakersFin",
 		};
+
 		private readonly string[] eng_Artifacts = {
 			"Adventurer",
 			"LuckyDog",
@@ -231,6 +243,7 @@ namespace GenshinGuide
 			"ShimenawasReminiscence",
 			"EmblemOfSeveredFate",
 		};
+
 		private readonly string[] eng_ArtifactSlotList = {
 			"flower",
 			"plume",
@@ -238,7 +251,8 @@ namespace GenshinGuide
 			"goblet",
 			"circlet",
 		};
-		private readonly string[] eng_ArtifactMainStatList =
+
+		private readonly string[] eng_Stats =
 		{
 			"hp", //0
             "atk",
@@ -258,18 +272,6 @@ namespace GenshinGuide
 			"anemo_dmg_", //15
             "geo_dmg_",
 		};
-		private readonly string[] eng_ArtifactSubStatList = {
-			"hp", // 0
-            "hp_",
-			"atk",
-			"atk_",
-			"def",
-			"def_", // 5
-            "enerRech_",
-			"eleMas",
-			"critRate_",
-			"critDMG_", //9
-        };
 
 		public GOOD()
 		{
@@ -301,7 +303,7 @@ namespace GenshinGuide
 			{
 				ICharacter temp = new ICharacter
 				{
-					key = eng_Names[x.name],
+					key = eng_Names.Contains(x.name) ? eng_Names[eng_Names.IndexOf(x.name)] : "Traveler",
 					level = x.level,
 					constellation = x.constellation,
 					ascension = x.AscensionLevel()
@@ -318,11 +320,11 @@ namespace GenshinGuide
 			{
 				IWeapon temp = new IWeapon
 				{
-					key = eng_Weapons[x.name],
+					key = eng_Weapons[Scraper.weapons.IndexOf(x.name)],
 					level = x.level,
 					ascension = x.AscensionCount(),
 					refinement = x.refinementLevel,
-					location = eng_Names[x.equippedCharacter]
+					location = x.equippedCharacter
 				};
 				weapons.Add(temp);
 			}
@@ -336,21 +338,22 @@ namespace GenshinGuide
 				{
 					IArtifact temp = new IArtifact
 					{
-						setKey = eng_Artifacts[x.setName],
-						slotKey = eng_ArtifactSlotList[x.gearSlot],
+						setKey = eng_Artifacts[Scraper.setNames.IndexOf(x.setName)],
+						slotKey = eng_ArtifactSlotList[Scraper.gearSlots.IndexOf(x.gearSlot)],
 						level = x.level,
 						rarity = x.rarity,
-						mainStatKey = eng_ArtifactMainStatList[x.mainStat],
-						location = eng_Names[x.equippedCharacter],
+						mainStatKey = eng_Stats[Scraper.stats.IndexOf(x.mainStat)],
+						location = Scraper.characters.IndexOf(x.equippedCharacter) != -1 ? eng_Names[Scraper.characters.IndexOf(x.equippedCharacter)] : "Traveler",
 						_lock = x._lock,
 						// SubStats
 						substats = new ISubstat[4]
 					};
+
 					for (int i = 0; i < 4; i++)
 					{
 						if (x.subStats[i].value != 0)
 						{
-							temp.substats[i].key = eng_ArtifactSubStatList[x.subStats[i].stat];
+							temp.substats[i].key = eng_Stats[Scraper.stats.IndexOf(x.subStats[i].stat)];
 							temp.substats[i].value = x.subStats[i].value;
 						}
 						else
@@ -386,9 +389,9 @@ namespace GenshinGuide
 
 			// Try to load external GOOD data to update.
 			// For preserving information at when uploading data to
-			// https://frzyc.github.io/genshin-optimizer 
+			// https://frzyc.github.io/genshin-optimizer
 			JObject database = null;
-			if (File.Exists(oldDataFilePath))
+			if (File.Exists(oldDataFilePath) && false) // && false hack. TODO: add support for data merging
 			{
 				try
 				{
@@ -429,7 +432,6 @@ namespace GenshinGuide
 					}
 					// Artifacts
 
-
 					using (StreamWriter file = File.CreateText(outputFile))
 					using (JsonWriter writer = new JsonTextWriter(file))
 					{
@@ -437,7 +439,6 @@ namespace GenshinGuide
 					}
 					Debug.WriteLine("Successfully merged databases");
 				}
-
 				catch (Exception)
 				{
 					UserInterface.AddError("Unable to create merged database.");

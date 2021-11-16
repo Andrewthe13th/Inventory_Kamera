@@ -17,9 +17,10 @@ namespace GenshinGuide
 		public static InputSimulator sim = new InputSimulator();
 		private static RECT area = new RECT();
 		private static RECT position = new RECT();
+
 		public static List<Size> resolutions = new List<Size>
 		{
-			// 16:9 
+			// 16:9
 			new Size(1920, 1080),
 			new Size(1600, 900),
 			new Size(1280, 720),
@@ -102,7 +103,6 @@ namespace GenshinGuide
 					Location = new Point(0,0)
 				};
 
-
 				form.Controls.Add(pb);
 				form.ShowDialog();
 			}
@@ -175,8 +175,8 @@ namespace GenshinGuide
 
 		public static void SelectArtifactInventory()
 		{
-			int buttonX = (int)(area.Right * (57 / (Double)160));
-			int buttonY = (int)(area.Bottom * (5 / (Double)90));
+			int buttonX = (int)(448 / 1280.0 * GetWidth());
+			int buttonY = (int)(31 / 720.0 * GetHeight());
 			SetCursorPos(position.Left + buttonX, position.Top + buttonY);
 			sim.Mouse.LeftButtonClick();
 			SystemRandomWait(Speed.UI);

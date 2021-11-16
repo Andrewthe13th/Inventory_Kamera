@@ -9,6 +9,7 @@ namespace GenshinGuide
 	{
 		// Artifact
 		private static PictureBox gearSlot_PictureBox;
+
 		private static PictureBox gearMainStat_PictureBox;
 		private static PictureBox gearLevel_PictureBox;
 		private static PictureBox[] gearSubStat_PictureBoxes = new PictureBox[4];
@@ -18,12 +19,14 @@ namespace GenshinGuide
 
 		// Character
 		private static PictureBox cName_PictureBox;
+
 		private static PictureBox cLevel_PictureBox;
 		private static PictureBox[] cTalent_PictureBoxes = new PictureBox[3];
 		private static TextBox character_TextBox;
 
 		// Counters
 		private static Label weaponCount_Label;
+
 		private static Label weaponMax_Label;
 		private static Label artifactCount_Label;
 		private static Label artifactMax_Label;
@@ -72,13 +75,13 @@ namespace GenshinGuide
 
 		public static void SetArtifact_GearSlot(Bitmap bm, string text, bool bWeapon = false)
 		{
-			UpdatePictureBox(bm, gearSlot_PictureBox);
+			UpdatePictureBox(new Bitmap(bm), gearSlot_PictureBox);
 			UpdateTextBox(bWeapon ? $"Weapon: {text}\n" : $"GearSlot: {text}\n", gear_TextBox);
 		}
 
 		private static void UpdateElements(Bitmap bm, string text, PictureBox pictureBox, TextBox textBox)
 		{
-			UpdatePictureBox(bm, pictureBox);
+			UpdatePictureBox(new Bitmap(bm), pictureBox);
 			UpdateTextBox(text, textBox);
 		}
 
@@ -86,16 +89,21 @@ namespace GenshinGuide
 		{
 			try
 			{
+				Bitmap clone = new Bitmap(bm.Width, bm.Height);
+				using (var copy = Graphics.FromImage(clone))
+				{
+					copy.DrawImage(bm, 0, 0);
+				}
 				MethodInvoker pictureBoxAction = delegate
 			{
-				pictureBox.Image = bm;
+				pictureBox.Image = clone;
 				pictureBox.Refresh();
 			};
 				pictureBox.Invoke(pictureBoxAction);
 			}
 			catch (Exception e)
 			{
-				Debug.WriteLine(e.StackTrace);
+				Debug.WriteLine($"Problem updating picturebox {pictureBox.Name}\n{e.StackTrace}");
 			}
 		}
 
@@ -113,9 +121,8 @@ namespace GenshinGuide
 			}
 			catch (Exception e)
 			{
-				Debug.WriteLine(e.StackTrace);
+				Debug.WriteLine($"Problem updating textbox {textBox.Name}\n{e.StackTrace}");
 			}
-
 		}
 
 		private static void UpdateLabel(string text, Label label)
@@ -131,7 +138,7 @@ namespace GenshinGuide
 			}
 			catch (Exception e)
 			{
-				Debug.WriteLine(e.StackTrace);
+				Debug.WriteLine($"Problem updating label {label.Name}\n{e.StackTrace}");
 			}
 		}
 
@@ -151,7 +158,7 @@ namespace GenshinGuide
 			if (i > -1 && i < 4)
 			{
 				UpdatePictureBox(bm, gearSubStat_PictureBoxes[i]);
-				UpdateTextBox($"SubStat {i}: {text}\n", gear_TextBox);
+				UpdateTextBox($"SubStat {i + 1}: {text}\n", gear_TextBox);
 			}
 		}
 
