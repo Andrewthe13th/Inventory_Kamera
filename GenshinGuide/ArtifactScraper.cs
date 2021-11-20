@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Accord;
 using Accord.Imaging;
 using Accord.Imaging.Filters;
 using static GenshinGuide.Artifact;
@@ -13,7 +14,7 @@ namespace GenshinGuide
 {
 	public static class ArtifactScraper
 	{
-		public static void ScanArtifacts(int count = 524)
+		public static void ScanArtifacts(int count = 0)
 		{
 			// Get Max artifacts from screen
 			int artifactCount = count == 0 ? ScanArtifactCount() : count;
@@ -59,9 +60,8 @@ namespace GenshinGuide
 					for (int i = 0; i < 10 * ( totalRows - rowsQueued ) - 1; i++)
 					{
 						Navigation.sim.Mouse.VerticalScroll(-1);
-						Navigation.SystemRandomWait(Navigation.Speed.InventoryScroll);
 					}
-					Navigation.SystemRandomWait(Navigation.Speed.Normal);
+					Navigation.SystemRandomWait(Navigation.Speed.Fast);
 				}
 				else
 				{
@@ -73,9 +73,8 @@ namespace GenshinGuide
 					for (int i = 0; i < 10 * rows - 1; i++)
 					{
 						Navigation.sim.Mouse.VerticalScroll(-1);
-						Navigation.SystemRandomWait(Navigation.Speed.InventoryScroll);
 					}
-					Navigation.SystemRandomWait(Navigation.Speed.Faster);
+					Navigation.SystemRandomWait(Navigation.Speed.Fast);
 				}
 			}
 		}
@@ -95,10 +94,9 @@ namespace GenshinGuide
 			Scraper.SetContrast(60.0, ref bm);
 			Scraper.SetInvert(ref bm);
 
-			string text = Scraper.AnalyzeText(bm);
+			string text = Scraper.AnalyzeText(bm).Trim();
 			bm.Dispose();
 			text = Regex.Replace(text, @"[^\d/]", "");
-			text = text.Trim();
 
 			int count;
 			// Check for dash
@@ -513,14 +511,17 @@ namespace GenshinGuide
 				default:
 
 					Scraper.SetContrast(100.0, ref bm);
-					Scraper.SetGamma(0.1, 0.1, 0.1, ref bm);
-					Scraper.SetInvert(ref bm);
 					Scraper.SetGrayscale(ref bm);
-					Scraper.SetThreshold(127, ref bm);
+					Scraper.SetThreshold(135, ref bm);
+					Scraper.SetInvert(ref bm);
 
 					// Get Main Stat
 					string mainStat = Scraper.AnalyzeText(bm).ToLower().Trim();
-					mainStat = Regex.Replace(mainStat, @"[\W_]", "");
+
+					// Remove anything not a-z as well as removes spaces/underscores
+					mainStat = Regex.Replace(mainStat, @"[\W_0-9]", "");
+					// Replace double characters (ex. aanemodmgbonus). Seemed to be a somewhat common problem.
+					mainStat = Regex.Replace(mainStat, "(.)\\1+", "$1");
 
 					//Debug.WriteLine($"ScanArtifactMainStat runtime: {ts.Milliseconds}ms");
 
@@ -536,7 +537,7 @@ namespace GenshinGuide
 			Scraper.SetInvert(ref bm);
 
 			// numbersOnly = true => seems to interpret the '+' as a '4'
-			string text = Scraper.AnalyzeText(bm, Tesseract.PageSegMode.SingleWord, numbersOnly: false).Trim().ToLower();
+			string text = Scraper.AnalyzeText(bm, Tesseract.PageSegMode.SingleWord).Trim().ToLower();
 
 			// Get rid of all non digits
 			text = Regex.Replace(text, @"[\D]", "");
@@ -552,14 +553,14 @@ namespace GenshinGuide
 			{
 				throw new Exception("Need to implement artifact substat scraping in 16:10 aspect ratio");
 			}
-
+			
 			var text = Scraper.AnalyzeText(artifactImage, Tesseract.PageSegMode.Auto).ToLower();
 			List<string> lines = new List<string>(text.Split('\n'));
-			lines.RemoveAll(line => string.IsNullOrWhiteSpace(line) || line.Contains("set:"));
+			lines.RemoveAll(line => string.IsNullOrEmpty(line) || line.Contains("set") || line.Contains("2-piece") || line.Contains("4-piece") || line.Contains("1-piece"));
 
 			SubStat[] substats = new SubStat[4];
 			List<Task<string>> tasks = new List<Task<string>>();
-
+			int setTask = 0;
 			for (int i = 0; i < lines.Count; i++)
 			{
 				int j = i;
@@ -569,7 +570,7 @@ namespace GenshinGuide
 
 					if (line.Contains("+"))
 					{
-						SubStat stat;
+						SubStat stat = new SubStat();
 
 						var split = line.Split('+');
 						string optional = "";
@@ -581,7 +582,10 @@ namespace GenshinGuide
 								optional = "%";
 							}
 						}
-						stat.stat = split[0] + optional;
+						if (Scraper.stats.Contains(split[0]))
+						{
+							stat.stat = split[0] + optional;
+						}
 						if (!decimal.TryParse(split[1], out stat.value))
 						{
 							stat.value = -1;
@@ -590,22 +594,21 @@ namespace GenshinGuide
 						substats[j] = stat;
 						return null;
 					}
-					else if (line.Contains(":"))
+					else// if (line.Contains(":")) // Sometimes Tesseract wouldn't detect a ':' making this check troublesome
 					{
-						var name = line.Split(':')[0].Trim().ToLower();
+						var name = line.Trim().ToLower();
 
 						name = Regex.Replace(name, @"[^\w]", "");
 
-						return name;
-					}
-					else
-					{
-						return null;
+						name = FindClosestSetName(name);
+
+						return !string.IsNullOrEmpty(name) ? name : null;
 					}
 				});
 				tasks.Add(task);
 			}
 
+			bool remove = false;
 			while (tasks.Count > 0)
 			{
 				for (int i = 0; i < tasks.Count; i++)
@@ -618,17 +621,128 @@ namespace GenshinGuide
 					if (!task.IsFaulted && task.Result != null)
 					{
 						setName = task.Result;
+						setTask = i;
+						remove = true;
 					}
-					if (task.IsCompleted)
+					if (task.IsCompleted && remove)
 					{
 						tasks.Remove(task);
 						break;
 					}
 				}
 			}
-
+			
+			// Reset any stats accidentally caught if they're below the set name
+			for (int i = setTask; i < substats.Length; i++)
+			{
+				substats[i].stat = null;
+				substats[i].value = 0;
+			}
+			
+			
 			//Debug.WriteLine($"ScanArtifactSubStats runtime: {ts.Milliseconds}ms");
 			return substats.ToList();
+		}
+
+		private static string FindClosestSetName(string name)
+		{
+			int index = 10;
+			int maxEdits = 25;
+			for (int i = 0; i < Scraper.setNames.Count; i++)
+			{
+				string setName = Scraper.setNames[i];
+				int edits = CalcDistance(name, setName, maxEdits);
+
+				if (edits <= 2)
+				{
+					return setName;
+				}
+
+				if (edits < maxEdits)
+				{
+					index = i;
+					maxEdits = edits;
+				}
+			}
+
+			return index != int.MaxValue ? Scraper.setNames[index] : null;
+		}
+
+		private static int CalcDistance(string text, string setName, int maxEdits)
+		{
+			int length1 = text.Length;
+			int length2 = setName.Length;
+
+			// Return trivial case - difference in string lengths exceeds threshhold
+			if (Math.Abs(length1 - length2) > maxEdits) { return int.MaxValue; }
+
+			// Ensure arrays [i] / length1 use shorter length 
+			if (length1 > length2)
+			{
+				Swap(ref setName, ref text);
+				Swap(ref length1, ref length2);
+			}
+
+			int maxi = length1;
+			int maxj = length2;
+
+			int[] dCurrent = new int[maxi + 1];
+			int[] dMinus1 = new int[maxi + 1];
+			int[] dMinus2 = new int[maxi + 1];
+			int[] dSwap;
+
+			for (int i = 0; i <= maxi; i++) { dCurrent[i] = i; }
+
+			int jm1 = 0, im1 = 0, im2 = -1;
+
+			for (int j = 1; j <= maxj; j++)
+			{
+
+				// Rotate
+				dSwap = dMinus2;
+				dMinus2 = dMinus1;
+				dMinus1 = dCurrent;
+				dCurrent = dSwap;
+
+				// Initialize
+				int minDistance = int.MaxValue;
+				dCurrent[0] = j;
+				im1 = 0;
+				im2 = -1;
+
+				for (int i = 1; i <= maxi; i++)
+				{
+
+					int cost = text[im1] == setName[jm1] ? 0 : 1;
+
+					int del = dCurrent[im1] + 1;
+					int ins = dMinus1[i] + 1;
+					int sub = dMinus1[im1] + cost;
+
+					//Fastest execution for min value of 3 integers
+					int min = (del > ins) ? (ins > sub ? sub : ins) : (del > sub ? sub : del);
+
+					if (i > 1 && j > 1 && text[im2] == setName[jm1] && text[im1] == setName[j - 2])
+						min = Math.Min(min, dMinus2[im2] + cost);
+
+					dCurrent[i] = min;
+					if (min < minDistance) { minDistance = min; }
+					im1++;
+					im2++;
+				}
+				jm1++;
+				if (minDistance > maxEdits) { return int.MaxValue; }
+			}
+
+			int result = dCurrent[maxi];
+			return ( result > maxEdits ) ? int.MaxValue : result;
+		}
+
+		private static void Swap<T>(ref T arg1, ref T arg2)
+		{
+			T temp = arg1;
+			arg1 = arg2;
+			arg2 = temp;
 		}
 
 		private static string ScanArtifactEquippedCharacter(Bitmap bm)
@@ -637,7 +751,7 @@ namespace GenshinGuide
 			Scraper.SetContrast(60.0, ref bm);
 
 			string equippedCharacter = Scraper.AnalyzeText(bm).ToLower().Trim();
-			equippedCharacter = Regex.Replace(equippedCharacter, @"[^\w]", "");
+			equippedCharacter = Regex.Replace(equippedCharacter, @"[^\w:_]", "");
 
 			if (equippedCharacter != "")
 			{
@@ -645,14 +759,12 @@ namespace GenshinGuide
 				{
 					equippedCharacter = equippedCharacter.Split(':')[1].Trim();
 					//UserInterface.SetGear_Equipped(bm, equippedCharacter);
-					equippedCharacter = Regex.Replace(equippedCharacter, @"[^\w_]", "");
 
 					//Debug.WriteLine($"ScanArtifactEquippedCharacter runtime: {ts.Milliseconds}ms");
 					return equippedCharacter;
 				}
 			}
 			// artifact has no equipped character
-
 			//Debug.WriteLine($"ScanArtifactEquippedCharacter runtime: {ts.Milliseconds}ms");
 			return null;
 		}

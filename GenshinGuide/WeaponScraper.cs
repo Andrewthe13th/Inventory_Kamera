@@ -61,7 +61,7 @@ namespace GenshinGuide
 					{
 						Navigation.sim.Mouse.VerticalScroll(-1);
 					}
-					Navigation.SystemRandomWait(Navigation.Speed.Normal);
+					Navigation.SystemRandomWait(Navigation.Speed.Fast);
 				}
 				else
 				{
@@ -326,27 +326,40 @@ namespace GenshinGuide
 		{
 			// Init Variables
 			string name = null;
-			int level = 1;
+			int level = -1;
 			bool ascension = false;
-			int refinementLevel = 1;
+			int refinementLevel = -11;
 			string equippedCharacter = null;
+			int rarity = 0;
 
-			if (bm.Count == 4)
+			if (bm.Count >= 4)
 			{
 				int w_name = 0; int w_level = 1; int w_refinement = 2; int w_equippedCharacter = 3;
+				
 				// Check for Rarity
 				Color rarityColor = bm[0].GetPixel(5, 5);
 				Color fiveStar = Color.FromArgb(255, 188, 105, 50);
 				Color fourthStar = Color.FromArgb(255, 161, 86, 224);
 				Color threeStar = Color.FromArgb(255, 81, 127, 203);
+
 				// Check for equipped color
 				Color equipped = Color.FromArgb(255, 255, 231, 187);
 
 				// Scan different parts of the weapon
-				bool b_RarityAboveTwo = Scraper.CompareColors(fiveStar, rarityColor) || Scraper.CompareColors(fourthStar, rarityColor) || Scraper.CompareColors(threeStar, rarityColor);
+				bool bRarity5 = Scraper.CompareColors(fiveStar, rarityColor);
+				bool bRarity4 = Scraper.CompareColors(fourthStar, rarityColor);
+				bool bRarity3 = Scraper.CompareColors(threeStar, rarityColor);
+
+				bool b_RarityAboveTwo = bRarity5 || bRarity4 || bRarity3;
+
+				
 
 				if (b_RarityAboveTwo)
 				{
+					if (bRarity5) rarity = 5;
+					if (bRarity4) rarity = 4;
+					if (bRarity3) rarity = 3;
+
 					Thread thr1 = new Thread(() => name = ScanName(bm[w_name]));
 					Thread thr2 = new Thread(() => level = ScanLevel(bm[w_level],ref ascension));
 					Thread thr3 = new Thread(() => refinementLevel = ScanRefinement(bm[w_refinement]));
@@ -358,24 +371,21 @@ namespace GenshinGuide
 					// End Threads
 					thr1.Join(); thr2.Join(); thr3.Join(); thr4.Join();
 
-					// dispose the list
-					foreach (Bitmap x in bm)
-					{
-						x.Dispose();
-					}
 				}
 				else
 				{
-					name = null; refinementLevel = -1; equippedCharacter = null;
+					name = null; refinementLevel = -1; equippedCharacter = null; rarity = 2;
+					return new Weapon(name, level, ascension, refinementLevel, equippedCharacter, id, 2);
 				}
 			}
 
-			return new Weapon(name, level, ascension, refinementLevel, equippedCharacter, id);
+			Weapon weapon = new Weapon(name, level, ascension, refinementLevel, equippedCharacter, id, rarity);
+			return weapon;
 		}
 
 		public static bool IsEnhancementOre(Bitmap nameBitmap)
 		{
-			return !string.IsNullOrEmpty(ScanEnchancementOreName(nameBitmap));
+			return Scraper.enhancementMaterials.Contains(ScanEnchancementOreName(nameBitmap));
 		}
 
 		public static int ScanWeaponCount()
@@ -441,13 +451,10 @@ namespace GenshinGuide
 			Scraper.SetInvert(ref bm);
 
 			// Analyze
-			string text = Scraper.AnalyzeText(bm);
-			text = text.Trim();
+			string text = Scraper.AnalyzeText(bm).Trim().ToLower();
 			bm.Dispose();
 
-			text = text.Trim();
 			text = Regex.Replace(text, @"[\W_]", "");
-			text = text.ToLower();
 
 			return text;
 		}
@@ -487,11 +494,11 @@ namespace GenshinGuide
 
 		public static int ScanRefinement(Bitmap bm)
 		{
-			Scraper.SetInvert(ref bm);
 			Scraper.SetGrayscale(ref bm);
+			Scraper.SetThreshold(200, ref bm);
+			Scraper.SetInvert(ref bm);
 
-			string text = Scraper.AnalyzeText(bm);
-			text = text.Trim();
+			string text = Scraper.AnalyzeText(bm).Trim();
 			text = Regex.Replace(text, @"[^\d]", "");
 
 			// Parse Int

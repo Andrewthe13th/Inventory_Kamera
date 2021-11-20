@@ -6,6 +6,8 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Threading;
+using Accord;
 using Accord.Imaging.Filters;
 using Tesseract;
 
@@ -13,7 +15,7 @@ namespace GenshinGuide
 {
 	public static class Scraper
 	{
-		private const int numEngines = 2;
+		private const int numEngines = 8;
 #if DEBUG
 		public static bool s_bDoDebugOnlyCode = false;
 #endif
@@ -64,23 +66,23 @@ namespace GenshinGuide
 
 		public static readonly List<string> stats = new List<string>
 		{
-			"hp",
-			"hp_flat",
+			"hp", //0
 			"hp%",
+			"hp_flat",
 			"atk",
+			"atk%", //4
 			"atk_flat",
-			"atk%",
 			"def",
 			"def%",
-			"energyrecharge",
+			"energyrecharge", //8
 			"elementalmastery",
 			"healingbonus",
 			"critrate",
-			"critdmg",
+			"critdmg", //12
 			"physicaldmgbonus",
 			"pyrodmgbonus",
 			"electrodmgbonus",
-			"cryodmgbonus",
+			"cryodmgbonus", //16
 			"hydrodmgbonus",
 			"anemodmgbonus",
 			"geodmgbonus",
@@ -97,6 +99,7 @@ namespace GenshinGuide
 
 		public static readonly List<string> characters = new List<string>
 		{
+			"traveler",
 			"amber",
 			"kaeya",
 			"lisa",
@@ -207,7 +210,7 @@ namespace GenshinGuide
 			"geo",
 		};
 
-		public static readonly HashSet<string> weapons = new HashSet<string>
+		public static readonly List<string> weapons = new List<string>
 		{
 			// Release Weapons
 			// 1 star
@@ -723,7 +726,7 @@ namespace GenshinGuide
 		{
 			if (!characters.Contains(traveler))
 			{
-				characters.Add(traveler);
+				characters[0] = traveler;
 				characterTalentConstellationOrder.Add(traveler, new string[] { "burst", "skill" });
 			}
 		}
@@ -749,7 +752,8 @@ namespace GenshinGuide
 			{
 				while (!engines.IsEmpty)
 				{
-					engines.TryTake(out TesseractEngine _);
+					if (engines.TryTake(out TesseractEngine e))
+						e.Dispose();
 				}
 
 				for (int i = 0; i < numEngines; i++)
@@ -764,7 +768,7 @@ namespace GenshinGuide
 		{
 			string text = "";
 			TesseractEngine e;
-			while (!engines.TryTake(out e)) { }
+			while (!engines.TryTake(out e)) { Thread.Sleep(10); }
 
 			if (numbersOnly) e.SetVariable("tessedit_char_whitelist", "0123456789");
 			using (var page = e.Process(bitmap, pageMode))
@@ -798,8 +802,7 @@ namespace GenshinGuide
 
 		#endregion OCR
 
-		#region Get Dictionary Codes
-
+		#region Check valid parameters
 		public static bool IsValidSetName(string setName)
 		{
 			if (setNames.Contains(setName))
@@ -814,9 +817,11 @@ namespace GenshinGuide
 			};
 		}
 
+		
+
 		public static bool IsValidStat(string stat)
 		{
-			if (string.IsNullOrEmpty(stat)) return false;
+			if (string.IsNullOrEmpty(stat)) return true;
 			if (stat.Contains("critr")) stat = "critrate"; // Fix for the 't' in 'rate' being read as an 'l'
 			if (stat.Contains("mastery")) stat = "elementalmastery"; // Fix for the 't' in 'elemental' being read as an 'l'
 			if (stats.Contains(stat))
@@ -895,7 +900,7 @@ namespace GenshinGuide
 			};
 		}
 
-		#endregion Get Dictionary Codes
+		#endregion Check valid parameters
 
 		public static string FindElementByName(string name)
 		{
@@ -1053,19 +1058,7 @@ namespace GenshinGuide
 
 		public static void SetInvert(ref Bitmap bitmap)
 		{
-			Bitmap temp = bitmap;
-			Bitmap bmap = (Bitmap)temp.Clone();
-			Color c;
-			for (int i = 0; i < bmap.Width; i++)
-			{
-				for (int j = 0; j < bmap.Height; j++)
-				{
-					c = bmap.GetPixel(i, j);
-					bmap.SetPixel(i, j,
-	  Color.FromArgb(255 - c.R, 255 - c.G, 255 - c.B));
-				}
-			}
-			bitmap = (Bitmap)bmap.Clone();
+			new Invert().ApplyInPlace(bitmap);
 		}
 
 		public static void SetColor
@@ -1154,6 +1147,17 @@ namespace GenshinGuide
 			Bitmap g = grayscale.Apply(bitmap);
 			new Threshold(threshold).ApplyInPlace(g);
 			bitmap = g;
+		}
+
+		public static void FilterColors(ref Bitmap artifactImage, IntRange red, IntRange green, IntRange blue)
+		{
+			ColorFiltering colorFilter = new ColorFiltering
+			{
+				Red = red,
+				Green = green,
+				Blue = blue
+			};
+			colorFilter.ApplyInPlace(artifactImage);
 		}
 
 		#endregion Image Operations

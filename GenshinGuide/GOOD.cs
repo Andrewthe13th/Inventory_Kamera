@@ -16,7 +16,8 @@ namespace GenshinGuide
 		[JsonProperty] public List<IArtifact> artifacts;
 		[JsonProperty] public List<ICharacter> characters;
 
-		private readonly List<string> eng_Names = new List<string> {
+		private readonly string[] eng_Names = {
+			"Traveler",
 			"Amber",
 			"Kaeya",
 			"Lisa",
@@ -254,22 +255,25 @@ namespace GenshinGuide
 
 		private readonly string[] eng_Stats =
 		{
-			"hp", //0
-            "atk",
+			"hp_", //0
 			"hp_",
-			"atk_", //3
+			"hp", 
+			"atk_", 
+			"atk_", //4
+            "atk",
+			"def",
             "def_",
-			"enerRech_", //5
+			"enerRech_", //8
             "eleMas",
 			"heal_",
 			"critRate_",
-			"critDMG_",
-			"physical_dmg_", //10
+			"critDMG_", //12
+			"physical_dmg_",
             "pyro_dmg_",
 			"electro_dmg_",
-			"cryo_dmg_",
+			"cryo_dmg_", //16
 			"hydro_dmg_",
-			"anemo_dmg_", //15
+			"anemo_dmg_", 
             "geo_dmg_",
 		};
 
@@ -298,68 +302,70 @@ namespace GenshinGuide
 			source = source.Trim();
 
 			// Assign Characters
-			List<Character> _characters = genshinData.GetCharacters();
-			foreach (Character x in _characters)
+			foreach (Character character in genshinData.GetCharacters())
 			{
 				ICharacter temp = new ICharacter
 				{
-					key = eng_Names.Contains(x.name) ? eng_Names[eng_Names.IndexOf(x.name)] : "Traveler",
-					level = x.level,
-					constellation = x.constellation,
-					ascension = x.AscensionLevel()
+					key = eng_Names[Scraper.characters.IndexOf(character.name)],
+					level = character.level,
+					constellation = character.constellation,
+					ascension = character.AscensionLevel()
 				};
-				temp.talent._auto = x.GetTalents()[0];
-				temp.talent.skill = x.GetTalents()[1];
-				temp.talent.burst = x.GetTalents()[2];
+				temp.talent._auto = character.GetTalents()[0];
+				temp.talent.skill = character.GetTalents()[1];
+				temp.talent.burst = character.GetTalents()[2];
 				characters.Add(temp);
 			}
 
 			// Assign Weapons
-			List<Weapon> _weapons = genshinData.GetInventory().GetWeapons();
-			foreach (Weapon x in _weapons)
+			foreach (Weapon weapon in genshinData.GetInventory().GetWeapons())
 			{
-				IWeapon temp = new IWeapon
+
+				IWeapon w = new IWeapon
 				{
-					key = eng_Weapons[Scraper.weapons.IndexOf(x.name)],
-					level = x.level,
-					ascension = x.AscensionCount(),
-					refinement = x.refinementLevel,
-					location = x.equippedCharacter
+					key = eng_Weapons[Scraper.weapons.IndexOf(weapon.name)],
+					level = weapon.level,
+					ascension = weapon.AscensionCount(),
+					refinement = weapon.refinementLevel,
+					location = Scraper.characters.Contains(weapon.name) ? eng_Names[Scraper.characters.IndexOf(weapon.name)] : ""
 				};
-				weapons.Add(temp);
+				weapons.Add(w);
 			}
 
 			// Assign Artifacts
-			List<Artifact> _artifacts = genshinData.GetInventory().GetArtifacts();
-			foreach (Artifact x in _artifacts)
+			foreach (Artifact artifact in genshinData.GetInventory().GetArtifacts())
 			{
 				// only assign artifact level 5-4
-				if (x.rarity >= 4)
+				if (artifact.rarity >= 4)
 				{
+					string setName = eng_Artifacts[Scraper.setNames.IndexOf(artifact.setName)];
+					string slotName = eng_ArtifactSlotList[Scraper.gearSlots.IndexOf(artifact.gearSlot)];
+					int index = Scraper.stats.IndexOf(artifact.mainStat);
+					string mainStat = eng_Stats[index];
+					string location = Scraper.characters.Contains(artifact.equippedCharacter) ? eng_Names[Scraper.characters.IndexOf(artifact.equippedCharacter)] : "";
 					IArtifact temp = new IArtifact
 					{
-						setKey = eng_Artifacts[Scraper.setNames.IndexOf(x.setName)],
-						slotKey = eng_ArtifactSlotList[Scraper.gearSlots.IndexOf(x.gearSlot)],
-						level = x.level,
-						rarity = x.rarity,
-						mainStatKey = eng_Stats[Scraper.stats.IndexOf(x.mainStat)],
-						location = Scraper.characters.IndexOf(x.equippedCharacter) != -1 ? eng_Names[Scraper.characters.IndexOf(x.equippedCharacter)] : "Traveler",
-						_lock = x._lock,
-						// SubStats
+						setKey = setName,
+						slotKey = slotName,
+						level = artifact.level,
+						rarity = artifact.rarity,
+						mainStatKey = mainStat,
+						location = location,
+						_lock = artifact._lock,
 						substats = new ISubstat[4]
 					};
 
 					for (int i = 0; i < 4; i++)
 					{
-						if (x.subStats[i].value != 0)
+						if (!string.IsNullOrEmpty(artifact.subStats[i].stat))
 						{
-							temp.substats[i].key = eng_Stats[Scraper.stats.IndexOf(x.subStats[i].stat)];
-							temp.substats[i].value = x.subStats[i].value;
+							temp.substats[i].key = eng_Stats[Scraper.stats.IndexOf(artifact.subStats[i].stat)];
+							temp.substats[i].value = artifact.subStats[i].value;
 						}
 						else
 						{
 							temp.substats[i].key = "";
-							temp.substats[i].value = x.subStats[i].value;
+							temp.substats[i].value = 0;
 						}
 					}
 					artifacts.Add(temp);
@@ -386,15 +392,16 @@ namespace GenshinGuide
 			string fileName = "\\genshinData_GOOD_" + DateTime.Now.ToString("MM.dd.yyyy_HH.mm.ss") + ".json";
 			fileName = fileName.Replace('/', '_');
 			string outputFile = outputDirectory + fileName;
-
-			// Try to load external GOOD data to update.
-			// For preserving information at when uploading data to
-			// https://frzyc.github.io/genshin-optimizer
-			JObject database = null;
 			if (File.Exists(oldDataFilePath) && false) // && false hack. TODO: add support for data merging
 			{
 				try
 				{
+
+					// Try to load external GOOD data to update.
+					// For preserving information at when uploading data to
+					// https://frzyc.github.io/genshin-optimizer
+					// This may not even be necessary
+					JObject database;
 					// Load source data
 					using (StreamReader file = File.OpenText(oldDataFilePath))
 					using (JsonTextReader reader = new JsonTextReader(file))

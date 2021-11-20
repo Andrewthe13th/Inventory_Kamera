@@ -57,6 +57,8 @@ namespace GenshinGuide
 				ImageProcessors.Add(processor);
 			}
 
+			Scraper.RestartEngines();
+
 			// Scan Main character Name
 			string mainCharacterName = CharacterScraper.ScanMainCharacterName();
 			Scraper.AssignTravelerName(mainCharacterName);
@@ -137,17 +139,20 @@ namespace GenshinGuide
 								// Scan as weapon
 								UserInterface.ResetGearDisplay();
 								Weapon w = WeaponScraper.CatalogueFromBitmaps(image.bm, image.id);
-								if (w.IsValid())
+								if (w.rarity >= 3) // TODO: Add options for choosing rarities
 								{
-									UserInterface.IncrementWeaponCount();
-									inventory.Add(w);
-									if (!string.IsNullOrEmpty(w.equippedCharacter))
-										equippedWeapons.Add(w);
-								}
-								else //if (!string.IsNullOrEmpty(w.GetName()))
-								{
-									UserInterface.AddError($"Unable to validate information for weapon #{image.id}");
-									// Maybe save bitmaps in some directory to see what an issue might be
+									if (w.IsValid())
+									{
+										UserInterface.IncrementWeaponCount();
+										inventory.Add(w);
+										if (!string.IsNullOrEmpty(w.equippedCharacter))
+											equippedWeapons.Add(w);
+									}
+									else //if (!string.IsNullOrEmpty(w.GetName()))
+									{
+										UserInterface.AddError($"Unable to validate information for weapon #{image.id}");
+										// Maybe save bitmaps in some directory to see what an issue might be
+									}
 								}
 							}
 						}
@@ -156,16 +161,11 @@ namespace GenshinGuide
 							// Scan as artifact
 							UserInterface.ResetGearDisplay();
 
-							Stopwatch stopwatch = new Stopwatch();
-							stopwatch.Start();
-
 							Artifact a= ArtifactScraper.CatalogueFromBitmapsAsync(image.bm, image.id).Result;
 
-							stopwatch.Stop();
-							TimeSpan ts = stopwatch.Elapsed;
-							Debug.WriteLine($"Time to process artifact #{image.id}: {ts.Seconds}.{ts.Milliseconds / 10}");
+							//Debug.WriteLine($"Time to process artifact #{image.id}: {ts.Seconds}.{ts.Milliseconds / 10}");
 
-							if (a.rarity >= 4)
+							if (a.rarity >= 4) // TODO: Add options for choosing rarities
 							{
 								if (a.IsValid())
 								{
@@ -175,24 +175,20 @@ namespace GenshinGuide
 
 									if (!string.IsNullOrEmpty(a.equippedCharacter))
 										equippedArtifacts.Add(a);
-									Debug.WriteLine($"Inventory size: {inventory.size}");
 								}
 								else //if (!string.IsNullOrEmpty(a.setName))
 								{
 									UserInterface.AddError($"Unable to validate information for artifact #{image.id}");
 									// Maybe save bitmaps in some directory to see what an issue might be
-
-									continue;
 								}
 							}
-
-							// Dispose of everything
-							image.bm.ForEach(b => b.Dispose());
 						}
 						else // not supposed to happen
 						{
 							Form1.UnexpectedError("Unknown Image type for Image Processor");
 						}
+						// Dispose of everything
+						image.bm.ForEach(b => b.Dispose());
 					}
 					else
 					{

@@ -64,7 +64,7 @@ namespace GenshinGuide
 				}
 			}
 
-			return Scraper.IsValidSlot(gearSlot) && level >= 0 && level <= 20 && Scraper.IsValidSetName(setName) && rarity != 0;
+			return 0 <= level && level <= 20 && rarity != 0 && Scraper.IsValidSlot(gearSlot) && Scraper.IsValidSetName(setName) && Scraper.IsValidStat(mainStat);
 		}
 
 		public string GetEquippedCharacter()
