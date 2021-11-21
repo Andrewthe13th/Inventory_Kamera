@@ -193,8 +193,8 @@ namespace GenshinGuide
 
 		public static void SelectCharacterAttributes()
 		{
-			int xOffset = 100;
-			int yOffset = 100;
+			int xOffset = (int)(170.0 / 1280.0 * GetWidth());
+			int yOffset = (int)(105.0 / 720.0 * GetHeight());
 			SetCursorPos(GetPosition().Left + xOffset, GetPosition().Top + yOffset);
 			sim.Mouse.LeftButtonClick();
 			SystemRandomWait(Speed.CharacterUI);
@@ -202,8 +202,8 @@ namespace GenshinGuide
 
 		public static void SelectCharacterConstellation()
 		{
-			int xOffset = 100;
-			int yOffset = 235;
+			int xOffset = (int)(170.0 / 1280.0 * GetWidth());
+			int yOffset = (int)(245.0 / 720.0 * GetHeight());
 			SetCursorPos(GetPosition().Left + xOffset, GetPosition().Top + yOffset);
 			sim.Mouse.LeftButtonClick();
 			SystemRandomWait(Speed.CharacterUI);
@@ -211,8 +211,8 @@ namespace GenshinGuide
 
 		public static void SelectCharacterTalents()
 		{
-			int xOffset = 100;
-			int yOffset = 290;
+			int xOffset = (int)(135 / 1280.0 * GetWidth());
+			int yOffset = (int)(290 / 720.0 * GetHeight());
 			SetCursorPos(GetPosition().Left + xOffset, GetPosition().Top + yOffset);
 			sim.Mouse.LeftButtonClick();
 			SystemRandomWait(Speed.CharacterUI);

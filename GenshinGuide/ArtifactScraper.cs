@@ -87,36 +87,38 @@ namespace GenshinGuide
 			int right = (int)(1208 / 1280.0 * Navigation.GetWidth());
 			int bottom = (int)(45 / 720.0 * Navigation.GetHeight());
 
-			Bitmap bm = Navigation.CaptureRegion(new RECT(left,top,right,bottom));
-			UserInterface.SetNavigation_Image(bm);
-
-			Scraper.SetGrayscale(ref bm);
-			Scraper.SetContrast(60.0, ref bm);
-			Scraper.SetInvert(ref bm);
-
-			string text = Scraper.AnalyzeText(bm).Trim();
-			bm.Dispose();
-			text = Regex.Replace(text, @"[^\d/]", "");
-
-			int count;
-			// Check for dash
-			if (Regex.IsMatch(text, "/"))
+			using (Bitmap bm = Navigation.CaptureRegion(new RECT(left, top, right, bottom)))
 			{
-				count = Int32.Parse(text.Split('/')[0]);
-			}
-			else
-			{
-				// divide by the number on the right if both numbers fused
-				count = Int32.Parse(text) / 1500;
-			}
+				UserInterface.SetNavigation_Image(bm);
 
-			// Check if larger than 1500
-			while (count > 1500)
-			{
-				count /= 10;
-			}
+				Bitmap nBM = Scraper.ConvertToGrayscale(bm);
+				Scraper.SetContrast(60.0, ref nBM);
+				Scraper.SetInvert(ref nBM);
 
-			return count;
+				string text = Scraper.AnalyzeText(nBM).Trim();
+				nBM.Dispose();
+				text = Regex.Replace(text, @"[^\d/]", "");
+
+				int count;
+				// Check for dash
+				if (Regex.IsMatch(text, "/"))
+				{
+					count = Int32.Parse(text.Split('/')[0]);
+				}
+				else
+				{
+					// divide by the number on the right if both numbers fused
+					count = Int32.Parse(text) / 1500;
+				}
+
+				// Check if larger than 1500
+				while (count > 1500)
+				{
+					count /= 10;
+				}
+
+				return count;
+			}
 		}
 
 		private static (List<Rectangle> rectangles, int cols, int rows) GetPageOfItems()
@@ -483,12 +485,13 @@ namespace GenshinGuide
 		private static string ScanArtifactGearSlot(Bitmap bm)
 		{
 			// Process Img
-			Scraper.SetGrayscale(ref bm);
-			Scraper.SetContrast(80.0, ref bm);
-			Scraper.SetInvert(ref bm);
+			Bitmap n = Scraper.ConvertToGrayscale(bm);
+			Scraper.SetContrast(80.0, ref n);
+			Scraper.SetInvert(ref n);
 
-			string gearSlot = Scraper.AnalyzeText(bm).Trim().ToLower();
+			string gearSlot = Scraper.AnalyzeText(n).Trim().ToLower();
 			gearSlot = Regex.Replace(gearSlot, @"[\W_]", "");
+			n.Dispose();
 			return gearSlot;
 		}
 
@@ -511,12 +514,12 @@ namespace GenshinGuide
 				default:
 
 					Scraper.SetContrast(100.0, ref bm);
-					Scraper.SetGrayscale(ref bm);
-					Scraper.SetThreshold(135, ref bm);
-					Scraper.SetInvert(ref bm);
+					Bitmap n = Scraper.ConvertToGrayscale(bm);
+					Scraper.SetThreshold(135, ref n);
+					Scraper.SetInvert(ref n);
 
 					// Get Main Stat
-					string mainStat = Scraper.AnalyzeText(bm).ToLower().Trim();
+					string mainStat = Scraper.AnalyzeText(n).ToLower().Trim();
 
 					// Remove anything not a-z as well as removes spaces/underscores
 					mainStat = Regex.Replace(mainStat, @"[\W_0-9]", "");
@@ -524,7 +527,7 @@ namespace GenshinGuide
 					mainStat = Regex.Replace(mainStat, "(.)\\1+", "$1");
 
 					//Debug.WriteLine($"ScanArtifactMainStat runtime: {ts.Milliseconds}ms");
-
+					n.Dispose();
 					return mainStat;
 			}
 		}
@@ -532,18 +535,18 @@ namespace GenshinGuide
 		private static int ScanArtifactLevel(Bitmap bm)
 		{
 			// Process Img
-			Scraper.SetGrayscale(ref bm);
-			Scraper.SetContrast(80.0, ref bm);
-			Scraper.SetInvert(ref bm);
+			Bitmap n = Scraper.ConvertToGrayscale(bm);
+			Scraper.SetContrast(80.0, ref n);
+			Scraper.SetInvert(ref n);
 
 			// numbersOnly = true => seems to interpret the '+' as a '4'
-			string text = Scraper.AnalyzeText(bm, Tesseract.PageSegMode.SingleWord).Trim().ToLower();
+			string text = Scraper.AnalyzeText(n, Tesseract.PageSegMode.SingleWord).Trim().ToLower();
 
 			// Get rid of all non digits
 			text = Regex.Replace(text, @"[\D]", "");
 
 			//Debug.WriteLine($"ScanArtifactLevel runtime: {ts.Milliseconds}ms");
-
+			n.Dispose();
 			return int.TryParse(text, out int level) ? level : -1;
 		}
 
@@ -600,7 +603,7 @@ namespace GenshinGuide
 
 						name = Regex.Replace(name, @"[^\w]", "");
 
-						name = FindClosestSetName(name);
+						name = Scraper.FindClosestSetName(name);
 
 						return !string.IsNullOrEmpty(name) ? name : null;
 					}
@@ -644,113 +647,12 @@ namespace GenshinGuide
 			return substats.ToList();
 		}
 
-		private static string FindClosestSetName(string name)
-		{
-			int index = 10;
-			int maxEdits = 25;
-			for (int i = 0; i < Scraper.setNames.Count; i++)
-			{
-				string setName = Scraper.setNames[i];
-				int edits = CalcDistance(name, setName, maxEdits);
-
-				if (edits <= 2)
-				{
-					return setName;
-				}
-
-				if (edits < maxEdits)
-				{
-					index = i;
-					maxEdits = edits;
-				}
-			}
-
-			return index != int.MaxValue ? Scraper.setNames[index] : null;
-		}
-
-		private static int CalcDistance(string text, string setName, int maxEdits)
-		{
-			int length1 = text.Length;
-			int length2 = setName.Length;
-
-			// Return trivial case - difference in string lengths exceeds threshhold
-			if (Math.Abs(length1 - length2) > maxEdits) { return int.MaxValue; }
-
-			// Ensure arrays [i] / length1 use shorter length 
-			if (length1 > length2)
-			{
-				Swap(ref setName, ref text);
-				Swap(ref length1, ref length2);
-			}
-
-			int maxi = length1;
-			int maxj = length2;
-
-			int[] dCurrent = new int[maxi + 1];
-			int[] dMinus1 = new int[maxi + 1];
-			int[] dMinus2 = new int[maxi + 1];
-			int[] dSwap;
-
-			for (int i = 0; i <= maxi; i++) { dCurrent[i] = i; }
-
-			int jm1 = 0, im1 = 0, im2 = -1;
-
-			for (int j = 1; j <= maxj; j++)
-			{
-
-				// Rotate
-				dSwap = dMinus2;
-				dMinus2 = dMinus1;
-				dMinus1 = dCurrent;
-				dCurrent = dSwap;
-
-				// Initialize
-				int minDistance = int.MaxValue;
-				dCurrent[0] = j;
-				im1 = 0;
-				im2 = -1;
-
-				for (int i = 1; i <= maxi; i++)
-				{
-
-					int cost = text[im1] == setName[jm1] ? 0 : 1;
-
-					int del = dCurrent[im1] + 1;
-					int ins = dMinus1[i] + 1;
-					int sub = dMinus1[im1] + cost;
-
-					//Fastest execution for min value of 3 integers
-					int min = (del > ins) ? (ins > sub ? sub : ins) : (del > sub ? sub : del);
-
-					if (i > 1 && j > 1 && text[im2] == setName[jm1] && text[im1] == setName[j - 2])
-						min = Math.Min(min, dMinus2[im2] + cost);
-
-					dCurrent[i] = min;
-					if (min < minDistance) { minDistance = min; }
-					im1++;
-					im2++;
-				}
-				jm1++;
-				if (minDistance > maxEdits) { return int.MaxValue; }
-			}
-
-			int result = dCurrent[maxi];
-			return ( result > maxEdits ) ? int.MaxValue : result;
-		}
-
-		private static void Swap<T>(ref T arg1, ref T arg2)
-		{
-			T temp = arg1;
-			arg1 = arg2;
-			arg2 = temp;
-		}
-
 		private static string ScanArtifactEquippedCharacter(Bitmap bm)
 		{
-			Scraper.SetGrayscale(ref bm);
-			Scraper.SetContrast(60.0, ref bm);
+			Bitmap n = Scraper.ConvertToGrayscale(bm);
+			Scraper.SetContrast(60.0, ref n);
 
-			string equippedCharacter = Scraper.AnalyzeText(bm).ToLower().Trim();
+			string equippedCharacter = Scraper.AnalyzeText(n).ToLower().Trim();
 			equippedCharacter = Regex.Replace(equippedCharacter, @"[^\w:_]", "");
 
 			if (equippedCharacter != "")
@@ -766,6 +668,7 @@ namespace GenshinGuide
 			}
 			// artifact has no equipped character
 			//Debug.WriteLine($"ScanArtifactEquippedCharacter runtime: {ts.Milliseconds}ms");
+			n.Dispose();
 			return null;
 		}
 

@@ -396,12 +396,13 @@ namespace GenshinGuide
 															   width: (int)(175 / 1280.0 * Navigation.GetWidth()),
 															   height: (int)(25 / 720.0 * Navigation.GetHeight())));
 
-			Scraper.SetGrayscale(ref countBitmap);
-			Scraper.SetContrast(60.0, ref countBitmap);
-			Scraper.SetInvert(ref countBitmap);
-			UserInterface.SetNavigation_Image(countBitmap);
+			Bitmap n = Scraper.ConvertToGrayscale(countBitmap);
+			Scraper.SetContrast(60.0, ref n);
+			Scraper.SetInvert(ref n);
+			UserInterface.SetNavigation_Image(n);
 
-			string text = Scraper.AnalyzeText(countBitmap);
+			string text = Scraper.AnalyzeText(n);
+			n.Dispose();
 
 			// Remove any non-numeric and '/' characters
 			text = Regex.Replace(text, @"[^\d/]", "");
@@ -429,16 +430,15 @@ namespace GenshinGuide
 		public static string ScanName(Bitmap bm)
 		{
 			Scraper.SetGamma(0.2, 0.2, 0.2, ref bm);
-			Scraper.SetGrayscale(ref bm);
-			Scraper.SetInvert(ref bm);
+			Bitmap n = Scraper.ConvertToGrayscale(bm);
+			Scraper.SetInvert(ref n);
 
 			// Analyze
-			string text = Scraper.AnalyzeText(bm);
-			text = text.Trim();
+			string text = Scraper.AnalyzeText(n).ToLower().Trim();
 			text = Regex.Replace(text, @"[\W]", "");
-			text = text.ToLower();
 
-			UserInterface.SetArtifact_GearSlot(bm, text, true);
+			UserInterface.SetArtifact_GearSlot(n, text, true);
+			n.Dispose();
 
 			// Check in Dictionary
 			return text;
@@ -447,12 +447,13 @@ namespace GenshinGuide
 		public static string ScanEnchancementOreName(Bitmap bm)
 		{
 			Scraper.SetGamma(0.2, 0.2, 0.2, ref bm);
-			Scraper.SetGrayscale(ref bm);
-			Scraper.SetInvert(ref bm);
+			Bitmap n = Scraper.ConvertToGrayscale(bm);
+			Scraper.SetInvert(ref n);
 
 			// Analyze
-			string text = Scraper.AnalyzeText(bm).Trim().ToLower();
+			string text = Scraper.AnalyzeText(n).Trim().ToLower();
 			bm.Dispose();
+			n.Dispose();
 
 			text = Regex.Replace(text, @"[\W_]", "");
 
@@ -461,13 +462,12 @@ namespace GenshinGuide
 
 		public static int ScanLevel(Bitmap bm, ref bool ascension)
 		{
-			Scraper.SetGrayscale(ref bm);
-			Scraper.SetInvert(ref bm);
-			Scraper.SetContrast(100.0, ref bm);
+			Bitmap n = Scraper.ConvertToGrayscale(bm);
+			Scraper.SetInvert(ref n);
+			Scraper.SetContrast(100.0, ref n);
 
-			string text = Scraper.AnalyzeText(bm);
+			string text = Scraper.AnalyzeText(n).Trim();
 			text = Regex.Replace(text, @"(?![\d/]).", "");
-			text = text.Trim();
 
 			UserInterface.SetWeapon_Level(bm, text);
 
@@ -494,30 +494,32 @@ namespace GenshinGuide
 
 		public static int ScanRefinement(Bitmap bm)
 		{
-			Scraper.SetGrayscale(ref bm);
-			Scraper.SetThreshold(200, ref bm);
-			Scraper.SetInvert(ref bm);
+			Bitmap n = Scraper.ConvertToGrayscale(bm);
+			Scraper.SetThreshold(200, ref n);
+			Scraper.SetInvert(ref n);
 
-			string text = Scraper.AnalyzeText(bm).Trim();
+			string text = Scraper.AnalyzeText(n).Trim();
 			text = Regex.Replace(text, @"[^\d]", "");
 
 			// Parse Int
 			if (int.TryParse(text, out int refinementLevel))
 			{
-				UserInterface.SetGear_Level(bm, text, true);
+				UserInterface.SetGear_Level(n, text, true);
+				n.Dispose();
 				bm.Dispose();
 				return refinementLevel;
 			}
+			bm.Dispose();
+			n.Dispose();
 			return -1;
 		}
 
 		public static string ScanEquippedCharacter(Bitmap bm)
 		{
-			Scraper.SetGrayscale(ref bm);
-			Scraper.SetContrast(60.0, ref bm);
+			Bitmap n = Scraper.ConvertToGrayscale(bm);
+			Scraper.SetContrast(60.0, ref n);
 
-			string extractedString = Scraper.AnalyzeText(bm);
-			extractedString.Trim();
+			string extractedString = Scraper.AnalyzeText(n).Trim();
 
 			if (extractedString != "")
 			{
@@ -526,9 +528,8 @@ namespace GenshinGuide
 				{
 					string[] tempString = extractedString.Split(':');
 					extractedString = tempString[1].Replace("\n", String.Empty);
-					UserInterface.SetGear_Equipped(bm, extractedString);
-					extractedString = Regex.Replace(extractedString, @"[^\w_]", "");
-					extractedString = extractedString.ToLower();
+					UserInterface.SetGear_Equipped(n, extractedString);
+					extractedString = Regex.Replace(extractedString, @"[^\w_]", "").ToLower();
 
 					// Assign Traveler Name if not found
 					string character = extractedString;
@@ -550,9 +551,12 @@ namespace GenshinGuide
 							break;
 						}
 					}
+
+					n.Dispose();
 					return extractedString.Length > 0 ? extractedString : null;
 				}
 			}
+			n.Dispose();
 			// artifact has no equipped character
 			return null;
 		}

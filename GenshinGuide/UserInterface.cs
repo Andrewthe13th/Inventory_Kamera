@@ -75,13 +75,13 @@ namespace GenshinGuide
 
 		public static void SetArtifact_GearSlot(Bitmap bm, string text, bool bWeapon = false)
 		{
-			UpdatePictureBox(new Bitmap(bm), gearSlot_PictureBox);
+			UpdatePictureBox(bm, gearSlot_PictureBox);
 			UpdateTextBox(bWeapon ? $"Weapon: {text}\n" : $"GearSlot: {text}\n", gear_TextBox);
 		}
 
 		private static void UpdateElements(Bitmap bm, string text, PictureBox pictureBox, TextBox textBox)
 		{
-			UpdatePictureBox(new Bitmap(bm), pictureBox);
+			UpdatePictureBox(bm, pictureBox);
 			UpdateTextBox(text, textBox);
 		}
 
@@ -177,9 +177,14 @@ namespace GenshinGuide
 			UpdateElements(bm, $"Name: {name}\nElement: {element}\n", cName_PictureBox, character_TextBox);
 		}
 
-		public static void SetCharacter_Level(Bitmap bm, int level)
+		public static void SetCharacter_Level(Bitmap bm, int level, int maxLevel)
 		{
-			UpdateElements(bm, $"Level: {level}\n", cLevel_PictureBox, character_TextBox);
+			UpdateElements(bm, $"Level: {level} / {maxLevel}\n", cLevel_PictureBox, character_TextBox);
+		}
+
+		public static void SetCharacter_Constellation(int level)
+		{
+			UpdateTextBox($"Constellation: {level}\n", character_TextBox);
 		}
 
 		public static void SetCharacter_Talent(Bitmap bm, string text, int i)
@@ -187,7 +192,7 @@ namespace GenshinGuide
 			if (i > -1 && i < 3)
 			{
 				UpdatePictureBox(bm, cTalent_PictureBoxes[i]);
-				UpdateTextBox($"Talent {i}: {text}\n", character_TextBox);
+				UpdateTextBox($"Talent {i+1}: {text}\n", character_TextBox);
 			}
 		}
 

@@ -11,9 +11,15 @@ namespace GenshinGuide
 		[JsonProperty] public bool ascension { get; private set; }
 		[JsonProperty] public int experience { get; private set; }
 		[JsonProperty] public Weapon weapon { get; private set; }
-		[JsonProperty] private readonly Dictionary<string, Artifact> artifacts = new Dictionary<string, Artifact>();
+		[JsonProperty] public Dictionary<string, Artifact> artifacts = new Dictionary<string, Artifact>();
 		[JsonProperty] public int constellation { get; private set; }
-		[JsonProperty] private readonly int[] talents = new int[3];
+		[JsonProperty] public int[] talents { get; private set; }
+
+		public Character()
+		{
+			constellation = -1;
+			talents = new int[3];
+		}
 
 		public Character(string _name, string _element, int _level, bool _ascension, int _experience, int _constellation, int[] _talents)
 		{
@@ -30,13 +36,13 @@ namespace GenshinGuide
 		{
 			for (int i = 0; i < 3; i++)
 			{
-				if (talents[i] == -1)
+				if (talents[i] < 1 || talents[i] > 15)
 				{
 					return false;
 				}
 			}
 
-			return Scraper.IsValidCharacter(name) && level != -1 && Scraper.IsValidElement(element) && constellation != -1;
+			return Scraper.IsValidCharacter(name) && level > 0 && Scraper.IsValidElement(element) && constellation >= 0;
 		}
 
 		public Dictionary<string, Artifact> GetArtifacts()

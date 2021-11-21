@@ -85,6 +85,7 @@ namespace GenshinGuide
 			}
 
 			workerQueue.Enqueue(new OCRImage(null, "END", 0));
+
 			if (checkbox[2])
 			{
 				// Get characters
@@ -94,7 +95,7 @@ namespace GenshinGuide
 				Navigation.MainMenuScreen();
 			}
 
-			// Wait for Image Processors to finish
+			// Wait for any processing to finish
 			AwaitProcessors();
 
 			if (checkbox[2])
@@ -206,13 +207,14 @@ namespace GenshinGuide
 
 		public void AssignArtifacts()
 		{
-			foreach (Artifact a in equippedArtifacts)
+			foreach (Artifact artifact in equippedArtifacts)
 			{
-				foreach (Character c in characters)
+				foreach (Character character in characters)
 				{
-					if (a.GetEquippedCharacter() == c.GetName())
+					if (artifact.GetEquippedCharacter() == character.GetName())
 					{
-						c.AssignArtifact(a);
+						character.AssignArtifact(artifact);
+						break;
 					}
 				}
 			}
@@ -220,13 +222,14 @@ namespace GenshinGuide
 
 		public void AssignWeapons()
 		{
-			foreach (Weapon w in equippedWeapons)
+			foreach (Weapon weapon in equippedWeapons)
 			{
-				foreach (Character c in characters)
+				foreach (Character character in characters)
 				{
-					if (w.GetEquippedCharacter() == c.GetName())
+					if (weapon.GetEquippedCharacter() == character.GetName())
 					{
-						c.AssignWeapon(w);
+						character.AssignWeapon(weapon);
+						break;
 					}
 				}
 			}

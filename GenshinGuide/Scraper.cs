@@ -7,6 +7,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Threading;
+using System.Xml.Linq;
 using Accord;
 using Accord.Imaging.Filters;
 using Tesseract;
@@ -199,7 +200,7 @@ namespace GenshinGuide
 			["thoma"] = new string[] { "skill", "burst" }, //Thoma
 		};
 
-		public static readonly HashSet<string> elements = new HashSet<string>
+		public static readonly List<string> elements = new List<string>
 		{
 			"pyro",
 			"hydro",
@@ -904,7 +905,123 @@ namespace GenshinGuide
 
 		public static string FindElementByName(string name)
 		{
-			return elements.Contains(name) ? name : "";
+			return FindClosestInList(name, elements);
+		}
+
+		public static string FindClosestWeapon(string name)
+		{
+			return FindClosestInList(name, weapons);
+		}
+
+		public static string FindClosestSetName(string name)
+		{
+			return FindClosestInList(name, setNames);
+		}
+
+		public static string FindClosestCharacterName(string name)
+		{
+			return FindClosestInList(name, characters);
+		}
+
+		private static string FindClosestInList(string source, List<string> targets)
+		{
+			if (targets.Contains(source)) return source;
+			
+			int index = int.MaxValue;
+			int maxEdits = 25;
+			for (int i = 0; i < targets.Count; i++)
+			{
+				string target = targets[i];
+				int edits = CalcDistance(source, target, maxEdits);
+
+				if (edits <= 1)
+				{
+					return target;
+				}
+				else if (edits < maxEdits)
+				{
+					index = i;
+					maxEdits = edits;
+				}
+			}
+
+			return index != int.MaxValue ? targets[index] : null;
+		}
+
+		private static int CalcDistance(string text, string setName, int maxEdits)
+		{
+			int length1 = text.Length;
+			int length2 = setName.Length;
+
+			// Return trivial case - difference in string lengths exceeds threshhold
+			if (Math.Abs(length1 - length2) > maxEdits) { return int.MaxValue; }
+
+			// Ensure arrays [i] / length1 use shorter length 
+			if (length1 > length2)
+			{
+				Swap(ref setName, ref text);
+				Swap(ref length1, ref length2);
+			}
+
+			int maxi = length1;
+			int maxj = length2;
+
+			int[] dCurrent = new int[maxi + 1];
+			int[] dMinus1 = new int[maxi + 1];
+			int[] dMinus2 = new int[maxi + 1];
+			int[] dSwap;
+
+			for (int i = 0; i <= maxi; i++) { dCurrent[i] = i; }
+
+			int jm1 = 0, im1 = 0, im2 = -1;
+
+			for (int j = 1; j <= maxj; j++)
+			{
+
+				// Rotate
+				dSwap = dMinus2;
+				dMinus2 = dMinus1;
+				dMinus1 = dCurrent;
+				dCurrent = dSwap;
+
+				// Initialize
+				int minDistance = int.MaxValue;
+				dCurrent[0] = j;
+				im1 = 0;
+				im2 = -1;
+
+				for (int i = 1; i <= maxi; i++)
+				{
+
+					int cost = text[im1] == setName[jm1] ? 0 : 1;
+
+					int del = dCurrent[im1] + 1;
+					int ins = dMinus1[i] + 1;
+					int sub = dMinus1[im1] + cost;
+
+					//Fastest execution for min value of 3 integers
+					int min = (del > ins) ? (ins > sub ? sub : ins) : (del > sub ? sub : del);
+
+					if (i > 1 && j > 1 && text[im2] == setName[jm1] && text[im1] == setName[j - 2])
+						min = Math.Min(min, dMinus2[im2] + cost);
+
+					dCurrent[i] = min;
+					if (min < minDistance) { minDistance = min; }
+					im1++;
+					im2++;
+				}
+				jm1++;
+				if (minDistance > maxEdits) { return int.MaxValue; }
+			}
+
+			int result = dCurrent[maxi];
+			return ( result > maxEdits ) ? int.MaxValue : result;
+		}
+		private static void Swap<T>(ref T arg1, ref T arg2)
+		{
+			T temp = arg1;
+			arg1 = arg2;
+			arg2 = temp;
 		}
 
 		public static bool CompareColors(Color a, Color b)
@@ -944,85 +1061,14 @@ namespace GenshinGuide
 			return destImage;
 		}
 
-		public static Bitmap SetGrayscale(Bitmap bitmap)
+		public static Bitmap ConvertToGrayscale(Bitmap bitmap)
 		{
-			Bitmap temp = bitmap;
-			Bitmap bmap = (Bitmap)temp.Clone();
-			Color c;
-			for (int i = 0; i < bmap.Width; i++)
-			{
-				for (int j = 0; j < bmap.Height; j++)
-				{
-					c = bmap.GetPixel(i, j);
-					byte gray = (byte)(.299 * c.R + .587 * c.G + .114 * c.B);
-
-					bmap.SetPixel(i, j, Color.FromArgb(gray, gray, gray));
-				}
-			}
-			return (Bitmap)bmap.Clone();
-		}
-
-		public static void SetGrayscale(ref Bitmap bitmap)
-		{
-			Bitmap temp = bitmap;
-			Bitmap bmap = (Bitmap)temp.Clone();
-			Color c;
-			for (int i = 0; i < bmap.Width; i++)
-			{
-				for (int j = 0; j < bmap.Height; j++)
-				{
-					c = bmap.GetPixel(i, j);
-					byte gray = (byte)(0.2125 * c.R + 0.7154 * c.G + 0.0721 * c.B);
-
-					bmap.SetPixel(i, j, Color.FromArgb(gray, gray, gray));
-				}
-			}
-			bitmap = (Bitmap)bmap.Clone();
+			return new Grayscale(0.2125, 0.7154, 0.0721).Apply(bitmap);
 		}
 
 		public static void SetContrast(double contrast, ref Bitmap bitmap)
 		{
-			Bitmap temp = bitmap;
-			Bitmap bmap = (Bitmap)temp.Clone();
-			if (contrast < -100) contrast = -100;
-			if (contrast > 100) contrast = 100;
-			contrast = ( 100.0 + contrast ) / 100.0;
-			contrast *= contrast;
-			Color c;
-			for (int i = 0; i < bmap.Width; i++)
-			{
-				for (int j = 0; j < bmap.Height; j++)
-				{
-					c = bmap.GetPixel(i, j);
-					double pR = c.R / 255.0;
-					pR -= 0.5;
-					pR *= contrast;
-					pR += 0.5;
-					pR *= 255;
-					if (pR < 0) pR = 0;
-					if (pR > 255) pR = 255;
-
-					double pG = c.G / 255.0;
-					pG -= 0.5;
-					pG *= contrast;
-					pG += 0.5;
-					pG *= 255;
-					if (pG < 0) pG = 0;
-					if (pG > 255) pG = 255;
-
-					double pB = c.B / 255.0;
-					pB -= 0.5;
-					pB *= contrast;
-					pB += 0.5;
-					pB *= 255;
-					if (pB < 0) pB = 0;
-					if (pB > 255) pB = 255;
-
-					bmap.SetPixel(i, j,
-		Color.FromArgb((byte)pR, (byte)pG, (byte)pB));
-				}
-			}
-			bitmap = (Bitmap)bmap.Clone();
+			new ContrastCorrection((int)contrast).ApplyInPlace(bitmap);
 		}
 
 		public static void SetGamma(double red, double green, double blue, ref Bitmap bitmap)
@@ -1143,10 +1189,7 @@ namespace GenshinGuide
 
 		public static void SetThreshold(int threshold, ref Bitmap bitmap)
 		{
-			Grayscale grayscale = new Grayscale( 0.2125, 0.7154, 0.0721 );
-			Bitmap g = grayscale.Apply(bitmap);
-			new Threshold(threshold).ApplyInPlace(g);
-			bitmap = g;
+			new Threshold(threshold).ApplyInPlace(bitmap);
 		}
 
 		public static void FilterColors(ref Bitmap artifactImage, IntRange red, IntRange green, IntRange blue)

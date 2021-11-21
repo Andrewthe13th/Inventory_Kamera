@@ -16,11 +16,7 @@ namespace GenshinGuide
 
 		public Weapon()
 		{
-			name = null;
-			level = -1;
-			ascension = false;
 			refinementLevel = -1;
-			equippedCharacter = null;
 			id = -1;
 			rarity = -1;
 		}
@@ -48,7 +44,7 @@ namespace GenshinGuide
 
 		public bool IsValid()
 		{
-			return	0 <= level && level <= 90 && 0 <= refinementLevel && refinementLevel <= 5 && Scraper.IsValidWeapon(name);
+			return	1 <= level && level <= 90 && 0 <= refinementLevel && refinementLevel <= 5 && Scraper.IsValidWeapon(name);
 		}
 
 		public int AscensionCount()
