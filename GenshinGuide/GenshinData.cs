@@ -149,7 +149,7 @@ namespace GenshinGuide
 										if (!string.IsNullOrEmpty(w.equippedCharacter))
 											equippedWeapons.Add(w);
 									}
-									else //if (!string.IsNullOrEmpty(w.GetName()))
+									else
 									{
 										UserInterface.AddError($"Unable to validate information for weapon #{image.id}");
 										// Maybe save bitmaps in some directory to see what an issue might be
@@ -162,22 +162,20 @@ namespace GenshinGuide
 							// Scan as artifact
 							UserInterface.ResetGearDisplay();
 
-							Artifact a= ArtifactScraper.CatalogueFromBitmapsAsync(image.bm, image.id).Result;
+							Artifact artifact = ArtifactScraper.CatalogueFromBitmapsAsync(image.bm, image.id).Result;
 
-							//Debug.WriteLine($"Time to process artifact #{image.id}: {ts.Seconds}.{ts.Milliseconds / 10}");
-
-							if (a.rarity >= 4) // TODO: Add options for choosing rarities
+							if (artifact.rarity >= 4) // TODO: Add options for choosing rarities
 							{
-								if (a.IsValid())
+								if (artifact.IsValid())
 								{
 									UserInterface.IncrementArtifactCount();
 
-									inventory.Add(a);
+									inventory.Add(artifact);
 
-									if (!string.IsNullOrEmpty(a.equippedCharacter))
-										equippedArtifacts.Add(a);
+									if (!string.IsNullOrEmpty(artifact.equippedCharacter))
+										equippedArtifacts.Add(artifact);
 								}
-								else //if (!string.IsNullOrEmpty(a.setName))
+								else
 								{
 									UserInterface.AddError($"Unable to validate information for artifact #{image.id}");
 									// Maybe save bitmaps in some directory to see what an issue might be
@@ -188,6 +186,7 @@ namespace GenshinGuide
 						{
 							Form1.UnexpectedError("Unknown Image type for Image Processor");
 						}
+
 						// Dispose of everything
 						image.bm.ForEach(b => b.Dispose());
 					}

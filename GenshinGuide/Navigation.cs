@@ -18,19 +18,6 @@ namespace GenshinGuide
 		private static RECT area = new RECT();
 		private static RECT position = new RECT();
 
-		public static List<Size> resolutions = new List<Size>
-		{
-			// 16:9
-			new Size(1920, 1080),
-			new Size(1600, 900),
-			new Size(1280, 720),
-
-			// 16:10 (or 8:5)
-			new Size(1680, 1050),
-			new Size(1440, 900),
-			new Size(1280, 800)
-		};
-
 		private static int delay = 0;
 
 		public const VirtualKeyCode escapeKey = VirtualKeyCode.ESCAPE;
@@ -193,8 +180,15 @@ namespace GenshinGuide
 
 		public static void SelectCharacterAttributes()
 		{
-			int xOffset = (int)(170.0 / 1280.0 * GetWidth());
-			int yOffset = (int)(105.0 / 720.0 * GetHeight());
+			
+			int xOffset = (int)(170 / 1280.0 * GetWidth());
+			int yOffset = (int)(105 / 720.0 * GetHeight());
+
+			if (GetAspectRatio() == new Size(8, 5))
+			{
+				yOffset = (int)( 105 / 800.0 * GetHeight() );
+			}
+
 			SetCursorPos(GetPosition().Left + xOffset, GetPosition().Top + yOffset);
 			sim.Mouse.LeftButtonClick();
 			SystemRandomWait(Speed.CharacterUI);
@@ -202,8 +196,14 @@ namespace GenshinGuide
 
 		public static void SelectCharacterConstellation()
 		{
-			int xOffset = (int)(170.0 / 1280.0 * GetWidth());
-			int yOffset = (int)(245.0 / 720.0 * GetHeight());
+			int xOffset = (int)(170 / 1280.0 * GetWidth());
+			int yOffset = (int)(245 / 720.0 * GetHeight());
+
+			if (GetAspectRatio() == new Size(8,5))
+			{
+				yOffset = (int)( 245 / 800.0 * GetHeight() );
+			}
+
 			SetCursorPos(GetPosition().Left + xOffset, GetPosition().Top + yOffset);
 			sim.Mouse.LeftButtonClick();
 			SystemRandomWait(Speed.CharacterUI);
@@ -213,6 +213,12 @@ namespace GenshinGuide
 		{
 			int xOffset = (int)(135 / 1280.0 * GetWidth());
 			int yOffset = (int)(290 / 720.0 * GetHeight());
+
+			if (GetAspectRatio() == new Size(8, 5))
+			{
+				yOffset = (int)( 290 / 800.0 * GetHeight() );
+			}
+
 			SetCursorPos(GetPosition().Left + xOffset, GetPosition().Top + yOffset);
 			sim.Mouse.LeftButtonClick();
 			SystemRandomWait(Speed.CharacterUI);
@@ -220,8 +226,14 @@ namespace GenshinGuide
 
 		public static void SelectNextCharacter()
 		{
-			int xOffset = 1230;
-			int yOffset = 350;
+			int xOffset = (int)(1230 / 1280.0 * GetWidth());
+			int yOffset = (int)(350 / 720.0 * GetHeight());
+
+			if (GetAspectRatio() == new Size(8,5))
+			{
+				yOffset = (int)( 400 / 800.0 * GetHeight() );
+			}
+
 			SetCursorPos(GetPosition().Left + xOffset, GetPosition().Top + yOffset);
 			sim.Mouse.LeftButtonClick();
 			SystemRandomWait(Speed.SelectNextCharacter);

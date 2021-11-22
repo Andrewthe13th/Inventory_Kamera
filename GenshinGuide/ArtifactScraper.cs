@@ -295,85 +295,106 @@ namespace GenshinGuide
 			// Separate to all pieces of artifact and add to pics
 			List<Bitmap> artifactImages = new List<Bitmap>();
 
-			Bitmap name, gearSlot, mainStat, subStats, level, equipped, rarity, locked;
+			Bitmap card;
 			RECT reference;
+			Bitmap name, gearSlot, mainStat, subStats, level, equipped, rarity, locked;
 
-			//if (Navigation.GetAspectRatio() == new Size(16,9))
-			//{
-			reference = new RECT(new Rectangle(862, 80, 327, 565));
+			int left, top, right, bottom;
 
-			int left = (int)Math.Round(reference.Left / 1280.0 * width, MidpointRounding.AwayFromZero);
-			int top = (int)Math.Round(reference.Top / 720.0 * height, MidpointRounding.AwayFromZero);
-			int right = (int)Math.Round(reference.Right / 1280.0 * width, MidpointRounding.AwayFromZero);
-			int bottom = (int)Math.Round(reference.Bottom / 720.0 * height, MidpointRounding.AwayFromZero);
-
-			using (Bitmap card = Navigation.CaptureRegion(new RECT(left, top, right, bottom)))
+			if (Navigation.GetAspectRatio() == new Size(16, 9))
 			{
-				// Equipped Character
-				//{
+				reference = new RECT(new Rectangle(862, 80, 327, 565));
+
+				left   = (int)Math.Round(reference.Left   / 1280.0 * width, MidpointRounding.AwayFromZero);
+				top    = (int)Math.Round(reference.Top    / 720.0 * height, MidpointRounding.AwayFromZero);
+				right  = (int)Math.Round(reference.Right  / 1280.0 * width, MidpointRounding.AwayFromZero);
+				bottom = (int)Math.Round(reference.Bottom / 720.0 * height, MidpointRounding.AwayFromZero);
+
+				card = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
+
 				equipped = card.Clone(new RECT(
 					Left: (int)( 50.0 / reference.Width * card.Width ),
 					Top: (int)( 522.0 / reference.Height * card.Height ),
 					Right: card.Width,
 					Bottom: card.Height), card.PixelFormat);
-				//}
-
-				//Navigation.DisplayBitmap(equipped);
-
-				name = card.Clone(new RECT(
-					Left: 0,
-					Top: 0,
-					Right: card.Width,
-					Bottom: (int)( 38.0 / reference.Height * card.Height )), card.PixelFormat);
-				//Navigation.DisplayBitmap(name);
-
-				// GearSlot
-				gearSlot = card.Clone(new RECT(
-					Left: (int)( 3.0 / reference.Width * card.Width ),
-					Top: (int)( 46.0 / reference.Height * card.Height ),
-					Right: (int)( ( ( reference.Width / 2.0 ) + 20 ) / reference.Width * card.Width ),
-					Bottom: (int)( 66.0 / reference.Height * card.Height )), card.PixelFormat);
-				//Navigation.DisplayBitmap(gearSlot);
-
-				// MainStat
-				mainStat = card.Clone(new RECT(
-					Left: 0,
-					Top: (int)( 100.0 / reference.Height * card.Height ),
-					Right: (int)( ( ( reference.Width / 2.0 ) + 20 ) / reference.Width * card.Width ),
-					Bottom: (int)( 120.0 / reference.Height * card.Height )), card.PixelFormat);
-				//Navigation.DisplayBitmap(mainStat);
-
-				// Level
-				level = card.Clone(new RECT(
-					Left: (int)( 18.0 / reference.Width * card.Width ),
-					Top: (int)( 203.0 / reference.Height * card.Height ),
-					Right: (int)( 61.0 / reference.Width * card.Width ),
-					Bottom: (int)( 228.0 / reference.Height * card.Height )), card.PixelFormat);
-				//Navigation.DisplayBitmap(level);
-
-				// SubStats
-				subStats = card.Clone(new RECT(
-					Left: 0,
-					Top: (int)( 235.0 / reference.Height * card.Height ),
-					Right: card.Width,
-					Bottom: (int)( 373.0 / reference.Height * card.Height )), card.PixelFormat);
-				//Navigation.DisplayBitmap(subStats);
-
-				// Rarity
-				rarity = card.Clone(new RECT(
-					Left: 1,
-					Top: 0,
-					Right: card.Width,
-					Bottom: 1), card.PixelFormat);
-				//Navigation.DisplayBitmap(rarity);
-
-				// Locked Status
-				locked = card.Clone(new RECT(
-					Left: (int)( 284.0 / reference.Width * card.Width ),
-					Top: (int)( 201.0 / reference.Height * card.Height ),
-					Right: (int)( 312.0 / reference.Width * card.Width ),
-					Bottom: (int)( 228.0 / reference.Height * card.Height )), card.PixelFormat);
 			}
+			else if (Navigation.GetAspectRatio() == new Size(8, 5))
+			{
+				reference = new Rectangle(862, 80, 327, 640);
+
+				left   = (int)Math.Round(reference.Left   / 1280.0 * width, MidpointRounding.AwayFromZero);
+				top    = (int)Math.Round(reference.Top    / 800.0 * height, MidpointRounding.AwayFromZero);
+				right  = (int)Math.Round(reference.Right  / 1280.0 * width, MidpointRounding.AwayFromZero);
+				bottom = (int)Math.Round(reference.Bottom / 800.0 * height, MidpointRounding.AwayFromZero);
+
+				card = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
+
+				equipped = card.Clone(new RECT(
+					Left: (int)( 50.0 / reference.Width * card.Width ),
+					Top: (int)( 602.0 / reference.Height * card.Height ),
+					Right: card.Width,
+					Bottom: card.Height), card.PixelFormat);
+			}
+			else
+			{
+				throw new Exception("Unknown aspect ratio: " + Navigation.GetAspectRatio());
+			}
+
+
+			name = card.Clone(new RECT(
+				Left: 0,
+				Top: 0,
+				Right: card.Width,
+				Bottom: (int)( 38.0 / reference.Height * card.Height )), card.PixelFormat);
+			//Navigation.DisplayBitmap(name);
+
+			// GearSlot
+			gearSlot = card.Clone(new RECT(
+				Left: (int)( 3.0 / reference.Width * card.Width ),
+				Top: (int)( 46.0 / reference.Height * card.Height ),
+				Right: (int)( ( ( reference.Width / 2.0 ) + 20 ) / reference.Width * card.Width ),
+				Bottom: (int)( 66.0 / reference.Height * card.Height )), card.PixelFormat);
+			//Navigation.DisplayBitmap(gearSlot);
+
+			// MainStat
+			mainStat = card.Clone(new RECT(
+				Left: 0,
+				Top: (int)( 100.0 / reference.Height * card.Height ),
+				Right: (int)( ( ( reference.Width / 2.0 ) + 20 ) / reference.Width * card.Width ),
+				Bottom: (int)( 120.0 / reference.Height * card.Height )), card.PixelFormat);
+			//Navigation.DisplayBitmap(mainStat);
+
+			// Level
+			level = card.Clone(new RECT(
+				Left: (int)( 18.0 / reference.Width * card.Width ),
+				Top: (int)( 203.0 / reference.Height * card.Height ),
+				Right: (int)( 61.0 / reference.Width * card.Width ),
+				Bottom: (int)( 228.0 / reference.Height * card.Height )), card.PixelFormat);
+			//Navigation.DisplayBitmap(level);
+
+			// SubStats
+			subStats = card.Clone(new RECT(
+				Left: 0,
+				Top: (int)( 235.0 / reference.Height * card.Height ),
+				Right: card.Width,
+				Bottom: (int)( 373.0 / reference.Height * card.Height )), card.PixelFormat);
+			//Navigation.DisplayBitmap(subStats);
+
+			// Rarity
+			rarity = card.Clone(new RECT(
+				Left: 1,
+				Top: 0,
+				Right: card.Width,
+				Bottom: 1), card.PixelFormat);
+			//Navigation.DisplayBitmap(rarity);
+
+			// Locked Status
+			locked = card.Clone(new RECT(
+				Left: (int)( 284.0 / reference.Width * card.Width ),
+				Top: (int)( 201.0 / reference.Height * card.Height ),
+				Right: (int)( 312.0 / reference.Width * card.Width ),
+				Bottom: (int)( 228.0 / reference.Height * card.Height )), card.PixelFormat);
+			
 			// Add all to artifact Images
 			artifactImages.Add(gearSlot); // 0
 			artifactImages.Add(mainStat);
@@ -502,7 +523,6 @@ namespace GenshinGuide
 				// Flower of Life. Flat HP
 				case "floweroflife":
 					//Debug.WriteLine($"ScanArtifactMainStat runtime: {ts.Milliseconds}ms");
-
 					return "hp_flat";
 
 				// Plume of Death. Flat ATK
@@ -552,11 +572,7 @@ namespace GenshinGuide
 
 		private static List<SubStat> ScanArtifactSubStats(Bitmap artifactImage, ref string setName)
 		{
-			if (Navigation.GetAspectRatio() == new Size(8, 5))
-			{
-				throw new Exception("Need to implement artifact substat scraping in 16:10 aspect ratio");
-			}
-			
+
 			var text = Scraper.AnalyzeText(artifactImage, Tesseract.PageSegMode.Auto).ToLower();
 			List<string> lines = new List<string>(text.Split('\n'));
 			lines.RemoveAll(line => string.IsNullOrEmpty(line) || line.Contains("set") || line.Contains("2-piece") || line.Contains("4-piece") || line.Contains("1-piece"));

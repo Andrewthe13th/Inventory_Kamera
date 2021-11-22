@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Text.RegularExpressions;
-using System.Threading;
 using Accord.Imaging;
-using Accord.Statistics.Visualizations;
 
 namespace GenshinGuide
 {
@@ -57,8 +55,8 @@ namespace GenshinGuide
 			{
 				if (string.IsNullOrEmpty(firstCharacterName))
 					firstCharacterName = name;
+				
 				// Scan Level and ascension
-
 				Navigation.SelectCharacterAttributes();
 				int level = ScanLevel(ref ascension);
 				if (level == -1)
@@ -123,12 +121,13 @@ namespace GenshinGuide
 				yReference = 800.0;
 			}
 
-			int left = (int)Math.Round(185 / xReference * Navigation.GetWidth(), MidpointRounding.AwayFromZero);
-			int top  = (int)Math.Round(26 / yReference * Navigation.GetHeight(), MidpointRounding.AwayFromZero);
-			int right = (int)Math.Round(( 275 + 185 ) / xReference * Navigation.GetWidth(), MidpointRounding.AwayFromZero);
-			int bottom = (int)Math.Round(( 35 + 26 ) / yReference * Navigation.GetHeight(), MidpointRounding.AwayFromZero);
+			RECT region = new RECT(
+				Left:   (int)(185 / xReference * Navigation.GetWidth()),
+				Top:    (int)(26  / yReference * Navigation.GetHeight()),
+				Right:  (int)(460 / xReference * Navigation.GetWidth()),
+				Bottom: (int)(60  / yReference * Navigation.GetHeight()));
 
-			Bitmap nameBitmap = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
+			Bitmap nameBitmap = Navigation.CaptureRegion(region);
 
 			//Image Operations
 			Scraper.SetGamma(0.2, 0.2, 0.2, ref nameBitmap);
@@ -160,11 +159,16 @@ namespace GenshinGuide
 		{
 			int attempts = 0;
 			int maxAttempts = 50;
+			Rectangle region = new RECT(
+				Left:   (int)( 85  / 1280.0 * Navigation.GetWidth() ),
+				Top:    (int)( 10  / 720.0 * Navigation.GetHeight() ),
+				Right:  (int)( 305 / 1280.0 * Navigation.GetWidth() ),
+				Bottom: (int)( 55  / 720.0 * Navigation.GetHeight() ));
+
 			do
 			{
-				using (Bitmap bm = Navigation.CaptureRegion(new Rectangle(85, 10, 220, 45)))
+				using (Bitmap bm = Navigation.CaptureRegion(region))
 				{
-
 					Bitmap n = Scraper.ConvertToGrayscale(bm);
 					Scraper.SetThreshold(110, ref n);
 					Scraper.SetInvert(ref n);
@@ -205,11 +209,24 @@ namespace GenshinGuide
 			int level = -1;
 			int attempt = 0;
 			int maxAttempts = 50;
+
+			var xRef = 1280.0;
+			var yRef = 720.0;
+			if (Navigation.GetAspectRatio() == new Size(8, 5))
+			{
+				yRef = 800.0;
+			}
+
+			Rectangle region =  new RECT(
+				Left:   (int)( 960  / xRef * Navigation.GetWidth() ),
+				Top:    (int)( 135  / yRef * Navigation.GetHeight() ),
+				Right:  (int)( 1125 / xRef * Navigation.GetWidth() ),
+				Bottom: (int)( 163  / yRef * Navigation.GetHeight() ));
+
 			do
 			{
-				Bitmap bm = Navigation.CaptureRegion(new Rectangle(960, 135, 165, 28));
+				Bitmap bm = Navigation.CaptureRegion(region);
 
-				//Image Operations
 				bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
 				Bitmap n = Scraper.ConvertToGrayscale(bm);
 				Scraper.SetInvert(ref n);
@@ -277,20 +294,37 @@ namespace GenshinGuide
 
 		private static int ScanConstellations()
 		{
-			int constellation = 0;
+			double yReference = 720.0;
+			int constellation;
 
-			Rectangle constActivate = new Rectangle(70, 665, 30, 30);
+			if (Navigation.GetAspectRatio() == new Size(8, 5))
+			{
+				yReference = 800.0;
+			}
 
+				Rectangle constActivate =  new RECT(
+				Left:   (int)( 70 / 1280.0 * Navigation.GetWidth() ),
+				Top:    (int)( 665 / 720.0 * Navigation.GetHeight() ),
+				Right:  (int)( 100 / 1280.0 * Navigation.GetWidth() ),
+				Bottom: (int)( 695 / 720.0 * Navigation.GetHeight() ));
 
-			for (int i = 0; i < 6; i++)
+			for (constellation = 0; constellation < 6; constellation++)
 			{
 				// Select Constellation
+				int yOffset = (int)( ( 180 + ( constellation * 75 ) ) / yReference * Navigation.GetHeight() );
+
+				if (Navigation.GetAspectRatio() == new Size(8, 5))
+				{
+					yOffset = (int)( ( 225 + ( constellation * 75 ) ) / yReference * Navigation.GetHeight() );
+				}
+
+				
 				Navigation.SetCursorPos(Navigation.GetPosition().Left + (int)(1130 / 1280.0 * Navigation.GetWidth()),
-										Navigation.GetPosition().Top + (int)((180 + ( i * 75 )) / 720.0 * Navigation.GetHeight()));
+										Navigation.GetPosition().Top + yOffset);
 				Navigation.sim.Mouse.LeftButtonClick();
 
 
-				Navigation.Speed speed = i == 0 ? Navigation.Speed.Normal : Navigation.Speed.Fast;
+				Navigation.Speed speed = constellation == 0 ? Navigation.Speed.Normal : Navigation.Speed.Fast;
 				Navigation.SystemRandomWait(speed);
 
 
@@ -305,15 +339,10 @@ namespace GenshinGuide
 					{
 						break;
 					}
-					else
-					{
-						++constellation;
-					}
 				}
 			}
 
 			Navigation.sim.Keyboard.KeyPress(WindowsInput.Native.VirtualKeyCode.ESCAPE);
-			Debug.WriteLine($"Constellation level: {constellation}");
 			UserInterface.SetCharacter_Constellation(constellation);
 			return constellation;
 		}
@@ -322,8 +351,7 @@ namespace GenshinGuide
 		{
 			int[] talents = {-1,-1,-1};
 
-			int xOffset = 165;
-			int yOffset = 116;
+			
 			int specialOffset = 0;
 
 			// Check if character has a movement talent like
@@ -333,17 +361,34 @@ namespace GenshinGuide
 				specialOffset = 1;
 			}
 
+			var xRef = 1280.0;
+			var yRef = 720.0;
+
+			if (Navigation.GetAspectRatio() == new Size(8, 5))
+			{
+				yRef = 800.0;
+			}
+
+			Rectangle region =  new RECT(
+				Left:   (int)( 160 / xRef * Navigation.GetWidth() ),
+				Top:    (int)( 115 / yRef * Navigation.GetHeight() ),
+				Right:  (int)( 225 / xRef * Navigation.GetWidth() ),
+				Bottom: (int)( 140 / yRef * Navigation.GetHeight() ));
+
 			for (int i = 0; i < 3; i++)
 			{
-				// Pause for each constellation
-				Navigation.SetCursorPos(Navigation.GetPosition().Left + 1130, Navigation.GetPosition().Top + 110 + ( ( i + ( ( i == 2 ) ? specialOffset : 0 ) ) * 60 ));
+				// Change y-offset for talent clicking
+				int yOffset = (int)( 110 / yRef * Navigation.GetHeight() ) + ( i + ( ( i == 2 ) ? specialOffset : 0 ) ) * (int)(60 / yRef * Navigation.GetHeight() );
+
+				Navigation.SetCursorPos(Navigation.GetPosition().Left + (int)(1130 / xRef * Navigation.GetWidth()), Navigation.GetPosition().Top + yOffset);
 				Navigation.sim.Mouse.LeftButtonClick();
 				Navigation.Speed speed = i == 0 ? Navigation.Speed.Normal : Navigation.Speed.Fast;
 				Navigation.SystemRandomWait(speed);
 
 				while (talents[i] < 1 || talents[i] > 15)
 				{
-					Bitmap talentLevel = Navigation.CaptureRegion(new Rectangle(xOffset, yOffset, 60, 25));
+					Bitmap talentLevel = Navigation.CaptureRegion(region);
+
 					talentLevel = Scraper.ResizeImage(talentLevel, talentLevel.Width * 2, talentLevel.Height * 2);
 
 					Bitmap n = Scraper.ConvertToGrayscale(talentLevel);

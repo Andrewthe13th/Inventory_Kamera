@@ -256,9 +256,9 @@ namespace GenshinGuide
 				// Grab image of entire card on Right
 				reference = new RECT(new Rectangle(862, 80, 327, 560)); // In 1280x720
 
-				int left = (int)Math.Round(reference.Left / 1280.0 * width, MidpointRounding.AwayFromZero);
-				int top = (int)Math.Round(reference.Top / 720.0 * height, MidpointRounding.AwayFromZero);
-				int right = (int)Math.Round(reference.Right / 1280.0 * width, MidpointRounding.AwayFromZero);
+				int left   = (int)Math.Round(reference.Left   / 1280.0 * width, MidpointRounding.AwayFromZero);
+				int top    = (int)Math.Round(reference.Top    / 720.0 * height, MidpointRounding.AwayFromZero);
+				int right  = (int)Math.Round(reference.Right  / 1280.0 * width, MidpointRounding.AwayFromZero);
 				int bottom = (int)Math.Round(reference.Bottom / 720.0 * height, MidpointRounding.AwayFromZero);
 
 				card = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
@@ -273,11 +273,11 @@ namespace GenshinGuide
 			else // if (Navigation.GetAspectRatio() == new Size(8, 5))
 			{
 				// Grab image of entire card on Right
-				reference = new RECT(new Rectangle(862, 80, 328, 640)); // In 1280x720
+				reference = new Rectangle(862, 80, 328, 640); // In 1280x720
 
-				int left = (int)Math.Round(reference.Left / 1280.0 * width, MidpointRounding.AwayFromZero);
-				int top = (int)Math.Round(reference.Top / 800.0 * height, MidpointRounding.AwayFromZero);
-				int right = (int)Math.Round(reference.Right / 1280.0 * width, MidpointRounding.AwayFromZero);
+				int left   = (int)Math.Round(reference.Left   / 1280.0 * width, MidpointRounding.AwayFromZero);
+				int top    = (int)Math.Round(reference.Top    / 800.0 * height, MidpointRounding.AwayFromZero);
+				int right  = (int)Math.Round(reference.Right  / 1280.0 * width, MidpointRounding.AwayFromZero);
 				int bottom = (int)Math.Round(reference.Bottom / 800.0 * height, MidpointRounding.AwayFromZero);
 
 				RECT itemCard = new RECT(left, top, right, bottom);
@@ -452,7 +452,6 @@ namespace GenshinGuide
 
 			// Analyze
 			string text = Scraper.AnalyzeText(n).Trim().ToLower();
-			bm.Dispose();
 			n.Dispose();
 
 			text = Regex.Replace(text, @"[\W_]", "");
@@ -464,7 +463,6 @@ namespace GenshinGuide
 		{
 			Bitmap n = Scraper.ConvertToGrayscale(bm);
 			Scraper.SetInvert(ref n);
-			Scraper.SetContrast(100.0, ref n);
 
 			string text = Scraper.AnalyzeText(n).Trim();
 			text = Regex.Replace(text, @"(?![\d/]).", "");
@@ -495,7 +493,6 @@ namespace GenshinGuide
 		public static int ScanRefinement(Bitmap bm)
 		{
 			Bitmap n = Scraper.ConvertToGrayscale(bm);
-			Scraper.SetThreshold(200, ref n);
 			Scraper.SetInvert(ref n);
 
 			string text = Scraper.AnalyzeText(n).Trim();
@@ -506,10 +503,8 @@ namespace GenshinGuide
 			{
 				UserInterface.SetGear_Level(n, text, true);
 				n.Dispose();
-				bm.Dispose();
 				return refinementLevel;
 			}
-			bm.Dispose();
 			n.Dispose();
 			return -1;
 		}

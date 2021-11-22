@@ -239,15 +239,12 @@ namespace GenshinGuide
 
 						// The Data object of json object
 						data.GatherData(checkbox);
-
+						return;
 						// Covert to GOOD format
 						GOOD good = new GOOD(data);
 
 						// Make Json File
 						good.WriteToJSON(OutputPath_TextBox.Text, Database_MenuItem.Text);
-
-						// Clear saved data
-						ResetUI();
 
 						UserInterface.SetProgramStatus("Finished");
 					}
