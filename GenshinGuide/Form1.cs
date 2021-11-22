@@ -91,9 +91,6 @@ namespace GenshinGuide
 				// Reset data
 				data = new GenshinData();
 				Navigation.Reset();
-			}
-			else
-			{
 				hook.Dispose();
 			}
 		}
@@ -194,7 +191,6 @@ namespace GenshinGuide
 		{
 			SaveSettings();
 			
-			
 			UserInterface.SetProgramStatus("Scanning");
 
 			if (Directory.Exists(OutputPath_TextBox.Text))
@@ -239,7 +235,7 @@ namespace GenshinGuide
 
 						// The Data object of json object
 						data.GatherData(checkbox);
-						return;
+
 						// Covert to GOOD format
 						GOOD good = new GOOD(data);
 

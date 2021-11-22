@@ -34,6 +34,7 @@ namespace GenshinGuide
 		{
 			b_threadCancel = true;
 			AwaitProcessors();
+			b_threadCancel = false;
 			workerQueue = new Queue<OCRImage>();
 		}
 
@@ -118,9 +119,6 @@ namespace GenshinGuide
 
 		public void ImageProcessorWorker()
 		{
-			Thread.CurrentThread.Priority = ThreadPriority.BelowNormal;
-			var threadPriority = Thread.CurrentThread.Priority;
-			Debug.WriteLine($"Thread #{Thread.CurrentThread.ManagedThreadId} priority: {threadPriority}");
 			while (true)
 			{
 				if (b_threadCancel)
@@ -186,7 +184,6 @@ namespace GenshinGuide
 						{
 							Form1.UnexpectedError("Unknown Image type for Image Processor");
 						}
-
 						// Dispose of everything
 						image.bm.ForEach(b => b.Dispose());
 					}
