@@ -1,16 +1,15 @@
 # Genshin Scanner
 
 An OCR Scanner that scans your characters, weapons and artifacts in Genshin Impact. This produces a JSON file that can be easily formated to work with most genshin websites.
-Currently it only supports ENGLISH words. 
+Currently it only supports ENGLISH. 
 
 ## How to use
 1. [Download the program](https://github.com/Andrewthe13th/Genshin_Scanner/releases/download/v0.9/Genshin_Scanner_V0.9.zip), unzip and then run.
 2. Open Genshin Impact and Log In. 
 3. In Genshin Impact, go to Settings
-4. Under Graphics, set Display Mode to 1280x720 Windowed
-5. Under Controls, set Control Type to Keyboard
-6. Exit Settings and leave the game in the Paimon Menu
-7. Go back to the scanner application, then click SCAN. (You can stop the scan anytime by pressing the 'ENTER' key)
+4. Under Controls, set Control Type to Keyboard
+5. Exit Settings and leave the game in the Paimon Menu
+6. Go back to the scanner application, then click SCAN. (You can stop the scan anytime by pressing the 'ENTER' key)
 Note: You will not be able to use your computer while the scan is taking place due to require the use of mouse and keyboard inputs.
 
 ### Can this get me banned?
@@ -24,325 +23,330 @@ My account has been used to test this script and has yet to be banned or warned 
 
 # JSON Format
 ```
-characters: [{},{},{}...] //contains all characters with equipped weapon and artifacts
-inventory: {[],[]} //All weapons and artifacts
+characters: [{},{},{}...] // contains all characters with equipped weapon and any artifacts
+inventory: {[],[]} // All weapons and artifacts
 ```
 
 ## Character Object
 ```
-name: digit // use CharacterList to get name  (ex: CharacterList[name])
-element: digit // use ElementNameList
-level: digit
+name: string (See 'characters' in Scraper.cs)
+element: string (See 'elements' in Scraper.cs)
+level: number
 ascension: boolean // ex: 80/80 -> false; 80/90 -> true
-experience: digit (NOT functional right now)
-weapon: {} // detailed in Weapon Object Section
+experience: number (NOT implemented)
+weapon: Weapon // detailed in Weapon Object Section
 artifacts: [ // detailed in Artifact Object Section
-  0: {} // flower
-  1: {} // feather
-  2: {} // sands
-  3: {} // goblet
-  4: {} // circlet
+  'flower'  : Artifact
+  'plume'   : Artifact
+  'sands'   : Artifact
+  'goblet'  : Artifact
+  'circlet' : Artifact
 ]
-constellation: digit
+constellation: number
 talents: [
-  0: digit //auto attack level
-  1: digit //skill attack level
-  2: digit //burst attack level
+  0: number //auto attack level
+  1: number //skill attack level
+  2: number //burst attack level
 ]
 ```
 
 ## Weapon Object
 ```
-name: digit // use example list to get name
-level: digit
-ascension: boolean
-refinementLevel: digit
-equippedCharacter: digit // use CharacterList
-id: digit // order of weapon scanned
+name: string // See 'weapons' in Scraper.cs
+level: number
+ascension: boolean // ex: 80/80 -> false; 80/90 -> true
+refinementLevel: number
+equippedCharacter: string ("" or name from 'characters' in Scraper.cs)
+id: number // order of weapon scanned
 ```
 
 ## Artifact Object
 ```
-gearSlot: digit // 0-4 (flower,feather,sands,goblet,circlet) use ArtifactSlotList
-rarity: digit // 5-1 stars
-mainStat: digit // use ArtifactMainStatList
-level: digit
-subStats: [{stat: digit, value: float}{stat: digit, value: float}{stat: digit, value: float}{stat: digit, value: float}] // use ArtifactSubStatList
-subStatsCount: digit
-setName: digit // use ArtifactList
-equippedCharacter: digit // use CharacterList
-id: digit // order of artifact scanned
+gearSlot: string  (See 'gearSlots' in Scraper.cs)
+rarity: number 
+mainStat: string  (See 'stats' in Scraper.cs)
+level: number
+subStats: [
+	{stat: string, value: float}
+	{stat: string, value: float}
+	{stat: string, value: float}
+	{stat: string, value: float}]
+subStatsCount: number
+setName: string (See 'setNames' in Scraper.cs)
+equippedCharacter: string
+id: number // order of artifact scanned
 ```
 
 ## Decoder List
-This list bellow are used for decoding the JSON to english. To support other languages replace words with the corresponding language.
-ex: (if name == 1) => CharacterList[characters[0].name] is "Traveler"
+This lists bellow are used for decoding internal objects to english. To support other languages replace words with the corresponding language.
+ex: (if name == "amber") => CharacterList[characters.IndexOf(name)] is "Amber". These lists can also be found in Scraper.cs and GOOD.cs.
 ```
-const CharacterList=[
-    null,//0
-    "Traveler",
-    "Amber",
-    "Kaeya",
-    "Lisa",
-    "Barbara",//5
-    "Razor",
-    "Xiangling",
-    "Beidou",
-    "Xingqiu",
-    "Ningguang",//10
-    "Fischl",
-    "Bennett",
-    "Noelle",
-    "Chongyun",
-    "Sucrose",//15
-    "Jean",
-    "Diluc",
-    "Qiqi",
-    "Mona",
-    "Keqing",//20
-    "Venti",
-    "Klee",
-    "Diona",
-    "Tartaglia",
-    "Xinyan",//25
-    "Zhongli",
-    "Albedo",
-    "Ganyu",
-    "Xiao",
-    "Hu Tao",//30
-    "Rosaria",
-    "Yanfei",
-    "Eula",
-    "Kaedehara Kazuha",
-    "Kamisato Ayaka",//35
-    "Yoimiya",
-    "Sayu",
-    "Raiden Shogun",
-    "Kujousara",
-    "Aloy", // 40
-    "Sangonomi Yakokomi",
+const characters=[
+	"Traveler",
+	"Amber",
+	"Kaeya",
+	"Lisa",
+	"Barbara",
+	"Razor",
+	"Xiangling",
+	"Beidou",
+	"Xingqiu",
+	"Ningguang",
+	"Fischl",
+	"Bennett",
+	"Noelle",
+	"Chongyun",
+	"Sucrose",
+	"Jean",
+	"Diluc",
+	"Qiqi",
+	"Mona",
+	"Keqing",
+	"Venti",
+	"Klee",
+	"Diona",
+	"Tartaglia",
+	"Xinyan",
+	"Zhongli",
+	"Albedo",
+	"Ganyu",
+	"Xiao",
+	"Hu Tao",
+	"Rosaria",
+	"Yanfei",
+	"Eula",
+	"Kaedehara Kazuha",
+	"Kamisato Ayaka",
+	"Yoimiya",
+	"Sayu",
+	"Raiden Shogun",
+	"Kujousara",
+	"Aloy",
+	"Sangonomi Yakokomi",
+	"Thoma",
 ]
 
-const WeaponList=[
-    //1Star
-    "Dull Blade",
-    "Waster Greatsword",
-    "Beginners Protector",
-    "Apprentices Notes",
-    "Hunter's Bow",//4
-    //2Stars
-    "Silver Sword",
-    "Old Mercs Pal",
-    "Iron Point",
-    "Pocket Grimoire",
-    "Seasoned Hunters Bow",//9
-    //3Star
-    "Cool Steel",//10
-    "Harbinger Of Dawn",
-    "Travelers Handy Sword",
-    "Fillet Blade",
-    "Skyrider Sword",
-    "Ferrous Shadow",//15
-    "Bloodtainted Greatsword",
-    "White Iron Greatsword",
-    "Debate Club",
-    "Skyrider Greatsword",
-    "White Tassel",//20
-    "Halberd",
-    "BlackTassel",
-    "MagicGuide",
-    "Thrilling Tales Of Dragon Slayers",
-    "Otherworldly Story",//25
-    "Emerald Orb",
-    "Twin Nephrite",
-    "Raven Bow",
-    "Sharpshooters Oath",
-    "Recurve Bow",//30
-    "Slingshot",
-    "Messenger",
-    //4star
-    "Favonius Sword",
-    "The Flute",
-    "Sacrificial Sword",//35
-    "Royal Longsword",
-    "Lions Roar",
-    "Prototype Rancour",
-    "Iron Sting",
-    "Blackcliff Longsword",//40
-    "The Black Sword",
-    "Sword Of Descension",
-    "Festering Desire",
-    "The Alley Flash",
-    "Favonius Greatsword",//45
-    "The Bell",
-    "Sacrificial Greatsword",
-    "Royal Greatsword",
-    "Rainslasher",
-    "Prototype Archaic",//50
-    "Whiteblind",
-    "Blackcliff Slasher",
-    "Serpent Spine",
-    "SnowTombed Starsilver",
-    "Lithic Blade",//55
-    "Dragons Bane",
-    "Prototype Starglitter",
-    "Crescent Pike",
-    "Blackcliff Pole",
-    "Deathmatch",//60
-    "Favonius Lance",
-    "Royal Spear",
-    "Dragonspine Spear",
-    "Lithic Spear",
-    "Favonius Codex",//65
-    "The Widsith",
-    "Sacrificial Fragments",
-    "Royal Grimoire",
-    "Solar Pearl",
-    "Prototype Amber",//70
-    "Mappa Mare",
-    "Blackcliff Agate",
-    "Eye Of Perception",
-    "Frostbearer",
-    "Wine And Song",//75
-    "Favonius Warbow",
-    "The Stringless",
-    "Sacrificial Bow",
-    "Royal Bow",
-    "Rust",//80
-    "Prototype Crescent",
-    "Compound Bow",
-    "Blackcliff Warbow",
-    "The Viridescent",
-    "Alley Hunter",//85
-    "Windblume Ode",
-    "Aquilia Favonia",
-    "Skyward Blade",
-    "Summit Shaper",
-    "Primordial Jade Cutter",//90
-    "Skyward Pride",
-    "Wolf's Gravestone",
-    "The Unforged",
-    "Primordial Jade-Winged Spear",
-    "Skyward Spine",//95
-    "Vortext Vanquisher",
-    "Staff Of Homa",
-    "Skyward Atlas",
-    "Lost Prayer To The SacredWinds",
-    "Memory Of Dust",//100
-    "Skyward Harp",
-    "Amo's Bow",
-    "Elegy For The End",
-    "Song Of Broken Pines",
-    "Mitternachts Waltz",//105
-    "Freedom-Sworn",
-    "Dodoco Tales",
-    //InazumaPatch
-    "Amenoma Kageuchi",
-    "Katsuragikiri Nagamasa",
-    "Kitain Cross Spear",//110
-    "Hamayumi",
-    "Hakushin Ring",
-    "Mistsplitter Reforged",
-    "Thundering Pulse",
-    // 2.1
-    "Predator", // 115
-    "Luxurious SeaLord",
-    "The Catch",
-    "Engulfing Lightning",
-    "Everlasting Moonglow",
+const weapons=[
+	// Release Weapons
+	// 1 Star
+	"DullBlade",
+	"WasterGreatsword",
+	"BeginnersProtector",
+	"ApprenticesNotes",
+	"HuntersBow",
+
+	// 2 Stars
+	"SilverSword",
+	"OldMercsPal",
+	"IronPoint",
+	"PocketGrimoire",
+	"SeasonedHuntersBow",
+
+	// 3 Star
+	"CoolSteel",
+	"HarbingerOfDawn",
+	"TravelersHandySword",
+	"FilletBlade",
+	"SkyriderSword",
+	"FerrousShadow",
+	"BloodtaintedGreatsword",
+	"WhiteIronGreatsword",
+	"DebateClub",
+	"SkyriderGreatsword",
+	"WhiteTassel",
+	"Halberd",
+	"BlackTassel",
+	"MagicGuide",
+	"ThrillingTalesOfDragonSlayers",
+	"OtherworldlyStory",
+	"EmeraldOrb",
+	"TwinNephrite",
+	"RavenBow",
+	"SharpshootersOath",
+	"RecurveBow",
+	"Slingshot",
+	"Messenger",
+
+	// 4 star
+	"FavoniusSword",
+	"TheFlute",
+	"SacrificialSword",
+	"RoyalLongsword",
+	"LionsRoar",
+	"PrototypeRancour",
+	"IronSting",
+	"BlackcliffLongsword",
+	"TheBlackSword",
+	"SwordOfDescension",
+	"FesteringDesire",
+	"TheAlleyFlash",
+	"FavoniusGreatsword",
+	"TheBell",
+	"SacrificialGreatsword",
+	"RoyalGreatsword",
+	"Rainslasher",
+	"PrototypeArchaic",
+	"Whiteblind",
+	"BlackcliffSlasher",
+	"SerpentSpine",
+	"SnowTombedStarsilver",
+	"LithicBlade",
+	"DragonsBane",
+	"PrototypeStarglitter",
+	"CrescentPike",
+	"BlackcliffPole",
+	"Deathmatch",
+	"FavoniusLance",
+	"RoyalSpear",
+	"DragonspineSpear",
+	"LithicSpear",
+	"FavoniusCodex",
+	"TheWidsith",
+	"SacrificialFragments",
+	"RoyalGrimoire",
+	"SolarPearl",
+	"PrototypeAmber",
+	"MappaMare",
+	"BlackcliffAgate",
+	"EyeOfPerception",
+	"Frostbearer",
+	"WineAndSong",
+	"FavoniusWarbow",
+	"TheStringless",
+	"SacrificialBow",
+	"RoyalBow",
+	"Rust",
+	"PrototypeCrescent",
+	"CompoundBow",
+	"BlackcliffWarbow",
+	"TheViridescentHunt",
+	"AlleyHunter",
+	"WindblumeOde",
+	"AquilaFavonia",
+	"SkywardBlade",
+	"SummitShaper",
+	"PrimordialJadeCutter",
+	"SkywardPride",
+	"WolfsGravestone",
+	"TheUnforged",
+	"PrimordialJadeWingedSpear",
+	"SkywardSpine",
+	"VortextVanquisher",
+	"StaffOfHoma",
+	"SkywardAtlas",
+	"LostPrayerToTheSacredWinds",
+	"MemoryOfDust",
+	"SkywardHarp",
+	"AmosBow",
+	"ElegyForTheEnd",
+	"SongOfBrokenPines",
+	"MitternachtsWaltz",
+	"Freedom-Sworn",
+	"DodocoTales",
+
+	// 2.0 Inazuma Patch
+	"AmenomaKageuchi",
+	"KatsuragikiriNagamasa",
+	"KitainCrossSpear",
+	"Hamayumi",
+	"HakushinRing",
+	"MistsplitterReforged",
+	"ThunderingPulse",
+
+	// 2.1
+	"Predator",
+	"LuxuriousSeaLord",
+	"TheCatch",
+	"EngulfingLightning",
+	"EverlastingMoonglow",
+	"DarkIronSword",
+
+	// 2.2
+	"PolarStar",
+	"Akuoumaru",
+	"MouunsMoon",
+	"WavebreakersFin",
 ]
 
-const ArtifactList=[
-    "Adventurer",
-    "LuckyDog",
-    "Traveling Doctor",
-    "Resolution Of Sojourner",
-    "Tiny Miracle",
-    "Berserker",//5
-    "Instructor",
-    "The Exile",
-    "Defenders Will",
-    "Brave Heart",
-    "Martial Artist",//10
-    "Gambler",
-    "Scholar",
-    "Prayers For Illumination",
-    "Prayers For Destiny",
-    "Prayers For Wisdom",//15
-    "Prayers For Springtime",
-    "Thundersoother",
-    "Lavawalker",
-    "Maiden Beloved",
-    "Gladiator's Finale",//20
-    "Viridescent Venerer",
-    "Wanderers Troupe",
-    "Thundering Fury",
-    "Crimson Witch Of Flames",
-    "Noblesse Oblige",//25
-    "Bloodstained Chivalry",
-    "Archaic Petra",
-    "Retracing Bolide",
-    "Heart Of Depth",
-    "Blizzard Strayer",//30
-    "Pale Flame",
-    "Tenacity Of The Millelith",
-    "Shimenawas Reminiscence",
-    "Emblem Of SeveredFate",
+const setNames=[
+	"Adventurer",
+	"LuckyDog",
+	"Traveling Doctor",
+	"Resolution Of Sojourner",
+	"Tiny Miracle",
+	"Berserker",//5
+	"Instructor",
+	"The Exile",
+	"Defenders Will",
+	"Brave Heart",
+	"Martial Artist",//10
+	"Gambler",
+	"Scholar",
+	"Prayers For Illumination",
+	"Prayers For Destiny",
+	"Prayers For Wisdom",//15
+	"Prayers For Springtime",
+	"Thundersoother",
+	"Lavawalker",
+	"Maiden Beloved",
+	"Gladiator's Finale",//20
+	"Viridescent Venerer",
+	"Wanderers Troupe",
+	"Thundering Fury",
+	"Crimson Witch Of Flames",
+	"Noblesse Oblige",//25
+	"Bloodstained Chivalry",
+	"Archaic Petra",
+	"Retracing Bolide",
+	"Heart Of Depth",
+	"Blizzard Strayer",//30
+	"Pale Flame",
+	"Tenacity Of The Millelith",
+	"Shimenawas Reminiscence",
+	"Emblem Of SeveredFate",
 ]
 
-const ArtifactSlotList=[
-    "Flower",
-    "Plume",
-    "Sands",
-    "Goblet",
-    "Circlet",
+const gearSlots =[
+	"flower",
+	"plume",
+	"sands",
+	"goblet",
+	"circlet",
 ]
 
-const ArtifactMainStatList = [
-    "HP", //0
-    "ATK",
-    "HP%",
-    "ATK%", //3
-    "DEF%",
-    "Energy Recharge", //5
-    "Elemental Mastery",
-    "Healing Bonus",
-    "CRIT Rate",
-    "CRIT DMG",
-    "Physical DMG Bonus", //10
-    "Pyro DMG Bonus",
-    "Electro DMG Bonus",
-    "Cryo DMG Bonus",
-    "Hydro DMG Bonus",
-    "Anemo DMG Bonus", //15
-    "Geo DMG Bonus",
+const stats = [
+	"HP", //0
+	"HP%",
+	"ATK",
+	"ATK%", //3
+	"DEF"
+	"DEF%",
+	"Energy Recharge", //5
+	"Elemental Mastery",
+	"Healing Bonus",
+	"CRIT Rate",
+	"CRIT DMG",
+	"Physical DMG Bonus", //10
+	"Pyro DMG Bonus",
+	"Electro DMG Bonus",
+	"Cryo DMG Bonus",
+	"Hydro DMG Bonus",
+	"Anemo DMG Bonus", //15
+	"Geo DMG Bonus",
 ]
 
-const ArtifactSubStatList = [
-    "HP", // 0
-    "HP%",
-    "ATK",
-    "ATK%",
-    "DEF",
-    "DEF%", // 5
-    "Energy Recharage",
-    "Elemental Mastery",
-    "CRIT Rate",
-    "CRIT DMG", //9
-]
-
-const ElementNameList = [
-    'Pyro',
-    'Hydro',
-    'Dendro',
-    'Electro',
-    'Anemo',
-    'Cryo',
-    'Geo',
+const elements = [
+	"Pyro",
+	"Hydro",
+	"Dendro",
+	"Electro",
+	"Anemo",
+	"Cryo",
+	"Geo",
 ]
 ```
 # License
-* This project is under the [MIT](LICENSE.md) license.
+* This project is under the [MIT](LICENSE) license.
 * All rights reserved by © miHoYo Co., Ltd. This project is not affiliated nor endorsed by miHoYo. Genshin Impact™ and other properties belong to their respective owners.
 * This project uses third-party libraries or other resources that may be
 distributed under [different licenses](THIRD-PARTY-NOTICES.md).
