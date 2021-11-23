@@ -313,7 +313,7 @@ namespace GenshinGuide
 
 				equipped = card.Clone(new RECT(
 					Left: (int)( 50.0 / reference.Width * card.Width ),
-					Top: (int)( 602.0 / reference.Height * card.Height ),
+					Top: (int)( 522.0 / reference.Height * card.Height ),
 					Right: card.Width,
 					Bottom: card.Height), card.PixelFormat);
 			}
