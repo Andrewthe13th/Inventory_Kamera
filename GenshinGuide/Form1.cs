@@ -190,6 +190,7 @@ namespace GenshinGuide
 		{
 			SaveSettings();
 			
+			
 			UserInterface.SetProgramStatus("Scanning");
 
 			if (Directory.Exists(OutputPath_TextBox.Text))

@@ -286,9 +286,9 @@ namespace GenshinGuide
 
 				// Equipped Character
 				equipped = card.Clone(new RECT(
-					Left:   (int)( 52.0  / reference.Width * card.Width ),
-					Top:    (int)( 602.0 / reference.Height * card.Height ),
-					Right:  card.Width,
+					Left: (int)( 52.0 / reference.Width * card.Width ),
+					Top: (int)( 602.0 / reference.Height * card.Height ),
+					Right: card.Width,
 					Bottom: card.Height), card.PixelFormat);
 			}
 
@@ -301,17 +301,17 @@ namespace GenshinGuide
 
 			// Level
 			level = card.Clone(new RECT(
-				Left:   (int)( 19.0  / reference.Width * card.Width ),
-				Top:    (int)( 206.0 / reference.Height * card.Height ),
-				Right:  (int)( 107.0 / reference.Width * card.Width ),
+				Left: (int)( 19.0 / reference.Width * card.Width ),
+				Top: (int)( 206.0 / reference.Height * card.Height ),
+				Right: (int)( 107.0 / reference.Width * card.Width ),
 				Bottom: (int)( 225.0 / reference.Height * card.Height )), card.PixelFormat);
 
 			// Refinement
 			refinement = card.Clone(new RECT(
-				Left:   (int)( 20.0  / reference.Width * card.Width ),
-				Top:    (int)( 235.0 / reference.Height * card.Height ),
-				Right:  (int)( 40.0  / reference.Width * card.Width ),
-				Bottom: (int)( 252.0 / reference.Height * card.Height )), card.PixelFormat);
+				Left: (int)( 18.0 / reference.Width * card.Width ),
+				Top: (int)( 234.0 / reference.Height * card.Height ),
+				Right: (int)( 42.0 / reference.Width * card.Width ),
+				Bottom: (int)( 254.0 / reference.Height * card.Height )), card.PixelFormat);
 
 			// Assign to List
 			weaponImages.Add(name);
@@ -490,14 +490,11 @@ namespace GenshinGuide
 
 		public static int ScanRefinement(Bitmap bm)
 		{
-			using (Bitmap up = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2))
-			{
-				Bitmap n = Scraper.ConvertToGrayscale(up);
+			Bitmap n = Scraper.ConvertToGrayscale(bm);
+			Scraper.SetInvert(ref n);
 
-				Scraper.SetInvert(ref n);
-
-				string text = Scraper.AnalyzeText(n).Trim();
-				text = Regex.Replace(text, @"[^\d]", "");
+			string text = Scraper.AnalyzeText(n).Trim();
+			text = Regex.Replace(text, @"[^\d]", "");
 
 			// Parse Int
 			if (int.TryParse(text, out int refinementLevel))
