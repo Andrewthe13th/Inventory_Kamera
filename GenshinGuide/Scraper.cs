@@ -44,7 +44,7 @@ namespace GenshinGuide
 			"prayersforillumination",
 			"prayersfordestiny",
 			"prayersforwisdom",
-			"prayersthespringtime",
+			"prayerstospringtime",
 			"thundersoother",
 			"lavawalker",
 			"maidenbeloved",

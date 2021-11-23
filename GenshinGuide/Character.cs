@@ -72,31 +72,31 @@ namespace GenshinGuide
 
 		public int AscensionLevel()
 		{
-			if (level < 20 || ( level == 20 && ascension == false ))
+			if (level < 20 || ( level == 20 && !ascension ))
 			{
 				return 0;
 			}
-			else if (level < 40 || ( level == 40 && ascension == false ))
+			else if (level < 40 || ( level == 40 && !ascension ))
 			{
 				return 1;
 			}
-			else if (level < 50 || ( level == 50 && ascension == false ))
+			else if (level < 50 || ( level == 50 && !ascension ))
 			{
 				return 2;
 			}
-			else if (level < 60 || ( level == 60 && ascension == false ))
+			else if (level < 60 || ( level == 60 && !ascension ))
 			{
 				return 3;
 			}
-			else if (level < 70 || ( level == 70 && ascension == false ))
+			else if (level < 70 || ( level == 70 && !ascension ))
 			{
 				return 4;
 			}
-			else if (level < 80 || ( level == 80 && ascension == false ))
+			else if (level < 80 || ( level == 80 && !ascension ))
 			{
 				return 5;
 			}
-			else if (level <= 90 || ( level == 90 && ascension == false ))
+			else if (level <= 90 || ( level == 90 && !ascension ))
 			{
 				return 6;
 			}

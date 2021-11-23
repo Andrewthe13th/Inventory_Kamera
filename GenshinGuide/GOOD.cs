@@ -287,17 +287,14 @@ namespace GenshinGuide
 
 		public GOOD(GenshinData genshinData)
 		{
-			format = "GOOD";
+			// Get rid of VS warning since we are converting this class to JSON
+			format = "GOOD".Trim();
 			version = 1;
-			source = "Genshin_Data_Scanner";
+			source = "Genshin_Data_Scanner".Trim();
 			characters = new List<ICharacter>();
 			artifacts = new List<IArtifact>();
 			weapons = new List<IWeapon>();
 
-			// Get rid of VS warning since we are converting this class to JSON
-			format = format.Trim();
-			version = version + 0;
-			source = source.Trim();
 
 			// Assign Characters
 			foreach (Character character in genshinData.GetCharacters())
@@ -309,7 +306,7 @@ namespace GenshinGuide
 					constellation = character.constellation,
 					ascension = character.AscensionLevel()
 				};
-				temp.talent._auto = character.GetTalents()[0];
+				temp.talent.auto = character.GetTalents()[0];
 				temp.talent.skill = character.GetTalents()[1];
 				temp.talent.burst = character.GetTalents()[2];
 				characters.Add(temp);
@@ -349,7 +346,7 @@ namespace GenshinGuide
 						rarity = artifact.rarity,
 						mainStatKey = mainStat,
 						location = location,
-						_lock = artifact._lock,
+						@lock = artifact._lock,
 						substats = new ISubstat[4]
 					};
 
@@ -375,10 +372,6 @@ namespace GenshinGuide
 		{
 			// Create JSON object
 			string dataString = JsonConvert.SerializeObject(this);
-
-			// Conform 'lock' and 'auto' keys to GOOD format
-			dataString = dataString.Replace("_lock", "lock");
-			dataString = dataString.Replace("_auto", "auto");
 
 			// Check for output directory
 			if (!Directory.Exists(outputDirectory))
@@ -469,16 +462,6 @@ namespace GenshinGuide
 				streamWriter.WriteLine(dataString.ToString());
 			}
 		}
-
-		public struct IWeapon
-		{
-			[JsonProperty] public string key;
-			[JsonProperty] public int level;
-			[JsonProperty] public int ascension;
-			[JsonProperty] public int refinement;
-			[JsonProperty] public string location;
-		}
-
 		public struct IArtifact
 		{
 			[JsonProperty] public string setKey;
@@ -487,8 +470,7 @@ namespace GenshinGuide
 			[JsonProperty] public int rarity;
 			[JsonProperty] public string mainStatKey;
 			[JsonProperty] public string location;
-			// change Lock to "_lock" after
-			[JsonProperty] public bool _lock;
+			[JsonProperty] public bool @lock;
 			[JsonProperty] public ISubstat[] substats;
 		}
 
@@ -498,19 +480,28 @@ namespace GenshinGuide
 			[JsonProperty] public decimal value;
 		}
 
-		public struct ICharacter
+		public struct IWeapon
 		{
 			[JsonProperty] public string key;
 			[JsonProperty] public int level;
 			[JsonProperty] public int ascension;
-			[JsonProperty] public ITalent talent;
+			[JsonProperty] public int refinement;
+			[JsonProperty] public string location;
+			[JsonProperty] public bool @lock;
+		}
+
+		public struct ICharacter
+		{
+			[JsonProperty] public string key;
+			[JsonProperty] public int level;
 			[JsonProperty] public int constellation;
+			[JsonProperty] public int ascension;
+			[JsonProperty] public ITalent talent;
 		}
 
 		public struct ITalent
 		{
-			// change auto to _auto
-			[JsonProperty] public int _auto;
+			[JsonProperty] public int @auto;
 			[JsonProperty] public int skill;
 			[JsonProperty] public int burst;
 		}
