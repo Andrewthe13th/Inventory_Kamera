@@ -224,7 +224,7 @@ namespace GenshinGuide
 
 						if (!sizes.Contains(Navigation.GetAspectRatio()))
 						{
-							throw new Exception($"{Navigation.GetAspectRatio()} is an invalid aspect ratio.");
+							throw new Exception($"{Navigation.GetSize()} is an invalid resolution.");
 						}
 
 						// Add navigation delay
