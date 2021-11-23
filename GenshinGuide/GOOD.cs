@@ -346,7 +346,7 @@ namespace GenshinGuide
 						rarity = artifact.rarity,
 						mainStatKey = mainStat,
 						location = location,
-						@lock = artifact._lock,
+						@lock = artifact.@lock,
 						substats = new ISubstat[4]
 					};
 

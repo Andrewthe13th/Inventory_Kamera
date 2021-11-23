@@ -318,6 +318,7 @@ namespace GenshinGuide
 			weaponImages.Add(level);
 			weaponImages.Add(refinement);
 			weaponImages.Add(equipped);
+			weaponImages.Add(card);
 
 			GenshinData.workerQueue.Enqueue(new OCRImage(weaponImages, "weapon", id));
 		}
@@ -437,7 +438,6 @@ namespace GenshinGuide
 			string text = Scraper.AnalyzeText(n).ToLower().Trim();
 			text = Regex.Replace(text, @"[\W]", "");
 
-			UserInterface.SetArtifact_GearSlot(n, text, true);
 			n.Dispose();
 
 			// Check in Dictionary
@@ -467,7 +467,6 @@ namespace GenshinGuide
 			string text = Scraper.AnalyzeText(n).Trim();
 			text = Regex.Replace(text, @"(?![\d/]).", "");
 
-			UserInterface.SetWeapon_Level(bm, text);
 
 			if (text.Contains('/'))
 			{
@@ -475,11 +474,10 @@ namespace GenshinGuide
 
 				if (temp.Length == 2)
 				{
-					if (temp[0] == temp[1])
-						ascension = true;
 
-					if (int.TryParse(temp[0], out int level))
+					if (int.TryParse(temp[0], out int level) && int.TryParse(temp[1], out int maxLevel))
 					{
+						ascension = level < maxLevel;
 						return level;
 					}
 					else
@@ -501,15 +499,13 @@ namespace GenshinGuide
 				string text = Scraper.AnalyzeText(n).Trim();
 				text = Regex.Replace(text, @"[^\d]", "");
 
-				// Parse Int
-				if (int.TryParse(text, out int refinementLevel))
-				{
-					UserInterface.SetGear_Level(n, text, true);
-					n.Dispose();
-					return refinementLevel;
-				}
+			// Parse Int
+			if (int.TryParse(text, out int refinementLevel))
+			{
 				n.Dispose();
+				return refinementLevel;
 			}
+			n.Dispose();
 			return -1;
 		}
 
@@ -527,7 +523,7 @@ namespace GenshinGuide
 				{
 					string[] tempString = extractedString.Split(':');
 					extractedString = tempString[1].Replace("\n", String.Empty);
-					UserInterface.SetGear_Equipped(n, extractedString);
+
 					extractedString = Regex.Replace(extractedString, @"[^\w_]", "").ToLower();
 
 					// Assign Traveler Name if not found

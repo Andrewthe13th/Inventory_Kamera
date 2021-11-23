@@ -13,7 +13,7 @@ namespace GenshinGuide
 		[JsonProperty] public int subStatsCount { get; private set; }
 		[JsonProperty] public string setName { get; private set; }
 		[JsonProperty] public string equippedCharacter { get; private set; }
-		[JsonProperty] public bool _lock { get; private set; }
+		[JsonProperty] public bool @lock { get; private set; }
 		[JsonProperty] public int id { get; private set; }
 
 		public Artifact()
@@ -26,7 +26,7 @@ namespace GenshinGuide
 			subStatsCount = 4;
 			setName = null;
 			equippedCharacter = null;
-			_lock = false;
+			@lock = false;
 			id = 0;
 		}
 
@@ -40,7 +40,7 @@ namespace GenshinGuide
 			subStatsCount = _subStatsCount;
 			setName = _setName;
 			equippedCharacter = _equippedCharacter;
-			_lock = _Lock;
+			@lock = _Lock;
 			id = _id;
 		}
 
@@ -76,6 +76,11 @@ namespace GenshinGuide
 		{
 			public string stat;
 			public decimal value;
+
+			public override string ToString()
+			{
+				return stat.Contains("%") || stat.Contains("crit") || stat.Contains("bonus") ? $"{stat.Replace("%", "")} + {value}%" : $"{stat} + {value}";
+			}
 		}
 
 		public override bool Equals(object obj) => this.Equals(obj as Artifact);
@@ -105,10 +110,10 @@ namespace GenshinGuide
 				&& subStatsCount == artifact.subStatsCount
 				&& setName == artifact.setName
 				&& equippedCharacter == artifact.equippedCharacter
-				&& _lock == artifact._lock;
+				&& @lock == artifact.@lock;
 		}
 
-		public override int GetHashCode() => (gearSlot, rarity, mainStat, level, subStats, subStatsCount, setName, equippedCharacter, _lock).GetHashCode();
+		public override int GetHashCode() => (gearSlot, rarity, mainStat, level, subStats, subStatsCount, setName, equippedCharacter, @lock).GetHashCode();
 
 		public static bool operator ==(Artifact lhs, Artifact rhs)
 		{

@@ -7,14 +7,8 @@ namespace GenshinGuide
 {
 	public static class UserInterface
 	{
-		// Artifact
-		private static PictureBox gearSlot_PictureBox;
-
-		private static PictureBox gearMainStat_PictureBox;
-		private static PictureBox gearLevel_PictureBox;
-		private static PictureBox[] gearSubStat_PictureBoxes = new PictureBox[4];
-		private static PictureBox gearSetName_PictureBox;
-		private static PictureBox gearEquipped_PictureBox;
+		// Artifacts and Weapons
+		private static PictureBox gear_PictureBox;
 		private static TextBox gear_TextBox;
 
 		// Character
@@ -26,28 +20,26 @@ namespace GenshinGuide
 
 		// Counters
 		private static Label weaponCount_Label;
-
 		private static Label weaponMax_Label;
+
 		private static Label artifactCount_Label;
 		private static Label artifactMax_Label;
+
 		private static Label characterCount_Label;
+
+		// Status
 		private static Label programStatus_Label;
 
-		// Error Log
+		// Error box
 		private static TextBox error_TextBox;
 
 		// Current Images
 		private static PictureBox navigation_PictureBox;
 
-		public static void Init(PictureBox _a_gearSlot, PictureBox _a_mainStat, PictureBox _a_level, PictureBox[] _a_subStats, PictureBox _a_setName, PictureBox _a_equipped, TextBox _a_textbox, PictureBox _c_name, PictureBox _c_level, PictureBox[] _c_talent, TextBox _c_textbox, Label _weaponCount, Label _weaponMax, Label _artifactCount, Label _artifactMax, Label _characterCount, Label _programStatus, TextBox _error_textBox, PictureBox _navigation_Image)
+		public static void Init(PictureBox _gear_PictureBox, TextBox _a_textbox, PictureBox _c_name, PictureBox _c_level, PictureBox[] _c_talent, TextBox _c_textbox, Label _weaponCount, Label _weaponMax, Label _artifactCount, Label _artifactMax, Label _characterCount, Label _programStatus, TextBox _error_textBox, PictureBox _navigation_Image)
 		{
 			// Artifacts and Weapons
-			gearSlot_PictureBox = _a_gearSlot;
-			gearMainStat_PictureBox = _a_mainStat;
-			gearLevel_PictureBox = _a_level;
-			gearSubStat_PictureBoxes = _a_subStats;
-			gearSetName_PictureBox = _a_setName;
-			gearEquipped_PictureBox = _a_equipped;
+			gear_PictureBox = _gear_PictureBox;
 			gear_TextBox = _a_textbox;
 
 			// Characters
@@ -71,12 +63,6 @@ namespace GenshinGuide
 
 			// Navigation Image
 			navigation_PictureBox = _navigation_Image;
-		}
-
-		public static void SetArtifact_GearSlot(Bitmap bm, string text, bool bWeapon = false)
-		{
-			UpdatePictureBox(bm, gearSlot_PictureBox);
-			UpdateTextBox(bWeapon ? $"Weapon: {text}\n" : $"GearSlot: {text}\n", gear_TextBox);
 		}
 
 		private static void UpdateElements(Bitmap bm, string text, PictureBox pictureBox, TextBox textBox)
@@ -142,34 +128,42 @@ namespace GenshinGuide
 			}
 		}
 
-		public static void SetWeapon_Level(Bitmap bm, string text)
+		public static void SetGear(Bitmap bm, Weapon weapon)
 		{
-			UpdateElements(bm, $"MainStat: {text}\n", gearMainStat_PictureBox, gear_TextBox);
+			ResetGearDisplay();
+			UpdatePictureBox(bm, gear_PictureBox);
+			int maxLevel = (int)( weapon.ascension ? Math.Floor(weapon.level / 10.0) + 1 * 10 : Math.Floor(weapon.level / 10.0) * 10 );
+			string text =
+				$"Name: {weapon.name}" + Environment.NewLine +
+				$"Level: {weapon.level} / {maxLevel}" + Environment.NewLine + 
+				$"Refinement: {weapon.refinementLevel}" + Environment.NewLine +
+				$"Equipped: {weapon.equippedCharacter}";
+			UpdateTextBox(text, gear_TextBox);
 		}
 
-		public static void SetGear_Level(Bitmap bm, string text, bool bWeapon = false)
+		public static void SetGear(Bitmap bm, Artifact artifact)
 		{
-			UpdatePictureBox(bm, gearLevel_PictureBox);
-			UpdateTextBox(bWeapon ? $"Refinement: {text}\n" : $"Level: {text}\n", gear_TextBox);
-		}
+			ResetGearDisplay();
+			UpdatePictureBox(bm, gear_PictureBox);
+			string text =
+				$"Rarity: {artifact.rarity}" + Environment.NewLine +
+				$"Level: {artifact.level}" + Environment.NewLine +
+				$"Set: {artifact.setName}" + Environment.NewLine +
+				$"Slot: {artifact.gearSlot}" + Environment.NewLine +
+				$"Stat: {artifact.mainStat}" + Environment.NewLine +
+				$"SubStats:" + Environment.NewLine;
 
-		public static void SetArtifact_SubStat(Bitmap bm, string text, int i)
-		{
-			if (i > -1 && i < 4)
+			for (int i = 0; i < artifact.subStats.Length; i++)
 			{
-				UpdatePictureBox(bm, gearSubStat_PictureBoxes[i]);
-				UpdateTextBox($"SubStat {i + 1}: {text}\n", gear_TextBox);
+				Artifact.SubStat substat = artifact.subStats[i];
+				if (string.IsNullOrEmpty(substat.stat)) break;
+				text += $"{i + 1}: {substat}" + Environment.NewLine;
 			}
-		}
 
-		public static void SetArtifact_SetName(Bitmap bm, string text)
-		{
-			UpdateElements(bm, $"SetName: {text}\n", gearSetName_PictureBox, gear_TextBox);
-		}
+			text += $"Equipped: {artifact.equippedCharacter}" + Environment.NewLine + 
+				$"Locked: {artifact.@lock}";
 
-		public static void SetGear_Equipped(Bitmap bm, string text)
-		{
-			UpdateElements(bm, $"Equipped: {text}\n", gearEquipped_PictureBox, gear_TextBox);
+			UpdateTextBox(text, gear_TextBox);
 		}
 
 		public static void SetCharacter_NameAndElement(Bitmap bm, string name, string element)
@@ -266,86 +260,45 @@ namespace GenshinGuide
 
 		public static void ResetGearDisplay()
 		{
-			MethodInvoker gearSlotAction = delegate { gearSlot_PictureBox.Image = null; };
-			MethodInvoker mainStatAction = delegate { gearMainStat_PictureBox.Image = null; };
-			MethodInvoker levelAction = delegate { gearLevel_PictureBox.Image = null; };
-			MethodInvoker subStatsAction_1 = delegate { gearSubStat_PictureBoxes[0].Image = null; };
-			MethodInvoker subStatsAction_2 = delegate { gearSubStat_PictureBoxes[1].Image = null; };
-			MethodInvoker subStatsAction_3 = delegate { gearSubStat_PictureBoxes[2].Image = null; };
-			MethodInvoker subStatsAction_4 = delegate { gearSubStat_PictureBoxes[3].Image = null; };
-			MethodInvoker setNameAction = delegate { gearSetName_PictureBox.Image = null; };
-			MethodInvoker equippedAction = delegate { gearEquipped_PictureBox.Image = null; };
+			MethodInvoker gearAction = delegate { gear_PictureBox.Image = null; };
+			
 			MethodInvoker textAction = delegate { gear_TextBox.Clear(); };
 
-			gearSlot_PictureBox.Invoke(gearSlotAction);
-			gearMainStat_PictureBox.Invoke(mainStatAction);
-			gearLevel_PictureBox.Invoke(levelAction);
-			gearSubStat_PictureBoxes[0].Invoke(subStatsAction_1);
-			gearSubStat_PictureBoxes[1].Invoke(subStatsAction_2);
-			gearSubStat_PictureBoxes[2].Invoke(subStatsAction_3);
-			gearSubStat_PictureBoxes[3].Invoke(subStatsAction_4);
-			gearSetName_PictureBox.Invoke(setNameAction);
-			gearEquipped_PictureBox.Invoke(equippedAction);
+			gear_PictureBox.Invoke(gearAction);
 			gear_TextBox.Invoke(textAction);
 		}
 
-		public static void ResetAll()
+		public static void ResetCounters()
 		{
-			// Counters
 			MethodInvoker characterCountAction = delegate { characterCount_Label.Text = "0"; weaponMax_Label.Refresh(); };
 			MethodInvoker weaponCountAction = delegate { weaponCount_Label.Text = "0"; weaponMax_Label.Refresh(); };
 			MethodInvoker weaponMaxAction = delegate { weaponMax_Label.Text = "?"; weaponMax_Label.Refresh(); };
 			MethodInvoker artifactCountAction = delegate { artifactCount_Label.Text = "0"; artifactMax_Label.Refresh(); };
 			MethodInvoker artifactMaxAction = delegate { artifactMax_Label.Text = "?"; artifactMax_Label.Refresh(); };
-			// Images
-			MethodInvoker gearSlotAction = delegate { gearSlot_PictureBox.Image = null; };
-			MethodInvoker mainStatAction = delegate { gearMainStat_PictureBox.Image = null; };
-			MethodInvoker artifactlevelAction = delegate { gearLevel_PictureBox.Image = null; };
-			MethodInvoker subStatsAction_1 = delegate { gearSubStat_PictureBoxes[0].Image = null; };
-			MethodInvoker subStatsAction_2 = delegate { gearSubStat_PictureBoxes[1].Image = null; };
-			MethodInvoker subStatsAction_3 = delegate { gearSubStat_PictureBoxes[2].Image = null; };
-			MethodInvoker subStatsAction_4 = delegate { gearSubStat_PictureBoxes[3].Image = null; };
-			MethodInvoker setNameAction = delegate { gearSetName_PictureBox.Image = null; };
-			MethodInvoker equippedAction = delegate { gearEquipped_PictureBox.Image = null; };
-			MethodInvoker artifactAction = delegate { gear_TextBox.Clear(); };
-			MethodInvoker nameAction = delegate { cName_PictureBox.Image = null; };
-			MethodInvoker levelAction = delegate { cLevel_PictureBox.Image = null; };
-			MethodInvoker talentAction_1 = delegate { cTalent_PictureBoxes[0].Image = null; };
-			MethodInvoker talentAction_2 = delegate { cTalent_PictureBoxes[1].Image = null; };
-			MethodInvoker talentAction_3 = delegate { cTalent_PictureBoxes[2].Image = null; };
-			MethodInvoker characterAction = delegate { character_TextBox.Clear(); };
-			//Error
-			MethodInvoker errorAction = delegate { error_TextBox.Clear(); };
 
 			characterCount_Label.Invoke(characterCountAction);
 			weaponCount_Label.Invoke(weaponCountAction);
 			weaponMax_Label.Invoke(weaponMaxAction);
 			artifactCount_Label.Invoke(artifactCountAction);
 			artifactMax_Label.Invoke(artifactMaxAction);
-			gearSlot_PictureBox.Invoke(gearSlotAction);
-			gearMainStat_PictureBox.Invoke(mainStatAction);
-			gearLevel_PictureBox.Invoke(artifactlevelAction);
-			gearSubStat_PictureBoxes[0].Invoke(subStatsAction_1);
-			gearSubStat_PictureBoxes[1].Invoke(subStatsAction_2);
-			gearSubStat_PictureBoxes[2].Invoke(subStatsAction_3);
-			gearSubStat_PictureBoxes[3].Invoke(subStatsAction_4);
-			gearSetName_PictureBox.Invoke(setNameAction);
-			gearEquipped_PictureBox.Invoke(equippedAction);
-			gear_TextBox.Invoke(artifactAction);
-			cName_PictureBox.Invoke(nameAction);
-			cLevel_PictureBox.Invoke(levelAction);
-			cTalent_PictureBoxes[0].Invoke(talentAction_1);
-			cTalent_PictureBoxes[1].Invoke(talentAction_2);
-			cTalent_PictureBoxes[2].Invoke(talentAction_3);
-			character_TextBox.Invoke(characterAction);
-			error_TextBox.Invoke(errorAction);
 		}
 
-		public static void ClearErrors()
+		public static void ResetErrors()
 		{
 			MethodInvoker textAction = delegate { error_TextBox.Clear(); };
 
 			error_TextBox.Invoke(textAction);
+		}
+
+		public static void ResetAll()
+		{
+			ResetGearDisplay();
+
+			ResetCharacterDisplay();
+
+			ResetCounters();
+
+			ResetErrors();
 		}
 	}
 }
