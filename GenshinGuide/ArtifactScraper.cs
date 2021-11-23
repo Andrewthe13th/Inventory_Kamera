@@ -302,16 +302,12 @@ namespace GenshinGuide
 
 			if (Navigation.GetAspectRatio() == new Size(16, 9))
 			{
+				reference = new RECT(new Rectangle(862, 80, 327, 560));
 
 				int left   = (int)Math.Round(reference.Left   / 1280.0 * width, MidpointRounding.AwayFromZero);
 				int top    = (int)Math.Round(reference.Top    / 720.0 * height, MidpointRounding.AwayFromZero);
 				int right  = (int)Math.Round(reference.Right  / 1280.0 * width, MidpointRounding.AwayFromZero);
 				int bottom = (int)Math.Round(reference.Bottom / 720.0 * height, MidpointRounding.AwayFromZero);
-
-				int left = (int)Math.Round(reference.Left / 1280.0 * width, MidpointRounding.AwayFromZero);
-				int top = (int)Math.Round(reference.Top / 720.0 * height, MidpointRounding.AwayFromZero);
-				int right = (int)Math.Round(reference.Right / 1280.0 * width, MidpointRounding.AwayFromZero);
-				int bottom = (int)Math.Round(reference.Bottom / 720.0  * height, MidpointRounding.AwayFromZero);
 
 				card = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
 
@@ -325,10 +321,10 @@ namespace GenshinGuide
 			{
 				reference = new RECT(new Rectangle(862, 80, 327, 640));
 
-				int left = (int)Math.Round(reference.Left / 1280.0 * width, MidpointRounding.AwayFromZero);
-				int top = (int)Math.Round(reference.Top / 800.0 * height, MidpointRounding.AwayFromZero);
-				int right = (int)Math.Round(reference.Right / 1280.0 * width, MidpointRounding.AwayFromZero);
-				int bottom = (int)Math.Round(reference.Bottom / 800.0  * height, MidpointRounding.AwayFromZero);
+				int left   = (int)Math.Round(reference.Left   / 1280.0 * width, MidpointRounding.AwayFromZero);
+				int top    = (int)Math.Round(reference.Top    / 800.0 * height, MidpointRounding.AwayFromZero);
+				int right  = (int)Math.Round(reference.Right  / 1280.0 * width, MidpointRounding.AwayFromZero);
+				int bottom = (int)Math.Round(reference.Bottom / 800.0 * height, MidpointRounding.AwayFromZero);
 
 				card = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
 
