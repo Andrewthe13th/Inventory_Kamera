@@ -91,6 +91,9 @@ namespace GenshinGuide
 				// Reset data
 				data = new GenshinData();
 				Navigation.Reset();
+			}
+			else
+			{
 				hook.Dispose();
 			}
 		}

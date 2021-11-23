@@ -297,41 +297,23 @@ namespace GenshinGuide
 
 			Bitmap card;
 			RECT reference;
-			Bitmap name, gearSlot, mainStat, subStats, level, equipped, rarity, locked;
+			Bitmap gearSlot, mainStat, subStats, level, equipped, rarity, locked;
 
-			int left, top, right, bottom;
 
 			if (Navigation.GetAspectRatio() == new Size(16, 9))
 			{
 				reference = new RECT(new Rectangle(862, 80, 327, 565));
 
-				left   = (int)Math.Round(reference.Left   / 1280.0 * width, MidpointRounding.AwayFromZero);
-				top    = (int)Math.Round(reference.Top    / 720.0 * height, MidpointRounding.AwayFromZero);
-				right  = (int)Math.Round(reference.Right  / 1280.0 * width, MidpointRounding.AwayFromZero);
-				bottom = (int)Math.Round(reference.Bottom / 720.0 * height, MidpointRounding.AwayFromZero);
+				int left   = (int)Math.Round(reference.Left   / 1280.0 * width, MidpointRounding.AwayFromZero);
+				int top    = (int)Math.Round(reference.Top    / 720.0 * height, MidpointRounding.AwayFromZero);
+				int right  = (int)Math.Round(reference.Right  / 1280.0 * width, MidpointRounding.AwayFromZero);
+				int bottom = (int)Math.Round(reference.Bottom / 720.0 * height, MidpointRounding.AwayFromZero);
 
 				card = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
 
 				equipped = card.Clone(new RECT(
 					Left: (int)( 50.0 / reference.Width * card.Width ),
 					Top: (int)( 522.0 / reference.Height * card.Height ),
-					Right: card.Width,
-					Bottom: card.Height), card.PixelFormat);
-			}
-			else if (Navigation.GetAspectRatio() == new Size(8, 5))
-			{
-				reference = new Rectangle(862, 80, 327, 640);
-
-				left   = (int)Math.Round(reference.Left   / 1280.0 * width, MidpointRounding.AwayFromZero);
-				top    = (int)Math.Round(reference.Top    / 800.0 * height, MidpointRounding.AwayFromZero);
-				right  = (int)Math.Round(reference.Right  / 1280.0 * width, MidpointRounding.AwayFromZero);
-				bottom = (int)Math.Round(reference.Bottom / 800.0 * height, MidpointRounding.AwayFromZero);
-
-				card = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
-
-				equipped = card.Clone(new RECT(
-					Left: (int)( 50.0 / reference.Width * card.Width ),
-					Top: (int)( 602.0 / reference.Height * card.Height ),
 					Right: card.Width,
 					Bottom: card.Height), card.PixelFormat);
 			}
