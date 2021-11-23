@@ -146,6 +146,7 @@ namespace GenshinGuide
 									{
 										UserInterface.IncrementWeaponCount();
 										inventory.Add(w);
+										UserInterface.SetGear(image.bm[4], w);
 										if (!string.IsNullOrEmpty(w.equippedCharacter))
 											equippedWeapons.Add(w);
 									}
@@ -160,8 +161,6 @@ namespace GenshinGuide
 						else if (image.type == "artifact")
 						{
 							// Scan as artifact
-							UserInterface.ResetGearDisplay();
-
 							Artifact artifact = ArtifactScraper.CatalogueFromBitmapsAsync(image.bm, image.id).Result;
 
 							if (artifact.rarity >= 4) // TODO: Add options for choosing rarities
@@ -172,6 +171,7 @@ namespace GenshinGuide
 
 									inventory.Add(artifact);
 
+									UserInterface.SetGear(image.bm[7], artifact);
 									if (!string.IsNullOrEmpty(artifact.equippedCharacter))
 										equippedArtifacts.Add(artifact);
 								}

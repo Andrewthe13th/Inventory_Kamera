@@ -37,25 +37,21 @@ namespace GenshinGuide
 			hook.KeyPressed += new EventHandler<KeyPressedEventArgs>(Hook_KeyPressed);
 
 			Language_ComboBox.SelectedItem = "ENG";
-			UserInterface.Init(GearSlot_PictureBox,
-					  ArtifactMainStat_PictureBox,
-					  Level_PictureBox,
-					  new[] { ArtifactSubStat1_PictureBox, ArtifactSubStat2_PictureBox, ArtifactSubStat3_PictureBox, ArtifactSubStat4_PictureBox },
-					  ArtifactSetName_PictureBox,
-					  ArtifactEquipped_PictureBox,
-					  ArtifactOutput_TextBox,
-					  CharacterName_PictureBox,
-					  CharacterLevel_PictureBox,
-					  new[] { CharacterTalent1_PictureBox, CharacterTalent2_PictureBox, CharacterTalent3_PictureBox },
-					  CharacterOutput_TextBox,
-					  WeaponsScannedCount_Label,
-					  WeaponsMax_Labell,
-					  ArtifactsScanned_Label,
-					  ArtifactsMax_Label,
-					  CharactersScanned_Label,
-					  ProgramStatus_Label,
-					  ErrorLog_TextBox,
-					  Navigation_Image);
+			UserInterface.Init(
+				GearPictureBox,
+				ArtifactOutput_TextBox,
+				CharacterName_PictureBox,
+				CharacterLevel_PictureBox,
+				new[] { CharacterTalent1_PictureBox, CharacterTalent2_PictureBox, CharacterTalent3_PictureBox },
+				CharacterOutput_TextBox,
+				WeaponsScannedCount_Label,
+				WeaponsMax_Labell,
+				ArtifactsScanned_Label,
+				ArtifactsMax_Label,
+				CharactersScanned_Label,
+				ProgramStatus_Label,
+				ErrorLog_TextBox,
+				Navigation_Image);
 			MaximizeBox = false;
 			MinimizeBox = false;
 		}
