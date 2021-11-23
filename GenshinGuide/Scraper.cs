@@ -69,23 +69,21 @@ namespace GenshinGuide
 		{
 			"hp", //0
 			"hp%",
-			"hp_flat",
 			"atk",
-			"atk%", //4
-			"atk_flat",
-			"def",
+			"atk%", 
+			"def", //4
 			"def%",
-			"energyrecharge", //8
+			"energyrecharge", 
 			"elementalmastery",
-			"healingbonus",
+			"healingbonus", //8
 			"critrate",
-			"critdmg", //12
+			"critdmg",
 			"physicaldmgbonus",
-			"pyrodmgbonus",
+			"pyrodmgbonus", //12
 			"electrodmgbonus",
-			"cryodmgbonus", //16
+			"cryodmgbonus", 
 			"hydrodmgbonus",
-			"anemodmgbonus",
+			"anemodmgbonus",//16
 			"geodmgbonus",
 		};
 

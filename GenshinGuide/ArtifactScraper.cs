@@ -514,12 +514,12 @@ namespace GenshinGuide
 				// Flower of Life. Flat HP
 				case "floweroflife":
 					//Debug.WriteLine($"ScanArtifactMainStat runtime: {ts.Milliseconds}ms");
-					return "hp_flat";
+					return "hp";
 
 				// Plume of Death. Flat ATK
 				case "plumeofdeath":
 					//Debug.WriteLine($"ScanArtifactMainStat runtime: {ts.Milliseconds}ms");
-					return "atk_flat";
+					return "atk";
 
 				// Otherwise it's either sands, goblet or circlet.
 				default:
@@ -538,6 +538,12 @@ namespace GenshinGuide
 					mainStat = Regex.Replace(mainStat, "(.)\\1+", "$1");
 
 					//Debug.WriteLine($"ScanArtifactMainStat runtime: {ts.Milliseconds}ms");
+
+					if (mainStat == "def" || mainStat == "atk" || mainStat == "hp")
+					{
+						mainStat += "%";
+					}
+
 					n.Dispose();
 					return mainStat;
 			}

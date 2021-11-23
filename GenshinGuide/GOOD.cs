@@ -255,25 +255,23 @@ namespace GenshinGuide
 
 		private readonly string[] eng_Stats =
 		{
-			"hp_", //0
+			"hp", //0
 			"hp_",
-			"hp", 
-			"atk_", 
-			"atk_", //4
             "atk",
-			"def",
+			"atk_", 
+			"def", //4
             "def_",
-			"enerRech_", //8
+			"enerRech_",
             "eleMas",
-			"heal_",
+			"heal_", //8
 			"critRate_",
-			"critDMG_", //12
+			"critDMG_",
 			"physical_dmg_",
-            "pyro_dmg_",
+            "pyro_dmg_", //12
 			"electro_dmg_",
-			"cryo_dmg_", //16
+			"cryo_dmg_", 
 			"hydro_dmg_",
-			"anemo_dmg_", 
+			"anemo_dmg_", //16
             "geo_dmg_",
 		};
 
