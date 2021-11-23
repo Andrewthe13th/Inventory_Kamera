@@ -97,6 +97,7 @@
 			this.characterScreenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.characterToolStripTextBox = new System.Windows.Forms.ToolStripTextBox();
 			this.oldDatabasePathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.Database_MenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.GOOD_CheckBox = new System.Windows.Forms.CheckBox();
 			this.Seelie_CheckBox = new System.Windows.Forms.CheckBox();
 			this.Materials_CheckBox = new System.Windows.Forms.CheckBox();
@@ -104,7 +105,6 @@
 			this.Artifacts_Checkbox = new System.Windows.Forms.CheckBox();
 			this.Weapons_CheckBox = new System.Windows.Forms.CheckBox();
 			this.ScannerDelay_TrackBar = new System.Windows.Forms.TrackBar();
-			this.Database_MenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			((System.ComponentModel.ISupportInitialize)(this.GearSlot_PictureBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.ArtifactMainStat_PictureBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.Level_PictureBox)).BeginInit();
@@ -196,6 +196,7 @@
 			// Language_ComboBox
 			// 
 			this.Language_ComboBox.BackColor = System.Drawing.Color.White;
+			this.Language_ComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.Language_ComboBox.FormattingEnabled = true;
 			this.Language_ComboBox.Items.AddRange(new object[] {
             "ENG"});
@@ -843,6 +844,7 @@
 			// inventoryToolStripTextBox
 			// 
 			this.inventoryToolStripTextBox.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
+			this.inventoryToolStripTextBox.Font = new System.Drawing.Font("Segoe UI", 9F);
 			this.inventoryToolStripTextBox.MaxLength = 2;
 			this.inventoryToolStripTextBox.Name = "inventoryToolStripTextBox";
 			this.inventoryToolStripTextBox.Size = new System.Drawing.Size(90, 23);
@@ -862,6 +864,7 @@
 			// characterToolStripTextBox
 			// 
 			this.characterToolStripTextBox.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
+			this.characterToolStripTextBox.Font = new System.Drawing.Font("Segoe UI", 9F);
 			this.characterToolStripTextBox.MaxLength = 2;
 			this.characterToolStripTextBox.Name = "characterToolStripTextBox";
 			this.characterToolStripTextBox.Size = new System.Drawing.Size(90, 23);
@@ -877,6 +880,15 @@
 			this.oldDatabasePathToolStripMenuItem.Name = "oldDatabasePathToolStripMenuItem";
 			this.oldDatabasePathToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
 			this.oldDatabasePathToolStripMenuItem.Text = "Database Path";
+			this.oldDatabasePathToolStripMenuItem.Visible = false;
+			// 
+			// Database_MenuItem
+			// 
+			this.Database_MenuItem.Name = "Database_MenuItem";
+			this.Database_MenuItem.Size = new System.Drawing.Size(77, 22);
+			this.Database_MenuItem.Text = " ";
+			this.Database_MenuItem.ToolTipText = "Click to change";
+			this.Database_MenuItem.Click += new System.EventHandler(this.databaseMenuItem_Click);
 			// 
 			// GOOD_CheckBox
 			// 
@@ -884,6 +896,7 @@
 			this.GOOD_CheckBox.Checked = global::GenshinGuide.Properties.Settings.Default.FormatGood;
 			this.GOOD_CheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.GOOD_CheckBox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::GenshinGuide.Properties.Settings.Default, "FormatGood", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+			this.GOOD_CheckBox.Enabled = false;
 			this.GOOD_CheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.GOOD_CheckBox.Location = new System.Drawing.Point(12, 87);
 			this.GOOD_CheckBox.Margin = new System.Windows.Forms.Padding(2);
@@ -908,6 +921,7 @@
 			this.Seelie_CheckBox.TabIndex = 84;
 			this.Seelie_CheckBox.Text = "Seelie";
 			this.Seelie_CheckBox.UseVisualStyleBackColor = true;
+			this.Seelie_CheckBox.Visible = false;
 			this.Seelie_CheckBox.Click += new System.EventHandler(this.SaveSettings);
 			// 
 			// Materials_CheckBox
@@ -924,6 +938,7 @@
 			this.Materials_CheckBox.TabIndex = 83;
 			this.Materials_CheckBox.Text = "Materials";
 			this.Materials_CheckBox.UseVisualStyleBackColor = true;
+			this.Materials_CheckBox.Visible = false;
 			this.Materials_CheckBox.Click += new System.EventHandler(this.SaveSettings);
 			// 
 			// Characters_CheckBox
@@ -987,14 +1002,6 @@
 			this.ScannerDelay_TrackBar.Size = new System.Drawing.Size(83, 45);
 			this.ScannerDelay_TrackBar.TabIndex = 68;
 			this.ScannerDelay_TrackBar.Value = global::GenshinGuide.Properties.Settings.Default.ScannerDelay;
-			// 
-			// databaseMenuItem
-			// 
-			this.Database_MenuItem.Name = "databaseMenuItem";
-			this.Database_MenuItem.Size = new System.Drawing.Size(180, 22);
-			this.Database_MenuItem.Text = " ";
-			this.Database_MenuItem.ToolTipText = "Click to change";
-			this.Database_MenuItem.Click += new System.EventHandler(this.databaseMenuItem_Click);
 			// 
 			// Form1
 			// 

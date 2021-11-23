@@ -948,6 +948,7 @@ namespace GenshinGuide
 			return index != int.MaxValue ? targets[index] : null;
 		}
 
+		// Adapted from https://stackoverflow.com/a/9454016/13205651
 		private static int CalcDistance(string text, string setName, int maxEdits)
 		{
 			int length1 = text.Length;
