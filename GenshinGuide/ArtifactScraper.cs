@@ -299,7 +299,6 @@ namespace GenshinGuide
 			RECT reference; 
 			Bitmap gearSlot, mainStat, subStats, level, equipped, rarity, locked;
 			 
-			if(Navigation.GetAspectRatio() == new Size(16, 9))
 			if (Navigation.GetAspectRatio() == new Size(16, 9))
 			{
 				reference = new RECT(new Rectangle(862, 80, 327, 560));
