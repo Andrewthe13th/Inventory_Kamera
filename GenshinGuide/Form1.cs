@@ -239,7 +239,7 @@ namespace GenshinGuide
 
 						// The Data object of json object
 						data.GatherData(checkbox);
-						return;
+
 						// Covert to GOOD format
 						GOOD good = new GOOD(data);
 
