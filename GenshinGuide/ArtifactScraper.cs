@@ -572,7 +572,13 @@ namespace GenshinGuide
 
 			var text = Scraper.AnalyzeText(artifactImage, Tesseract.PageSegMode.Auto).ToLower();
 			List<string> lines = new List<string>(text.Split('\n'));
-			lines.RemoveAll(line => string.IsNullOrEmpty(line) || line.Contains("set") || line.Contains("2-piece") || line.Contains("4-piece") || line.Contains("1-piece"));
+			lines.RemoveAll(line => string.IsNullOrEmpty(line));
+
+			var index = lines.FindIndex(line => line.Contains("piece set"));
+			if (index >= 0)
+			{
+				lines.RemoveRange(index, lines.Count - index);
+			}
 
 			SubStat[] substats = new SubStat[4];
 			List<Task<string>> tasks = new List<Task<string>>();
@@ -647,14 +653,6 @@ namespace GenshinGuide
 					}
 				}
 			}
-			
-			// Reset any stats accidentally caught if they're below the set name
-			for (int i = setTask; i < substats.Length; i++)
-			{
-				substats[i].stat = null;
-				substats[i].value = 0;
-			}
-			
 			
 			//Debug.WriteLine($"ScanArtifactSubStats runtime: {ts.Milliseconds}ms");
 			return substats.ToList();
