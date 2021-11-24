@@ -60,7 +60,6 @@
 			this.ErrorLog_TextBox = new System.Windows.Forms.TextBox();
 			this.ErrorLog_Label = new System.Windows.Forms.Label();
 			this.Instructions2_Label = new System.Windows.Forms.Label();
-			this.Instructions2a_Label = new System.Windows.Forms.Label();
 			this.Instructions2b_Label = new System.Windows.Forms.Label();
 			this.Instruction3_Label = new System.Windows.Forms.Label();
 			this.ErrorReport_Label = new System.Windows.Forms.Label();
@@ -449,33 +448,22 @@
 			this.Instructions2_Label.TabIndex = 55;
 			this.Instructions2_Label.Text = "2. Go to Settings";
 			// 
-			// Instructions2a_Label
-			// 
-			this.Instructions2a_Label.AutoSize = true;
-			this.Instructions2a_Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.3F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.Instructions2a_Label.Location = new System.Drawing.Point(181, 67);
-			this.Instructions2a_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-			this.Instructions2a_Label.Name = "Instructions2a_Label";
-			this.Instructions2a_Label.Size = new System.Drawing.Size(304, 13);
-			this.Instructions2a_Label.TabIndex = 56;
-			this.Instructions2a_Label.Text = "2a. Under Graphics, set Display Mode to 1280 x 720 Windowed";
-			// 
 			// Instructions2b_Label
 			// 
 			this.Instructions2b_Label.AutoSize = true;
 			this.Instructions2b_Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.3F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.Instructions2b_Label.Location = new System.Drawing.Point(181, 81);
+			this.Instructions2b_Label.Location = new System.Drawing.Point(181, 68);
 			this.Instructions2b_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
 			this.Instructions2b_Label.Name = "Instructions2b_Label";
 			this.Instructions2b_Label.Size = new System.Drawing.Size(235, 13);
 			this.Instructions2b_Label.TabIndex = 57;
-			this.Instructions2b_Label.Text = "2b. Under Controls, set Control Type to Keyboard";
+			this.Instructions2b_Label.Text = "2a. Under Controls, set Control Type to Keyboard";
 			// 
 			// Instruction3_Label
 			// 
 			this.Instruction3_Label.AutoSize = true;
 			this.Instruction3_Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.3F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.Instruction3_Label.Location = new System.Drawing.Point(159, 94);
+			this.Instruction3_Label.Location = new System.Drawing.Point(159, 82);
 			this.Instruction3_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
 			this.Instruction3_Label.Name = "Instruction3_Label";
 			this.Instruction3_Label.Size = new System.Drawing.Size(293, 13);
@@ -730,6 +718,7 @@
 			// inventoryToolStripTextBox
 			// 
 			this.inventoryToolStripTextBox.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
+			this.inventoryToolStripTextBox.Font = new System.Drawing.Font("Segoe UI", 9F);
 			this.inventoryToolStripTextBox.MaxLength = 2;
 			this.inventoryToolStripTextBox.Name = "inventoryToolStripTextBox";
 			this.inventoryToolStripTextBox.Size = new System.Drawing.Size(90, 23);
@@ -749,6 +738,7 @@
 			// characterToolStripTextBox
 			// 
 			this.characterToolStripTextBox.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
+			this.characterToolStripTextBox.Font = new System.Drawing.Font("Segoe UI", 9F);
 			this.characterToolStripTextBox.MaxLength = 2;
 			this.characterToolStripTextBox.Name = "characterToolStripTextBox";
 			this.characterToolStripTextBox.Size = new System.Drawing.Size(90, 23);
@@ -917,7 +907,6 @@
 			this.Controls.Add(this.Releases_Label);
 			this.Controls.Add(this.Instruction3_Label);
 			this.Controls.Add(this.Instructions2b_Label);
-			this.Controls.Add(this.Instructions2a_Label);
 			this.Controls.Add(this.Instructions2_Label);
 			this.Controls.Add(this.Github_Label);
 			this.Controls.Add(this.ProgramStatus_Label);
@@ -995,7 +984,6 @@
         private System.Windows.Forms.TextBox ErrorLog_TextBox;
         private System.Windows.Forms.Label ErrorLog_Label;
         private System.Windows.Forms.Label Instructions2_Label;
-        private System.Windows.Forms.Label Instructions2a_Label;
         private System.Windows.Forms.Label Instructions2b_Label;
         private System.Windows.Forms.Label Instruction3_Label;
         private System.Windows.Forms.Label ErrorReport_Label;
