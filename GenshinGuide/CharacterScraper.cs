@@ -162,6 +162,7 @@ namespace GenshinGuide
 			int maxAttempts = 50;
 			do
 			{
+				Navigation.SystemRandomWait(Navigation.Speed.Fast);
 				using (Bitmap bm = Navigation.CaptureRegion(new Rectangle(85, 10, 220, 45)))
 				{
 
@@ -207,6 +208,7 @@ namespace GenshinGuide
 			int maxAttempts = 50;
 			do
 			{
+				Navigation.SystemRandomWait(Navigation.Speed.Fast);
 				Bitmap bm = Navigation.CaptureRegion(new Rectangle(960, 135, 165, 28));
 
 				//Image Operations
