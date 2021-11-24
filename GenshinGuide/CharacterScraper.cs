@@ -167,7 +167,8 @@ namespace GenshinGuide
 
 			do
 			{
-				using (Bitmap bm = Navigation.CaptureRegion(region))
+				Navigation.SystemRandomWait(Navigation.Speed.Fast);
+				using (Bitmap bm = Navigation.CaptureRegion(new Rectangle(85, 10, 220, 45)))
 				{
 					Bitmap n = Scraper.ConvertToGrayscale(bm);
 					Scraper.SetThreshold(110, ref n);
@@ -225,7 +226,8 @@ namespace GenshinGuide
 
 			do
 			{
-				Bitmap bm = Navigation.CaptureRegion(region);
+				Navigation.SystemRandomWait(Navigation.Speed.Fast);
+				Bitmap bm = Navigation.CaptureRegion(new Rectangle(960, 135, 165, 28));
 
 				bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
 				Bitmap n = Scraper.ConvertToGrayscale(bm);
