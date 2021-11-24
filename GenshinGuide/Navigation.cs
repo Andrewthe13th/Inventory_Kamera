@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows.Forms;
 using WindowsInput;
 using WindowsInput.Native;
@@ -392,15 +393,15 @@ namespace GenshinGuide
 					break;
 
 				case Speed.SelectNextInventoryItem:
-					value = 64;
+					value = 80;
 					value += delay / 4;
 					break;
 			}
 
-			System.Threading.Thread.Sleep(value);
+			Thread.Sleep(value);
 		}
 
-		public static void AddDelay(int _delay)
+		public static void SetDelay(int _delay)
 		{
 			delay = _delay;
 		}

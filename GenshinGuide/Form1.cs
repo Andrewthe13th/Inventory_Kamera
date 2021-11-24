@@ -225,7 +225,7 @@ namespace GenshinGuide
 						}
 
 						// Add navigation delay
-						Navigation.AddDelay(ScannerDelayValue(Delay));
+						Navigation.SetDelay(ScannerDelayValue(Delay));
 
 						// Create boolean array
 						bool[] checkbox = new bool[3];
@@ -327,12 +327,32 @@ namespace GenshinGuide
 			CharactersChecked = ( (CheckBox)sender ).Checked;
 		}
 
+		private void ScannerDelay_TrackBar_ValueChanged(object sender, EventArgs e)
+		{
+			Delay = ( (TrackBar)sender ).Value;
+		}
+
 		private void Exit_MenuItem_Click(object sender, EventArgs e)
 		{
 			Application.Exit();
 		}
 
-		private void bToolStripMenuItem_KeyDown(object sender, KeyEventArgs e)
+		private void DatabaseMenuItem_Click(object sender, EventArgs e)
+		{
+			CommonOpenFileDialog d = new CommonOpenFileDialog
+			{
+				InitialDirectory = Database_MenuItem.Text,
+			};
+
+			d.Filters.Add(new CommonFileDialogFilter("JSON Files", ".json"));
+
+			if (d.ShowDialog() == CommonFileDialogResult.Ok)
+			{
+				Database_MenuItem.Text = d.FileName;
+			}
+		}
+
+		private void OptionsMenuItem_KeyDown(object sender, KeyEventArgs e)
 		{
 			// Stops windows from making pinging sound
 			e.SuppressKeyPress = true;
@@ -388,6 +408,7 @@ namespace GenshinGuide
 			}
 		}
 
+		#region Unicode Helper Functions
 		// Needed to display OEM keys as glyphs from keyboard. Should work for other languages
 		// and keyboard layouts but only tested with QWERTY layout.
 		private string KeyCodeToUnicode(Keys key)
@@ -421,20 +442,7 @@ namespace GenshinGuide
 
 		[DllImport("user32.dll")]
 		private static extern int ToUnicodeEx(uint wVirtKey, uint wScanCode, byte[] lpKeyState, [Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pwszBuff, int cchBuff, uint wFlags, IntPtr dwhkl);
+		#endregion Unicode Helper Functions
 
-		private void databaseMenuItem_Click(object sender, EventArgs e)
-		{
-			CommonOpenFileDialog d = new CommonOpenFileDialog
-			{
-				InitialDirectory = Database_MenuItem.Text,
-			};
-
-			d.Filters.Add(new CommonFileDialogFilter("JSON Files", ".json"));
-
-			if (d.ShowDialog() == CommonFileDialogResult.Ok)
-			{
-				Database_MenuItem.Text = d.FileName;
-			}
-		}
 	}
 }

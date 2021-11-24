@@ -308,9 +308,9 @@ namespace GenshinGuide
 
 			// Refinement
 			refinement = card.Clone(new RECT(
-				Left: (int)( 18.0 / reference.Width * card.Width ),
-				Top: (int)( 234.0 / reference.Height * card.Height ),
-				Right: (int)( 42.0 / reference.Width * card.Width ),
+				Left: (int)( 20.0 / reference.Width * card.Width ),
+				Top: (int)( 235.0 / reference.Height * card.Height ),
+				Right: (int)( 40.0 / reference.Width * card.Width ),
 				Bottom: (int)( 254.0 / reference.Height * card.Height )), card.PixelFormat);
 
 			// Assign to List
@@ -490,19 +490,22 @@ namespace GenshinGuide
 
 		public static int ScanRefinement(Bitmap bm)
 		{
-			Bitmap n = Scraper.ConvertToGrayscale(bm);
-			Scraper.SetInvert(ref n);
-
-			string text = Scraper.AnalyzeText(n).Trim();
-			text = Regex.Replace(text, @"[^\d]", "");
-
-			// Parse Int
-			if (int.TryParse(text, out int refinementLevel))
+			using (Bitmap up = Scraper.ResizeImage(bm, bm.Width*2, bm.Height*2))
 			{
+				Bitmap n = Scraper.ConvertToGrayscale(up);
+				Scraper.SetInvert(ref n);
+
+				string text = Scraper.AnalyzeText(n).Trim();
+				text = Regex.Replace(text, @"[^\d]", "");
+
+				// Parse Int
+				if (int.TryParse(text, out int refinementLevel))
+				{
+					n.Dispose();
+					return refinementLevel;
+				}
 				n.Dispose();
-				return refinementLevel;
 			}
-			n.Dispose();
 			return -1;
 		}
 

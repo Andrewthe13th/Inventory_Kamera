@@ -4,10 +4,12 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Accord;
 using Accord.Imaging;
 using Accord.Imaging.Filters;
+using Accord.Math.Geometry;
 using static GenshinGuide.Artifact;
 
 namespace GenshinGuide
@@ -30,6 +32,8 @@ namespace GenshinGuide
 			while (cardsQueued < artifactCount)
 			{
 				int cardsRemaining = artifactCount - cardsQueued;
+				// Go through each "page" of items and queue. In the event that not a full page of
+				// items are scolled to, offset the index of rectangle to start clicking from
 				for (int i = cardsRemaining < fullPage ? ( rows - ( totalRows - rowsQueued ) ) * cols : 0; i < rectangles.Count; i++)
 				{
 					Rectangle item = rectangles[i];
@@ -568,12 +572,14 @@ namespace GenshinGuide
 
 		private static List<SubStat> ScanArtifactSubStats(Bitmap artifactImage, ref string setName)
 		{
-
-			var text = Scraper.AnalyzeText(artifactImage, Tesseract.PageSegMode.Auto).ToLower();
+			Bitmap n = (Bitmap)artifactImage.Clone();
+			Scraper.SetBrightness(35, ref n);
+			Scraper.SetContrast(10, ref n);
+			var text = Scraper.AnalyzeText(n, Tesseract.PageSegMode.Auto).ToLower();
 			List<string> lines = new List<string>(text.Split('\n'));
-			lines.RemoveAll(line => string.IsNullOrEmpty(line));
+			lines.RemoveAll(line => string.IsNullOrWhiteSpace(line));
 
-			var index = lines.FindIndex(line => line.Contains("piece set"));
+			var index = lines.FindIndex(line => line.Contains("piece") || line.Contains("set") || line.Length < 5);
 			if (index >= 0)
 			{
 				lines.RemoveRange(index, lines.Count - index);
@@ -581,7 +587,6 @@ namespace GenshinGuide
 
 			SubStat[] substats = new SubStat[4];
 			List<Task<string>> tasks = new List<Task<string>>();
-			int setTask = 0;
 			for (int i = 0; i < lines.Count; i++)
 			{
 				int j = i;
@@ -629,7 +634,6 @@ namespace GenshinGuide
 				tasks.Add(task);
 			}
 
-			bool remove = false;
 			while (tasks.Count > 0)
 			{
 				for (int i = 0; i < tasks.Count; i++)
@@ -642,17 +646,15 @@ namespace GenshinGuide
 					if (!task.IsFaulted && task.Result != null)
 					{
 						setName = task.Result;
-						setTask = i;
-						remove = true;
 					}
-					if (task.IsCompleted && remove)
+					if (task.IsCompleted)
 					{
 						tasks.Remove(task);
 						break;
 					}
 				}
 			}
-			
+			n.Dispose();
 			//Debug.WriteLine($"ScanArtifactSubStats runtime: {ts.Milliseconds}ms");
 			return substats.ToList();
 		}

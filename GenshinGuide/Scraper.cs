@@ -926,7 +926,7 @@ namespace GenshinGuide
 			if (targets.Contains(source)) return source;
 			
 			int index = int.MaxValue;
-			int maxEdits = 25;
+			int maxEdits = 15;
 			for (int i = 0; i < targets.Count; i++)
 			{
 				string target = targets[i];
@@ -1191,7 +1191,7 @@ namespace GenshinGuide
 			new Threshold(threshold).ApplyInPlace(bitmap);
 		}
 
-		public static void FilterColors(ref Bitmap artifactImage, IntRange red, IntRange green, IntRange blue)
+		public static void FilterColors(ref Bitmap bm, IntRange red, IntRange green, IntRange blue)
 		{
 			ColorFiltering colorFilter = new ColorFiltering
 			{
@@ -1199,7 +1199,7 @@ namespace GenshinGuide
 				Green = green,
 				Blue = blue
 			};
-			colorFilter.ApplyInPlace(artifactImage);
+			colorFilter.ApplyInPlace(bm);
 		}
 
 		#endregion Image Operations

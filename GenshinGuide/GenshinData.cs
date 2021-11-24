@@ -138,7 +138,6 @@ namespace GenshinGuide
 							if (!WeaponScraper.IsEnhancementOre(image.bm[0]))
 							{
 								// Scan as weapon
-								UserInterface.ResetGearDisplay();
 								Weapon w = WeaponScraper.CatalogueFromBitmaps(image.bm, image.id);
 								if (w.rarity >= 3) // TODO: Add options for choosing rarities
 								{

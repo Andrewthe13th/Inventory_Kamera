@@ -38,8 +38,6 @@ namespace GenshinGuide
 			bool ascension = false;
 			int experience = 0;
 
-
-
 			// Scan the Name and element of Character. Attempt 20 times max.
 			ScanNameAndElement(ref name, ref element);
 
@@ -61,7 +59,7 @@ namespace GenshinGuide
 				int level = ScanLevel(ref ascension);
 				if (level == -1)
 				{
-					UserInterface.AddError("Could not determine character's level");
+					UserInterface.AddError($"Could not determine {name}'s level");
 					goto Fail;
 				}
 
@@ -168,7 +166,7 @@ namespace GenshinGuide
 			do
 			{
 				Navigation.SystemRandomWait(Navigation.Speed.Fast);
-				using (Bitmap bm = Navigation.CaptureRegion(new Rectangle(85, 10, 220, 45)))
+				using (Bitmap bm = Navigation.CaptureRegion(region))
 				{
 					Bitmap n = Scraper.ConvertToGrayscale(bm);
 					Scraper.SetThreshold(110, ref n);
@@ -226,8 +224,8 @@ namespace GenshinGuide
 
 			do
 			{
-				Navigation.SystemRandomWait(Navigation.Speed.Fast);
-				Bitmap bm = Navigation.CaptureRegion(new Rectangle(960, 135, 165, 28));
+				Navigation.SystemRandomWait(Navigation.Speed.Normal);
+				Bitmap bm = Navigation.CaptureRegion(region);
 
 				bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
 				Bitmap n = Scraper.ConvertToGrayscale(bm);

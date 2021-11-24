@@ -730,14 +730,13 @@
 			// inventoryToolStripTextBox
 			// 
 			this.inventoryToolStripTextBox.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
-			this.inventoryToolStripTextBox.Font = new System.Drawing.Font("Segoe UI", 9F);
 			this.inventoryToolStripTextBox.MaxLength = 2;
 			this.inventoryToolStripTextBox.Name = "inventoryToolStripTextBox";
 			this.inventoryToolStripTextBox.Size = new System.Drawing.Size(90, 23);
 			this.inventoryToolStripTextBox.Tag = "InventoryKey";
 			this.inventoryToolStripTextBox.Text = "B";
 			this.inventoryToolStripTextBox.ToolTipText = "Key to open inventory";
-			this.inventoryToolStripTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.bToolStripMenuItem_KeyDown);
+			this.inventoryToolStripTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.OptionsMenuItem_KeyDown);
 			// 
 			// characterScreenToolStripMenuItem
 			// 
@@ -750,14 +749,13 @@
 			// characterToolStripTextBox
 			// 
 			this.characterToolStripTextBox.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
-			this.characterToolStripTextBox.Font = new System.Drawing.Font("Segoe UI", 9F);
 			this.characterToolStripTextBox.MaxLength = 2;
 			this.characterToolStripTextBox.Name = "characterToolStripTextBox";
 			this.characterToolStripTextBox.Size = new System.Drawing.Size(90, 23);
 			this.characterToolStripTextBox.Tag = "CharacterKey";
 			this.characterToolStripTextBox.Text = "C";
 			this.characterToolStripTextBox.ToolTipText = "Key to open character screen";
-			this.characterToolStripTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.bToolStripMenuItem_KeyDown);
+			this.characterToolStripTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.OptionsMenuItem_KeyDown);
 			// 
 			// oldDatabasePathToolStripMenuItem
 			// 
@@ -774,7 +772,7 @@
 			this.Database_MenuItem.Size = new System.Drawing.Size(77, 22);
 			this.Database_MenuItem.Text = " ";
 			this.Database_MenuItem.ToolTipText = "Click to change";
-			this.Database_MenuItem.Click += new System.EventHandler(this.databaseMenuItem_Click);
+			this.Database_MenuItem.Click += new System.EventHandler(this.DatabaseMenuItem_Click);
 			// 
 			// GOOD_CheckBox
 			// 
@@ -888,6 +886,7 @@
 			this.ScannerDelay_TrackBar.Size = new System.Drawing.Size(83, 45);
 			this.ScannerDelay_TrackBar.TabIndex = 68;
 			this.ScannerDelay_TrackBar.Value = global::GenshinGuide.Properties.Settings.Default.ScannerDelay;
+			this.ScannerDelay_TrackBar.ValueChanged += new System.EventHandler(this.ScannerDelay_TrackBar_ValueChanged);
 			// 
 			// Form1
 			// 
