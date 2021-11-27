@@ -322,7 +322,7 @@ namespace GenshinGuide
 					level = weapon.level,
 					ascension = weapon.AscensionCount(),
 					refinement = weapon.refinementLevel,
-					location = Scraper.characters.Contains(weapon.name) ? eng_Names[Scraper.characters.IndexOf(weapon.name)] : ""
+					location = Scraper.characters.Contains(weapon.equippedCharacter) ? eng_Names[Scraper.characters.IndexOf(weapon.equippedCharacter)] : ""
 				};
 				weapons.Add(w);
 			}

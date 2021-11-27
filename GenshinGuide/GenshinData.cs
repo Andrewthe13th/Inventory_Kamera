@@ -101,10 +101,10 @@ namespace GenshinGuide
 			if (checkbox[2])
 			{
 				// Assign Artifacts to Characters
-				if (checkbox[1])
-					AssignArtifacts();
 				if (checkbox[0])
 					AssignWeapons();
+				if (checkbox[1])
+					AssignArtifacts();
 			}
 		}
 
@@ -224,8 +224,9 @@ namespace GenshinGuide
 			{
 				foreach (Character character in characters)
 				{
-					if (weapon.GetEquippedCharacter() == character.GetName())
+					if (weapon.equippedCharacter == character.name)
 					{
+						Debug.WriteLine($"Assigned {weapon.name} to {character.name}");
 						character.AssignWeapon(weapon);
 						break;
 					}
