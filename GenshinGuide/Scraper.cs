@@ -63,6 +63,8 @@ namespace GenshinGuide
 			"tenacityofthemillelith",
 			"shimenawasreminiscence",
 			"emblemofseveredfate",
+			"huskofopulentdreams",
+			"oceanhuedclam",
 		};
 
 		public static readonly List<string> stats = new List<string>
@@ -145,6 +147,8 @@ namespace GenshinGuide
 			"sangonomiyakokomi",
 			"sangonomiya",
 			"thoma",
+			// "aratakiitto",
+			// "gorou"
 		};
 
 		public static Dictionary<string, string[]> characterTalentConstellationOrder = new Dictionary<string, string[]>
@@ -350,6 +354,10 @@ namespace GenshinGuide
 			"akuoumaru",
 			"mouunsmoon",
 			"wavebreakersfin",
+
+			// 2.3
+			"redhornstonethresher",
+			"cinnabarspindle"
 		};
 
 		public static readonly HashSet<string> characterDevelopmentItemsCode = new HashSet<string>

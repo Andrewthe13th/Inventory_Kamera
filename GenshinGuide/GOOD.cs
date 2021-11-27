@@ -64,6 +64,8 @@ namespace GenshinGuide
 			"SangonomiyaKokomi",
 			"SangonomiyaKokomi",
 			"Thoma",
+			// "AratakiItto",
+			// "Gorou"
 		};
 
 		private readonly string[] eng_Weapons = {
@@ -205,6 +207,10 @@ namespace GenshinGuide
 			"Akuoumaru",
 			"MouunsMoon",
 			"WavebreakersFin",
+
+			// 2.3
+			"RedhornStonethresher",
+			"CinnabarSpindle"
 		};
 
 		private readonly string[] eng_Artifacts = {
@@ -243,6 +249,8 @@ namespace GenshinGuide
 			"TenacityOfTheMillelith",
 			"ShimenawasReminiscence",
 			"EmblemOfSeveredFate",
+			"HuskOfOpulentDreams",
+			"OceanHuedClam"
 		};
 
 		private readonly string[] eng_ArtifactSlotList = {
