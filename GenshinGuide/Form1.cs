@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using NHotkey;
+using NHotkey.WindowsForms;
 using WindowsInput.Native;
 
 namespace GenshinGuide
@@ -19,7 +21,6 @@ namespace GenshinGuide
 		private static Thread mainThread;
 
 		private static GenshinData data = new GenshinData();
-		public static KeyboardHook hook = new KeyboardHook();
 		private static string filePath = "";
 
 		private int Delay;
@@ -32,9 +33,6 @@ namespace GenshinGuide
 		public Form1()
 		{
 			InitializeComponent();
-
-			// register the event that is fired after the key press.
-			hook.KeyPressed += new EventHandler<KeyPressedEventArgs>(Hook_KeyPressed);
 
 			Language_ComboBox.SelectedItem = "ENG";
 			UserInterface.Init(
@@ -74,21 +72,29 @@ namespace GenshinGuide
 			}
 		}
 
-		private void Hook_KeyPressed(object sender, KeyPressedEventArgs e)
+		private void Hotkey_Pressed(object sender, HotkeyEventArgs e)
 		{
-			// show the keys pressed in a label.
+			e.Handled = true;
+			
+			// Check if scanner is running
 			if (mainThread.IsAlive)
 			{
-				// stop navigating throw weapons/artifacts
+				// Stop navigating weapons/artifacts
 				mainThread.Abort();
-				// stop weapon/artifact processor thread
+
+				// Stop weapon/artifact processors
 				data.StopImageProcessorWorkers();
-				UserInterface.SetProgramStatus("Scan Stopped");
+
 				// Reset data
 				data = new GenshinData();
+
+				UserInterface.SetProgramStatus("Scan Stopped");
+
 				Navigation.Reset();
 			}
-			hook.UnRegisterHotKeys();
+
+			// Remove hotkey
+			HotkeyManager.Current.Remove("Stop");
 		}
 
 		private void ResetUI()
@@ -97,9 +103,6 @@ namespace GenshinGuide
 			data = new GenshinData();
 
 			Navigation.Reset();
-
-			// Un-register ENTER key. Otherwise you can't hit ENTER in another application
-			hook.UnRegisterHotKeys();
 		}
 
 		public static void UnexpectedError(string error)
@@ -186,25 +189,31 @@ namespace GenshinGuide
 		private void StartButton_Clicked(object sender, EventArgs e)
 		{
 			SaveSettings();
-			
+
 			UserInterface.SetProgramStatus("Scanning");
 
 			if (Directory.Exists(OutputPath_TextBox.Text))
 			{
-				UserInterface.ResetAll();
-				hook.RegisterHotKey(Keys.Enter);
 				if (running)
 				{
 					Debug.WriteLine("Already running");
-					ResetUI();
 					return;
 				}
 
 				running = true;
+				UserInterface.ResetAll();
+
+				HotkeyManager.Current.AddOrReplace("Stop", Keys.Enter, Hotkey_Pressed);
+
 				mainThread = new Thread(() =>
 				{
 					try
 					{
+						while (true)
+						{
+							Debug.WriteLine("Running");
+							Thread.Sleep(1000);
+						}
 						// Get Screen Location and Size
 						Navigation.Initialize("GenshinImpact");
 
@@ -244,8 +253,7 @@ namespace GenshinGuide
 					catch (Exception ex)
 					{
 						Debug.WriteLine($"{ex.Message}\n{ex.StackTrace}\n");
-						UserInterface.AddError($"{ex.Message}"); 
-						UserInterface.AddError($"{ex.StackTrace}");
+						UserInterface.AddError($"{ex.Message}" + Environment.NewLine + $"{ex.StackTrace}"); 
 					}
 					finally
 					{
@@ -300,7 +308,7 @@ namespace GenshinGuide
 		private void Form1_FormClosing(object sender, FormClosingEventArgs e)
 		{
 			SaveSettings();
-			hook.Dispose();
+			HotkeyManager.Current.Remove("Stop");
 		}
 
 		private void SaveSettings(object sender, EventArgs e)
