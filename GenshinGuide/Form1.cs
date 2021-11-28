@@ -103,6 +103,8 @@ namespace GenshinGuide
 			data = new GenshinData();
 
 			Navigation.Reset();
+
+			HotkeyManager.Current.Remove("Stop");
 		}
 
 		public static void UnexpectedError(string error)
