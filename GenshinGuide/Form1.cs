@@ -88,10 +88,7 @@ namespace GenshinGuide
 				data = new GenshinData();
 				Navigation.Reset();
 			}
-			else
-			{
-				hook.Dispose();
-			}
+			hook.UnRegisterHotKeys();
 		}
 
 		private void ResetUI()
@@ -102,7 +99,7 @@ namespace GenshinGuide
 			Navigation.Reset();
 
 			// Un-register ENTER key. Otherwise you can't hit ENTER in another application
-			hook.Dispose();
+			hook.UnRegisterHotKeys();
 		}
 
 		public static void UnexpectedError(string error)
@@ -190,7 +187,6 @@ namespace GenshinGuide
 		{
 			SaveSettings();
 			
-			
 			UserInterface.SetProgramStatus("Scanning");
 
 			if (Directory.Exists(OutputPath_TextBox.Text))
@@ -212,7 +208,6 @@ namespace GenshinGuide
 						// Get Screen Location and Size
 						Navigation.Initialize("GenshinImpact");
 
-						
 						List<Size> sizes = new List<Size>
 						{ 
 							new Size(16,9),
@@ -305,6 +300,7 @@ namespace GenshinGuide
 		private void Form1_FormClosing(object sender, FormClosingEventArgs e)
 		{
 			SaveSettings();
+			hook.Dispose();
 		}
 
 		private void SaveSettings(object sender, EventArgs e)

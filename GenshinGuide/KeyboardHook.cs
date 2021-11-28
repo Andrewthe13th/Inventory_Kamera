@@ -42,8 +42,7 @@ namespace GenshinGuide
 					ModifierKeys modifier = (ModifierKeys)((int)m.LParam & 0xFFFF);
 
 					// invoke the event to notify the parent.
-					if (KeyPressed != null)
-						KeyPressed(this, new KeyPressedEventArgs(modifier, key));
+					KeyPressed?.Invoke(this, new KeyPressedEventArgs(modifier, key));
 				}
 			}
 
@@ -67,8 +66,7 @@ namespace GenshinGuide
 			// register the event of the inner native window.
 			_window.KeyPressed += delegate (object sender, KeyPressedEventArgs args)
 			{
-				if (KeyPressed != null)
-					KeyPressed(this, args);
+				KeyPressed?.Invoke(this, args);
 			};
 		}
 
@@ -80,12 +78,21 @@ namespace GenshinGuide
 		public void RegisterHotKey(Keys key)
 		{
 			// increment the counter.
-			_currentId = _currentId + 1;
+			_currentId++;
 
 			// register the hot key.
 			RegisterHotKey(_window.Handle, _currentId, 0, (uint)key);
 			//if (!RegisterHotKey(_window.Handle, _currentId, 0, (uint)key))
 			//    throw new InvalidOperationException("Couldn’t register the hot key.");
+		}
+
+		public void UnRegisterHotKeys()
+		{
+			for (int i = _currentId; i > 0; i--)
+			{
+				UnregisterHotKey(_window.Handle, i);
+			}
+			_currentId = 0;
 		}
 
 		/// <summary>
@@ -98,10 +105,7 @@ namespace GenshinGuide
 		public void Dispose()
 		{
 			// unregister all the registered hot keys.
-			for (int i = _currentId; i > 0; i--)
-			{
-				UnregisterHotKey(_window.Handle, i);
-			}
+			UnRegisterHotKeys();
 
 			// dispose the inner native window.
 			_window.Dispose();
