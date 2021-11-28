@@ -209,11 +209,6 @@ namespace GenshinGuide
 				{
 					try
 					{
-						while (true)
-						{
-							Debug.WriteLine("Running");
-							Thread.Sleep(1000);
-						}
 						// Get Screen Location and Size
 						Navigation.Initialize("GenshinImpact");
 
@@ -276,7 +271,7 @@ namespace GenshinGuide
 
 		private void Github_Label_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
 		{
-			System.Diagnostics.Process.Start("https://github.com/Andrewthe13th/Genshin_Scanner/");
+			Process.Start("https://github.com/Andrewthe13th/Genshin_Scanner/");
 		}
 
 		private void Releases_Label_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
