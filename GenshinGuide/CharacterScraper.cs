@@ -321,8 +321,7 @@ namespace GenshinGuide
 				
 				Navigation.SetCursorPos(Navigation.GetPosition().Left + (int)(1130 / 1280.0 * Navigation.GetWidth()),
 										Navigation.GetPosition().Top + yOffset);
-				Navigation.sim.Mouse.LeftButtonClick();
-
+				Navigation.Click();
 
 				Navigation.Speed speed = constellation == 0 ? Navigation.Speed.Normal : Navigation.Speed.Fast;
 				Navigation.SystemRandomWait(speed);
@@ -381,7 +380,7 @@ namespace GenshinGuide
 				int yOffset = (int)( 110 / yRef * Navigation.GetHeight() ) + ( i + ( ( i == 2 ) ? specialOffset : 0 ) ) * (int)(60 / yRef * Navigation.GetHeight() );
 
 				Navigation.SetCursorPos(Navigation.GetPosition().Left + (int)(1130 / xRef * Navigation.GetWidth()), Navigation.GetPosition().Top + yOffset);
-				Navigation.sim.Mouse.LeftButtonClick();
+				Navigation.Click();
 				Navigation.Speed speed = i == 0 ? Navigation.Speed.Normal : Navigation.Speed.Fast;
 				Navigation.SystemRandomWait(speed);
 

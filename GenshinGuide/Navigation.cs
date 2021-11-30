@@ -157,7 +157,7 @@ namespace GenshinGuide
 			int buttonX = (int)(385 / 1280.0 * GetWidth());
 			int buttonY = (int)(35  / 720.0 * GetHeight());
 			SetCursorPos(position.Left + buttonX, position.Top + buttonY);
-			sim.Mouse.LeftButtonClick();
+			Click();
 			SystemRandomWait(Speed.UI);
 		}
 
@@ -166,7 +166,7 @@ namespace GenshinGuide
 			int buttonX = (int)(448 / 1280.0 * GetWidth());
 			int buttonY = (int)(31 / 720.0 * GetHeight());
 			SetCursorPos(position.Left + buttonX, position.Top + buttonY);
-			sim.Mouse.LeftButtonClick();
+			Click();
 			SystemRandomWait(Speed.UI);
 		}
 
@@ -175,7 +175,7 @@ namespace GenshinGuide
 			int artifactButtonLocation_X =(int)(area.Right *(64 /(Double) 160));
 			int artifactButtonLocation_Y =(int)(area.Bottom *(5 /(Double) 90));
 			SetCursorPos(position.Left + artifactButtonLocation_X, position.Top + artifactButtonLocation_Y);
-			sim.Mouse.LeftButtonClick();
+			Click();
 			SystemRandomWait(Speed.UI);
 		}
 
@@ -191,7 +191,7 @@ namespace GenshinGuide
 			}
 
 			SetCursorPos(GetPosition().Left + xOffset, GetPosition().Top + yOffset);
-			sim.Mouse.LeftButtonClick();
+			Click();
 			SystemRandomWait(Speed.CharacterUI);
 		}
 
@@ -206,7 +206,7 @@ namespace GenshinGuide
 			}
 
 			SetCursorPos(GetPosition().Left + xOffset, GetPosition().Top + yOffset);
-			sim.Mouse.LeftButtonClick();
+			Click();
 			SystemRandomWait(Speed.CharacterUI);
 		}
 
@@ -221,7 +221,7 @@ namespace GenshinGuide
 			}
 
 			SetCursorPos(GetPosition().Left + xOffset, GetPosition().Top + yOffset);
-			sim.Mouse.LeftButtonClick();
+			Click();
 			SystemRandomWait(Speed.CharacterUI);
 		}
 
@@ -236,7 +236,7 @@ namespace GenshinGuide
 			}
 
 			SetCursorPos(GetPosition().Left + xOffset, GetPosition().Top + yOffset);
-			sim.Mouse.LeftButtonClick();
+			Click();
 			SystemRandomWait(Speed.SelectNextCharacter);
 		}
 
@@ -330,6 +330,14 @@ namespace GenshinGuide
 
 		[DllImport("user32.dll")]
 		public static extern bool SetCursorPos(int X, int Y);
+
+		public static void Click()
+		{
+			if (SystemInformation.MouseButtonsSwapped)
+				sim.Mouse.RightButtonClick();
+			else
+				sim.Mouse.LeftButtonClick();
+		}
 
 		#endregion Mouse
 

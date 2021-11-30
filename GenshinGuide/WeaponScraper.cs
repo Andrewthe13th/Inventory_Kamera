@@ -34,7 +34,7 @@ namespace GenshinGuide
 				{
 					Rectangle item = rectangles[i];
 					Navigation.SetCursorPos(Navigation.GetPosition().Left + item.Center().X, Navigation.GetPosition().Top + item.Center().Y + offset);
-					Navigation.sim.Mouse.LeftButtonClick();
+					Navigation.Click();
 					Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
 
 					// Queue card for scanning
