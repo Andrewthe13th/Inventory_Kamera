@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -81,9 +80,6 @@ namespace GenshinGuide
 			{
 				// Stop navigating weapons/artifacts
 				mainThread.Abort();
-
-				// Stop weapon/artifact processors
-				data.StopImageProcessorWorkers();
 
 				// Reset data
 				data = new GenshinData();
@@ -249,15 +245,19 @@ namespace GenshinGuide
 						UserInterface.SetProgramStatus("Finished");
 					}
 					catch (ThreadAbortException)
-					{ }
+					{
+						// Workers can get stuck if the thread is aborted or an exception is raised
+						data.StopImageProcessorWorkers();
+					}
 					catch (Exception ex)
 					{
+						// Workers can get stuck if the thread is aborted or an exception is raised
+						data.StopImageProcessorWorkers();
 						Debug.WriteLine($"{ex.Message}\n{ex.StackTrace}\n");
 						UserInterface.AddError($"{ex.Message}" + Environment.NewLine + $"{ex.StackTrace}"); 
 					}
 					finally
 					{
-						// Clear saved data
 						ResetUI();
 						running = false;
 						Debug.WriteLine("No longer running");
