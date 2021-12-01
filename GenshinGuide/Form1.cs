@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -75,7 +76,6 @@ namespace GenshinGuide
 		private void Hotkey_Pressed(object sender, HotkeyEventArgs e)
 		{
 			e.Handled = true;
-			
 			// Check if scanner is running
 			if (mainThread.IsAlive)
 			{
@@ -92,9 +92,6 @@ namespace GenshinGuide
 
 				Navigation.Reset();
 			}
-
-			// Remove hotkey
-			HotkeyManager.Current.Remove("Stop");
 		}
 
 		private void ResetUI()
@@ -104,6 +101,12 @@ namespace GenshinGuide
 
 			Navigation.Reset();
 
+			// Need to invoke method from the UI's handle, not the worker thread
+			BeginInvoke((MethodInvoker)delegate { RemoveHotkey(); });
+		}
+
+		private void RemoveHotkey()
+		{
 			HotkeyManager.Current.Remove("Stop");
 		}
 
@@ -305,7 +308,7 @@ namespace GenshinGuide
 		private void Form1_FormClosing(object sender, FormClosingEventArgs e)
 		{
 			SaveSettings();
-			HotkeyManager.Current.Remove("Stop");
+			RemoveHotkey();
 		}
 
 		private void SaveSettings(object sender, EventArgs e)
