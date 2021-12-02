@@ -232,6 +232,7 @@ namespace GenshinGuide
                     for (int k = 0; k < 10; k++)
                     {
                         Navigation.sim.Mouse.VerticalScroll(-1);
+                        Navigation.SystemRandomWait(Navigation.Speed.InventoryScroll);
                         // skip a scroll
                         if ((k == 7) && ((scrollCount % 3) == 0))
                         {
@@ -245,11 +246,11 @@ namespace GenshinGuide
                                 else
                                 {
                                     Navigation.sim.Mouse.VerticalScroll(-1);
+                                    Navigation.SystemRandomWait(Navigation.Speed.InventoryScroll);
                                 }
                             }
                         }
-                    }
-                    Navigation.SystemRandomWait(Navigation.Speed.InventoryScroll);
+                    } 
                 }
             };
 
@@ -610,7 +611,7 @@ namespace GenshinGuide
             UserInterface.SetNavigation_Image(bm);
             //bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
 
-            string text = Scraper.AnalyzeText(bm);
+            string text = Scraper.AnalyzeText_Best(bm);
             text = Regex.Replace(text, @"[^\d/]", "");
 
             int count = 0;

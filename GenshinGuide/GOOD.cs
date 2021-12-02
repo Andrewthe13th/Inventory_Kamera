@@ -203,7 +203,7 @@ namespace GenshinGuide
             "PrayersForIllumination",
             "PrayersForDestiny",
             "PrayersForWisdom",//15
-            "PrayersTheSpringtime",
+            "PrayersToSpringtime",
             "Thundersoother",
             "Lavawalker",
             "MaidenBeloved",

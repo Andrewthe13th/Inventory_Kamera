@@ -11,12 +11,16 @@ namespace GenshinGuide
     {
         [JsonProperty] private List<Weapon> weapons;
         [JsonProperty] private List<Artifact> artifacts;
+        [JsonProperty] private List<Material> materials;
+        [JsonProperty] private List<Material> characterDevelopmentItems;
         //private List<Artifact> equippedArtifacts;
 
         public Inventory()
         {
             weapons = new List<Weapon>();
             artifacts = new List<Artifact>();
+            materials = new List<Material>();
+            characterDevelopmentItems = new List<Material>();
             //equippedArtifacts = new List<Artifact>();
         }
 
@@ -30,30 +34,44 @@ namespace GenshinGuide
             return weapons;
         }
 
+        public List<Material> GetMaterialList()
+        {
+            return materials;
+        }
+
+        public List<Material> GetCharDevItems()
+        {
+            return characterDevelopmentItems;
+        }
+
         public void AssignArtifact(Artifact _artifact)
         {
             artifacts.Add(_artifact);
-            //artifacts = ArtifactScraper.ScanArtifacts(ref equippedArtifacts);
-            //ArtifactScraper.ScanArtifacts();
         }
 
         public void AssignWeapon(Weapon _weapon)
         {
             weapons.Add(_weapon);
-            //weapons = WeaponScraper.ScanWeapons(ref equippedWeapon);
+        }
+
+        public void AssignMaterials(ref List<Material> _material)
+        {
+            materials = _material;
+        }
+
+        public void AssignCharacterDevelopmentItems(ref List<Material> _material)
+        {
+            characterDevelopmentItems = _material;
         }
 
         public void AssignArtifacts(ref List<Artifact> _artifacts)
         {
             artifacts = _artifacts;
-            //artifacts = ArtifactScraper.ScanArtifacts(ref equippedArtifacts);
-            //ArtifactScraper.ScanArtifacts();
         }
 
         public void AssignWeapons(ref List<Weapon> _weapons)
         {
             weapons = _weapons;
-            //weapons = WeaponScraper.ScanWeapons(ref equippedWeapon);
         }
     }
 }

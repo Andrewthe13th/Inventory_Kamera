@@ -42,7 +42,7 @@ namespace GenshinGuide
             ["prayersforillumination"] = ++setCount,
             ["prayersfordestiny"] = ++setCount,
             ["prayersforwisdom"] = ++setCount, // 15
-            ["prayersthespringtime"] = ++setCount,
+            ["prayerstospringtime"] = ++setCount,
             ["thundersoother"] = ++setCount,
             ["lavawalker"] = ++setCount,
             ["maidenbeloved"] = ++setCount,
@@ -357,8 +357,9 @@ namespace GenshinGuide
             ["wanderersadvice"] = characterDevelopmentItemsCount++,
 
             // character level-up materials
+                // enemies
             ["slimeconcentrate"] = characterDevelopmentItemsCount++,
-            ["secretions"] = characterDevelopmentItemsCount++,
+            ["slimesecretions"] = characterDevelopmentItemsCount++,
             ["slimecondensate"] = characterDevelopmentItemsCount++,
             ["ominousmask"] = characterDevelopmentItemsCount++,
             ["stainedmask"] = characterDevelopmentItemsCount++,
@@ -408,7 +409,12 @@ namespace GenshinGuide
             ["spectralnucleus"] = characterDevelopmentItemsCount++,
             ["spectralheart"] = characterDevelopmentItemsCount++,
             ["spectralhusk"] = characterDevelopmentItemsCount++,
+            ["concealedtalon"] = characterDevelopmentItemsCount++,
+            ["concealedunguis"] = characterDevelopmentItemsCount++,
+            ["concealedclaw"] = characterDevelopmentItemsCount++,
 
+
+            // Weekly Boss Items
             ["dvalinsplume"] = characterDevelopmentItemsCount++,
             ["dvalinsclaw"] = characterDevelopmentItemsCount++,
             ["dvalinssigh"] = characterDevelopmentItemsCount++,
@@ -425,8 +431,9 @@ namespace GenshinGuide
             ["hellfirebutterfly"] = characterDevelopmentItemsCount++,
             ["ashenheart"] = characterDevelopmentItemsCount++,
 
+                // World Boss
             ["everflameseed"] = characterDevelopmentItemsCount++,
-            ["cleansinghearth"] = characterDevelopmentItemsCount++,
+            ["cleansingheart"] = characterDevelopmentItemsCount++,
             ["lightningprism"] = characterDevelopmentItemsCount++,
             ["hoarfrostcore"] = characterDevelopmentItemsCount++,
             ["hurricaneseed"] = characterDevelopmentItemsCount++,
@@ -439,6 +446,9 @@ namespace GenshinGuide
             ["smolderingpearl"] = characterDevelopmentItemsCount++,
             ["dewofrepudiation"] = characterDevelopmentItemsCount++,
             ["stormbeads"] = characterDevelopmentItemsCount++,
+            ["riftbornregalia"] = characterDevelopmentItemsCount++,
+
+
             // gemstones
             ["agnidusagategemstone"] = characterDevelopmentItemsCount++,
             ["agnidusagatechunk"] = characterDevelopmentItemsCount++,
@@ -455,10 +465,10 @@ namespace GenshinGuide
             ["vajradaamethystfragment"] = characterDevelopmentItemsCount++,
             ["vajradaamethystsliver"] = characterDevelopmentItemsCount++,
 
-            ["vayudaturquoisefragmentgemstone"] = characterDevelopmentItemsCount++,
-            ["vayudaturquoisefragmentchunk"] = characterDevelopmentItemsCount++,
-            ["vayudaturquoisefragmentfragment"] = characterDevelopmentItemsCount++,
-            ["vayudaturquoisefragmentsliver"] = characterDevelopmentItemsCount++,
+            ["vayudaturquoisegemstone"] = characterDevelopmentItemsCount++,
+            ["vayudaturquoisechunk"] = characterDevelopmentItemsCount++,
+            ["vayudaturquoisefragment"] = characterDevelopmentItemsCount++,
+            ["vayudaturquoisesliver"] = characterDevelopmentItemsCount++,
 
             ["shivadajadegemstone"] = characterDevelopmentItemsCount++,
             ["shivadajadechunk"] = characterDevelopmentItemsCount++,
@@ -575,18 +585,18 @@ namespace GenshinGuide
             ["fabric"] = materialsCount++,
 
             // wood
-            ["birch"] = materialsCount++,
-            ["cuihua"] = materialsCount++,
-            ["pine"] = materialsCount++,
-            ["cedar"] = materialsCount++,
+            ["birchwood"] = materialsCount++,
+            ["cuihuawood"] = materialsCount++,
+            ["pinewood"] = materialsCount++,
+            ["fragrantcedarwood"] = materialsCount++,
             ["firwood"] = materialsCount++,
-            ["sandbearer"] = materialsCount++,
-            ["bamboo"] = materialsCount++,
+            ["sandbearerwood"] = materialsCount++,
+            ["bamboosegment"] = materialsCount++,
             ["firwood"] = materialsCount++,
-            ["yumemiru"] = materialsCount++,
-            ["maple"] = materialsCount++,
-            ["otogi"] = materialsCount++,
-            ["aralia"] = materialsCount++,
+            ["yumemiruwood"] = materialsCount++,
+            ["maplewood"] = materialsCount++,
+            ["otogiwood"] = materialsCount++,
+            ["araliawood"] = materialsCount++,
 
             // forging ore
             ["ironchunk"] = materialsCount++,
@@ -613,7 +623,7 @@ namespace GenshinGuide
             ["medaka"] = materialsCount++,
             ["glazemedaka"] = materialsCount++,
             ["sweetflowermedaka"] = materialsCount++,
-            ["aizenmedake"] = materialsCount++,
+            ["aizenmedaka"] = materialsCount++,
             ["dawncatcher"] = materialsCount++,
             ["crystalfish"] = materialsCount++,
             ["lungedstickleback"] = materialsCount++,
@@ -701,6 +711,7 @@ namespace GenshinGuide
             ["seaganoderma"] = materialsCount++,
             ["sangopearl"] = materialsCount++,
             ["amakumofruit"] = materialsCount++,
+            ["fluorescentfungus"] = materialsCount++,
 
             //[""] = materialsCount++,
             //[""] = materialsCount++,
@@ -717,7 +728,9 @@ namespace GenshinGuide
             ["sanctifyingessence"] = 5, // 4
         };
 
-        private static TesseractEngine ocr_live = new TesseractEngine( (Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+        private static TesseractEngine ocr_singleWord = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_best_eng", EngineMode.LstmOnly);
+        private static TesseractEngine ocr_best = new TesseractEngine( (Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_best_eng", EngineMode.LstmOnly);
+        private static TesseractEngine ocr_live = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
         private static TesseractEngine ocr_1 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
         private static TesseractEngine ocr_2 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
         private static TesseractEngine ocr_3 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
@@ -751,11 +764,11 @@ namespace GenshinGuide
         //    return text;
         //}
 
-        public static string AnalyzeText(Bitmap bitmap)
+        public static string AnalyzeText_Best(Bitmap bitmap)
         {
             string text = "";
             
-                using (var page = ocr_live.Process(bitmap, PageSegMode.SingleBlock))
+                using (var page = ocr_best.Process(bitmap, PageSegMode.SingleBlock))
                 {
                     using (var iter = page.GetIterator())
                     {
@@ -769,6 +782,48 @@ namespace GenshinGuide
                 }
 
             
+            return text;
+        }
+
+        public static string AnalyzeText_SingleWord(Bitmap bitmap)
+        {
+            string text = "";
+
+            using (var page = ocr_singleWord.Process(bitmap, PageSegMode.SingleWord))
+            {
+                using (var iter = page.GetIterator())
+                {
+                    iter.Begin();
+                    do
+                    {
+                        text += iter.GetText(PageIteratorLevel.TextLine);
+                    }
+                    while (iter.Next(PageIteratorLevel.TextLine));
+                }
+            }
+
+
+            return text;
+        }
+
+        public static string AnalyzeText(Bitmap bitmap)
+        {
+            string text = "";
+
+            using (var page = ocr_live.Process(bitmap, PageSegMode.SingleBlock))
+            {
+                using (var iter = page.GetIterator())
+                {
+                    iter.Begin();
+                    do
+                    {
+                        text += iter.GetText(PageIteratorLevel.TextLine);
+                    }
+                    while (iter.Next(PageIteratorLevel.TextLine));
+                }
+            }
+
+
             return text;
         }
 
@@ -1175,6 +1230,39 @@ namespace GenshinGuide
                 return -1;
             };
         }
+        // Materials Item Code
+        public static int GetMaterialCode(string item)
+        {
+            int code = -1;
+            if (materialsCode.TryGetValue(item, out code))
+            {
+                return code;
+            }
+            else
+            {
+                Debug.Print("Error: " + item + " is not a valid Material Name");
+                UserInterface.AddError(item + " is not a valid Material Name");
+                //Form1.UnexpectedError(weapon + " is not a valid Weapon Name");
+                return -1;
+            };
+        }
+
+        // Character Development Item Code
+        public static int GetCharacterDevelopmentNameCode(string item)
+        {
+            int code = -1;
+            if (characterDevelopmentItemsCode.TryGetValue(item, out code))
+            {
+                return code;
+            }
+            else
+            {
+                Debug.Print("Error: " + item + " is not a valid Character Development Item Name");
+                UserInterface.AddError(item + " is not a valid Character Development Item Name");
+                //Form1.UnexpectedError(weapon + " is not a valid Weapon Name");
+                return -1;
+            };
+        }
         #endregion
 
         public static string FindElement(string name)
@@ -1231,14 +1319,84 @@ namespace GenshinGuide
             }
         }
 
-        public static void CreateJsonFile(GOOD data,string path)
+        public static void CreateJsonFile(string format, object data, string path, List<bool> sections)
         {
             // write to JSON file
             string JSONresult = JsonConvert.SerializeObject(data);
 
-            // Alter JSON file to have correct names for lock and auto keywords
-            JSONresult = JSONresult.Replace("_lock", "lock");
-            JSONresult = JSONresult.Replace("_auto", "auto");
+            if (format == "GOOD")
+            {
+                // Alter JSON file to have correct names for lock and auto keywords
+                JSONresult = JSONresult.Replace("_lock", "lock");
+                JSONresult = JSONresult.Replace("_auto", "auto");
+
+                // Remove sections not marked in booleans
+                if (sections[0] == false)
+                {
+                    JSONresult = JSONresult.Replace(",\"weapons\":[],", "");
+                    JSONresult = JSONresult.Replace(",\"weapons\":[]", "");
+                    JSONresult = JSONresult.Replace("\"weapons\":[],", "");
+                    JSONresult = JSONresult.Replace("\"weapons\":[]", "");
+                }
+                if (sections[1] == false)
+                {
+                    //JSONresult = JSONresult.Replace("\"artifacts\":[],", "");
+                    JSONresult = JSONresult.Replace(",\"artifacts\":[],", "");
+                    JSONresult = JSONresult.Replace(",\"artifacts\":[]", "");
+                    JSONresult = JSONresult.Replace("\"artifacts\":[],", "");
+                    JSONresult = JSONresult.Replace("\"artifacts\":[]", "");
+                }
+                if (sections[2] == false)
+                {
+                    // character is always first in list
+                    JSONresult = JSONresult.Replace("\"characters\":[],", "");
+                    JSONresult = JSONresult.Replace("\"characters\":[]", "");
+
+                }
+
+                //// Get rid of other sections in genshin data
+                //JSONresult = JSONresult.Replace(",\"characterdevelopmentitems\":[],", "");
+                //JSONresult = JSONresult.Replace(",\"characterdevelopmentitems\":[]", "");
+                //JSONresult = JSONresult.Replace("\"characterdevelopmentitems\":[],", "");
+                //JSONresult = JSONresult.Replace("\"characterdevelopmentitems\":[]", "");
+
+                //JSONresult = JSONresult.Replace(",\"materials\":[],", "");
+                //JSONresult = JSONresult.Replace(",\"materials\":[]", "");
+                //JSONresult = JSONresult.Replace("\"materials\":[],", "");
+                //JSONresult = JSONresult.Replace("\"materials\":[]", "");
+            }
+            else if(format == "Seelie")
+            {
+                // Remove sections not marked in booleans
+                if (sections[0] == false)
+                {
+                    JSONresult = JSONresult.Replace(",\"materials\":[],", "");
+                    JSONresult = JSONresult.Replace(",\"materials\":[]", "");
+                    JSONresult = JSONresult.Replace("\"materials\":[],", "");
+                    JSONresult = JSONresult.Replace("\"materials\":[]", "");
+                }
+                if (sections[1] == false)
+                {
+                    JSONresult = JSONresult.Replace(",\"characterdevelopmentitems\":[],", "");
+                    JSONresult = JSONresult.Replace(",\"characterdevelopmentitems\":[]", "");
+                    JSONresult = JSONresult.Replace("\"characterdevelopmentitems\":[],", "");
+                    JSONresult = JSONresult.Replace("\"characterdevelopmentitems\":[]", "");
+                }
+
+                // Get rid of other sections in genshin data
+                //JSONresult = JSONresult.Replace(",\"weapons\":[],", "");
+                //JSONresult = JSONresult.Replace(",\"weapons\":[]", "");
+                //JSONresult = JSONresult.Replace("\"weapons\":[],", "");
+                //JSONresult = JSONresult.Replace("\"weapons\":[]", "");
+
+                //JSONresult = JSONresult.Replace(",\"artifacts\":[],", "");
+                //JSONresult = JSONresult.Replace(",\"artifacts\":[]", "");
+                //JSONresult = JSONresult.Replace("\"artifacts\":[],", "");
+                //JSONresult = JSONresult.Replace("\"artifacts\":[]", "");
+
+                //JSONresult = JSONresult.Replace("\"characters\":[],", "");
+                //JSONresult = JSONresult.Replace("\"characters\":[]", "");
+            }
 
             // Put file in Genshin Data directory
             if (!Directory.Exists(path))
@@ -1246,7 +1404,8 @@ namespace GenshinGuide
                 Directory.CreateDirectory(path);
             }
             // Create file with timestamp in name
-            string fileName = "\\genshinData_GOOD_" + DateTime.Today.ToString("d") + ".json";
+            DateTime time = DateTime.Now;
+            string fileName = "\\genshinData_" + format + "_" + time.ToString("yyyy_MM_dd_HH_mm_ss") + ".json";
             fileName = fileName.Replace('/', '_');
             string filePath = path + fileName;
 

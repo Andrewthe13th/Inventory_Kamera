@@ -231,6 +231,7 @@ namespace GenshinGuide
                     for (int k = 0; k < 10; k++)
                     {
                         Navigation.sim.Mouse.VerticalScroll(-1);
+                        Navigation.SystemRandomWait(Navigation.Speed.InventoryScroll);
                         // skip a scroll
                         if ((k == 7) && ((scrollCount % 3) == 0))
                         {
@@ -244,6 +245,7 @@ namespace GenshinGuide
                                 else
                                 {
                                     Navigation.sim.Mouse.VerticalScroll(-1);
+                                    Navigation.SystemRandomWait(Navigation.Speed.InventoryScroll);
                                 }
                             }
                         }
@@ -316,7 +318,7 @@ namespace GenshinGuide
             Scraper.SetInvert(ref bm);
             UserInterface.SetNavigation_Image(bm);
 
-            string text = Scraper.AnalyzeText(bm);
+            string text = Scraper.AnalyzeText_Best(bm);
             text = Regex.Replace(text, @"[^\d/]", "");
             text = text.Trim();
 
@@ -837,10 +839,23 @@ namespace GenshinGuide
             }
             else // scan time, cup, hat artifacts only
             {
-                Scraper.SetContrast(100.0, ref bm);
-                Scraper.SetGamma(0.1, 0.1, 0.1,ref bm);
-                Scraper.SetInvert(ref bm);
+                Scraper.SetContrast(20.0, ref bm);
                 Scraper.SetGrayscale(ref bm);
+                Scraper.SetInvert(ref bm);
+                Scraper.SetGamma(1.8, 1.8, 1.8, ref bm);
+                Scraper.SetContrast(75.0, ref bm);
+                //Scraper.SetBrightness(50, ref bm);
+
+                //Scraper.SetBrightness(50,ref bm);
+                //Scraper.SetContrast(100.0, ref bm);
+                //Scraper.SetGamma(0.1, 0.1, 0.1,ref bm);
+                //Scraper.SetInvert(ref bm);
+                //Scraper.SetGrayscale(ref bm);
+
+                //Scraper.SetContrast(100.0, ref bm);
+                //Scraper.SetGamma(0.1, 0.1, 0.1,ref bm);
+                //Scraper.SetInvert(ref bm);
+                //Scraper.SetGrayscale(ref bm);
 
                 mainStat = Scraper.AnalyzeText_1(bm);
                 mainStat = mainStat.Replace("\n", String.Empty);

@@ -5,6 +5,8 @@ using System.Drawing.Imaging;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Threading;
+using System.Linq;
+using System.Collections.Generic;
 
 
 namespace GenshinGuide
@@ -17,10 +19,6 @@ namespace GenshinGuide
         static public KeyboardHook hook = new KeyboardHook();
         static string filePath = "";
         static int delayLevel = 0;
-        // Checkbox for scanner
-        static bool bWeapons = true;
-        static bool bArtifacts = true;
-        static bool bCharacters = true;
 
 
         public Form1()
@@ -55,10 +53,23 @@ namespace GenshinGuide
             delayLevel = ScannerDelay.Value;
             ScannerDelay.ValueChanged += trackbar_ValueChanged;
 
+            // Set all checkbox set
+            for(int i = 0; i < good_checkedListBox.Items.Count; i++)
+            {
+                good_checkedListBox.SetItemCheckState(i, CheckState.Checked);
+            }
+
+            for (int i = 0; i < seelie_checkedListBox.Items.Count; i++)
+            {
+                seelie_checkedListBox.SetItemCheckState(i, CheckState.Checked);
+            }
+
             // Add function to update values for checkboxes for threads
-            w_CheckBox.CheckedChanged += W_Checkbox_ValueChanged;
-            a_CheckBox.CheckedChanged += A_Checkbox_ValueChanged;
-            c_CheckBox.CheckedChanged += C_Checkbox_ValueChanged;
+            //w_CheckBox.CheckedChanged += W_Checkbox_ValueChanged;
+            //a_CheckBox.CheckedChanged += A_Checkbox_ValueChanged;
+            //c_CheckBox.CheckedChanged += C_Checkbox_ValueChanged;
+            //cd_CheckBox.CheckedChanged += CD_Checkbox_ValueChanged;
+            //m_CheckBox.CheckedChanged += M_Checkbox_ValueChanged;
         }
 
         private void trackbar_ValueChanged(object sender, EventArgs e)
@@ -68,17 +79,27 @@ namespace GenshinGuide
 
         private void W_Checkbox_ValueChanged(object sender, EventArgs e)
         {
-            bWeapons = w_CheckBox.Checked;
+            //bWeapons = w_CheckBox.Checked;
         }
 
         private void A_Checkbox_ValueChanged(object sender, EventArgs e)
         {
-            bArtifacts = a_CheckBox.Checked;
+            //bArtifacts = a_CheckBox.Checked;
         }
 
         private void C_Checkbox_ValueChanged(object sender, EventArgs e)
         {
-            bCharacters = c_CheckBox.Checked;
+            //bCharacters = c_CheckBox.Checked;
+        }
+
+        private void CD_Checkbox_ValueChanged(object sender, EventArgs e)
+        {
+            //bCharacterDevelopmentItems = cd_CheckBox.Checked;
+        }
+
+        private void M_Checkbox_ValueChanged(object sender, EventArgs e)
+        {
+            //bMaterials = m_CheckBox.Checked;
         }
 
         private int ScannerDelayValue(int value)
@@ -169,24 +190,72 @@ namespace GenshinGuide
                     int delay = ScannerDelayValue(delayLevel);
                     Navigation.AddDelay(delay);
 
+                    // Get data format
+                    string dataFormat = "";
+                    foreach (RadioButton rdo in DataFormat.Controls.OfType<RadioButton>())
+                    {
+                        if (rdo.Checked)
+                        {
+                            dataFormat = rdo.Text;
+                            break;
+                        }
+                    }
+
                     // Create boolean array
-                    bool[] checkbox = new bool[3];
-                    checkbox[0] = bWeapons;
-                    checkbox[1] = bArtifacts;
-                    checkbox[2] = bCharacters;
+                    List<bool> checkbox = new List<bool>();
+                    if(dataFormat == "GOOD")
+                    {
+                        for(int i = 0; i < good_checkedListBox.Items.Count; i++)
+                        {
+                            CheckState check = good_checkedListBox.GetItemCheckState(i);
+                            if (check == CheckState.Checked)
+                            {
+                                checkbox.Add(true);
+                            }
+                            else
+                            {
+                                checkbox.Add(false);
+                            }
+                        }
+                    }
+                    else if (dataFormat == "Seelie")
+                    {
+                        for (int i = 0; i < seelie_checkedListBox.Items.Count; i++)
+                        {
+                            CheckState check = seelie_checkedListBox.GetItemCheckState(i);
+                            if (check == CheckState.Checked)
+                            {
+                                checkbox.Add(true);
+                            }
+                            else
+                            {
+                                checkbox.Add(false);
+                            }
+                        }
+                    }
 
                     // check if screen size is 1280 x 720
                     if (Navigation.GetWidth() == 1280 && Navigation.GetHeight() == 720)
                     {
 
                         // The Data object of json object
-                        data.GatherData(checkbox);
+                        data.GatherData(dataFormat,checkbox);
 
-                        // Covert to GOOD format
-                        GOOD good = new GOOD(data);
+                        object format = new object();
+
+                        if(dataFormat == "GOOD")
+                        {
+                            // Covert to GOOD format
+                            format = new GOOD(data);
+                        }
+                        else if(dataFormat == "Seelie")
+                        {
+                            // Covert to Seelie format
+                            format = new Seelie(data);
+                        }
 
                         // Make Json File
-                        Scraper.CreateJsonFile(good, filePath);
+                        Scraper.CreateJsonFile(dataFormat, format, filePath, checkbox);
 
                         // Clear saved data
                         ResetUI();
@@ -326,6 +395,18 @@ namespace GenshinGuide
         private void label28_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void seelie_RadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            good_checkedListBox.Visible = false;
+            seelie_checkedListBox.Visible = true;
+        }
+
+        private void good_RadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            good_checkedListBox.Visible = true;
+            seelie_checkedListBox.Visible = false;
         }
     }
 

@@ -272,7 +272,7 @@ namespace GenshinGuide
             
 
             //string text = Scraper.AnalyzeFewText(bm);
-            string text = Scraper.AnalyzeText(bm);
+            string text = Scraper.AnalyzeText_Best(bm);
             text = text.Trim();
             text = Regex.Replace(text, @"(?![0-9/]).", "");
             text = Regex.Replace(text, @"/", " ");
@@ -351,7 +351,7 @@ namespace GenshinGuide
             //Scraper.SetInvert(ref bm);
             Scraper.SetContrast(30.0, ref bm);
 
-            string text = Scraper.AnalyzeText(bm);
+            string text = Scraper.AnalyzeText_Best(bm);
             text = text.Trim();
             text = Regex.Replace(text, @"(?![0-9\s/]).", "");
 

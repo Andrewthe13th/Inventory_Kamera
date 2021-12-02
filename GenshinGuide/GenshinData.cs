@@ -50,7 +50,7 @@ namespace GenshinGuide
             return inventory;
         }
 
-        public void GatherData(bool[] checkbox)
+        public void GatherData(string format, List<bool> checkbox)
         {
             // Initize Image Processor Queue
             ImageProcessor = new Thread(() => { ImageProcessorWorker(); });
@@ -65,57 +65,83 @@ namespace GenshinGuide
                 Scraper.b_AssignedTravelerName = true;
             }
 
-            if (checkbox[0])
+            if(format == "GOOD")
             {
-                // Get Weapons
-                Navigation.InventoryScreen();
-                Navigation.SelectWeaponInventory();
-                WeaponScraper.ScanWeapons();
-                //inventory.AssignWeapons(ref equippedWeapons);
-                Navigation.MainMenuScreen();
+                if (checkbox[0])
+                {
+                    // Get Weapons
+                    Navigation.InventoryScreen();
+                    Navigation.SelectWeaponInventory();
+                    WeaponScraper.ScanWeapons();
+                    //inventory.AssignWeapons(ref equippedWeapons);
+                    Navigation.MainMenuScreen();
+                }
+
+                if (checkbox[1])
+                {
+                    // Get Artifacts
+                    Navigation.InventoryScreen();
+                    Navigation.SelectArtifactInventory();
+                    ArtifactScraper.ScanArtifacts();
+                    //inventory.AssignArtifacts(ref equippedArtifacts);
+                    Navigation.MainMenuScreen();
+                }
+
+                workerQueue.Enqueue(new OCRImage(null, "END", 0));
+
+                // Wait till weapons have been scanned
+                // Used to Get name of traveler
+                //while (b_ScanWeapons == false)
+                //{
+                //    System.Threading.Thread.Sleep(1000);
+                //}
+
+                if (checkbox[2])
+                {
+                    // Get characters
+                    Navigation.CharacterScreen();
+                    characters = new List<Character>();
+                    characters = CharacterScraper.ScanCharacters();
+                    Navigation.MainMenuScreen();
+                }
+
+                // Wait for Image Processor to finish
+                ImageProcessor.Join();
+
+                if (checkbox[2])
+                {
+                    // Assign Artifacts to Characters
+                    if (checkbox[1])
+                        AssignArtifacts();
+                    if (checkbox[0])
+                        AssignWeapons();
+                }
             }
 
-            if (checkbox[1])
+            if (format == "Seelie")
             {
-                // Get Artifacts
-                Navigation.InventoryScreen();
-                Navigation.SelectArtifactInventory();
-                ArtifactScraper.ScanArtifacts();
-                //inventory.AssignArtifacts(ref equippedArtifacts);
-                Navigation.MainMenuScreen();
+                // Scan Character Development Items
+                if (checkbox[1])
+                {
+                    // Get Materials
+                    Navigation.InventoryScreen();
+                    Navigation.SelectCharacterDevelopmentInventory();
+                    List<Material> materials = MaterialScraper.Scan_Materials(InventorySection.CharacterDevelopmentItems);
+                    inventory.AssignCharacterDevelopmentItems(ref materials);
+                    Navigation.MainMenuScreen();
+                }
+
+                // Scan Materials
+                if (checkbox[0])
+                {
+                    // Get Materials
+                    Navigation.InventoryScreen();
+                    Navigation.SelectMaterialInventory();
+                    List<Material> materials = MaterialScraper.Scan_Materials(InventorySection.Materials);
+                    inventory.AssignMaterials(ref materials);
+                    Navigation.MainMenuScreen();
+                }
             }
-
-            workerQueue.Enqueue(new OCRImage(null, "END", 0));
-
-            // Wait till weapons have been scanned
-            // Used to Get name of traveler
-            //while (b_ScanWeapons == false)
-            //{
-            //    System.Threading.Thread.Sleep(1000);
-            //}
-
-            if(checkbox[2])
-            {
-                // Get characters
-                Navigation.CharacterScreen();
-                characters = new List<Character>();
-                characters = CharacterScraper.ScanCharacters();
-                Navigation.MainMenuScreen();
-            }
-            
-            // Wait for Image Processor to finish
-            ImageProcessor.Join();
-
-            if (checkbox[2])
-            {
-                // Assign Artifacts to Characters
-                if(checkbox[1])
-                    AssignArtifacts();
-                if(checkbox[0])
-                    AssignWeapons();
-            }
-
-            //Console.ReadKey();
         }
 
         public static void ImageProcessorWorker()

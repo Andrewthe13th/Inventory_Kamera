@@ -85,9 +85,18 @@ namespace GenshinGuide
             SystemRandomWait(Speed.UI);
         }
 
-        public static void SelectCharacterDevelopmentItems()
+        public static void SelectCharacterDevelopmentInventory()
         {
             Double artifactButtonLocation_X = (Double)area.right * ((Double)64 / (Double)160);
+            Double artifactButtonLocation_Y = (Double)area.bottom * ((Double)5 / (Double)90);
+            SetCursorPos(position.left + Convert.ToInt32(artifactButtonLocation_X), position.top + Convert.ToInt32(artifactButtonLocation_Y));
+            sim.Mouse.LeftButtonClick();
+            SystemRandomWait(Speed.UI);
+        }
+
+        public static void SelectMaterialInventory()
+        {
+            Double artifactButtonLocation_X = (Double)area.right * ((Double)78 / (Double)160);
             Double artifactButtonLocation_Y = (Double)area.bottom * ((Double)5 / (Double)90);
             SetCursorPos(position.left + Convert.ToInt32(artifactButtonLocation_X), position.top + Convert.ToInt32(artifactButtonLocation_Y));
             sim.Mouse.LeftButtonClick();
@@ -260,13 +269,8 @@ namespace GenshinGuide
             }
             else if (type == Speed.UI)
             {
-                value = r.Next(1000, 1200);
-                value += delay;
-            }
-            else if (type == Speed.UI)
-            {
-                value = r.Next(1200, 1500);
-                value += delay;
+                value = r.Next(1800, 2200);
+                value += delay*3;
             }
             else if (type == Speed.SelectNextCharacter)
             {
@@ -275,8 +279,8 @@ namespace GenshinGuide
             }
             else if (type == Speed.InventoryScroll)
             {
-                value = 20;
-                value += delay/5;
+                value = 10;
+                value += delay/10;
             }
             else if (type == Speed.SelectNextInventoryItem)
             {

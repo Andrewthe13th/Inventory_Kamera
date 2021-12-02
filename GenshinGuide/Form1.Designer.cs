@@ -80,10 +80,7 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.ScannerDelay = new System.Windows.Forms.TrackBar();
             this.label22 = new System.Windows.Forms.Label();
-            this.w_CheckBox = new System.Windows.Forms.CheckBox();
             this.label23 = new System.Windows.Forms.Label();
-            this.a_CheckBox = new System.Windows.Forms.CheckBox();
-            this.c_CheckBox = new System.Windows.Forms.CheckBox();
             this.label24 = new System.Windows.Forms.Label();
             this.label25 = new System.Windows.Forms.Label();
             this.label26 = new System.Windows.Forms.Label();
@@ -91,10 +88,11 @@
             this.label27 = new System.Windows.Forms.Label();
             this.FilePath = new System.Windows.Forms.Label();
             this.label28 = new System.Windows.Forms.Label();
-            this.label29 = new System.Windows.Forms.Label();
-            this.good_CheckBox = new System.Windows.Forms.CheckBox();
-            this.m_CheckBox = new System.Windows.Forms.CheckBox();
-            this.seelie_CheckBox = new System.Windows.Forms.CheckBox();
+            this.DataFormat = new System.Windows.Forms.GroupBox();
+            this.seelie_RadioButton = new System.Windows.Forms.RadioButton();
+            this.good_RadioButton = new System.Windows.Forms.RadioButton();
+            this.good_checkedListBox = new System.Windows.Forms.CheckedListBox();
+            this.seelie_checkedListBox = new System.Windows.Forms.CheckedListBox();
             ((System.ComponentModel.ISupportInitialize)(this.a_GearSlot_Image)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.a_MainStat_Image)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.a_Level_Image)).BeginInit();
@@ -112,6 +110,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.navigation_Image)).BeginInit();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ScannerDelay)).BeginInit();
+            this.DataFormat.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnClickHere
@@ -630,33 +629,20 @@
             // 
             // ScannerDelay
             // 
-            this.ScannerDelay.Location = new System.Drawing.Point(32, 269);
+            this.ScannerDelay.Location = new System.Drawing.Point(15, 269);
             this.ScannerDelay.Maximum = 2;
             this.ScannerDelay.Name = "ScannerDelay";
-            this.ScannerDelay.Size = new System.Drawing.Size(104, 56);
+            this.ScannerDelay.Size = new System.Drawing.Size(156, 56);
             this.ScannerDelay.TabIndex = 68;
             // 
             // label22
             // 
             this.label22.AutoSize = true;
-            this.label22.Location = new System.Drawing.Point(29, 249);
+            this.label22.Location = new System.Drawing.Point(39, 249);
             this.label22.Name = "label22";
             this.label22.Size = new System.Drawing.Size(101, 17);
             this.label22.TabIndex = 69;
             this.label22.Text = "Scanner Delay";
-            // 
-            // w_CheckBox
-            // 
-            this.w_CheckBox.AutoSize = true;
-            this.w_CheckBox.Checked = true;
-            this.w_CheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.w_CheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.w_CheckBox.Location = new System.Drawing.Point(15, 157);
-            this.w_CheckBox.Name = "w_CheckBox";
-            this.w_CheckBox.Size = new System.Drawing.Size(81, 19);
-            this.w_CheckBox.TabIndex = 70;
-            this.w_CheckBox.Text = "Weapons";
-            this.w_CheckBox.UseVisualStyleBackColor = true;
             // 
             // label23
             // 
@@ -668,37 +654,11 @@
             this.label23.TabIndex = 71;
             this.label23.Text = "Scan Items";
             // 
-            // a_CheckBox
-            // 
-            this.a_CheckBox.AutoSize = true;
-            this.a_CheckBox.Checked = true;
-            this.a_CheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.a_CheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.a_CheckBox.Location = new System.Drawing.Point(15, 177);
-            this.a_CheckBox.Name = "a_CheckBox";
-            this.a_CheckBox.Size = new System.Drawing.Size(71, 19);
-            this.a_CheckBox.TabIndex = 72;
-            this.a_CheckBox.Text = "Artifacts";
-            this.a_CheckBox.UseVisualStyleBackColor = true;
-            // 
-            // c_CheckBox
-            // 
-            this.c_CheckBox.AutoSize = true;
-            this.c_CheckBox.Checked = true;
-            this.c_CheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.c_CheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.c_CheckBox.Location = new System.Drawing.Point(15, 197);
-            this.c_CheckBox.Name = "c_CheckBox";
-            this.c_CheckBox.Size = new System.Drawing.Size(88, 19);
-            this.c_CheckBox.TabIndex = 73;
-            this.c_CheckBox.Text = "Characters";
-            this.c_CheckBox.UseVisualStyleBackColor = true;
-            // 
             // label24
             // 
             this.label24.AutoSize = true;
             this.label24.Font = new System.Drawing.Font("Microsoft Sans Serif", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label24.Location = new System.Drawing.Point(39, 305);
+            this.label24.Location = new System.Drawing.Point(29, 305);
             this.label24.Name = "label24";
             this.label24.Size = new System.Drawing.Size(26, 13);
             this.label24.TabIndex = 74;
@@ -708,7 +668,7 @@
             // 
             this.label25.AutoSize = true;
             this.label25.Font = new System.Drawing.Font("Microsoft Sans Serif", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label25.Location = new System.Drawing.Point(71, 305);
+            this.label25.Location = new System.Drawing.Point(84, 305);
             this.label25.Name = "label25";
             this.label25.Size = new System.Drawing.Size(32, 13);
             this.label25.TabIndex = 75;
@@ -718,7 +678,7 @@
             // 
             this.label26.AutoSize = true;
             this.label26.Font = new System.Drawing.Font("Microsoft Sans Serif", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label26.Location = new System.Drawing.Point(103, 305);
+            this.label26.Location = new System.Drawing.Point(133, 305);
             this.label26.Name = "label26";
             this.label26.Size = new System.Drawing.Size(38, 13);
             this.label26.TabIndex = 76;
@@ -767,54 +727,72 @@
             this.label28.TabIndex = 80;
             this.label28.Text = "Language:";
             // 
-            // label29
+            // DataFormat
             // 
-            this.label29.AutoSize = true;
-            this.label29.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label29.Location = new System.Drawing.Point(15, 66);
-            this.label29.Name = "label29";
-            this.label29.Size = new System.Drawing.Size(56, 17);
-            this.label29.TabIndex = 81;
-            this.label29.Text = "Format:";
+            this.DataFormat.Controls.Add(this.seelie_RadioButton);
+            this.DataFormat.Controls.Add(this.good_RadioButton);
+            this.DataFormat.Location = new System.Drawing.Point(12, 60);
+            this.DataFormat.Name = "DataFormat";
+            this.DataFormat.Size = new System.Drawing.Size(111, 74);
+            this.DataFormat.TabIndex = 86;
+            this.DataFormat.TabStop = false;
+            this.DataFormat.Text = "Format:";
             // 
-            // good_CheckBox
+            // seelie_RadioButton
             // 
-            this.good_CheckBox.AutoSize = true;
-            this.good_CheckBox.Checked = true;
-            this.good_CheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.good_CheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.good_CheckBox.Location = new System.Drawing.Point(15, 84);
-            this.good_CheckBox.Name = "good_CheckBox";
-            this.good_CheckBox.Size = new System.Drawing.Size(65, 19);
-            this.good_CheckBox.TabIndex = 82;
-            this.good_CheckBox.Text = "GOOD";
-            this.good_CheckBox.UseVisualStyleBackColor = true;
+            this.seelie_RadioButton.AutoSize = true;
+            this.seelie_RadioButton.Location = new System.Drawing.Point(13, 40);
+            this.seelie_RadioButton.Name = "seelie_RadioButton";
+            this.seelie_RadioButton.Size = new System.Drawing.Size(68, 21);
+            this.seelie_RadioButton.TabIndex = 88;
+            this.seelie_RadioButton.Text = "Seelie";
+            this.seelie_RadioButton.UseVisualStyleBackColor = true;
+            this.seelie_RadioButton.CheckedChanged += new System.EventHandler(this.seelie_RadioButton_CheckedChanged);
             // 
-            // m_CheckBox
+            // good_RadioButton
             // 
-            this.m_CheckBox.AutoSize = true;
-            this.m_CheckBox.Checked = true;
-            this.m_CheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.m_CheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.m_CheckBox.Location = new System.Drawing.Point(14, 217);
-            this.m_CheckBox.Name = "m_CheckBox";
-            this.m_CheckBox.Size = new System.Drawing.Size(74, 19);
-            this.m_CheckBox.TabIndex = 83;
-            this.m_CheckBox.Text = "Material";
-            this.m_CheckBox.UseVisualStyleBackColor = true;
+            this.good_RadioButton.AutoSize = true;
+            this.good_RadioButton.Checked = true;
+            this.good_RadioButton.Location = new System.Drawing.Point(13, 20);
+            this.good_RadioButton.Name = "good_RadioButton";
+            this.good_RadioButton.Size = new System.Drawing.Size(72, 21);
+            this.good_RadioButton.TabIndex = 87;
+            this.good_RadioButton.TabStop = true;
+            this.good_RadioButton.Text = "GOOD";
+            this.good_RadioButton.UseVisualStyleBackColor = true;
+            this.good_RadioButton.CheckedChanged += new System.EventHandler(this.good_RadioButton_CheckedChanged);
             // 
-            // seelie_CheckBox
+            // good_checkedListBox
             // 
-            this.seelie_CheckBox.AutoSize = true;
-            this.seelie_CheckBox.Checked = true;
-            this.seelie_CheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.seelie_CheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.seelie_CheckBox.Location = new System.Drawing.Point(14, 102);
-            this.seelie_CheckBox.Name = "seelie_CheckBox";
-            this.seelie_CheckBox.Size = new System.Drawing.Size(64, 19);
-            this.seelie_CheckBox.TabIndex = 84;
-            this.seelie_CheckBox.Text = "Seelie";
-            this.seelie_CheckBox.UseVisualStyleBackColor = true;
+            this.good_checkedListBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(234)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.good_checkedListBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.good_checkedListBox.CheckOnClick = true;
+            this.good_checkedListBox.FormattingEnabled = true;
+            this.good_checkedListBox.Items.AddRange(new object[] {
+            "Weapons",
+            "Artifacts",
+            "Characters"});
+            this.good_checkedListBox.Location = new System.Drawing.Point(15, 157);
+            this.good_checkedListBox.Name = "good_checkedListBox";
+            this.good_checkedListBox.Size = new System.Drawing.Size(146, 68);
+            this.good_checkedListBox.TabIndex = 87;
+            // 
+            // seelie_checkedListBox
+            // 
+            this.seelie_checkedListBox.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(234)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.seelie_checkedListBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.seelie_checkedListBox.CheckOnClick = true;
+            this.seelie_checkedListBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.seelie_checkedListBox.FormattingEnabled = true;
+            this.seelie_checkedListBox.Items.AddRange(new object[] {
+            "Materials",
+            "Char Development"});
+            this.seelie_checkedListBox.Location = new System.Drawing.Point(15, 157);
+            this.seelie_checkedListBox.Name = "seelie_checkedListBox";
+            this.seelie_checkedListBox.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.seelie_checkedListBox.Size = new System.Drawing.Size(158, 68);
+            this.seelie_checkedListBox.TabIndex = 88;
+            this.seelie_checkedListBox.Visible = false;
             // 
             // Form1
             // 
@@ -822,10 +800,9 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(234)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
             this.ClientSize = new System.Drawing.Size(735, 552);
-            this.Controls.Add(this.seelie_CheckBox);
-            this.Controls.Add(this.m_CheckBox);
-            this.Controls.Add(this.good_CheckBox);
-            this.Controls.Add(this.label29);
+            this.Controls.Add(this.seelie_checkedListBox);
+            this.Controls.Add(this.good_checkedListBox);
+            this.Controls.Add(this.DataFormat);
             this.Controls.Add(this.label28);
             this.Controls.Add(this.FilePath);
             this.Controls.Add(this.label27);
@@ -833,10 +810,7 @@
             this.Controls.Add(this.label26);
             this.Controls.Add(this.label25);
             this.Controls.Add(this.label24);
-            this.Controls.Add(this.c_CheckBox);
-            this.Controls.Add(this.a_CheckBox);
             this.Controls.Add(this.label23);
-            this.Controls.Add(this.w_CheckBox);
             this.Controls.Add(this.label22);
             this.Controls.Add(this.ScannerDelay);
             this.Controls.Add(this.panel1);
@@ -887,6 +861,8 @@
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ScannerDelay)).EndInit();
+            this.DataFormat.ResumeLayout(false);
+            this.DataFormat.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -945,10 +921,7 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.TrackBar ScannerDelay;
         private System.Windows.Forms.Label label22;
-        private System.Windows.Forms.CheckBox w_CheckBox;
         private System.Windows.Forms.Label label23;
-        private System.Windows.Forms.CheckBox a_CheckBox;
-        private System.Windows.Forms.CheckBox c_CheckBox;
         private System.Windows.Forms.Label label24;
         private System.Windows.Forms.Label label25;
         private System.Windows.Forms.Label label26;
@@ -956,10 +929,11 @@
         private System.Windows.Forms.Label label27;
         private System.Windows.Forms.Label FilePath;
         private System.Windows.Forms.Label label28;
-        private System.Windows.Forms.Label label29;
-        private System.Windows.Forms.CheckBox good_CheckBox;
-        private System.Windows.Forms.CheckBox m_CheckBox;
-        private System.Windows.Forms.CheckBox seelie_CheckBox;
+        private System.Windows.Forms.GroupBox DataFormat;
+        private System.Windows.Forms.RadioButton seelie_RadioButton;
+        private System.Windows.Forms.RadioButton good_RadioButton;
+        private System.Windows.Forms.CheckedListBox good_checkedListBox;
+        private System.Windows.Forms.CheckedListBox seelie_checkedListBox;
     }
 }
 
