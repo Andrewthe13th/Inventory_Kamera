@@ -61,6 +61,8 @@ namespace GenshinGuide
             ["tenacityofthemillelith"] = ++setCount,
             ["shimenawasreminiscence"] = ++setCount,
             ["emblemofseveredfate"] = ++setCount,
+            ["huskofopulentdreams"] = ++setCount, // 35
+            ["oceanhuedclam"] = ++setCount, 
         };
         private static Dictionary<string, int> mainStatCode = new Dictionary<string, int>
         {
@@ -156,7 +158,6 @@ namespace GenshinGuide
             ["kujou"] = characterCount,
             ["aloy"] = ++characterCount, // 40
             ["sangonomiyakokomi"] = ++characterCount,
-            ["sangonomiya"] = characterCount,
             ["thoma"] = ++characterCount,
         };
         public static Dictionary<int, string[]> characterTalentConstellationOrder = new Dictionary<int, string[]>
@@ -349,6 +350,11 @@ namespace GenshinGuide
             // 2.2
             ["polarstar"] = ++weaponCount, 
             ["akuoumaru"] = ++weaponCount,
+            ["wavebreakersfin"] = ++weaponCount,
+            // 2.3 
+            ["cinnabarspindle"] = ++weaponCount,
+            // beta
+            ["mouunsmoon"] = ++weaponCount, // 125
 
         };
         private static Dictionary<string, int> characterDevelopmentItemsCode = new Dictionary<string, int>

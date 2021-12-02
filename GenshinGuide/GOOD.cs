@@ -187,6 +187,11 @@ namespace GenshinGuide
             // 2.2
             "PolarStar", 
             "Akuoumaru",
+			"WavebreakersFin",
+			// 2.3 
+			"CinnabarSpindle",
+			//beta
+			"MouunsMoon",
         };
         private string[] eng_Artifacts = { 
             "Adventurer",
@@ -223,7 +228,9 @@ namespace GenshinGuide
             "PaleFlame",
             "TenacityOfTheMillelith",
             "ShimenawasReminiscence",
-            "EmblemOfSeveredFate", 
+            "EmblemOfSeveredFate",
+			"HuskOfOpulentDreams",
+			"OceanHuedClam",
         };
         private string[] eng_ArtifactSlotList = { 
             "flower",
