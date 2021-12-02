@@ -53,7 +53,9 @@ namespace GenshinGuide
             "RaidenShogun",
             "KujouSara",
             "Aloy",
-            "SangonomiyaKokomi", };
+            "SangonomiyaKokomi",
+            "Thoma",
+        };
         private string[] eng_Weapons = {
              // 1 Star
             "DullBlade",
