@@ -15,7 +15,7 @@ namespace GenshinGuide
     {
         //private KeyHandler ghk;
         static Thread mainThread;
-        static GenshinData data = new GenshinData();
+        static InventoryKamera data = new InventoryKamera();
         static public KeyboardHook hook = new KeyboardHook();
         static string filePath = "";
         static int delayLevel = 0;
@@ -137,7 +137,7 @@ namespace GenshinGuide
                 data.StopImageProcessorWorker();
                 UserInterface.SetProgramStatus("Scan Stopped",true);
                 // Reset data
-                data = new GenshinData();
+                data = new InventoryKamera();
                 Navigation.Reset();
                 // Un register ENTER key
                 //hook.Dispose();
@@ -152,7 +152,7 @@ namespace GenshinGuide
         {
             UserInterface.SetProgramStatus("Finished");
             // Reset data
-            data = new GenshinData();
+            data = new InventoryKamera();
             Navigation.Reset();
             // Un register ENTER key
             hook.Dispose();
@@ -269,7 +269,7 @@ namespace GenshinGuide
                     }
                     else
                     {
-                        data = new GenshinData();
+                        data = new InventoryKamera();
                         UserInterface.AddError("Game Window not set to 1280 x 720 Windowed");
                         Navigation.Reset();
                     // Un register ENTER key

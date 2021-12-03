@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("A OCR scanner for Genshin Impact")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Andrew De La Fuente")]
-[assembly: AssemblyProduct("GenshinGuide")]
+[assembly: AssemblyProduct("InventoryKamera")]
 [assembly: AssemblyCopyright("Copyright ©  2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

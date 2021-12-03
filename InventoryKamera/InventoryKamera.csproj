@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{7B7F907E-11F4-4000-B711-8E532A36F8A9}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>GenshinGuide</RootNamespace>
-    <AssemblyName>GenshinGuide</AssemblyName>
+    <RootNamespace>InventoryKamera</RootNamespace>
+    <AssemblyName>InventoryKamera</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -120,7 +120,7 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="GenshinData.cs" />
+    <Compile Include="InventoryKamera.cs" />
     <Compile Include="OCRImage.cs" />
     <Compile Include="Inventory.cs" />
     <Compile Include="KeyboardHook.cs" />
@@ -145,6 +145,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="app.manifest" />
     <None Include="packages.config" />
@@ -157,7 +158,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="tessdata\genshin_best_eng.traineddata" />
+    <None Include="tessdata\genshin_best_eng.traineddata">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="tessdata\genshin_fast_09_04_21.traineddata">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -402,7 +402,7 @@ namespace GenshinGuide
             artifactImages.Add(artifactLocked); //6
 
             // Send Image to Worker Queue
-            GenshinData.workerQueue.Enqueue(new OCRImage(artifactImages, "artifact", id));
+            InventoryKamera.workerQueue.Enqueue(new OCRImage(artifactImages, "artifact", id));
             g.Dispose();
         }
 

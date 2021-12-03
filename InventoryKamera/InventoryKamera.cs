@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 namespace GenshinGuide
 {
-    public class GenshinData
+    public class InventoryKamera
     {
         [JsonProperty]
         private static List<Character> characters = new List<Character>();
@@ -23,7 +23,7 @@ namespace GenshinGuide
         private static volatile bool b_threadCancel = false;
         // TODO add language option
 
-        public GenshinData()
+        public InventoryKamera()
         {
             characters = new List<Character>();
             inventory = new Inventory();

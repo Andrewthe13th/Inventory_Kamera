@@ -282,7 +282,7 @@ namespace GenshinGuide
             weapons = new List<IWeapon>();
         }
 
-        public GOOD(GenshinData genshinData)
+        public GOOD(InventoryKamera genshinData)
         {
             format = "GOOD";
             version = 1;

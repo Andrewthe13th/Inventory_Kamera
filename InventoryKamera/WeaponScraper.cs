@@ -348,7 +348,7 @@ namespace GenshinGuide
             weaponImages.Add(weaponEquippedCharacter);
 
             // Send Image to Worker Queue
-            GenshinData.workerQueue.Enqueue(new OCRImage(weaponImages,"weapon",id));
+            InventoryKamera.workerQueue.Enqueue(new OCRImage(weaponImages,"weapon",id));
             g.Dispose();
         }
 

@@ -1296,7 +1296,7 @@ namespace GenshinGuide
             return element;
         }
 
-        public static void CreateJsonFile(GenshinData data)
+        public static void CreateJsonFile(InventoryKamera data)
         {
             // write to JSON file
             string JSONresult = JsonConvert.SerializeObject(data);

@@ -373,7 +373,7 @@ namespace GenshinGuide
             inventory = new List<SeelieItem>();
         }
 
-        public Seelie(GenshinData genshinData)
+        public Seelie(InventoryKamera genshinData)
         {
             inventory = new List<SeelieItem>();
 
