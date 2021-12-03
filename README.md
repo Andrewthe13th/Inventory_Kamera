@@ -3,7 +3,7 @@
 An OCR Scanner that scans your characters, weapons, artifacts, materials and character development Items in Genshin Impact. Creates a 'GOOD' json formatted code when scanning characters, weapons and artifacts and is used to import data into [Genshin Optimizer](https://frzyc.github.io/genshin-optimizer/#/) and any other projects that adopt the GOOD format such as discord bots. It also create a 'Seelie' json fomat when scanning materials and character development Items to be used with [Seelie](https://seelie.inmagi.com/). This might changed later in future updates.Currently it only supports ENGLISH words. 
 
 ## How to use
-1. [Download the program](https://github.com/Andrewthe13th/Genshin_Scanner/releases/download/v0.9/Genshin_Scanner_V0.9.zip), unzip and then run.
+1. [Download the program](https://github.com/Andrewthe13th/Inventory_Kamera/releases/tag/v1.0), unzip and then run.
 2. Open Genshin Impact and Log In. 
 3. In Genshin Impact, go to Settings
 4. Under Graphics, set Display Mode to 1280x720 Windowed
