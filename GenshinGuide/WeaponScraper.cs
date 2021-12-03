@@ -821,7 +821,7 @@ namespace GenshinGuide
 
                 if (temp.Length == 2)
                 {
-                    if (temp[0] == temp[1])
+                    if (temp[0] != temp[1])
                         ascension = true;
 
                     int level = -1;

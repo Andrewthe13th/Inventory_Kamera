@@ -542,7 +542,8 @@ namespace GenshinGuide
                 Color equippedColor = bm[a_equippedCharacter].GetPixel(5, 5);
 
                 // Check for lock color
-                Color lockColor = Color.FromArgb(255, 255, 138, 117);
+                //Color lockColor = Color.FromArgb(255, 255, 138, 117);
+                Color lockColor = Color.FromArgb(255, 158, 161, 168);
                 Color lockStatus = bm[a_lock].GetPixel(0, 0);
 
                 // Remove artifacts lower than 3 star
@@ -551,7 +552,8 @@ namespace GenshinGuide
                 {
                     rarity = (Scraper.CompareColors(fiveStar, rarityColor)) ? 5 : 4;
                     bool b_equipped = Scraper.CompareColors(equipped, equippedColor);
-                    _lock = Scraper.CompareColors(lockColor, lockStatus);
+                    //_lock = Scraper.CompareColors(lockColor, lockStatus);
+                    _lock = Scraper.CompareColors(lockColor, lockStatus) ? false: true;
 
                     // Improved Scanning using multi threading
                     Thread thr1 = new Thread(() => gearSlot = ScanArtifactGearSlot(bm[a_gearSlot], width, height));

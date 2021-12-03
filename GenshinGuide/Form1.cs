@@ -116,6 +116,10 @@ namespace GenshinGuide
             {
                 return 100;
             }
+            else if (value == 3)
+            {
+                return 200;
+            }
             else
             {
                 return 100;
@@ -358,12 +362,12 @@ namespace GenshinGuide
 
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            System.Diagnostics.Process.Start("https://github.com/Andrewthe13th/Genshin_Scanner/");
+            System.Diagnostics.Process.Start("https://github.com/Andrewthe13th/Inventory_Kamera");
         }
 
         private void linkLabel2_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            System.Diagnostics.Process.Start("https://github.com/Andrewthe13th/Genshin_Scanner/issues");
+            System.Diagnostics.Process.Start("https://github.com/Andrewthe13th/Inventory_Kamera/issues");
         }
 
         private void label17_Click_1(object sender, EventArgs e)
@@ -373,7 +377,7 @@ namespace GenshinGuide
 
         private void linkLabel3_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            System.Diagnostics.Process.Start("https://github.com/Andrewthe13th/Genshin_Scanner/releases");
+            System.Diagnostics.Process.Start("https://github.com/Andrewthe13th/Inventory_Kamera/releases");
         }
 
         private void ProgramStatus_Click(object sender, EventArgs e)

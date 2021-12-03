@@ -158,7 +158,10 @@ namespace GenshinGuide
             ["kujou"] = characterCount,
             ["aloy"] = ++characterCount, // 40
             ["sangonomiyakokomi"] = ++characterCount,
-            ["thoma"] = ++characterCount,
+            ["gorou"] = ++characterCount,
+            ["aratakiitto"] = ++characterCount,
+            ["shenhe"] = ++characterCount,
+            ["yunjin"] = ++characterCount, //45
         };
         public static Dictionary<int, string[]> characterTalentConstellationOrder = new Dictionary<int, string[]>
         {
@@ -206,6 +209,10 @@ namespace GenshinGuide
             [40] = new string[]{ "burst", "skill" }, //Aloy  Note: has no constellations
             [41] = new string[] { "burst", "skill" }, //Sangonomiya Kokomi 
             [42] = new string[] { "skill", "burst" }, //Thoma 
+            [43] = new string[] { "skill", "burst" }, //gorou
+            [44] = new string[] { "skill", "burst" }, //aratakiitto
+            [45] = new string[] { "skill", "burst" }, //shenhe
+            [46] = new string[] { "skill", "burst" }, //yunjin
         };
         private static Dictionary<string, int> elementalCode = new Dictionary<string, int>
         {
@@ -740,7 +747,7 @@ namespace GenshinGuide
         private static TesseractEngine ocr_best = new TesseractEngine( (Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_best_eng", EngineMode.LstmOnly);
         private static TesseractEngine ocr_live = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
         private static TesseractEngine ocr_1 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
-        private static TesseractEngine ocr_2 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
+        private static TesseractEngine ocr_2 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_best_eng", EngineMode.LstmOnly);
         private static TesseractEngine ocr_3 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
         private static TesseractEngine ocr_4 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);
         private static TesseractEngine ocr_5 = new TesseractEngine((Directory.GetCurrentDirectory()) + "\\tessdata", "genshin_fast_09_04_21", EngineMode.LstmOnly);

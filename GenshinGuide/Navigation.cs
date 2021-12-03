@@ -284,8 +284,8 @@ namespace GenshinGuide
             }
             else if (type == Speed.SelectNextInventoryItem)
             {
-                value = 64;
-                value += delay/4;
+                value = 100;
+                value += delay/3;
             }
 
             System.Threading.Thread.Sleep(value);

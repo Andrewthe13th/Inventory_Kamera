@@ -93,6 +93,7 @@
             this.good_RadioButton = new System.Windows.Forms.RadioButton();
             this.good_checkedListBox = new System.Windows.Forms.CheckedListBox();
             this.seelie_checkedListBox = new System.Windows.Forms.CheckedListBox();
+            this.label17 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.a_GearSlot_Image)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.a_MainStat_Image)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.a_Level_Image)).BeginInit();
@@ -630,7 +631,7 @@
             // ScannerDelay
             // 
             this.ScannerDelay.Location = new System.Drawing.Point(15, 269);
-            this.ScannerDelay.Maximum = 2;
+            this.ScannerDelay.Maximum = 3;
             this.ScannerDelay.Name = "ScannerDelay";
             this.ScannerDelay.Size = new System.Drawing.Size(156, 56);
             this.ScannerDelay.TabIndex = 68;
@@ -658,7 +659,7 @@
             // 
             this.label24.AutoSize = true;
             this.label24.Font = new System.Drawing.Font("Microsoft Sans Serif", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label24.Location = new System.Drawing.Point(29, 305);
+            this.label24.Location = new System.Drawing.Point(22, 301);
             this.label24.Name = "label24";
             this.label24.Size = new System.Drawing.Size(26, 13);
             this.label24.TabIndex = 74;
@@ -668,7 +669,7 @@
             // 
             this.label25.AutoSize = true;
             this.label25.Font = new System.Drawing.Font("Microsoft Sans Serif", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label25.Location = new System.Drawing.Point(84, 305);
+            this.label25.Location = new System.Drawing.Point(57, 301);
             this.label25.Name = "label25";
             this.label25.Size = new System.Drawing.Size(32, 13);
             this.label25.TabIndex = 75;
@@ -678,7 +679,7 @@
             // 
             this.label26.AutoSize = true;
             this.label26.Font = new System.Drawing.Font("Microsoft Sans Serif", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label26.Location = new System.Drawing.Point(133, 305);
+            this.label26.Location = new System.Drawing.Point(95, 301);
             this.label26.Name = "label26";
             this.label26.Size = new System.Drawing.Size(38, 13);
             this.label26.TabIndex = 76;
@@ -794,12 +795,23 @@
             this.seelie_checkedListBox.TabIndex = 88;
             this.seelie_checkedListBox.Visible = false;
             // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Font = new System.Drawing.Font("Microsoft Sans Serif", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label17.Location = new System.Drawing.Point(139, 301);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(38, 13);
+            this.label17.TabIndex = 89;
+            this.label17.Text = "200ms";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(120F, 120F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(234)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
             this.ClientSize = new System.Drawing.Size(735, 552);
+            this.Controls.Add(this.label17);
             this.Controls.Add(this.seelie_checkedListBox);
             this.Controls.Add(this.good_checkedListBox);
             this.Controls.Add(this.DataFormat);
@@ -841,7 +853,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
-            this.Text = "Genshin Impact Scanner V0.9";
+            this.Text = "Inventory Kamera v1.0";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.a_GearSlot_Image)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.a_MainStat_Image)).EndInit();
@@ -934,6 +946,7 @@
         private System.Windows.Forms.RadioButton good_RadioButton;
         private System.Windows.Forms.CheckedListBox good_checkedListBox;
         private System.Windows.Forms.CheckedListBox seelie_checkedListBox;
+        private System.Windows.Forms.Label label17;
     }
 }
 
