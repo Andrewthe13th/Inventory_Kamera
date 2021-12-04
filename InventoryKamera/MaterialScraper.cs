@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using System.Drawing;
 
-namespace GenshinGuide
+namespace InventoryKamera
 {
     public struct Material
     {

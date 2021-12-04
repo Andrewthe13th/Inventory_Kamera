@@ -9,7 +9,7 @@ using System.IO;
 using Tesseract;
 using Newtonsoft.Json;
 
-namespace GenshinGuide
+namespace InventoryKamera
 {
     public static class Scraper
     {
@@ -1296,7 +1296,7 @@ namespace GenshinGuide
             return element;
         }
 
-        public static void CreateJsonFile(InventoryKamera data)
+        public static void CreateJsonFile(GenshinData data)
         {
             // write to JSON file
             string JSONresult = JsonConvert.SerializeObject(data);

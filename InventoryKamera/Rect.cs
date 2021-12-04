@@ -5,7 +5,7 @@ using System.Text;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
-namespace GenshinGuide
+namespace InventoryKamera
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct RECT

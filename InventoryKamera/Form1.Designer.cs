@@ -1,4 +1,4 @@
-﻿namespace GenshinGuide
+﻿namespace InventoryKamera
 {
     partial class Form1
     {

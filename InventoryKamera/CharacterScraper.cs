@@ -10,7 +10,7 @@ using System.Windows.Forms;
 using Tesseract;
 using System.Numerics;
 
-namespace GenshinGuide
+namespace InventoryKamera
 {
     public static class CharacterScraper
     {

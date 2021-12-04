@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace GenshinGuide
+namespace InventoryKamera
 {
     public sealed class KeyboardHook : IDisposable
     {

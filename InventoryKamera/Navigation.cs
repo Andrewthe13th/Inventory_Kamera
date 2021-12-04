@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using WindowsInput;
 
-namespace GenshinGuide
+namespace InventoryKamera
 {
     public static class Navigation
     {

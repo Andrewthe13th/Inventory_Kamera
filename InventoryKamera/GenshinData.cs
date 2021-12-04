@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using System.Threading;
 using Newtonsoft.Json;
 
-namespace GenshinGuide
+namespace InventoryKamera
 {
-    public class InventoryKamera
+    public class GenshinData
     {
         [JsonProperty]
         private static List<Character> characters = new List<Character>();
@@ -23,7 +23,7 @@ namespace GenshinGuide
         private static volatile bool b_threadCancel = false;
         // TODO add language option
 
-        public InventoryKamera()
+        public GenshinData()
         {
             characters = new List<Character>();
             inventory = new Inventory();

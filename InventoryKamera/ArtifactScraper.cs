@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 
-namespace GenshinGuide
+namespace InventoryKamera
 {
     public static class ArtifactScraper
     {
@@ -402,7 +402,7 @@ namespace GenshinGuide
             artifactImages.Add(artifactLocked); //6
 
             // Send Image to Worker Queue
-            InventoryKamera.workerQueue.Enqueue(new OCRImage(artifactImages, "artifact", id));
+            GenshinData.workerQueue.Enqueue(new OCRImage(artifactImages, "artifact", id));
             g.Dispose();
         }
 

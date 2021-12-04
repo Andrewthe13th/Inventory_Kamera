@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GenshinGuide
+namespace InventoryKamera
 {
     public static class WeaponScraper
     {
@@ -348,7 +348,7 @@ namespace GenshinGuide
             weaponImages.Add(weaponEquippedCharacter);
 
             // Send Image to Worker Queue
-            InventoryKamera.workerQueue.Enqueue(new OCRImage(weaponImages,"weapon",id));
+            GenshinData.workerQueue.Enqueue(new OCRImage(weaponImages,"weapon",id));
             g.Dispose();
         }
 

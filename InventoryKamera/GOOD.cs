@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace GenshinGuide
+namespace InventoryKamera
 {
     public class GOOD
     {
@@ -282,11 +282,11 @@ namespace GenshinGuide
             weapons = new List<IWeapon>();
         }
 
-        public GOOD(InventoryKamera genshinData)
+        public GOOD(GenshinData genshinData)
         {
             format = "GOOD";
             version = 1;
-            source = "Genshin_Data_Scanner";
+            source = "Inventory_Kamera";
             characters = new List<ICharacter>();
             artifacts = new List<IArtifact>();
             weapons = new List<IWeapon>();

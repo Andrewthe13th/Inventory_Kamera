@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace GenshinGuide
+namespace InventoryKamera
 {
     public class Character
     {

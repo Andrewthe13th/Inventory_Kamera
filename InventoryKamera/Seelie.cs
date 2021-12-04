@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace GenshinGuide
+namespace InventoryKamera
 {
     class Seelie
     {
@@ -373,7 +373,7 @@ namespace GenshinGuide
             inventory = new List<SeelieItem>();
         }
 
-        public Seelie(InventoryKamera genshinData)
+        public Seelie(GenshinData genshinData)
         {
             inventory = new List<SeelieItem>();
 
