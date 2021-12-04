@@ -38,7 +38,7 @@ namespace InventoryKamera
             //Scraper.SetContrast(80.0, ref bm);
             UserInterface.SetNavigation_Image(bm);
 
-            string text = Scraper.AnalyzeText(bm);
+            string text = Scraper.AnalyzeText_Best(bm);
             text = text.Trim();
 
             if (text != "")
