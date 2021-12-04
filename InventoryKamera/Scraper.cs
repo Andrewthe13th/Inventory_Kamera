@@ -62,7 +62,7 @@ namespace InventoryKamera
             ["shimenawasreminiscence"] = ++setCount,
             ["emblemofseveredfate"] = ++setCount,
             ["huskofopulentdreams"] = ++setCount, // 35
-            ["oceanhuedclam"] = ++setCount, 
+            ["oceanhuedclam"] = ++setCount,
         };
         private static Dictionary<string, int> mainStatCode = new Dictionary<string, int>
         {
@@ -158,57 +158,58 @@ namespace InventoryKamera
             ["kujou"] = characterCount,
             ["aloy"] = ++characterCount, // 40
             ["sangonomiyakokomi"] = ++characterCount,
+            ["thoma"] = ++characterCount,
             ["gorou"] = ++characterCount,
             ["aratakiitto"] = ++characterCount,
-            ["shenhe"] = ++characterCount,
-            ["yunjin"] = ++characterCount, //45
+            ["shenhe"] = ++characterCount, // 45
+            ["yunjin"] = ++characterCount,
         };
         public static Dictionary<int, string[]> characterTalentConstellationOrder = new Dictionary<int, string[]>
         {
             /////////// Traveler is Assigned at runtime /////////////
             [1] = new string[]{ "burst", "skill" }, // Traveler
             ///////////////////////////////////////////////
-            [2] = new string[]{ "burst", "skill" }, //Amber 
-            [3] = new string[]{ "skill", "burst" }, //Kaeya 
-            [4] = new string[]{ "burst", "skill" }, //Lisa 
-            [5] = new string[]{ "burst", "skill" }, //Barbara  
-            [6] = new string[]{ "burst", "skill" }, //Razor 
-            [7] = new string[]{ "burst", "skill" }, //Xiangling 
-            [8] = new string[]{ "skill", "burst" }, //Beidou 
-            [9] = new string[]{ "burst", "skill" }, //Xingqiu 
-            [10] = new string[]{ "burst", "skill" }, //Ningguang  
-            [11] = new string[]{ "skill", "burst" }, //Fischl 
-            [12] = new string[]{ "skill", "burst" }, //Bennett 
-            [13] = new string[]{ "skill", "burst" }, //Noelle 
-            [14] = new string[]{ "burst", "skill" }, //Chongyun 
-            [15] = new string[]{ "skill", "burst" }, //Sucrose  
-            [16] = new string[]{ "burst", "skill" }, //Jean 
-            [17] = new string[]{ "skill", "burst" }, //Diluc 
-            [18] = new string[]{ "burst", "skill" }, //Qiqi 
-            [19] = new string[]{ "burst", "skill" }, //Mona 
-            [20] = new string[]{ "burst", "skill" }, //Keqing  
-            [21] = new string[]{ "burst", "skill" }, //Venti 
-            [22] = new string[]{ "skill", "burst" }, //Klee 
-            [23] = new string[]{ "burst", "skill" }, //Diona 
-            [24] = new string[]{ "skill", "burst" }, //Tartaglia 
-            [25] = new string[]{ "skill", "burst" }, //Xinyan  
-            [26] = new string[]{ "skill", "burst" }, //Zhongli 
-            [27] = new string[]{ "skill", "burst" }, //Albedo 
-            [28] = new string[]{ "burst", "skill" }, //Ganyu 
-            [29] = new string[]{ "skill", "burst" }, //Xiao 
-            [30] = new string[]{ "skill", "burst" }, //Hu Tao  
-            [31] = new string[]{ "skill", "burst" }, //Rosaria 
-            [32] = new string[]{ "skill", "burst" }, //Yanfei 
-            [33] = new string[]{ "burst", "skill" }, //Eula 
-            [34] = new string[]{ "skill", "burst" }, //Kaedehara Kazuha 
-            [35] = new string[]{ "burst", "skill" }, //Kamisato Ayaka  
-            [36] = new string[]{ "skill", "burst" }, //Yoimiya 
-            [37] = new string[]{ "burst", "skill" }, //Sayu 
-            [38] = new string[]{ "burst", "skill" }, //Raiden Shogun 
-            [39] = new string[]{ "burst", "skill" }, //Kujou Sara 
+            [2] = new string[]{ "burst", "skill" }, //Amber
+            [3] = new string[]{ "skill", "burst" }, //Kaeya
+            [4] = new string[]{ "burst", "skill" }, //Lisa
+            [5] = new string[]{ "burst", "skill" }, //Barbara
+            [6] = new string[]{ "burst", "skill" }, //Razor
+            [7] = new string[]{ "burst", "skill" }, //Xiangling
+            [8] = new string[]{ "skill", "burst" }, //Beidou
+            [9] = new string[]{ "burst", "skill" }, //Xingqiu
+            [10] = new string[]{ "burst", "skill" }, //Ningguang
+            [11] = new string[]{ "skill", "burst" }, //Fischl
+            [12] = new string[]{ "skill", "burst" }, //Bennett
+            [13] = new string[]{ "skill", "burst" }, //Noelle
+            [14] = new string[]{ "burst", "skill" }, //Chongyun
+            [15] = new string[]{ "skill", "burst" }, //Sucrose
+            [16] = new string[]{ "burst", "skill" }, //Jean
+            [17] = new string[]{ "skill", "burst" }, //Diluc
+            [18] = new string[]{ "burst", "skill" }, //Qiqi
+            [19] = new string[]{ "burst", "skill" }, //Mona
+            [20] = new string[]{ "burst", "skill" }, //Keqing
+            [21] = new string[]{ "burst", "skill" }, //Venti
+            [22] = new string[]{ "skill", "burst" }, //Klee
+            [23] = new string[]{ "burst", "skill" }, //Diona
+            [24] = new string[]{ "skill", "burst" }, //Tartaglia
+            [25] = new string[]{ "skill", "burst" }, //Xinyan
+            [26] = new string[]{ "skill", "burst" }, //Zhongli
+            [27] = new string[]{ "skill", "burst" }, //Albedo
+            [28] = new string[]{ "burst", "skill" }, //Ganyu
+            [29] = new string[]{ "skill", "burst" }, //Xiao
+            [30] = new string[]{ "skill", "burst" }, //Hu Tao
+            [31] = new string[]{ "skill", "burst" }, //Rosaria
+            [32] = new string[]{ "skill", "burst" }, //Yanfei
+            [33] = new string[]{ "burst", "skill" }, //Eula
+            [34] = new string[]{ "skill", "burst" }, //Kaedehara Kazuha
+            [35] = new string[]{ "burst", "skill" }, //Kamisato Ayaka
+            [36] = new string[]{ "skill", "burst" }, //Yoimiya
+            [37] = new string[]{ "burst", "skill" }, //Sayu
+            [38] = new string[]{ "burst", "skill" }, //Raiden Shogun
+            [39] = new string[]{ "burst", "skill" }, //Kujou Sara
             [40] = new string[]{ "burst", "skill" }, //Aloy  Note: has no constellations
-            [41] = new string[] { "burst", "skill" }, //Sangonomiya Kokomi 
-            [42] = new string[] { "skill", "burst" }, //Thoma 
+            [41] = new string[] { "burst", "skill" }, //Sangonomiya Kokomi
+            [42] = new string[] { "skill", "burst" }, //Thoma
             [43] = new string[] { "skill", "burst" }, //gorou
             [44] = new string[] { "skill", "burst" }, //aratakiitto
             [45] = new string[] { "skill", "burst" }, //shenhe
@@ -355,10 +356,10 @@ namespace InventoryKamera
             ["everlastingmoonglow"] = ++weaponCount,
             ["darkironsword"] = ++weaponCount, // 120
             // 2.2
-            ["polarstar"] = ++weaponCount, 
+            ["polarstar"] = ++weaponCount,
             ["akuoumaru"] = ++weaponCount,
             ["wavebreakersfin"] = ++weaponCount,
-            // 2.3 
+            // 2.3
             ["cinnabarspindle"] = ++weaponCount,
             // beta
             ["mouunsmoon"] = ++weaponCount, // 125
@@ -782,7 +783,7 @@ namespace InventoryKamera
         public static string AnalyzeText_Best(Bitmap bitmap)
         {
             string text = "";
-            
+
                 using (var page = ocr_best.Process(bitmap, PageSegMode.SingleBlock))
                 {
                     using (var iter = page.GetIterator())
@@ -796,7 +797,7 @@ namespace InventoryKamera
                     }
                 }
 
-            
+
             return text;
         }
 
