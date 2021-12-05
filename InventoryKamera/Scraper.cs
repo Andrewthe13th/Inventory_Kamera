@@ -454,6 +454,11 @@ namespace InventoryKamera
 			"stormbeads",
 
 			// gemstones
+			"brilliantdiamondgemstone",
+			"brilliantdiamondchunk",
+			"brilliantdiamondfragment",
+			"brilliantdiamondsliver",
+
 			"agnidusagategemstone",
 			"agnidusagatechunk",
 			"agnidusagatefragment",

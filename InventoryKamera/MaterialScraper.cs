@@ -54,9 +54,9 @@ namespace InventoryKamera
 			{
 				// Select Material
 				Navigation.SetCursorPos(Navigation.GetPosition().Left + Convert.ToInt32(materialLocation_X) + ( xOffset * ( count % maxColumns ) ), Navigation.GetPosition().Top + Convert.ToInt32(materialLocation_Y));
-				Navigation.SystemRandomWait(Navigation.Speed.Instant);
+				Navigation.SystemRandomWait(Navigation.Speed.Faster);
 				Navigation.Click();
-				Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
+				Navigation.SystemRandomWait(Navigation.Speed.Faster);
 
 				// Scan Material Name
 				material.name = ScanMaterialName(section);

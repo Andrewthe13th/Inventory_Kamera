@@ -107,35 +107,40 @@ namespace InventoryKamera
 			"element_2|riftborn_regalia|0",
 
             // gemstones
-            "element_1|agnidus_agate|3",
-			"element_1|agnidus_agate|2",
-			"element_1|agnidus_agate|1",
-			"element_1|agnidus_agate|0",
+            "element_1|brilliant_diamond|3",
+            "element_1|brilliant_diamond|2",
+            "element_1|brilliant_diamond|1",
+            "element_1|brilliant_diamond|0", 
 
-			"element_1|varunada_lazurite|3",
-			"element_1|varunada_lazurite|2",
-			"element_1|varunada_lazurite|1",
-			"element_1|varunada_lazurite|0",
-
-			"element_1|vajrada_amethyst|3",
-			"element_1|vajrada_amethyst|2",
-			"element_1|vajrada_amethyst|1",
-			"element_1|vajrada_amethyst|0",
-
-			"element_1|vayuda_turqoise|3",
-			"element_1|vayuda_turqoise|2",
-			"element_1|vayuda_turqoise|1",
-			"element_1|vayuda_turqoise|0",
-
-			"element_1|shivada_jade|3",
-			"element_1|shivada_jade|2",
-			"element_1|shivada_jade|1",
-			"element_1|shivada_jade|0",
-
-			"element_1|prithiva_topaz|3",
-			"element_1|prithiva_topaz|2",
-			"element_1|prithiva_topaz|1",
-			"element_1|prithiva_topaz|0",
+            "element_1|agnidus_agate|3", 
+            "element_1|agnidus_agate|2", 
+            "element_1|agnidus_agate|1", 
+            "element_1|agnidus_agate|0", 
+             
+            "element_1|varunada_lazurite|3", 
+            "element_1|varunada_lazurite|2", 
+            "element_1|varunada_lazurite|1", 
+            "element_1|varunada_lazurite|0", 
+             
+            "element_1|vajrada_amethyst|3", 
+            "element_1|vajrada_amethyst|2", 
+            "element_1|vajrada_amethyst|1", 
+            "element_1|vajrada_amethyst|0", 
+             
+            "element_1|vayuda_turqoise|3", 
+            "element_1|vayuda_turqoise|2", 
+            "element_1|vayuda_turqoise|1", 
+            "element_1|vayuda_turqoise|0", 
+             
+            "element_1|shivada_jade|3", 
+            "element_1|shivada_jade|2", 
+            "element_1|shivada_jade|1", 
+            "element_1|shivada_jade|0", 
+             
+            "element_1|prithiva_topaz|3", 
+            "element_1|prithiva_topaz|2", 
+            "element_1|prithiva_topaz|1",
+            "element_1|prithiva_topaz|0", 
 
             // talent level-up materials
             "talent|freedom|2",
