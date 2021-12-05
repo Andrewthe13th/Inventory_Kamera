@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using Newtonsoft.Json;
 
 namespace InventoryKamera
 {
-    public class InventoryKamera
-    {
-        [JsonProperty]
-        private static List<Character> characters = new List<Character>();
-        [JsonProperty]
-        private static Inventory inventory = new Inventory();
+	public class InventoryKamera
+	{
+		[JsonProperty]
+		private static List<Character> characters = new List<Character>();
+
+		[JsonProperty]
+		private static Inventory inventory = new Inventory();
 
 		private static List<Artifact> equippedArtifacts = new List<Artifact>();
 		private static List<Weapon> equippedWeapons = new List<Weapon>();
@@ -19,15 +19,15 @@ namespace InventoryKamera
 		private static List<Thread> ImageProcessors = new List<Thread>();
 		private static volatile bool b_threadCancel = false;
 		private static int maxProcessors = 2; // TODO: Add support for more processors
-		// TODO add language option
+											  // TODO add language option
 
-        public InventoryKamera()
-        {
-            characters = new List<Character>();
-            inventory = new Inventory();
-            equippedArtifacts = new List<Artifact>();
-            equippedWeapons = new List<Weapon>();
-        }
+		public InventoryKamera()
+		{
+			characters = new List<Character>();
+			inventory = new Inventory();
+			equippedArtifacts = new List<Artifact>();
+			equippedWeapons = new List<Weapon>();
+		}
 
 		public void StopImageProcessorWorkers()
 		{
@@ -63,78 +63,77 @@ namespace InventoryKamera
 			Scraper.AssignTravelerName(mainCharacterName);
 			Scraper.b_AssignedTravelerName = true;
 
-            if(formats[0])
-            {
-                if (checkbox[0])
-                {
-                    // Get Weapons
-                    Navigation.InventoryScreen();
-                    Navigation.SelectWeaponInventory();
-                    WeaponScraper.ScanWeapons();
-                    //inventory.AssignWeapons(ref equippedWeapons);
-                    Navigation.MainMenuScreen();
-                }
+			if (formats[0])
+			{
+				if (checkbox[0])
+				{
+					// Get Weapons
+					Navigation.InventoryScreen();
+					Navigation.SelectWeaponInventory();
+					WeaponScraper.ScanWeapons();
+					//inventory.AssignWeapons(ref equippedWeapons);
+					Navigation.MainMenuScreen();
+				}
 
-                if (checkbox[1])
-                {
-                    // Get Artifacts
-                    Navigation.InventoryScreen();
-                    Navigation.SelectArtifactInventory();
-                    ArtifactScraper.ScanArtifacts();
-                    //inventory.AssignArtifacts(ref equippedArtifacts);
-                    Navigation.MainMenuScreen();
-                }
+				if (checkbox[1])
+				{
+					// Get Artifacts
+					Navigation.InventoryScreen();
+					Navigation.SelectArtifactInventory();
+					ArtifactScraper.ScanArtifacts();
+					//inventory.AssignArtifacts(ref equippedArtifacts);
+					Navigation.MainMenuScreen();
+				}
 
-                workerQueue.Enqueue(new OCRImage(null, "END", 0));
+				workerQueue.Enqueue(new OCRImage(null, "END", 0));
 
+				if (checkbox[2])
+				{
+					// Get characters
+					Navigation.CharacterScreen();
+					characters = new List<Character>();
+					characters = CharacterScraper.ScanCharacters();
+					Navigation.MainMenuScreen();
+				}
 
-                if (checkbox[2])
-                {
-                    // Get characters
-                    Navigation.CharacterScreen();
-                    characters = new List<Character>();
-                    characters = CharacterScraper.ScanCharacters();
-                    Navigation.MainMenuScreen();
-                }
-
-				// Wait for Image Processor to finish
+				// Wait for Image Processors to finish
 				AwaitProcessors();
 
-                if (checkbox[2])
-                {
-                    // Assign Artifacts to Characters
-                    if (checkbox[1])
-                        AssignArtifacts();
-                    if (checkbox[0])
-                        AssignWeapons();
-                }
-            }
+				if (checkbox[2])
+				{
+					// Assign Artifacts to Characters
+					if (checkbox[1])
+						AssignArtifacts();
+					if (checkbox[0])
+						AssignWeapons();
+				}
+			}
 
-            if (formats[1])
-            {
-                // Scan Character Development Items
-                if (checkbox[3])
-                {
-                    // Get Materials
-                    Navigation.InventoryScreen();
-                    Navigation.SelectCharacterDevelopmentInventory();
-                    List<Material> materials = MaterialScraper.Scan_Materials(InventorySection.CharacterDevelopmentItems);
-                    inventory.SetCharacterDevelopmentItems(ref materials);
-                    Navigation.MainMenuScreen();
-                }
+			if (formats[1])
+			{
+				// Scan Character Development Items
+				if (checkbox[3])
+				{
+					// Get Materials
+					Navigation.InventoryScreen();
+					Navigation.SelectCharacterDevelopmentInventory();
+					List<Material> materials = MaterialScraper.Scan_Materials(InventorySection.CharacterDevelopmentItems);
+					inventory.SetCharacterDevelopmentItems(ref materials);
+					Navigation.MainMenuScreen();
+				}
 
-                // Scan Materials
-                if (checkbox[4])
-                {
-                    // Get Materials
-                    Navigation.InventoryScreen();
-                    Navigation.SelectMaterialInventory();
-                    List<Material> materials = MaterialScraper.Scan_Materials(InventorySection.Materials);
-                    inventory.SetMaterials(ref materials);
-                    Navigation.MainMenuScreen();
-                }
-            }
-        }
+				// Scan Materials
+				if (checkbox[4])
+				{
+					// Get Materials
+					Navigation.InventoryScreen();
+					Navigation.SelectMaterialInventory();
+					List<Material> materials = MaterialScraper.Scan_Materials(InventorySection.Materials);
+					inventory.SetMaterials(ref materials);
+					Navigation.MainMenuScreen();
+				}
+			}
+		}
 
 		private void AwaitProcessors()
 		{

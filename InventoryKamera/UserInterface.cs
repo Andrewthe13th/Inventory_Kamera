@@ -9,6 +9,7 @@ namespace InventoryKamera
 	{
 		// Artifacts and Weapons
 		private static PictureBox gear_PictureBox;
+
 		private static TextBox gear_TextBox;
 
 		// Character
@@ -20,6 +21,7 @@ namespace InventoryKamera
 
 		// Counters
 		private static Label weaponCount_Label;
+
 		private static Label weaponMax_Label;
 
 		private static Label artifactCount_Label;
@@ -135,7 +137,7 @@ namespace InventoryKamera
 			int maxLevel = (int)( weapon.ascension ? Math.Floor(weapon.level / 10.0) + 1 * 10 : Math.Floor(weapon.level / 10.0) * 10 );
 			string text =
 				$"Name: {weapon.name}" + Environment.NewLine +
-				$"Level: {weapon.level} / {maxLevel}" + Environment.NewLine + 
+				$"Level: {weapon.level} / {maxLevel}" + Environment.NewLine +
 				$"Refinement: {weapon.refinementLevel}" + Environment.NewLine +
 				$"Equipped: {weapon.equippedCharacter}";
 			UpdateTextBox(text, gear_TextBox);
@@ -160,7 +162,7 @@ namespace InventoryKamera
 				text += $"{i + 1}: {substat}" + Environment.NewLine;
 			}
 
-			text += $"Equipped: {artifact.equippedCharacter}" + Environment.NewLine + 
+			text += $"Equipped: {artifact.equippedCharacter}" + Environment.NewLine +
 				$"Locked: {artifact.@lock}";
 
 			UpdateTextBox(text, gear_TextBox);
@@ -186,7 +188,7 @@ namespace InventoryKamera
 			if (i > -1 && i < 3)
 			{
 				UpdatePictureBox(bm, cTalent_PictureBoxes[i]);
-				UpdateTextBox($"Talent {i+1}: {text}\n", character_TextBox);
+				UpdateTextBox($"Talent {i + 1}: {text}\n", character_TextBox);
 			}
 		}
 
@@ -215,16 +217,13 @@ namespace InventoryKamera
 			UpdateLabel($"{Int32.Parse(characterCount_Label.Text) + 1}", characterCount_Label);
 		}
 
-		public static void SetProgramStatus(string status)
+		public static void SetProgramStatus(string status, bool ok = true)
 		{
-			MethodInvoker statusAction;
-
-			statusAction = delegate
+			MethodInvoker statusAction = delegate
 			{
 				programStatus_Label.Text = status;
-				programStatus_Label.ForeColor = Color.Green;
+				programStatus_Label.ForeColor = ok ? Color.Green : Color.Red;
 				programStatus_Label.Font = new Font(programStatus_Label.Font.FontFamily, 15);
-				programStatus_Label.Location = new Point(44, 278);
 				programStatus_Label.Refresh();
 			};
 
@@ -261,7 +260,7 @@ namespace InventoryKamera
 		public static void ResetGearDisplay()
 		{
 			MethodInvoker gearAction = delegate { gear_PictureBox.Image = null; };
-			
+
 			MethodInvoker textAction = delegate { gear_TextBox.Clear(); };
 
 			gear_PictureBox.Invoke(gearAction);

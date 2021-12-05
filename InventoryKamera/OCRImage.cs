@@ -16,7 +16,6 @@ namespace InventoryKamera
 			type = _type;
 			id = _id;
 		}
-
 	}
 
 	public class Queue<T>

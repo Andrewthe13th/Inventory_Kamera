@@ -31,7 +31,7 @@ namespace InventoryKamera
 
 			return characters;
 		}
-		
+
 		private static bool ScanCharacter(out Character character)
 		{
 			string name = null; string element = null;
@@ -47,13 +47,12 @@ namespace InventoryKamera
 				goto Fail;
 			}
 
-
 			// Check if character was first scanned
 			if (name != firstCharacterName)
 			{
 				if (string.IsNullOrEmpty(firstCharacterName))
 					firstCharacterName = name;
-				
+
 				// Scan Level and ascension
 				Navigation.SelectCharacterAttributes();
 				int level = ScanLevel(ref ascension);
@@ -105,7 +104,7 @@ namespace InventoryKamera
 				character = new Character(name, element, level, ascension, experience, constellation, talents);
 				return true;
 			}
-		Fail: 
+		Fail:
 			character = new Character();
 			return false;
 		}
@@ -180,25 +179,22 @@ namespace InventoryKamera
 					{
 						var split = text.Split('/');
 
-
 						// search for element in block
 						element = Scraper.FindElementByName(split[0].Trim());
 
-
 						// strip each char from name until found in dictionary
 						name = Scraper.FindClosestCharacterName(split[1].Trim().Replace(" ", ""));
-						if (!string.IsNullOrEmpty(name) && ! string.IsNullOrEmpty(element))
+						if (!string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(element))
 						{
 							UserInterface.SetCharacter_NameAndElement(bm, name, element);
 							return;
 						}
 					}
 					n.Dispose();
-					
 				}
 				attempts++;
 				Navigation.SystemRandomWait(Navigation.Speed.Faster);
-			} while ((string.IsNullOrEmpty(name) || string.IsNullOrEmpty(element)) && (attempts < maxAttempts));
+			} while (( string.IsNullOrEmpty(name) || string.IsNullOrEmpty(element) ) && ( attempts < maxAttempts ));
 			name = null;
 			element = null;
 		}
@@ -232,13 +228,11 @@ namespace InventoryKamera
 				Scraper.SetInvert(ref n);
 				Scraper.SetContrast(30.0, ref bm);
 
-
 				string text = Scraper.AnalyzeText(n).Trim();
 
 				text = Regex.Replace(text, @"(?![0-9/]).", "");
 				if (text.Contains("/"))
 				{
-
 					var values = text.Split('/');
 					if (int.TryParse(values[0], out level) && int.TryParse(values[1], out int maxLevel))
 					{
@@ -302,7 +296,7 @@ namespace InventoryKamera
 				yReference = 800.0;
 			}
 
-				Rectangle constActivate =  new RECT(
+			Rectangle constActivate =  new RECT(
 				Left:   (int)( 70 / 1280.0 * Navigation.GetWidth() ),
 				Top:    (int)( 665 / 720.0 * Navigation.GetHeight() ),
 				Right:  (int)( 100 / 1280.0 * Navigation.GetWidth() ),
@@ -318,15 +312,12 @@ namespace InventoryKamera
 					yOffset = (int)( ( 225 + ( constellation * 75 ) ) / yReference * Navigation.GetHeight() );
 				}
 
-				
-				Navigation.SetCursorPos(Navigation.GetPosition().Left + (int)(1130 / 1280.0 * Navigation.GetWidth()),
+				Navigation.SetCursorPos(Navigation.GetPosition().Left + (int)( 1130 / 1280.0 * Navigation.GetWidth() ),
 										Navigation.GetPosition().Top + yOffset);
 				Navigation.Click();
 
 				Navigation.Speed speed = constellation == 0 ? Navigation.Speed.Normal : Navigation.Speed.Fast;
 				Navigation.SystemRandomWait(speed);
-
-
 
 				// Grab Color
 				using (Bitmap region = Navigation.CaptureRegion(constActivate))
@@ -350,7 +341,6 @@ namespace InventoryKamera
 		{
 			int[] talents = {-1,-1,-1};
 
-			
 			int specialOffset = 0;
 
 			// Check if character has a movement talent like
@@ -379,7 +369,7 @@ namespace InventoryKamera
 				// Change y-offset for talent clicking
 				int yOffset = (int)( 110 / yRef * Navigation.GetHeight() ) + ( i + ( ( i == 2 ) ? specialOffset : 0 ) ) * (int)(60 / yRef * Navigation.GetHeight() );
 
-				Navigation.SetCursorPos(Navigation.GetPosition().Left + (int)(1130 / xRef * Navigation.GetWidth()), Navigation.GetPosition().Top + yOffset);
+				Navigation.SetCursorPos(Navigation.GetPosition().Left + (int)( 1130 / xRef * Navigation.GetWidth() ), Navigation.GetPosition().Top + yOffset);
 				Navigation.Click();
 				Navigation.Speed speed = i == 0 ? Navigation.Speed.Normal : Navigation.Speed.Fast;
 				Navigation.SystemRandomWait(speed);
@@ -394,10 +384,8 @@ namespace InventoryKamera
 					Scraper.SetContrast(60, ref n);
 					Scraper.SetInvert(ref n);
 
-
 					string text = Scraper.AnalyzeText(n).Trim();
 					text = Regex.Replace(text, @"\D", "");
-
 
 					if (int.TryParse(text, out int level))
 					{
@@ -411,12 +399,10 @@ namespace InventoryKamera
 					n.Dispose();
 					talentLevel.Dispose();
 				}
-
 			}
 
 			Navigation.sim.Keyboard.KeyPress(WindowsInput.Native.VirtualKeyCode.ESCAPE);
 			return talents;
 		}
-
 	}
 }

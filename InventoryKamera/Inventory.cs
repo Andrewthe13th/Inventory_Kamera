@@ -3,13 +3,13 @@ using Newtonsoft.Json;
 
 namespace InventoryKamera
 {
-    public class Inventory
-    {
-        [JsonProperty] private List<Weapon> weapons;
-        [JsonProperty] private List<Artifact> artifacts;
-        [JsonProperty] private List<Material> materials;
-        [JsonProperty] private List<Material> characterDevelopmentItems;
-        //private List<Artifact> equippedArtifacts;
+	public class Inventory
+	{
+		[JsonProperty] private List<Weapon> weapons;
+		[JsonProperty] private List<Artifact> artifacts;
+		[JsonProperty] private List<Material> materials;
+		[JsonProperty] private List<Material> characterDevelopmentItems;
+		//private List<Artifact> equippedArtifacts;
 
 		public int size
 		{
@@ -17,14 +17,14 @@ namespace InventoryKamera
 			set => size = weapons.Count + artifacts.Count;
 		}
 
-        public Inventory()
-        {
-            weapons = new List<Weapon>();
-            artifacts = new List<Artifact>();
-            materials = new List<Material>();
-            characterDevelopmentItems = new List<Material>();
-            //equippedArtifacts = new List<Artifact>();
-        }
+		public Inventory()
+		{
+			weapons = new List<Weapon>();
+			artifacts = new List<Artifact>();
+			materials = new List<Material>();
+			characterDevelopmentItems = new List<Material>();
+			//equippedArtifacts = new List<Artifact>();
+		}
 
 		public void Add(Weapon w)
 		{

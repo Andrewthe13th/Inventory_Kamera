@@ -4,12 +4,9 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
-using Accord;
 using Accord.Imaging;
 using Accord.Imaging.Filters;
-using Accord.Math.Geometry;
 using static InventoryKamera.Artifact;
 
 namespace InventoryKamera
@@ -300,9 +297,9 @@ namespace InventoryKamera
 			List<Bitmap> artifactImages = new List<Bitmap>();
 
 			Bitmap card;
-			RECT reference; 
+			RECT reference;
 			Bitmap gearSlot, mainStat, subStats, level, equipped, rarity, locked;
-			 
+
 			if (Navigation.GetAspectRatio() == new Size(16, 9))
 			{
 				reference = new RECT(new Rectangle(862, 80, 327, 560));
@@ -387,7 +384,7 @@ namespace InventoryKamera
 				Right: (int)( 312.0 / reference.Width * card.Width ),
 				Bottom: (int)( 228.0 / reference.Height * card.Height )), card.PixelFormat);
 			//Navigation.DisplayBitmap(locked);
-			
+
 			// Add all to artifact Images
 			artifactImages.Add(gearSlot); // 0
 			artifactImages.Add(mainStat);
@@ -398,9 +395,9 @@ namespace InventoryKamera
 			artifactImages.Add(locked); //6
 			artifactImages.Add(card);
 
-            // Send Image to Worker Queue
-            InventoryKamera.workerQueue.Enqueue(new OCRImage(artifactImages, "artifact", id));
-        }
+			// Send Image to Worker Queue
+			InventoryKamera.workerQueue.Enqueue(new OCRImage(artifactImages, "artifact", id));
+		}
 
 		public static async Task<Artifact> CatalogueFromBitmapsAsync(List<Bitmap> bm, int id)
 		{

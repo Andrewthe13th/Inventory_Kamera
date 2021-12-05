@@ -336,7 +336,7 @@ namespace InventoryKamera
 			if (bm.Count >= 4)
 			{
 				int w_name = 0; int w_level = 1; int w_refinement = 2; int w_equippedCharacter = 3;
-				
+
 				// Check for Rarity
 				Color rarityColor = bm[0].GetPixel(5, 5);
 				Color fiveStar = Color.FromArgb(255, 188, 105, 50);
@@ -352,8 +352,6 @@ namespace InventoryKamera
 				bool bRarity3 = Scraper.CompareColors(threeStar, rarityColor);
 
 				bool b_RarityAboveTwo = bRarity5 || bRarity4 || bRarity3;
-
-				
 
 				if (b_RarityAboveTwo)
 				{
@@ -371,7 +369,6 @@ namespace InventoryKamera
 
 					// End Threads
 					thr1.Join(); thr2.Join(); thr3.Join(); thr4.Join();
-
 				}
 				else
 				{
@@ -467,14 +464,12 @@ namespace InventoryKamera
 			string text = Scraper.AnalyzeText(n).Trim();
 			text = Regex.Replace(text, @"(?![\d/]).", "");
 
-
 			if (text.Contains('/'))
 			{
 				string[] temp = text.Split(new[] { '/' }, 2);
 
 				if (temp.Length == 2)
 				{
-
 					if (int.TryParse(temp[0], out int level) && int.TryParse(temp[1], out int maxLevel))
 					{
 						ascension = level < maxLevel;
@@ -490,7 +485,7 @@ namespace InventoryKamera
 
 		public static int ScanRefinement(Bitmap bm)
 		{
-			using (Bitmap up = Scraper.ResizeImage(bm, bm.Width*2, bm.Height*2))
+			using (Bitmap up = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2))
 			{
 				Bitmap n = Scraper.ConvertToGrayscale(up);
 				Scraper.SetInvert(ref n);

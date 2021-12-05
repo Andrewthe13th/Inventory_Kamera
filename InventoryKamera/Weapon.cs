@@ -12,7 +12,7 @@ namespace InventoryKamera
 		[JsonProperty] public string equippedCharacter { get; private set; }
 		public int id { get; private set; }
 
-		public int rarity { get;  private set; }
+		public int rarity { get; private set; }
 
 		public Weapon()
 		{
@@ -44,7 +44,7 @@ namespace InventoryKamera
 
 		public bool IsValid()
 		{
-			return	1 <= level && level <= 90 && 0 <= refinementLevel && refinementLevel <= 5 && Scraper.IsValidWeapon(name);
+			return 1 <= level && level <= 90 && 0 <= refinementLevel && refinementLevel <= 5 && Scraper.IsValidWeapon(name);
 		}
 
 		public int AscensionCount()

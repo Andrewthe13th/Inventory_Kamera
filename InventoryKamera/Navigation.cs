@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -187,9 +186,9 @@ namespace InventoryKamera
 			Click();
 			SystemRandomWait(Speed.UI);
 		}
+
 		public static void SelectCharacterAttributes()
 		{
-			
 			int xOffset = (int)(170 / 1280.0 * GetWidth());
 			int yOffset = (int)(105 / 720.0 * GetHeight());
 
@@ -208,7 +207,7 @@ namespace InventoryKamera
 			int xOffset = (int)(170 / 1280.0 * GetWidth());
 			int yOffset = (int)(245 / 720.0 * GetHeight());
 
-			if (GetAspectRatio() == new Size(8,5))
+			if (GetAspectRatio() == new Size(8, 5))
 			{
 				yOffset = (int)( 245 / 800.0 * GetHeight() );
 			}
@@ -238,7 +237,7 @@ namespace InventoryKamera
 			int xOffset = (int)(1230 / 1280.0 * GetWidth());
 			int yOffset = (int)(350 / 720.0 * GetHeight());
 
-			if (GetAspectRatio() == new Size(8,5))
+			if (GetAspectRatio() == new Size(8, 5))
 			{
 				yOffset = (int)( 400 / 800.0 * GetHeight() );
 			}
@@ -359,7 +358,7 @@ namespace InventoryKamera
 			switch (type)
 			{
 				case Speed.Normal:
-					value = r.Next(320, 500);
+					value = 500;
 					value += delay;
 					break;
 
@@ -412,9 +411,18 @@ namespace InventoryKamera
 					value = 100;
 					value += delay / 3;
 					break;
+
+				default:
+					value = 1000;
+					break;
 			}
 
-			Thread.Sleep(value);
+			Wait(value);
+		}
+
+		public static void Wait(int ms = 1000)
+		{
+			Thread.Sleep(ms);
 		}
 
 		public static void SetDelay(int _delay)

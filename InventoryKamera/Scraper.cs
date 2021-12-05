@@ -7,7 +7,6 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Threading;
-using System.Xml.Linq;
 using Accord;
 using Accord.Imaging.Filters;
 using Tesseract;
@@ -72,10 +71,10 @@ namespace InventoryKamera
 			"hp", //0
 			"hp%",
 			"atk",
-			"atk%", 
+			"atk%",
 			"def", //4
 			"def%",
-			"energyrecharge", 
+			"energyrecharge",
 			"elementalmastery",
 			"healingbonus", //8
 			"critrate",
@@ -83,7 +82,7 @@ namespace InventoryKamera
 			"physicaldmgbonus",
 			"pyrodmgbonus", //12
 			"electrodmgbonus",
-			"cryodmgbonus", 
+			"cryodmgbonus",
 			"hydrodmgbonus",
 			"anemodmgbonus",//16
 			"geodmgbonus",
@@ -419,6 +418,9 @@ namespace InventoryKamera
 			"spectralnucleus",
 			"spectralheart",
 			"spectralhusk",
+			"concealedtalon",
+			"concealedunguis",
+			"concealedclaw",
 
 			"dvalinsplume",
 			"dvalinsclaw",
@@ -708,6 +710,7 @@ namespace InventoryKamera
 			"seaganoderma",
 			"sangopearl",
 			"amakumofruit",
+			"fluorescentfungus",
 		};
 
 		public static readonly HashSet<string> enhancementMaterials = new HashSet<string>
@@ -810,6 +813,7 @@ namespace InventoryKamera
 		#endregion OCR
 
 		#region Check valid parameters
+
 		public static bool IsValidSetName(string setName)
 		{
 			if (setNames.Contains(setName))
@@ -823,8 +827,6 @@ namespace InventoryKamera
 				return false;
 			};
 		}
-
-		
 
 		public static bool IsValidStat(string stat)
 		{
@@ -909,6 +911,8 @@ namespace InventoryKamera
 
 		#endregion Check valid parameters
 
+		#region Element Searching
+
 		public static string FindElementByName(string name)
 		{
 			return FindClosestInList(name, elements);
@@ -942,7 +946,7 @@ namespace InventoryKamera
 		private static string FindClosestInList(string source, List<string> targets)
 		{
 			if (targets.Contains(source)) return source;
-			
+
 			int index = int.MaxValue;
 			int maxEdits = 15;
 			for (int i = 0; i < targets.Count; i++)
@@ -973,7 +977,7 @@ namespace InventoryKamera
 			// Return trivial case - difference in string lengths exceeds threshhold
 			if (Math.Abs(length1 - length2) > maxEdits) { return int.MaxValue; }
 
-			// Ensure arrays [i] / length1 use shorter length 
+			// Ensure arrays [i] / length1 use shorter length
 			if (length1 > length2)
 			{
 				Swap(ref setName, ref text);
@@ -994,7 +998,6 @@ namespace InventoryKamera
 
 			for (int j = 1; j <= maxj; j++)
 			{
-
 				// Rotate
 				dSwap = dMinus2;
 				dMinus2 = dMinus1;
@@ -1009,7 +1012,6 @@ namespace InventoryKamera
 
 				for (int i = 1; i <= maxi; i++)
 				{
-
 					int cost = text[im1] == setName[jm1] ? 0 : 1;
 
 					int del = dCurrent[im1] + 1;
@@ -1034,12 +1036,15 @@ namespace InventoryKamera
 			int result = dCurrent[maxi];
 			return ( result > maxEdits ) ? int.MaxValue : result;
 		}
+
 		private static void Swap<T>(ref T arg1, ref T arg2)
 		{
 			T temp = arg1;
 			arg1 = arg2;
 			arg2 = temp;
 		}
+
+		#endregion Element Searching
 
 		public static bool CompareColors(Color a, Color b)
 		{

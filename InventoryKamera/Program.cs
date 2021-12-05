@@ -3,13 +3,13 @@ using System.Windows.Forms;
 
 namespace InventoryKamera
 {
-	static class Program
+	internal static class Program
 	{
 		/// <summary>
 		/// The main entry point for the application.
 		/// </summary>
 		[STAThread]
-		static void Main()
+		private static void Main()
 		{
 			if (Environment.OSVersion.Version.Major >= 6)
 				SetProcessDPIAware();

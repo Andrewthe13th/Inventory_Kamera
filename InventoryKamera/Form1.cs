@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -13,7 +12,6 @@ using NHotkey;
 using NHotkey.WindowsForms;
 using WindowsInput.Native;
 
-
 namespace InventoryKamera
 {
 	public partial class Form1 : Form
@@ -21,7 +19,6 @@ namespace InventoryKamera
 		private static Thread mainThread;
 		private static InventoryKamera data = new InventoryKamera();
 		private static string filePath = "";
-
 
 		private bool GOODChecked;
 		private bool SeelieChecked;
@@ -147,7 +144,6 @@ namespace InventoryKamera
 			CharDevItems_CheckBox.Checked = Properties.Settings.Default.ScanCharDevItems;
 			Materials_CheckBox.Checked = Properties.Settings.Default.ScanMaterials;
 
-
 			ScannerDelay_TrackBar.Value = Properties.Settings.Default.ScannerDelay;
 
 			OutputPath_TextBox.Text = Properties.Settings.Default.OutputPath;
@@ -214,6 +210,7 @@ namespace InventoryKamera
 					Debug.WriteLine("Already running");
 					return;
 				}
+				running = true;
 
 				// Create boolean array
 				bool[] items = new bool[5];
@@ -230,63 +227,68 @@ namespace InventoryKamera
 				HotkeyManager.Current.AddOrReplace("Stop", Keys.Enter, Hotkey_Pressed);
 
 				mainThread = new Thread(() =>
+				{
+					try
 					{
-						try
-						{
-							// Get Screen Location and Size
-							Navigation.Initialize("GenshinImpact");
+						// Get Screen Location and Size
+						Navigation.Initialize("GenshinImpact");
 
-							List<Size> sizes = new List<Size>
+						List<Size> sizes = new List<Size>
 						{
 							new Size(16,9),
 							//new Size(8,5),
 						};
 
-							if (!sizes.Contains(Navigation.GetAspectRatio()))
-							{
-								throw new Exception($"{Navigation.GetSize()} is an invalid resolution.");
-							}
-
-							// Add navigation delay
-							Navigation.SetDelay(ScannerDelayValue(Delay));
-
-							// The Data object of json object
-							data.GatherData(formats, items);
-
-							if (formats[0])
-							{
-								// Covert to GOOD format
-								GOOD good = new GOOD(data);
-								// Make Json File
-								good.WriteToJSON(OutputPath_TextBox.Text, Database_MenuItem.Text);
-							}
-
-							if (formats[1])
-							{
-								// Seelie
-							}
-
-							UserInterface.SetProgramStatus("Finished");
-						}
-						catch (ThreadAbortException)
+						if (!sizes.Contains(Navigation.GetAspectRatio()) && ( Navigation.GetHeight() != 720 || Navigation.GetWidth() != 1280 ))
 						{
-							// Workers can get stuck if the thread is aborted or an exception is raised
-							data.StopImageProcessorWorkers();
+							throw new Exception($"{Navigation.GetSize()} is an invalid resolution.");
 						}
-						catch (Exception ex)
+
+						// Add navigation delay
+						Navigation.SetDelay(ScannerDelayValue(Delay));
+
+						// The Data object of json object
+						data.GatherData(formats, items);
+
+						if (formats[0])
 						{
-							// Workers can get stuck if the thread is aborted or an exception is raised
-							data.StopImageProcessorWorkers();
-							Debug.WriteLine($"{ex.Message}\n{ex.StackTrace}\n");
-							UserInterface.AddError($"{ex.Message}" + Environment.NewLine + $"{ex.StackTrace}");
+							// Covert to GOOD format
+							GOOD good = new GOOD(data);
+							// Make Json File
+							good.WriteToJSON(OutputPath_TextBox.Text, Database_MenuItem.Text);
 						}
-						finally
+
+						if (formats[1])
 						{
-							ResetUI();
-							running = false;
-							Debug.WriteLine("No longer running");
+							// Seelie
+							Seelie seelie = new Seelie(data);
+
+							seelie.WriteToJSON(OutputPath_TextBox.Text, Database_MenuItem.Text);
 						}
-					})
+
+						UserInterface.SetProgramStatus("Finished");
+					}
+					catch (ThreadAbortException)
+					{
+						// Workers can get stuck if the thread is aborted or an exception is raised
+						data.StopImageProcessorWorkers();
+						UserInterface.SetProgramStatus("Scan stopped");
+					}
+					catch (Exception ex)
+					{
+						// Workers can get stuck if the thread is aborted or an exception is raised
+						data.StopImageProcessorWorkers();
+						Debug.WriteLine($"{ex.Message}\n{ex.StackTrace}\n");
+						UserInterface.AddError($"{ex.Message}" + Environment.NewLine + $"{ex.StackTrace}");
+						UserInterface.SetProgramStatus("Scan aborted", ok: false);
+					}
+					finally
+					{
+						ResetUI();
+						running = false;
+						Debug.WriteLine("No longer running");
+					}
+				})
 				{
 					IsBackground = true
 				};
@@ -459,6 +461,7 @@ namespace InventoryKamera
 		}
 
 		#region Unicode Helper Functions
+
 		// Needed to display OEM keys as glyphs from keyboard. Should work for other languages
 		// and keyboard layouts but only tested with QWERTY layout.
 		private string KeyCodeToUnicode(Keys key)
@@ -491,7 +494,7 @@ namespace InventoryKamera
 
 		[DllImport("user32.dll")]
 		private static extern int ToUnicodeEx(uint wVirtKey, uint wScanCode, byte[] lpKeyState, [Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pwszBuff, int cchBuff, uint wFlags, IntPtr dwhkl);
-		#endregion Unicode Helper Functions
 
+		#endregion Unicode Helper Functions
 	}
 }

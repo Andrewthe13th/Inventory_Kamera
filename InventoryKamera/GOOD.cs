@@ -265,19 +265,19 @@ namespace InventoryKamera
 		{
 			"hp", //0
 			"hp_",
-            "atk",
-			"atk_", 
+			"atk",
+			"atk_",
 			"def", //4
             "def_",
 			"enerRech_",
-            "eleMas",
+			"eleMas",
 			"heal_", //8
 			"critRate_",
 			"critDMG_",
 			"physical_dmg_",
-            "pyro_dmg_", //12
+			"pyro_dmg_", //12
 			"electro_dmg_",
-			"cryo_dmg_", 
+			"cryo_dmg_",
 			"hydro_dmg_",
 			"anemo_dmg_", //16
             "geo_dmg_",
@@ -303,7 +303,6 @@ namespace InventoryKamera
 			artifacts = new List<IArtifact>();
 			weapons = new List<IWeapon>();
 
-
 			// Assign Characters
 			foreach (Character character in genshinData.GetCharacters())
 			{
@@ -323,7 +322,6 @@ namespace InventoryKamera
 			// Assign Weapons
 			foreach (Weapon weapon in genshinData.GetInventory().GetWeapons())
 			{
-
 				IWeapon w = new IWeapon
 				{
 					key = eng_Weapons[Scraper.weapons.IndexOf(weapon.name)],
@@ -376,7 +374,7 @@ namespace InventoryKamera
 			}
 		}
 
-		public void WriteToJSON(string outputDirectory, string oldDataFilePath = "")
+		internal void WriteToJSON(string outputDirectory, string oldDataFilePath = "")
 		{
 			// Create JSON object
 			string dataString = JsonConvert.SerializeObject(this);
@@ -388,14 +386,13 @@ namespace InventoryKamera
 			}
 
 			// Create file with timestamp in name
-			string fileName = "\\genshinData_GOOD_" + DateTime.Now.ToString("MM.dd.yyyy_HH.mm.ss") + ".json";
+			string fileName = "\\genshinData_GOOD_" + DateTime.Now.ToString("yyyy.MM.dd_HH.mm") + ".json";
 			fileName = fileName.Replace('/', '_');
 			string outputFile = outputDirectory + fileName;
 			if (File.Exists(oldDataFilePath) && false) // && false hack. TODO: add support for data merging
 			{
 				try
 				{
-
 					// Try to load external GOOD data to update.
 					// For preserving information at when uploading data to
 					// https://frzyc.github.io/genshin-optimizer
@@ -459,17 +456,18 @@ namespace InventoryKamera
 
 			if (!File.Exists(outputFile)) // did not make file
 			{
-				UserInterface.AddError("Failed to output at : " + outputDirectory);
+				UserInterface.AddError($"Failed to output at : {outputDirectory}");
 			}
 		}
 
 		private static void WriteStringToFile(string dataString, string outputFile)
 		{
-			using (var streamWriter = new StreamWriter(outputFile, true))
+			using (var streamWriter = new StreamWriter(outputFile))
 			{
 				streamWriter.WriteLine(dataString.ToString());
 			}
 		}
+
 		public struct IArtifact
 		{
 			[JsonProperty] public string setKey;
