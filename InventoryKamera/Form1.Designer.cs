@@ -97,6 +97,7 @@
 			this.Artifacts_Checkbox = new System.Windows.Forms.CheckBox();
 			this.Weapons_CheckBox = new System.Windows.Forms.CheckBox();
 			this.ScannerDelay_TrackBar = new System.Windows.Forms.TrackBar();
+			this.label1 = new System.Windows.Forms.Label();
 			((System.ComponentModel.ISupportInitialize)(this.CharacterTalent3_PictureBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.CharacterTalent2_PictureBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.CharacterTalent1_PictureBox)).BeginInit();
@@ -453,7 +454,7 @@
 			// 
 			this.Instructions2b_Label.AutoSize = true;
 			this.Instructions2b_Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.3F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.Instructions2b_Label.Location = new System.Drawing.Point(181, 68);
+			this.Instructions2b_Label.Location = new System.Drawing.Point(181, 80);
 			this.Instructions2b_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
 			this.Instructions2b_Label.Name = "Instructions2b_Label";
 			this.Instructions2b_Label.Size = new System.Drawing.Size(235, 13);
@@ -464,7 +465,7 @@
 			// 
 			this.Instruction3_Label.AutoSize = true;
 			this.Instruction3_Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.3F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.Instruction3_Label.Location = new System.Drawing.Point(159, 82);
+			this.Instruction3_Label.Location = new System.Drawing.Point(159, 94);
 			this.Instruction3_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
 			this.Instruction3_Label.Name = "Instruction3_Label";
 			this.Instruction3_Label.Size = new System.Drawing.Size(293, 13);
@@ -894,12 +895,23 @@
 			this.ScannerDelay_TrackBar.Value = global::InventoryKamera.Properties.Settings.Default.ScannerDelay;
 			this.ScannerDelay_TrackBar.ValueChanged += new System.EventHandler(this.ScannerDelay_TrackBar_ValueChanged);
 			// 
+			// label1
+			// 
+			this.label1.AutoSize = true;
+			this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.3F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+			this.label1.Location = new System.Drawing.Point(181, 67);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(295, 13);
+			this.label1.TabIndex = 87;
+			this.label1.Text = "2a. Under Graphics, set display mode to 1280x720 Windowed";
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
 			this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(234)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
 			this.ClientSize = new System.Drawing.Size(595, 472);
+			this.Controls.Add(this.label1);
 			this.Controls.Add(this.Materials_CheckBox);
 			this.Controls.Add(this.GOOD_CheckBox);
 			this.Controls.Add(this.Seelie_CheckBox);
@@ -1038,6 +1050,7 @@
 		private System.Windows.Forms.ToolStripMenuItem Database_MenuItem;
 		private System.Windows.Forms.PictureBox GearPictureBox;
 		private System.Windows.Forms.CheckBox Materials_CheckBox;
+		private System.Windows.Forms.Label label1;
 	}
 }
 

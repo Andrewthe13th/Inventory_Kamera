@@ -407,6 +407,9 @@ namespace InventoryKamera
 
 		private void OptionsMenuItem_KeyDown(object sender, KeyEventArgs e)
 		{
+			e.Handled = true;
+			e.SuppressKeyPress = true;
+
 			// Virtual keys for 0-9, A-Z
 			bool vk = e.KeyCode >= Keys.D0 && e.KeyCode <= Keys.Z;
 			// Numpad keys and function keys (internally accepts up to F24)
@@ -414,7 +417,7 @@ namespace InventoryKamera
 			// OEM keys (Keys that vary depending on keyboard layout)
 			bool oem = e.KeyCode >= Keys.Oem1 && e.KeyCode <= Keys.Oem7;
 			// Arrow keys, spacebar, INS, DEL, HOME, END, PAGEUP, PAGEDOWN
-			bool misc = e.KeyCode == Keys.Space || (e.KeyCode >= Keys.Left && e.KeyCode <= Keys.Down) || (e.KeyCode >= Keys.Prior && e.KeyCode <= Keys.Home) || e.KeyCode == Keys.Insert || e.KeyCode == Keys.Delete;
+			bool misc = e.KeyCode == Keys.Space || (e.KeyCode >= Keys.Left && e.KeyCode <= Keys.Down) || (e.KeyCode >= Keys.Prior && e.KeyCode <= Keys.Home) || e.KeyCode == Keys.Insert || e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back;
 
 			// Validate that key is an acceptable Genshin keybind.
 			if (!vk && !np && !oem && !misc)
@@ -425,13 +428,14 @@ namespace InventoryKamera
 			ToolStripTextBox s = (ToolStripTextBox)sender;
 
 			// Needed to differentiate between NUMPAD numbers and numbers at top of keyboard
-			s.Text = np ? new KeysConverter().ConvertToString(e.KeyCode) : KeyCodeToUnicode(e.KeyData);
+			s.Text = np || e.KeyCode == Keys.Back ? new KeysConverter().ConvertToString(e.KeyCode) : KeyCodeToUnicode(e.KeyData);
 
 			// Spacebar or upper navigation keys (INSERT-PAGEDOWN keys) make textbox empty
-			if (s.Text.Equals("") || s.Text.Equals(" "))
+			if (string.IsNullOrWhiteSpace(s.Text) || string.IsNullOrEmpty(s.Text))
 			{
 				s.Text = new KeysConverter().ConvertToString(e.KeyCode);
 			}
+
 
 			switch (s.Tag)
 			{
