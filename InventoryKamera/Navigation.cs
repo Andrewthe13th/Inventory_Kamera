@@ -357,24 +357,39 @@ namespace InventoryKamera
 
 			switch (type)
 			{
-				case Speed.Normal:
-					value = 500;
-					value += delay;
-					break;
-
-				case Speed.Instant:
+				case Speed.Fastest:
 					value = 10;
 					value += delay / 10;
 					break;
 
 				case Speed.Faster:
-					value = 40;
+					value = 100;
 					value += delay / 5;
 					break;
 
 				case Speed.Fast:
-					value = r.Next(125, 150);
+					value = 250;
 					value += delay / 2;
+					break;
+
+				case Speed.Normal:
+					value = 500;
+					value += delay;
+					break;
+
+				case Speed.Slow:
+					value = 1000;
+					value += 3 * delay;
+					break;
+
+				case Speed.Slower:
+					value = 2000;
+					value += 3 * delay;
+					break;
+
+				case Speed.Slowest:
+					value = 3000;
+					value += 3 * delay;
 					break;
 
 				case Speed.CharacterUI:
@@ -385,11 +400,6 @@ namespace InventoryKamera
 				case Speed.ArtifactIgnore:
 					value = r.Next(50, 70);
 					value += delay / 5;
-					break;
-
-				case Speed.Slow:
-					value = r.Next(1900, 2600);
-					value += 3 * delay;
 					break;
 
 				case Speed.UI:
@@ -432,11 +442,13 @@ namespace InventoryKamera
 
 		public enum Speed
 		{
+			Slowest,
+			Slower,
 			Slow,
 			Normal,
-			Instant,
 			Fast,
 			Faster,
+			Fastest,
 			UI,
 			ArtifactIgnore,
 			SelectNextCharacter,

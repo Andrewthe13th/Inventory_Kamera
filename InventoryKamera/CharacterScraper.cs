@@ -38,6 +38,8 @@ namespace InventoryKamera
 			bool ascension = false;
 			int experience = 0;
 
+			Navigation.SelectCharacterAttributes();
+
 			// Scan the Name and element of Character. Attempt 20 times max.
 			ScanNameAndElement(ref name, ref element);
 
@@ -54,7 +56,6 @@ namespace InventoryKamera
 					firstCharacterName = name;
 
 				// Scan Level and ascension
-				Navigation.SelectCharacterAttributes();
 				int level = ScanLevel(ref ascension);
 				if (level == -1)
 				{
@@ -220,7 +221,6 @@ namespace InventoryKamera
 
 			do
 			{
-				Navigation.SystemRandomWait(Navigation.Speed.Normal);
 				Bitmap bm = Navigation.CaptureRegion(region);
 
 				bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
@@ -245,6 +245,7 @@ namespace InventoryKamera
 					n.Dispose();
 					bm.Dispose();
 				}
+				Navigation.SystemRandomWait(Navigation.Speed.Normal);
 			} while (level == -1 && attempt < maxAttempts);
 
 			return -1;

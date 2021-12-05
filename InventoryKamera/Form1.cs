@@ -201,6 +201,8 @@ namespace InventoryKamera
 		{
 			SaveSettings();
 
+			UserInterface.ResetAll();
+
 			UserInterface.SetProgramStatus("Scanning");
 
 			if (Directory.Exists(OutputPath_TextBox.Text))

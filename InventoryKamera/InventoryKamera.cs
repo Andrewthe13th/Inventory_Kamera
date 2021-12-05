@@ -27,6 +27,7 @@ namespace InventoryKamera
 			inventory = new Inventory();
 			equippedArtifacts = new List<Artifact>();
 			equippedWeapons = new List<Weapon>();
+			ImageProcessors = new List<Thread>();
 		}
 
 		public void StopImageProcessorWorkers()
@@ -55,6 +56,7 @@ namespace InventoryKamera
 				processor.Start();
 				ImageProcessors.Add(processor);
 			}
+			Debug.WriteLine($"Added {ImageProcessors.Count} workers");
 
 			Scraper.RestartEngines();
 
@@ -141,6 +143,7 @@ namespace InventoryKamera
 			{
 				ImageProcessors.RemoveAll(process => !process.IsAlive);
 			}
+			b_threadCancel = false;
 		}
 
 		public void ImageProcessorWorker()
