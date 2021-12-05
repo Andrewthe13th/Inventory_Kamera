@@ -466,6 +466,11 @@ namespace InventoryKamera
 
 
             // gemstones
+            ["brilliantdiamondgemstone"] = characterDevelopmentItemsCount++,
+            ["brilliantdiamondchunk"] = characterDevelopmentItemsCount++,
+            ["brilliantdiamondfragment"] = characterDevelopmentItemsCount++,
+            ["brilliantdiamondsliver"] = characterDevelopmentItemsCount++,
+
             ["agnidusagategemstone"] = characterDevelopmentItemsCount++,
             ["agnidusagatechunk"] = characterDevelopmentItemsCount++,
             ["agnidusagatefragment"] = characterDevelopmentItemsCount++,

@@ -105,10 +105,15 @@ namespace InventoryKamera
             "element_2|smoldering_pearl|0",
             "element_2|dew_of_repudiation|0",
             "element_2|storm_beads|0",
-            "element_2|riftborn_regalia|0", 
+            "element_2|riftborn_regalia|0",
 
 
             // gemstones
+            "element_1|brilliant_diamond|3",
+            "element_1|brilliant_diamond|2",
+            "element_1|brilliant_diamond|1",
+            "element_1|brilliant_diamond|0", 
+
             "element_1|agnidus_agate|3", 
             "element_1|agnidus_agate|2", 
             "element_1|agnidus_agate|1", 
