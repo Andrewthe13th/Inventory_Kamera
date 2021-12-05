@@ -6,9 +6,10 @@ An OCR Scanner that scans your characters, weapons, artifacts, materials and cha
 1. [Download the program](https://github.com/Andrewthe13th/Inventory_Kamera/releases/tag/v1.0), unzip and then run.
 2. Open Genshin Impact and Log In. 
 3. In Genshin Impact, go to Settings
-4. Under Controls, set Control Type to Keyboard
-5. Exit Settings and leave the game in the Paimon Menu
-6. Go back to the scanner application, then click SCAN. (You can stop the scan anytime by pressing the 'ENTER' key)
+4. Under Graphics, set display mode to 1280x720 Windowed
+5. Under Controls, set Control Type to Keyboard
+6. Exit Settings and leave the game in the Paimon Menu
+7. Go back to the scanner application, then click SCAN. (You can stop the scan anytime by pressing the 'ENTER' key)
 Note: You will not be able to use your computer while the scan is taking place due to require the use of mouse and keyboard inputs.
 
 ### Can this get me banned?
