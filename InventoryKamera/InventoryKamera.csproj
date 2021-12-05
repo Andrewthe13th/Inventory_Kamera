@@ -162,7 +162,7 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="GenshinData.cs" />
+    <Compile Include="InventoryKamera.cs" />
     <Compile Include="OCRImage.cs" />
     <Compile Include="Inventory.cs" />
     <Compile Include="Navigation.cs" />
