@@ -162,7 +162,7 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="InventoryKamera.cs" />
+    <Compile Include="GenshinData.cs" />
     <Compile Include="OCRImage.cs" />
     <Compile Include="Inventory.cs" />
     <Compile Include="Navigation.cs" />
@@ -210,7 +210,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="DesignBust_genshin_impact_folder_icon256.ico" />
     <Content Include="Item_Special_Kamera.ico" />
   </ItemGroup>
   <ItemGroup>

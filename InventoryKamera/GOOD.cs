@@ -296,9 +296,9 @@ namespace InventoryKamera
 		public GOOD(InventoryKamera genshinData)
 		{
 			// Get rid of VS warning since we are converting this class to JSON
-			format = "GOOD".Trim();
+			format = "GOOD";
 			version = 1;
-			source = "Genshin_Data_Scanner".Trim();
+			source = "Inventory_Kamera";
 			characters = new List<ICharacter>();
 			artifacts = new List<IArtifact>();
 			weapons = new List<IWeapon>();
