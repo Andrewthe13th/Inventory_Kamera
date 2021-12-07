@@ -1,29 +1,53 @@
 # Inventory Kamera - A Genshin Data Scanner
 
-An OCR Scanner that scans your characters, weapons, artifacts, materials and character development Items in Genshin Impact. Creates a 'GOOD' json formatted code when scanning characters, weapons and artifacts and is used to import data into [Genshin Optimizer](https://frzyc.github.io/genshin-optimizer/#/) and any other projects that adopt the GOOD format such as discord bots. It also create a 'Seelie' json fomat when scanning materials and character development Items to be used with [Seelie](https://seelie.inmagi.com/). This might changed later in future updates.Currently it only supports ENGLISH words. 
+An OCR Scanner that scans your Characters, Weapons, Artifacts, Materials and Character Development items in your Inventory.</br>
+The scanner supports multiple exporting file formats, including these following:
 
-## How to use
-1. [Download the program](https://github.com/Andrewthe13th/Inventory_Kamera/releases/tag/v1.0), unzip and then run.
-2. Open Genshin Impact and Log In. 
-3. In Genshin Impact, go to Settings
-4. Under Graphics, set Display Mode to 1280x720 Windowed
-5. Under Controls, set Control Type to Keyboard
-6. Exit Settings and leave the game in the Paimon Menu
-7. Go back to the scanner application, then click SCAN. (You can stop the scan anytime by pressing the 'ENTER' key)
-Note: You will not be able to use your computer while the scan is taking place due to require the use of mouse and keyboard inputs.
+- `GOOD` .good (JSON) format for [Genshin Optimizer](https://frzyc.github.io/genshin-optimizer/#/) that include Characters, Weapons and Artifacts; and are widely used in many Genshin Impact fan-made projects and services, such as Discord bots.
+- `Seelie` JSON format to be used with [SEELIE.me](https://seelie.inmagi.com/) (Might change later in the future updates)
+
+Currently supports certain game language, screen size, scanning settings, and export options. Please follow the instructions on what you have to do.
+
+## How to use the Scanner
+1. Make sure that you already have [Microsoft Visual C++ Redistributable packages](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2015-2017-2019-and-2022) installed on your device.
+2. [Download the program (Inventory_Kamera_Vx.x.zip)](https://github.com/Andrewthe13th/Inventory_Kamera/releases/latest) and unzip the downloaded file.
+3. Open the folder, and double click `InventoryKamera` to start up the scanner.
+    - This might prompt you with Security or/and User Access prompt. Allow the access to continue.
+5. Open Genshin Impact > Log In > and click 'Start'. 
+6. Press `ESC` (or eqivalent keystroke) to open Paimon menu.
+7. Go to `Settings` (cog button) and set to these setup.
+   - Under `Languages`, set Game Language to `English`.
+   - Under `Graphics`, set Display Mode to `1280x720 Windowed`.
+   - Under `Controls`, set Control Type to `Keyboard`.
+8. Exit `Settings` and leave the game in Paimon Menu
+9. Go back to the scanner application, then click SCAN.
+   - (optional) Set the scanner delays to improve performance (default : 0ms)
+   - (optional) Set the export destination in File Location
+10. You can stop the scanner at any time by pressing `ENTER` key
+11. If there's an Error on the Error Log, copy it; understand it; explain it all in [Report an Issue](https://github.com/Andrewthe13th/Inventory_Kamera/issues)
+
+NOTE: You will not be able to use your computer while the scan is taking place due to require the use of mouse and keyboard inputs.
 
 ### Can this get me banned?
- According to [miHoYo's response](https://genshin.mihoyo.com/en/news/detail/5763), I would say no. 
+ According to [miHoYo's response to Script, Plug-In, and Third-Party Software](https://genshin.mihoyo.com/en/news/detail/5763), I would say no. 
 1. This scanner does not exploit the game. It just takes pictures of the game window.
-2. This scanner does no provide artificial in-game progress.
+2. This scanner does not provide artificial in-game progress.
 3. This scanner does nothing to provide account selling/exchanging.
-4. Doesn't provide top up in primo gems. 
-Also this scanner has random length pauses which makes sure it doesn't scan too fast to prevent false positives.
+4. Doesn't provide Top-up Primogem. 
+
+Also this scanner has random duration of pauses which makes the scanner prevent false positive by scanning too fast.
 My account has been used to test this script and has yet to be banned or warned of the use of scripts. 
 
-# License
+## Contribute or Report an Issue
+If you ran through any issue with our scanner, please [Report an Issue here](https://github.com/Andrewthe13th/Inventory_Kamera/issues). 
+
+NOTE: Before sending an issue, please check that there is no other open issue similar to yours by searching up the issue list.
+
+## License
 * This project is under the [MIT](LICENSE.md) license.
-* All rights reserved by © miHoYo Co., Ltd. This project is not affiliated nor endorsed by miHoYo. Genshin Impact™ and other properties belong to their respective owners.
 * This project uses third-party libraries or other resources that may be
 distributed under [different licenses](THIRD-PARTY-NOTICES.md).
 
+---
+
+All rights reserved by © miHoYo Co., Ltd. This project is not affiliated nor endorsed by miHoYo. Genshin Impact™ and other properties belong to their respective owners.
