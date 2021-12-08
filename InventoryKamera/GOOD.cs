@@ -386,7 +386,7 @@ namespace InventoryKamera
 			}
 
 			// Create file with timestamp in name
-			string fileName = "\\genshinData_GOOD_" + DateTime.Now.ToString("yyyy.MM.dd_HH.mm") + ".json";
+			string fileName = "\\genshinData_GOOD_" + DateTime.Now.ToString("yyyy_MM_dd_HH_mm") + ".json";
 			fileName = fileName.Replace('/', '_');
 			string outputFile = outputDirectory + fileName;
 			if (File.Exists(oldDataFilePath) && false) // && false hack. TODO: add support for data merging
