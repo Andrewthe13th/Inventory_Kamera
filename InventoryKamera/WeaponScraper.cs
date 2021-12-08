@@ -1,1072 +1,554 @@
 ﻿using System;
-using System.Drawing;
 using System.Collections.Generic;
-using System.Linq;
 using System.Diagnostics;
+using System.Drawing;
+using System.Linq;
 using System.Text.RegularExpressions;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
+using Accord.Imaging;
+using Accord.Imaging.Filters;
 
 namespace InventoryKamera
 {
-    public static class WeaponScraper
-    {
-        public static List<Weapon> ScanWeapons(ref List<Weapon> equippedWeapon)
-        {
-            List<Weapon> weapons = new List<Weapon>();
-
-            // Get Max weapons from screen
-            int weaponCount = ScanWeaponCount();
-            //Debug.Print("Max Weapons: " + weaponCount.ToString());
-            //int weaponCount = 29;
-            int currentweaponCount = 0;
-            int scrollCount = 0;
-
-            // Where in screen space weapons are
-            Double weaponLocation_X = (Double)Navigation.GetArea().right * ((Double)21 / (Double)160);
-            Double weaponLocation_Y = (Double)Navigation.GetArea().bottom * ((Double)14 / (Double)90);
-            Bitmap bm = new Bitmap(130, 130);
-            Graphics g = Graphics.FromImage(bm);
-            int maxColumns = 7;
-            int maxRows = 4;
-            int totalRows = (int)Math.Ceiling((decimal)( (decimal)(weaponCount) / (decimal)(maxColumns) ));
-            int currentColumn = 0;
-            int currentRow = 0;
-
-            // offset used to move mouse to other weapons
-            int xOffset = Convert.ToInt32((Double)Navigation.GetArea().right * ((Double)12.25 / (Double)160));
-            int yOffset = Convert.ToInt32((Double)Navigation.GetArea().bottom * ((Double)14.5 / (Double)90));
-
-            // Testing for single weapons. REMOVE LATER!!!
-            //Weapon a = ScanWeapon(0);
-
-            
-            // Go through weapon list
-            while (currentweaponCount < weaponCount)
-            {
-                //if ((weaponCount - currentweaponCount <= (maxRows * maxColumns-1)) && (currentColumn == 0))
-                //{
-
-                //    break;
-                //}
-                if ( currentweaponCount % maxColumns == 0)
-                {
-                    currentRow++;
-                    if(totalRows - currentRow <= maxRows-1)
-                    {
-                        break;
-                    }
-                }
-
-
-                // Select weapon
-                Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(weaponLocation_X) + (xOffset * (currentweaponCount % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(weaponLocation_Y));
-                Navigation.sim.Mouse.LeftButtonClick();
-                Navigation.SystemRandomWait(Navigation.Speed.Faster);
-
-                // Scan weapon
-                Weapon w = ScanWeapon(currentweaponCount);
-                currentweaponCount++;
-                currentColumn++;
-
-                // Add weapon to equipped list
-                if (w.GetEquippedCharacter() != 0)
-                {
-                    equippedWeapon.Add(w);
-                }
-
-                // Add to weapon List Object
-                weapons.Add(w);
-
-                // reach end of row
-                if (currentColumn == maxColumns)
-                {
-                    // reset mouse pointer and scroll down weapon list
-                    currentColumn = 0;
-                    scrollCount++;
-
-                    // scroll down
-                    for (int k = 0; k < 10; k++)
-                    {
-                        Navigation.sim.Mouse.VerticalScroll(-1);
-                        // skip a scroll
-                        if ((k == 7) && ((scrollCount % 3) == 0))
-                        {
-                            k++;
-                            if (scrollCount % 9 == 0)
-                            {
-                                if (scrollCount == 18)
-                                {
-                                    scrollCount = 0;
-                                }
-                                else
-                                {
-                                    Navigation.sim.Mouse.VerticalScroll(-1);
-                                }
-                            }
-                        }
-                    }
-                    Navigation.SystemRandomWait(Navigation.Speed.Fast);
-                }
-            };
-
-            // scroll down as much as possible
-            for (int i = 0; i < 20; i++)
-            {
-                Navigation.sim.Mouse.VerticalScroll(-1);
-            }
-            Navigation.SystemRandomWait(Navigation.Speed.Normal);
-
-            // Get weapons on bottom of page
-            int rowsLeft = (int)Math.Ceiling((double)(weaponCount - currentweaponCount) / (double)maxColumns);
-            bool b_EnchancementOre = false;
-            int startPostion = 1;
-            for (int i = startPostion; i < (rowsLeft + startPostion); i++)
-            {
-                for (int k = 0; k < maxColumns; k++)
-                {
-                    if (weaponCount - currentweaponCount <= 0)
-                    {
-                        break;
-                    }
-                    if (!b_EnchancementOre)
-                    {
-                        Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(weaponLocation_X) + (xOffset * (k % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(weaponLocation_Y) + (yOffset * (i % (maxRows + 1))));
-                        Navigation.sim.Mouse.LeftButtonClick();
-                        Navigation.SystemRandomWait(Navigation.Speed.Faster);
-                    }
-
-                    // check if enchnacement Ore
-                    if(weaponCount - currentweaponCount == 7)
-                    {
-                        b_EnchancementOre = CheckForEnchancementOre();
-                    }
-
-                    if (b_EnchancementOre)
-                    {
-                        // Scan top row instead
-                        Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(weaponLocation_X) + (xOffset * (k % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(weaponLocation_Y) + (yOffset * (0 % (maxRows + 1))));
-                        Navigation.sim.Mouse.LeftButtonClick();
-                        Navigation.SystemRandomWait(Navigation.Speed.Faster);
-                    }
-
-                    Weapon w = ScanWeapon(currentweaponCount);
-                    currentweaponCount++;
-
-                    // Add to weapon List Object
-                    weapons.Add(w);
-                }
-            }//*/
-
-
-            return weapons;
-        }
-
-        public static void ScanWeapons()
-        {
-            // Get Max weapons from screen
-            int weaponCount = ScanWeaponCount();
-            UserInterface.SetWeapon_Max(weaponCount);
-            //Debug.Print("Max Weapons: " + weaponCount.ToString());
-            //int weaponCount = 29;
-            int currentweaponCount = 0;
-            int scrollCount = 0;
-
-            // Where in screen space weapons are
-            Double weaponLocation_X = (Double)Navigation.GetArea().right * ((Double)21 / (Double)160);
-            Double weaponLocation_Y = (Double)Navigation.GetArea().bottom * ((Double)14 / (Double)90);
-            Bitmap bm = new Bitmap(130, 130);
-            Graphics g = Graphics.FromImage(bm);
-            int maxColumns = 7;
-            int maxRows = 4;
-            int totalRows = (int)Math.Ceiling((decimal)((decimal)(weaponCount) / (decimal)(maxColumns)));
-            int currentColumn = 0;
-            int currentRow = 0;
-
-            // offset used to move mouse to other weapons
-            int xOffset = Convert.ToInt32((Double)Navigation.GetArea().right * ((Double)12.25 / (Double)160));
-            int yOffset = Convert.ToInt32((Double)Navigation.GetArea().bottom * ((Double)14.5 / (Double)90));
-
-            // Testing for single weapons. REMOVE LATER!!!
-            //Weapon a = ScanWeapon(0);
-
-
-            // Go through weapon list
-            while (currentweaponCount < weaponCount)
-            {
-                //if ((weaponCount - currentweaponCount <= (maxRows * maxColumns-1)) && (currentColumn == 0))
-                //{
-
-                //    break;
-                //}
-                if (currentweaponCount % maxColumns == 0)
-                {
-                    currentRow++;
-                    if (totalRows - currentRow <= maxRows - 1)
-                    {
-                        break;
-                    }
-                }
-
-
-                // Select weapon
-                Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(weaponLocation_X) + (xOffset * (currentweaponCount % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(weaponLocation_Y));
-                Navigation.sim.Mouse.LeftButtonClick();
-                Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
-
-                // Scan weapon
-                ScanWeaponImage(currentweaponCount);
-
-                currentweaponCount++;
-                currentColumn++;
-
-                // reach end of row
-                if (currentColumn == maxColumns)
-                {
-                    // reset mouse pointer and scroll down weapon list
-                    currentColumn = 0;
-                    scrollCount++;
-
-                    // scroll down
-                    for (int k = 0; k < 10; k++)
-                    {
-                        Navigation.sim.Mouse.VerticalScroll(-1);
-                        Navigation.SystemRandomWait(Navigation.Speed.InventoryScroll);
-                        // skip a scroll
-                        if ((k == 7) && ((scrollCount % 3) == 0))
-                        {
-                            k++;
-                            if (scrollCount % 9 == 0)
-                            {
-                                if (scrollCount == 18)
-                                {
-                                    scrollCount = 0;
-                                }
-                                else
-                                {
-                                    Navigation.sim.Mouse.VerticalScroll(-1);
-                                    Navigation.SystemRandomWait(Navigation.Speed.InventoryScroll);
-                                }
-                            }
-                        }
-                    } 
-                }
-            };
-
-            // scroll down as much as possible
-            for (int i = 0; i < 20; i++)
-            {
-                Navigation.sim.Mouse.VerticalScroll(-1);
-            }
-            Navigation.SystemRandomWait(Navigation.Speed.InventoryScroll);
-
-            // Get weapons on bottom of page
-            int rowsLeft = (int)Math.Ceiling((double)(weaponCount - currentweaponCount) / (double)maxColumns);
-            bool b_EnchancementOre = false;
-            int startPostion = 1;
-            for (int i = startPostion; i < (rowsLeft + startPostion); i++)
-            {
-                for (int k = 0; k < maxColumns; k++)
-                {
-                    if (weaponCount - currentweaponCount <= 0)
-                    {
-                        break;
-                    }
-                    if (!b_EnchancementOre)
-                    {
-                        Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(weaponLocation_X) + (xOffset * (k % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(weaponLocation_Y) + (yOffset * (i % (maxRows + 1))));
-                        Navigation.sim.Mouse.LeftButtonClick();
-                        Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
-                    }
-
-                    // check if enchnacement Ore
-                    if (weaponCount - currentweaponCount == 7)
-                    {
-                        b_EnchancementOre = CheckForEnchancementOre();
-                    }
-
-                    if (b_EnchancementOre)
-                    {
-                        // Scan top row instead
-                        Navigation.SetCursorPos(Navigation.GetPosition().left + Convert.ToInt32(weaponLocation_X) + (xOffset * (k % maxColumns)), Navigation.GetPosition().top + Convert.ToInt32(weaponLocation_Y) + (yOffset * (0 % (maxRows + 1))));
-                        Navigation.sim.Mouse.LeftButtonClick();
-                        Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
-                    }
-
-                    ScanWeaponImage(currentweaponCount);
-                    currentweaponCount++;
-                }
-            }//*/
-        }
-
-        public static void ScanWeaponImage(int id)
-        {
-
-            // Grab Image of Entire weapon on Right
-            Double weaponLocation_X = (Double)Navigation.GetArea().right * ((Double)108 / (Double)160);
-            Double weaponLocation_Y = (Double)Navigation.GetArea().bottom * ((Double)10 / (Double)90);
-            int width = 325; int height = 560;
-            Bitmap bm = new Bitmap(width, height,System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-            Graphics g = Graphics.FromImage(bm);
-            int screenLocation_X = Navigation.GetPosition().left + Convert.ToInt32(weaponLocation_X);
-            int screenLocation_Y = Navigation.GetPosition().top + Convert.ToInt32(weaponLocation_Y);
-            g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
-
-            // Separate to all pieces of weapon and add to pics
-            List<Bitmap> weaponImages = new List<Bitmap>();
-
-            // Name
-            int xOffset = 10;
-            int yOffset = 7;
-            Bitmap weaponName = bm.Clone(new Rectangle(xOffset, yOffset, width - 2 * xOffset, 25), bm.PixelFormat);
-
-            // Level
-            xOffset = 14;
-            yOffset = 204;
-            Bitmap weaponLevel = bm.Clone(new Rectangle(xOffset, yOffset, 110, 22), bm.PixelFormat);
-
-            // Refinement
-            xOffset = 13;
-            yOffset = 230;
-            Bitmap weaponRefinement = bm.Clone(new Rectangle(xOffset, yOffset, 30, 30), bm.PixelFormat);
-            g = Graphics.FromImage(weaponRefinement);
-            g.DrawRectangle(new Pen(weaponRefinement.GetPixel(7, 10), 14), new Rectangle(0, 0, 30, 30));
-
-            // Equipped Character
-            xOffset = 30;
-            yOffset = 532;
-            Bitmap weaponEquippedCharacter = bm.Clone(new Rectangle(xOffset, yOffset, width - xOffset, 20), bm.PixelFormat);
-            g = Graphics.FromImage(weaponEquippedCharacter);
-            // Gets rid of character head on Left
-            g.DrawRectangle(new Pen(weaponEquippedCharacter.GetPixel(width - xOffset - 1, 10), 14), new Rectangle(0, 0, 13, bm.Height));
-
-            // Assign to List
-            weaponImages.Add(weaponName);
-            weaponImages.Add(weaponLevel);
-            weaponImages.Add(weaponRefinement);
-            weaponImages.Add(weaponEquippedCharacter);
-
-            // Send Image to Worker Queue
-            GenshinData.workerQueue.Enqueue(new OCRImage(weaponImages,"weapon",id));
-            g.Dispose();
-        }
-
-        //public static Weapon ScanWeapon(Bitmap bm, int id)
-        //{
-        //    // Init Variables
-        //    int name = 0;
-        //    int level = 1;
-        //    bool ascension = false;
-        //    int refinementLevel = 1;
-        //    int equippedCharacter = 0;
-        //    int width = 325; int height = 560;
-
-        //    // Check for Rarity
-        //    Color rarityColor = bm.GetPixel(12, 10);
-        //    Color fiveStar = Color.FromArgb(255, 188, 105, 50);
-        //    Color fourthStar = Color.FromArgb(255, 161, 86, 224);
-        //    Color threeStar = Color.FromArgb(255, 81, 127, 203);
-        //    // Check for equipped color
-        //    Color equipped = Color.FromArgb(255, 255, 231, 187);
-        //    Color equippedColor = bm.GetPixel(5, height - 10);
-
-        //    // Scan different parts of the weapon
-        //    bool b_equipped = Scraper.CompareColors(equipped, equippedColor);
-        //    bool b_RarityAboveTwo = Scraper.CompareColors(fiveStar, rarityColor) || Scraper.CompareColors(fourthStar, rarityColor) || Scraper.CompareColors(threeStar, rarityColor);
-        //    // multi threading support 
-        //    Bitmap bm_1 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
-        //    Bitmap bm_2 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
-        //    Bitmap bm_3 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
-        //    Bitmap bm_4 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
-        //    bm.Dispose();
-
-        //    Thread thr1 = new Thread(() => name = ScanWeaponName(bm_1, width, height));
-        //    Thread thr2 = new Thread(() => level = ScanWeaponLevel(bm_2, width, height, ref ascension));
-        //    Thread thr3 = new Thread(() => refinementLevel = ScanWeaponRefinement(bm_3, width, height));
-        //    Thread thr4 = new Thread(() => equippedCharacter = ScanWeaponEquippedCharacter(bm_4, width, height));
-
-        //    // Start Threads
-
-        //    thr1.Start(); thr2.Start();
-        //    if (b_RarityAboveTwo)
-        //    {
-        //        thr3.Start();
-        //    }
-        //    if (b_equipped)
-        //    {
-        //        thr4.Start();
-        //    }
-
-        //    // End Threads
-
-        //    thr1.Join(); thr2.Join();
-        //    if (b_equipped)
-        //    {
-        //        thr4.Join();
-        //    }
-        //    if (b_RarityAboveTwo)
-        //    {
-        //        thr3.Join();
-        //    }
-
-        //    bm_1.Dispose(); bm_2.Dispose(); bm_3.Dispose(); bm_4.Dispose();
-
-        //    Weapon weapon = new Weapon(name, level, ascension, refinementLevel, equippedCharacter, id);
-
-        //    // Check for Errors
-
-        //    return weapon;
-
-        //}
-
-        public static Weapon ScanWeapon(List<Bitmap> bm, int id)
-        {
-
-            // Init Variables
-            int name = 0;
-            int level = 1;
-            bool ascension = false;
-            int refinementLevel = 1;
-            int equippedCharacter = 0;
-            int width = 325; int height = 560;
-
-            if (bm.Count == 4)
-            {
-                int w_name = 0;int w_level = 1;int w_refinement = 2;int w_equippedCharacter = 3;
-                // Check for Rarity
-                Color rarityColor = bm[0].GetPixel(5, 5);
-                Color fiveStar = Color.FromArgb(255, 188, 105, 50);
-                Color fourthStar = Color.FromArgb(255, 161, 86, 224);
-                Color threeStar = Color.FromArgb(255, 81, 127, 203);
-                // Check for equipped color
-                Color equipped = Color.FromArgb(255, 255, 231, 187);
-                Color equippedColor = bm[w_equippedCharacter].GetPixel(5, 5);
-
-                // Scan different parts of the weapon
-                bool b_equipped = Scraper.CompareColors(equipped, equippedColor);
-                bool b_RarityAboveTwo = Scraper.CompareColors(fiveStar, rarityColor) || Scraper.CompareColors(fourthStar, rarityColor) || Scraper.CompareColors(threeStar, rarityColor);
-
-                if ( b_RarityAboveTwo || b_equipped )
-                {
-                    Thread thr1 = new Thread(() => name = ScanWeaponName(bm[w_name], width, height));
-                    Thread thr2 = new Thread(() => level = ScanWeaponLevel(bm[w_level], width, height, ref ascension));
-                    Thread thr3 = new Thread(() => refinementLevel = ScanWeaponRefinement(bm[w_refinement], width, height));
-                    Thread thr4 = new Thread(() => equippedCharacter = ScanWeaponEquippedCharacter(bm[w_equippedCharacter], width, height));
-
-                    // Start Threads
-
-                    thr1.Start(); thr2.Start();
-                    if (b_RarityAboveTwo)
-                    {
-                        thr3.Start();
-                    }
-                    if (b_equipped)
-                    {
-                        thr4.Start();
-                    }
-
-                    // End Threads
-
-                    thr1.Join(); thr2.Join();
-                    if (b_equipped)
-                    {
-                        thr4.Join();
-                    }
-                    if (b_RarityAboveTwo)
-                    {
-                        thr3.Join();
-                    }
-
-                    // dispose the list
-                    foreach (Bitmap x in bm)
-                    {
-                        x.Dispose();
-                    }
-                }
-                else
-                {
-                    name = -1; refinementLevel = -1; equippedCharacter = -1;
-                }
-            }
-
-            Weapon weapon = new Weapon(name, level, ascension, refinementLevel, equippedCharacter, id);
-
-            // Check for Errors
-
-            return weapon;
-
-        }
-
-        public static Weapon ScanWeapon(int id)
-        {
-            // Init Variables
-            int name = 0;
-            int level = 1;
-            bool ascension = false;
-            int refinementLevel = 1;
-            int equippedCharacter = 0;
-
-            // Grab Image of Entire weapon on Right
-            Double weaponLocation_X = (Double)Navigation.GetArea().right * ((Double)108 / (Double)160);
-            Double weaponLocation_Y = (Double)Navigation.GetArea().bottom * ((Double)10 / (Double)90);
-            int width = 325; int height = 560;
-            Bitmap bm = new Bitmap(width, height);
-            Graphics g = Graphics.FromImage(bm);
-            int screenLocation_X = Navigation.GetPosition().left + Convert.ToInt32(weaponLocation_X);
-            int screenLocation_Y = Navigation.GetPosition().top + Convert.ToInt32(weaponLocation_Y);
-            g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
-
-            // Check for Rarity
-            Color rarityColor = bm.GetPixel(12, 10);
-            Color fiveStar = Color.FromArgb(255, 188, 105, 50);
-            Color fourthStar = Color.FromArgb(255, 161, 86, 224);
-            Color threeStar = Color.FromArgb(255, 81, 127, 203);
-            // Check for equipped color
-            Color equipped = Color.FromArgb(255, 255, 231, 187);
-            Color equippedColor = bm.GetPixel(5, height - 10);
-
-            // Scan different parts of the weapon
-
-            bool b_equipped = Scraper.CompareColors(equipped, equippedColor);
-            bool b_RarityAboveTwo = Scraper.CompareColors(fiveStar, rarityColor) || Scraper.CompareColors(fourthStar, rarityColor) || Scraper.CompareColors(threeStar, rarityColor);
-            // TODO:: ADD multi threading support 
-            Bitmap bm_1 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
-            Bitmap bm_2 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
-            Bitmap bm_3 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
-            Bitmap bm_4 = bm.Clone(new Rectangle(0, 0, width, height), bm.PixelFormat);
-
-            Thread thr1 = new Thread(() => name = ScanWeaponName(bm_1, width, height));
-            Thread thr2 = new Thread(() => level = ScanWeaponLevel(bm_2, width, height, ref ascension));
-            Thread thr3 = new Thread(() => refinementLevel = ScanWeaponRefinement(bm_3, width, height));
-            Thread thr4 = new Thread(() => equippedCharacter = ScanWeaponEquippedCharacter(bm_4, width, height));
-
-            // Start Threads
-
-            thr1.Start(); thr2.Start();
-            if (b_RarityAboveTwo)
-            {
-                thr3.Start();
-            }
-            if (b_equipped)
-            {
-                thr4.Start();
-            }
-
-            // End Threads
-
-            thr1.Join(); thr2.Join();
-            if (b_equipped)
-            {
-                thr4.Join();
-            }
-            if (b_RarityAboveTwo)
-            {
-                thr3.Join();
-            }
-
-
-
-
-            Weapon weapon = new Weapon(name, level, ascension, refinementLevel, equippedCharacter, id);
-
-            return weapon;
-            
-        }
-
-        public static bool CheckForEnchancementOre()
-        {
-            // Init Variables
-            int name = 0;
-
-            // Grab Image of Entire weapon on Right
-            Double weaponLocation_X = (Double)Navigation.GetArea().right * ((Double)108 / (Double)160);
-            Double weaponLocation_Y = (Double)Navigation.GetArea().bottom * ((Double)10 / (Double)90);
-            int width = 325; int height = 560;
-            Bitmap bm = new Bitmap(width, height);
-            Graphics g = Graphics.FromImage(bm);
-            int screenLocation_X = Navigation.GetPosition().left + Convert.ToInt32(weaponLocation_X);
-            int screenLocation_Y = Navigation.GetPosition().top + Convert.ToInt32(weaponLocation_Y);
-            g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
-            //bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
-
-            name = ScanEnchancementOreName(bm, width, height);
-            bm.Dispose();
-
-            return (name > 0)? true:false;
-        }
-
-        public static int ScanWeaponCount()
-        {
-            //Find weapon count
-            Double weaponCountLocation_X = (Double)Navigation.GetArea().right * ((Double)130 / (Double)160);
-            Double weaponCountLocation_Y = (Double)Navigation.GetArea().bottom * ((Double)2 / (Double)90);
-            Bitmap bm = new Bitmap(175, 34);
-            Graphics g = Graphics.FromImage(bm);
-            g.CopyFromScreen(Navigation.GetPosition().left + Convert.ToInt32(weaponCountLocation_X), Navigation.GetPosition().top + Convert.ToInt32(weaponCountLocation_Y), 0, 0, bm.Size);
-
-            Scraper.SetGrayscale(ref bm);
-            Scraper.SetContrast(60.0, ref bm);
-            Scraper.SetInvert(ref bm);
-            UserInterface.SetNavigation_Image(bm);
-            //bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
-
-            string text = Scraper.AnalyzeText_Best(bm);
-            text = Regex.Replace(text, @"[^\d/]", "");
-
-            int count = 0;
-            // Check for dash
-            if (Regex.IsMatch(text, "/"))
-            {
-                count = Int32.Parse(text.Split('/')[0]);
-            }
-            else
-            {
-                // divide by the number on the right if both numbers fused
-                count = Int32.Parse(text) / 2000;
-            }
-
-            // Check if larger than 1000
-            while (count > 2000)
-            {
-                count = count / 20;
-            }
-
-
-            return count;
-        }
-
-        //public static int ScanWeaponName(Bitmap weaponImage, int max_X, int max_Y)
-        //{
-        //    int name = 0;
-
-        //    //Init
-        //    int xOffset = 10;
-        //    int yOffset = 7;
-        //    //Bitmap bm = new Bitmap(max_X-2*xOffset, 25);
-        //    Bitmap bm = weaponImage.Clone(new Rectangle(xOffset, yOffset, max_X-2*xOffset, 25), weaponImage.PixelFormat);
-
-        //    // Setup Img
-        //    Graphics g = Graphics.FromImage(bm);
-
-        //    Scraper.SetGamma(0.2, 0.2, 0.2, ref bm);
-        //    Scraper.SetGrayscale(ref bm);
-        //    Scraper.SetInvert(ref bm);
-        //    bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
-
-        //    // Analyze
-        //    string text = Scraper.AnalyzeText_1(bm);
-        //    text = text.Trim();
-
-        //    text = text.Trim();
-        //    text = Regex.Replace(text, @"[\W]", "");
-        //    text = text.ToLower();
-
-        //    UserInterface.SetArtifact_GearSlot(bm, text,true);
-
-        //    // Check in Dictionary
-        //    name = Scraper.GetWeaponCode(text);
-
-        //    bm.Dispose();g.Dispose();
-
-        //    return name;
-        //}
-        public static int ScanWeaponName(Bitmap bm, int max_X, int max_Y)
-        {
-            int name = 0;
-
-            Scraper.SetGamma(0.2, 0.2, 0.2, ref bm);
-            Scraper.SetGrayscale(ref bm);
-            Scraper.SetInvert(ref bm);
-            //bm = Scraper.ResizeImage(bm, max_X * 2, max_Y * 2);
-
-            // Analyze
-            string text = Scraper.AnalyzeText_1(bm);
-            text = text.Trim();
-            text = Regex.Replace(text, @"[\W]", "");
-            text = text.ToLower();
-
-            UserInterface.SetArtifact_GearSlot(bm, text, true);
-
-            // Check in Dictionary
-            name = Scraper.GetWeaponCode(text);
-
-            return name;
-        }
-
-        public static int ScanEnchancementOreName(Bitmap weaponImage, int max_X, int max_Y)
-        {
-            int name = 0;
-
-            //Init
-            int xOffset = 10;
-            int yOffset = 7;
-            //Bitmap bm = new Bitmap(max_X-2*xOffset, 25);
-            Bitmap bm = weaponImage.Clone(new Rectangle(xOffset, yOffset, max_X - 2 * xOffset, 25), weaponImage.PixelFormat);
-
-            // Setup Img
-            Graphics g = Graphics.FromImage(bm);
-
-            Scraper.SetGamma(0.2, 0.2, 0.2, ref bm);
-            Scraper.SetGrayscale(ref bm);
-            Scraper.SetInvert(ref bm);
-
-            UserInterface.SetNavigation_Image(bm);
-
-            // Analyze
-            string text = Scraper.AnalyzeText(bm);
-            text = text.Trim();
-            bm.Dispose();
-            
-
-            text = text.Trim();
-            //text = Regex.Replace(text, @"(?![A-Za-z\s]).", "");
-            text = Regex.Replace(text, @"[\W_]", "");
-            text = text.ToLower();
-            //Debug.Print("Weapon Name: " + text);
-
-            // Check in Dictionary
-            name = Scraper.GetEnhancementMaterialCode(text);
-
-            return name;
-        }
-
-        //public static int ScanWeaponLevel(Bitmap weaponImage, int max_X, int max_Y, ref bool ascension)
-        //{
-        //    // Get Level
-        //    int xOffset = 14;
-        //    int yOffset = 204;
-        //    //Bitmap bm = new Bitmap(110, 22); // old was 100
-        //    Bitmap bm = weaponImage.Clone(new Rectangle(xOffset, yOffset, 110, 22), weaponImage.PixelFormat);
-        //    //Graphics g = Graphics.FromImage(bm);
-        //    //g.CopyFromScreen(weaponLocation_X + xOffset, weaponLocation_Y + yOffset, 0, 0, bm.Size);
-        //    //g.DrawRectangle(new Pen(bm.GetPixel(1, 20), 22), new Rectangle(0, 0, max_X, max_Y));
-        //    //bm = Scraper.ResizeImage(bm, max_X * 2, max_Y * 2);
-
-        //    Scraper.SetGrayscale(ref bm);
-        //    Scraper.SetInvert(ref bm);
-        //    Scraper.SetContrast(100.0, ref bm);
-
-        //    string text = Scraper.AnalyzeText_2(bm);
-        //    //string text = Scraper.AnalyzeOneText(bm);
-        //    text = Regex.Replace(text, @"(?![\d/]).", "");
-        //    text = text.Trim();
-        //    //text = Regex.Replace(text, @"(\s{1}.*)", "");
-        //    //text = text.Trim();
-
-        //    UserInterface.SetArtifact_MainStat(bm, text,true);
-
-        //    bm.Dispose();
-
-        //    if (text.Contains('/'))
-        //    {
-        //        string[] temp = text.Split(new[]{ '/' }, 2);
-
-        //        if(temp.Length == 2)
-        //        {
-        //            if (temp[0] == temp[1])
-        //                ascension = true;
-
-        //            int level = -1;
-        //            if (int.TryParse(temp[0],out level))
-        //            {
-
-
-        //                return level;
-        //            }
-        //            else
-        //            {
-        //                string text1 = "Found " + temp[0] + "instead of Weapon Level.";
-        //                Debug.Print("Found " + temp[0] + "instead of Weapon Level.");
-        //                UserInterface.AddError(text1);
-        //                //Form1.UnexpectedError(text);
-        //                return -1;
-        //            }
-        //        }
-        //        else
-        //        {
-        //            string text1 = "Found " + temp[0] + "instead of Weapon Level.";
-        //            Debug.Print("Found " + temp[0] + "instead of Weapon Level.");
-        //            UserInterface.AddError(text1);
-        //            //Form1.UnexpectedError(text);
-        //            return -1;
-        //        }
-
-        //    }
-        //    else
-        //    {
-        //        string text1 = "Found " + text + "instead of Weapon Level.";
-        //        Debug.Print("Found " + text + "instead of Weapon Level." );
-        //        UserInterface.AddError(text1);
-        //        //Form1.UnexpectedError(text);
-        //        return -1;
-        //    }
-        //}
-
-        public static int ScanWeaponLevel(Bitmap bm, int max_X, int max_Y, ref bool ascension)
-        {
-            Scraper.SetGrayscale(ref bm);
-            Scraper.SetInvert(ref bm);
-            Scraper.SetContrast(100.0, ref bm);
-
-            string text = Scraper.AnalyzeText_2(bm);
-            text = Regex.Replace(text, @"(?![\d/]).", "");
-            text = text.Trim();
-
-            UserInterface.SetArtifact_MainStat(bm, text, true);
-
-            if (text.Contains('/'))
-            {
-                string[] temp = text.Split(new[] { '/' }, 2);
-
-                if (temp.Length == 2)
-                {
-                    if (temp[0] != temp[1])
-                        ascension = true;
-
-                    int level = -1;
-                    if (int.TryParse(temp[0], out level))
-                    {
-
-
-                        return level;
-                    }
-                    else
-                    {
-                        string text1 = "Found " + temp[0] + "instead of Weapon Level.";
-                        Debug.Print("Found " + temp[0] + "instead of Weapon Level.");
-                        UserInterface.AddError(text1);
-                        //Form1.UnexpectedError(text);
-                        return -1;
-                    }
-                }
-                else
-                {
-                    string text1 = "Found " + temp[0] + "instead of Weapon Level.";
-                    Debug.Print("Found " + temp[0] + "instead of Weapon Level.");
-                    UserInterface.AddError(text1);
-                    //Form1.UnexpectedError(text);
-                    return -1;
-                }
-
-            }
-            else
-            {
-                string text1 = "Found " + text + "instead of Weapon Level.";
-                Debug.Print("Found " + text + "instead of Weapon Level.");
-                UserInterface.AddError(text1);
-                //Form1.UnexpectedError(text);
-                return -1;
-            }
-        }
-
-        //public static int ScanWeaponRefinement(Bitmap weaponImage, int max_X, int max_Y)
-        //{
-        //    int xOffset = 13;
-        //    int yOffset = 230;
-        //    // Get Level
-        //    //Bitmap bm = new Bitmap(30, 30);
-        //    Bitmap bm = weaponImage.Clone(new Rectangle(xOffset, yOffset, 30, 30), weaponImage.PixelFormat);
-        //    Graphics g = Graphics.FromImage(bm);
-        //    //g.CopyFromScreen(weaponLocation_X + xOffset, weaponLocation_Y + yOffset, 0, 0, bm.Size);
-        //    g.DrawRectangle(new Pen(bm.GetPixel(7, 10), 14), new Rectangle(0, 0, 30, 30));
-        //    //Scraper.SetContrast(100.0, ref bm);
-
-        //    //Scraper.SetContrast(60.0, ref bm);
-        //    Scraper.SetInvert(ref bm);
-        //    Scraper.SetGrayscale(ref bm);
-        //    //bm = Scraper.ResizeImage(bm, max_X * 2, max_Y * 2);
-
-        //    string text = Scraper.AnalyzeText_3(bm);
-        //    text = text.Trim();
-        //    text = Regex.Replace(text, @"[^\d]", "");
-
-        //    // Parse Int
-        //    int refinementLevel = -1;
-        //    if(int.TryParse(text, out refinementLevel))
-        //    {
-        //        UserInterface.SetArtifact_Level(bm, text,true);
-        //        bm.Dispose(); g.Dispose();
-        //        return refinementLevel;
-        //    }
-        //    else
-        //    {
-        //        // try again to try to get 5
-        //        bm = new Bitmap(30, 30);
-        //        bm = weaponImage.Clone(new Rectangle(xOffset, yOffset, max_X - xOffset, max_Y - yOffset), weaponImage.PixelFormat);
-        //        g = Graphics.FromImage(bm);
-        //        //g.CopyFromScreen(weaponLocation_X + xOffset, weaponLocation_Y + yOffset, 0, 0, bm.Size);
-        //        g.DrawRectangle(new Pen(bm.GetPixel(7, 10), 14), new Rectangle(0, 0, max_X, max_Y));
-        //        //Scraper.SetContrast(100.0, ref bm);
-        //        Scraper.SetGrayscale(ref bm);
-        //        //Scraper.SetContrast(60.0, ref bm);
-        //        //Scraper.SetInvert(ref bm);
-        //        bm = Scraper.ResizeImage(bm, max_X * 2, max_Y * 2);
-        //        text = Scraper.AnalyzeText_3(bm);
-        //        text = text.Trim();
-
-        //        refinementLevel = -1;
-        //        if (int.TryParse(text, out refinementLevel))
-        //        {
-        //            UserInterface.SetArtifact_Level(bm, text);
-        //            bm.Dispose(); g.Dispose();
-        //            return refinementLevel;
-        //        }
-        //        else
-        //            return refinementLevel;
-        //    }
-        //}
-
-        public static int ScanWeaponRefinement(Bitmap bm, int max_X, int max_Y)
-        {
-            Bitmap bm_copy = bm.Clone(new Rectangle(0, 0, 30, 30), bm.PixelFormat);
-
-            Scraper.SetInvert(ref bm);
-            Scraper.SetGrayscale(ref bm);
-
-            string text = Scraper.AnalyzeText_3(bm);
-            text = text.Trim();
-            text = Regex.Replace(text, @"[^\d]", "");
-
-            // Parse Int
-            int refinementLevel = -1;
-            if (int.TryParse(text, out refinementLevel))
-            {
-                UserInterface.SetArtifact_Level(bm, text, true);
-                bm.Dispose();
-                return refinementLevel;
-            }
-            else
-            {
-                // try again to try to get 5
-                bm = bm_copy;
-                //bm = Scraper.ResizeImage(bm, 30 * 2, 30 * 2);
-                text = Scraper.AnalyzeText_3(bm);
-                text = text.Trim();
-
-                refinementLevel = -1;
-                if (int.TryParse(text, out refinementLevel))
-                {
-                    UserInterface.SetArtifact_Level(bm, text);
-                    bm.Dispose();
-                    return refinementLevel;
-                }
-                else
-                    return refinementLevel;
-            }
-        }
-
-        //public static int ScanWeaponEquippedCharacter(Bitmap weaponImage, int max_X, int max_Y)
-        //{
-        //    int xOffset = 30;
-        //    int yOffset = 532;
-
-        //    Bitmap bm = weaponImage.Clone(new Rectangle(xOffset, yOffset, max_X - xOffset, 20), weaponImage.PixelFormat);
-        //    Graphics g = Graphics.FromImage(bm);
-        //    // Gets rid of character head on Left
-        //    g.DrawRectangle(new Pen(bm.GetPixel(max_X - xOffset - 1, 10), 14), new Rectangle(0, 0, 13, bm.Height));
-        //    Scraper.SetGrayscale(ref bm);
-        //    Scraper.SetContrast(60.0, ref bm);
-
-        //    string equippedCharacter = Scraper.AnalyzeText_4(bm);
-        //    equippedCharacter.Trim();
-        //    equippedCharacter = equippedCharacter.Replace("\n", String.Empty);
-        //    //UserInterface.SetArtifact_Equipped(bm, equippedCharacter);
-
-        //    if (equippedCharacter != "")
-        //    {
-        //        var regexItem = new Regex("Equipped:");
-        //        if (regexItem.IsMatch(equippedCharacter))
-        //        {
-        //            string[] tempString = equippedCharacter.Split(':');
-        //            equippedCharacter = tempString[1].Replace("\n", String.Empty);
-        //            UserInterface.SetArtifact_Equipped(bm, equippedCharacter);
-        //            equippedCharacter = Regex.Replace(equippedCharacter, @"[^\w_]", "");
-        //            equippedCharacter = equippedCharacter.ToLower();
-
-        //            // Assign Traveler Name if not found
-        //            int character = Scraper.GetCharacterCode(equippedCharacter);
-        //            if (Scraper.b_AssignedTravelerName == false && character == 1)
-        //            {
-        //                Scraper.AssignTravelerName(equippedCharacter);
-        //                Scraper.b_AssignedTravelerName = true;
-        //            }
-
-        //            // Used to match with Traveler Name
-        //            while (equippedCharacter.Length > 1)
-        //            {
-        //                int temp = Scraper.GetCharacterCode(equippedCharacter, true);
-        //                if (temp == -1)
-        //                {
-        //                    equippedCharacter = equippedCharacter.Substring(0, equippedCharacter.Length - 1);
-        //                }
-        //                else
-        //                {
-        //                    break;
-        //                }
-        //            }
-
-        //            if (equippedCharacter.Length > 0)
-        //            {
-        //                return Scraper.GetCharacterCode(equippedCharacter);
-        //            }
-        //            return 0;
-        //        }
-        //    }
-        //    // artifact has no equipped character
-        //    return 0;
-        //}
-
-        public static int ScanWeaponEquippedCharacter(Bitmap bm, int max_X, int max_Y)
-        {
-            Scraper.SetGrayscale(ref bm);
-            Scraper.SetContrast(60.0, ref bm);
-
-            string equippedCharacter = Scraper.AnalyzeText_4(bm);
-            equippedCharacter.Trim();
-
-            if (equippedCharacter != "")
-            {
-                var regexItem = new Regex("Equipped:");
-                if (regexItem.IsMatch(equippedCharacter))
-                {
-                    string[] tempString = equippedCharacter.Split(':');
-                    equippedCharacter = tempString[1].Replace("\n", String.Empty);
-                    UserInterface.SetArtifact_Equipped(bm, equippedCharacter);
-                    equippedCharacter = Regex.Replace(equippedCharacter, @"[^\w_]", "");
-                    equippedCharacter = equippedCharacter.ToLower();
-
-                    // Assign Traveler Name if not found
-                    int character = Scraper.GetCharacterCode(equippedCharacter);
-                    if (Scraper.b_AssignedTravelerName == false && character == 1)
-                    {
-                        Scraper.AssignTravelerName(equippedCharacter);
-                        Scraper.b_AssignedTravelerName = true;
-                    }
-
-                    // Used to match with Traveler Name
-                    while (equippedCharacter.Length > 1)
-                    {
-                        int temp = Scraper.GetCharacterCode(equippedCharacter, true);
-                        if (temp == -1)
-                        {
-                            equippedCharacter = equippedCharacter.Substring(0, equippedCharacter.Length - 1);
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-
-                    if(equippedCharacter.Length > 0)
-                    {
-                        return Scraper.GetCharacterCode(equippedCharacter);
-                    }
-                    return 0;
-                }
-            }
-            // artifact has no equipped character
-            return 0;
-        }
-    }
+	public static class WeaponScraper
+	{
+		public static void ScanWeapons(int count = 0)
+		{
+			// Determine maximum number of weapons to scan
+			int weaponCount = count == 0 ? ScanWeaponCount(): count;
+			var (rectangles, cols, rows) = GetPageOfItems();
+			int fullPage = cols * rows;
+			int totalRows = (int)Math.Ceiling(weaponCount / (decimal)cols);
+			int cardsQueued = 0;
+			int rowsQueued = 0;
+			int offset = 0;
+			UserInterface.SetWeapon_Max(weaponCount);
+
+			// Go through weapon list
+			while (cardsQueued < weaponCount)
+			{
+				int cardsRemaining =  weaponCount - cardsQueued ;
+				// Go through each "page" of items and queue. In the event that not a full page of
+				// items are scolled to, offset the index of rectangle to start clicking from
+				for (int i = cardsRemaining < fullPage ? ( rows - ( totalRows - rowsQueued ) ) * cols : 0; i < rectangles.Count; i++)
+				{
+					Rectangle item = rectangles[i];
+					Navigation.SetCursorPos(Navigation.GetPosition().Left + item.Center().X, Navigation.GetPosition().Top + item.Center().Y + offset);
+					Navigation.Click();
+					Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
+
+					// Queue card for scanning
+					QueueScan(cardsQueued);
+					cardsQueued++;
+					if (cardsQueued >= weaponCount)
+					{
+						return;
+					}
+				}
+
+				rowsQueued += rows;
+
+				// Page done, now scroll
+				// If the number of remaining scans is shorter than a full page then
+				// only scroll a few rows
+				if (totalRows - rowsQueued <= rows)
+				{
+					if (Navigation.GetAspectRatio() == new Size(8, 5))
+					{
+						offset = 35; // Lazy fix
+					}
+					for (int i = 0; i < 10 * ( totalRows - rowsQueued ) - 1; i++)
+					{
+						Navigation.sim.Mouse.VerticalScroll(-1);
+					}
+					Navigation.SystemRandomWait(Navigation.Speed.Fast);
+				}
+				else
+				{
+					for (int i = 0; i < 10 * rows - 1; i++)
+					{
+						Navigation.sim.Mouse.VerticalScroll(-1);
+					}
+					Navigation.SystemRandomWait(Navigation.Speed.Fast);
+				}
+			}
+		}
+
+		private static (List<Rectangle> rectangles, int cols, int rows) GetPageOfItems()
+		{
+			var card = new RECT(
+				Left: 0,
+				Top: 0,
+				Right: (int)(80 / 1280.0 * Navigation.GetWidth()),
+				Bottom: (int)(100 / 720.0 * Navigation.GetHeight()));
+
+			// Filter for relative size of items in inventory, give or take a few pixels
+			BlobCounter blobCounter = new BlobCounter
+			{
+				FilterBlobs = true,
+				MinHeight = card.Height - 15,
+				MaxHeight = card.Height + 15,
+				MinWidth  = card.Width - 15,
+				MaxWidth  = card.Width + 15,
+			};
+
+			// Screenshot of inventory
+			Bitmap screenshot = Navigation.CaptureWindow();
+			Bitmap output = new Bitmap(screenshot); // Copy used to overlay onto in testing
+
+			// Image pre-processing
+			ContrastCorrection contrast = new ContrastCorrection(80);
+			Grayscale grayscale = new Grayscale(0.2125, 0.7154, 0.0721);
+			Edges edges = new Edges();
+			Threshold threshold = new Threshold(15);
+			FillHoles holes = new FillHoles
+			{
+				CoupledSizeFiltering = true,
+				MaxHoleWidth = card.Width + 10,
+				MaxHoleHeight = card.Height + 10
+			};
+			SobelEdgeDetector sobel = new SobelEdgeDetector();
+
+			screenshot = contrast.Apply(screenshot);
+			screenshot = edges.Apply(screenshot); // Quick way to find ~75% of edges
+			screenshot = grayscale.Apply(screenshot);
+			screenshot = threshold.Apply(screenshot); // Convert to black and white only based on pixel intensity
+
+			screenshot = sobel.Apply(screenshot); // Find some more edges
+			screenshot = holes.Apply(screenshot); // Fill shapes
+			screenshot = sobel.Apply(screenshot); // Find edges of those shapes. A second pass removes edges within item card
+												  //Navigation.DisplayBitmap(screenshot);
+
+			blobCounter.ProcessImage(screenshot);
+			// Note: Processing won't always detect all item rectangles on screen. Since the
+			// background isn't a solid color it's a bit trickier to filter out.
+
+			if (blobCounter.ObjectsCount < 1)
+			{
+				throw new Exception("No items detected in inventory");
+			}
+
+			// Don't save overlapping blobs
+			List<Rectangle> rectangles = new List<Rectangle>();
+			List<Rectangle> blobRects = blobCounter.GetObjectsRectangles().ToList();
+
+			int sWidth = blobRects[0].Width;
+			int sHeight = blobRects[0].Height;
+			foreach (var rect in blobRects)
+			{
+				bool add = true;
+				foreach (var item in rectangles)
+				{
+					Rectangle r1 = rect;
+					Rectangle r2 = item;
+					Rectangle intersect = Rectangle.Intersect(r1, r2);
+					if (intersect.Width > r1.Width * .2)
+					{
+						add = false;
+						break;
+					}
+				}
+				if (add)
+				{
+					sWidth = Math.Min(sWidth, rect.Width);
+					sHeight = Math.Min(sHeight, rect.Height);
+					rectangles.Add(rect);
+				}
+			}
+
+			// Determine X and Y coordinates for columns and rows, respectively
+			var colCoords = new List<int>();
+			var rowCoords = new List<int>();
+
+			foreach (var item in rectangles)
+			{
+				bool addX = true;
+				bool addY = true;
+				foreach (var x in colCoords)
+				{
+					var xC = item.Center().X;
+					if (x - 10 <= xC && xC <= x + 10)
+					{
+						addX = false;
+						break;
+					}
+				}
+				foreach (var y in rowCoords)
+				{
+					var yC = item.Center().Y;
+					if (y - 10 <= yC && yC <= y + 10)
+					{
+						addY = false;
+						break;
+					}
+				}
+				if (addX)
+				{
+					colCoords.Add(item.Center().X);
+				}
+				if (addY)
+				{
+					rowCoords.Add(item.Center().Y);
+				}
+			}
+
+			// Clear it all because we're going to use X,Y coordinate pairings to build rectangles
+			// around. This won't be perfect but it should algorithmically put rectangles over all
+			// images on the screen. The center of each of these rectangles should be a good enough
+			// spot to click.
+			rectangles.Clear();
+			colCoords.Sort();
+			rowCoords.Sort();
+			foreach (var row in rowCoords)
+			{
+				foreach (var col in colCoords)
+				{
+					int x = (int)( col - (sWidth * .5) );
+					int y = (int)( row - (sHeight * .5) );
+
+					rectangles.Add(new Rectangle(x, y, sWidth, sHeight));
+				}
+			}
+
+			// Remove some rectangles that somehow overlap each other. Don't think this happens
+			// but it doesn't hurt to double check.
+			for (int i = 0; i < rectangles.Count - 1; i++)
+			{
+				for (int j = i + 1; j < rectangles.Count; j++)
+				{
+					Rectangle r1 = rectangles[i];
+					Rectangle r2 = rectangles[j];
+					Rectangle intersect = Rectangle.Intersect(r1, r2);
+					if (intersect.Width > r1.Width * .2)
+					{
+						rectangles.RemoveAt(j);
+					}
+				}
+			}
+
+			// Sort by row then by column within each row
+			rectangles = rectangles.OrderBy(r => r.Top).ThenBy(r => r.Left).ToList();
+
+			Debug.WriteLine($"{colCoords.Count} columns");
+			Debug.WriteLine($"{rowCoords.Count} rows");
+			Debug.WriteLine($"{rectangles.Count} rectangles");
+
+			//new RectanglesMarker(rectangles, Color.Green).ApplyInPlace(output);
+			//Navigation.DisplayBitmap(output, "Rectangles");
+
+			return (rectangles, colCoords.Count, rowCoords.Count);
+		}
+
+		public static void QueueScan(int id)
+		{
+			int width = Navigation.GetWidth();
+			int height = Navigation.GetHeight();
+
+			// Separate to all pieces of card
+			List<Bitmap> weaponImages = new List<Bitmap>();
+
+			Bitmap card;
+			RECT reference;
+			Bitmap name, level, refinement, equipped;
+
+			if (Navigation.GetAspectRatio() == new Size(16, 9))
+			{
+				// Grab image of entire card on Right
+				reference = new RECT(new Rectangle(862, 80, 327, 560)); // In 1280x720
+
+				int left   = (int)Math.Round(reference.Left   / 1280.0 * width, MidpointRounding.AwayFromZero);
+				int top    = (int)Math.Round(reference.Top    / 720.0 * height, MidpointRounding.AwayFromZero);
+				int right  = (int)Math.Round(reference.Right  / 1280.0 * width, MidpointRounding.AwayFromZero);
+				int bottom = (int)Math.Round(reference.Bottom / 720.0 * height, MidpointRounding.AwayFromZero);
+
+				card = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
+
+				// Equipped Character
+				equipped = card.Clone(new RECT(
+				Left: (int)( 52.0 / reference.Width * card.Width ),
+				Top: (int)( 522.0 / reference.Height * card.Height ),
+				Right: card.Width,
+				Bottom: card.Height), card.PixelFormat);
+			}
+			else // if (Navigation.GetAspectRatio() == new Size(8, 5))
+			{
+				// Grab image of entire card on Right
+				reference = new Rectangle(862, 80, 328, 640); // In 1280x720
+
+				int left   = (int)Math.Round(reference.Left   / 1280.0 * width, MidpointRounding.AwayFromZero);
+				int top    = (int)Math.Round(reference.Top    / 800.0 * height, MidpointRounding.AwayFromZero);
+				int right  = (int)Math.Round(reference.Right  / 1280.0 * width, MidpointRounding.AwayFromZero);
+				int bottom = (int)Math.Round(reference.Bottom / 800.0 * height, MidpointRounding.AwayFromZero);
+
+				RECT itemCard = new RECT(left, top, right, bottom);
+
+				card = Navigation.CaptureRegion(itemCard);
+
+				// Equipped Character
+				equipped = card.Clone(new RECT(
+					Left: (int)( 52.0 / reference.Width * card.Width ),
+					Top: (int)( 602.0 / reference.Height * card.Height ),
+					Right: card.Width,
+					Bottom: card.Height), card.PixelFormat);
+			}
+
+			// Name
+			name = card.Clone(new RECT(
+				Left: 0,
+				Top: 0,
+				Right: card.Width,
+				Bottom: (int)( 38.0 / reference.Height * card.Height )), card.PixelFormat);
+
+			// Level
+			level = card.Clone(new RECT(
+				Left: (int)( 19.0 / reference.Width * card.Width ),
+				Top: (int)( 206.0 / reference.Height * card.Height ),
+				Right: (int)( 107.0 / reference.Width * card.Width ),
+				Bottom: (int)( 225.0 / reference.Height * card.Height )), card.PixelFormat);
+
+			// Refinement
+			refinement = card.Clone(new RECT(
+				Left: (int)( 20.0 / reference.Width * card.Width ),
+				Top: (int)( 235.0 / reference.Height * card.Height ),
+				Right: (int)( 40.0 / reference.Width * card.Width ),
+				Bottom: (int)( 254.0 / reference.Height * card.Height )), card.PixelFormat);
+
+			// Assign to List
+			weaponImages.Add(name);
+			weaponImages.Add(level);
+			weaponImages.Add(refinement);
+			weaponImages.Add(equipped);
+			weaponImages.Add(card);
+
+			InventoryKamera.workerQueue.Enqueue(new OCRImage(weaponImages, "weapon", id));
+		}
+
+		public static Weapon CatalogueFromBitmaps(List<Bitmap> bm, int id)
+		{
+			// Init Variables
+			string name = null;
+			int level = -1;
+			bool ascension = false;
+			int refinementLevel = -11;
+			string equippedCharacter = null;
+			int rarity = 0;
+
+			if (bm.Count >= 4)
+			{
+				int w_name = 0; int w_level = 1; int w_refinement = 2; int w_equippedCharacter = 3;
+
+				// Check for Rarity
+				Color rarityColor = bm[0].GetPixel(5, 5);
+				Color fiveStar = Color.FromArgb(255, 188, 105, 50);
+				Color fourthStar = Color.FromArgb(255, 161, 86, 224);
+				Color threeStar = Color.FromArgb(255, 81, 127, 203);
+
+				// Check for equipped color
+				Color equipped = Color.FromArgb(255, 255, 231, 187);
+
+				// Scan different parts of the weapon
+				bool bRarity5 = Scraper.CompareColors(fiveStar, rarityColor);
+				bool bRarity4 = Scraper.CompareColors(fourthStar, rarityColor);
+				bool bRarity3 = Scraper.CompareColors(threeStar, rarityColor);
+
+				bool b_RarityAboveTwo = bRarity5 || bRarity4 || bRarity3;
+
+				if (b_RarityAboveTwo)
+				{
+					if (bRarity5) rarity = 5;
+					if (bRarity4) rarity = 4;
+					if (bRarity3) rarity = 3;
+
+					Thread thr1 = new Thread(() => name = ScanName(bm[w_name]));
+					Thread thr2 = new Thread(() => level = ScanLevel(bm[w_level],ref ascension));
+					Thread thr3 = new Thread(() => refinementLevel = ScanRefinement(bm[w_refinement]));
+					Thread thr4 = new Thread(() => equippedCharacter = ScanEquippedCharacter(bm[w_equippedCharacter]));
+
+					// Start Threads
+					thr1.Start(); thr2.Start(); thr3.Start(); thr4.Start();
+
+					// End Threads
+					thr1.Join(); thr2.Join(); thr3.Join(); thr4.Join();
+				}
+				else
+				{
+					name = null; refinementLevel = -1; equippedCharacter = null; rarity = 2;
+					return new Weapon(name, level, ascension, refinementLevel, equippedCharacter, id, 2);
+				}
+			}
+
+			Weapon weapon = new Weapon(name, level, ascension, refinementLevel, equippedCharacter, id, rarity);
+			return weapon;
+		}
+
+		public static bool IsEnhancementOre(Bitmap nameBitmap)
+		{
+			return Scraper.enhancementMaterials.Contains(ScanEnchancementOreName(nameBitmap));
+		}
+
+		public static int ScanWeaponCount()
+		{
+			//Find weapon count
+			Bitmap countBitmap = Navigation.CaptureRegion(new Rectangle(x: (int)(1030 / 1280.0 * Navigation.GetWidth()),
+															   y: (int)(20 / 720.0 * Navigation.GetHeight()),
+															   width: (int)(175 / 1280.0 * Navigation.GetWidth()),
+															   height: (int)(25 / 720.0 * Navigation.GetHeight())));
+
+			Bitmap n = Scraper.ConvertToGrayscale(countBitmap);
+			Scraper.SetContrast(60.0, ref n);
+			Scraper.SetInvert(ref n);
+			UserInterface.SetNavigation_Image(n);
+
+			string text = Scraper.AnalyzeText(n);
+			n.Dispose();
+
+			// Remove any non-numeric and '/' characters
+			text = Regex.Replace(text, @"[^\d/]", "");
+
+			int count;
+			// Check for slash
+			if (Regex.IsMatch(text, "/"))
+			{
+				count = Int32.Parse(text.Split('/')[0]);
+			}
+			else
+			{
+				// divide by the number on the right if both numbers fused
+				count = Int32.Parse(text) / 2000;
+			}
+
+			// Check if larger than 1000
+			while (count > 2000)
+			{
+				count /= 20;
+			}
+			return count;
+		}
+
+		public static string ScanName(Bitmap bm)
+		{
+			Scraper.SetGamma(0.2, 0.2, 0.2, ref bm);
+			Bitmap n = Scraper.ConvertToGrayscale(bm);
+			Scraper.SetInvert(ref n);
+
+			// Analyze
+			string text = Scraper.AnalyzeText(n).ToLower().Trim();
+			text = Regex.Replace(text, @"[\W]", "");
+
+			n.Dispose();
+
+			// Check in Dictionary
+			return text;
+		}
+
+		public static string ScanEnchancementOreName(Bitmap bm)
+		{
+			Scraper.SetGamma(0.2, 0.2, 0.2, ref bm);
+			Bitmap n = Scraper.ConvertToGrayscale(bm);
+			Scraper.SetInvert(ref n);
+
+			// Analyze
+			string text = Scraper.AnalyzeText(n).Trim().ToLower();
+			n.Dispose();
+
+			text = Regex.Replace(text, @"[\W_]", "");
+
+			return text;
+		}
+
+		public static int ScanLevel(Bitmap bm, ref bool ascension)
+		{
+			Bitmap n = Scraper.ConvertToGrayscale(bm);
+			Scraper.SetInvert(ref n);
+
+			string text = Scraper.AnalyzeText(n).Trim();
+			text = Regex.Replace(text, @"(?![\d/]).", "");
+
+			if (text.Contains('/'))
+			{
+				string[] temp = text.Split(new[] { '/' }, 2);
+
+				if (temp.Length == 2)
+				{
+					if (int.TryParse(temp[0], out int level) && int.TryParse(temp[1], out int maxLevel))
+					{
+						ascension = level < maxLevel;
+						return level;
+					}
+					else
+					{
+					}
+				}
+			}
+			return -1;
+		}
+
+		public static int ScanRefinement(Bitmap bm)
+		{
+			using (Bitmap up = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2))
+			{
+				Bitmap n = Scraper.ConvertToGrayscale(up);
+				Scraper.SetInvert(ref n);
+
+				string text = Scraper.AnalyzeText(n).Trim();
+				text = Regex.Replace(text, @"[^\d]", "");
+
+				// Parse Int
+				if (int.TryParse(text, out int refinementLevel))
+				{
+					n.Dispose();
+					return refinementLevel;
+				}
+				n.Dispose();
+			}
+			return -1;
+		}
+
+		public static string ScanEquippedCharacter(Bitmap bm)
+		{
+			Bitmap n = Scraper.ConvertToGrayscale(bm);
+			Scraper.SetContrast(60.0, ref n);
+
+			string extractedString = Scraper.AnalyzeText(n).Trim();
+
+			if (extractedString != "")
+			{
+				var regexItem = new Regex("Equipped:");
+				if (regexItem.IsMatch(extractedString))
+				{
+					string[] tempString = extractedString.Split(':');
+					extractedString = tempString[1].Replace("\n", String.Empty);
+
+					extractedString = Regex.Replace(extractedString, @"[^\w_]", "").ToLower();
+
+					// Assign Traveler Name if not found
+					string character = extractedString;
+					if (Scraper.b_AssignedTravelerName == false && character != null)
+					{
+						Scraper.AssignTravelerName(extractedString);
+						Scraper.b_AssignedTravelerName = true;
+					}
+
+					// Used to match with Traveler Name
+					while (extractedString.Length > 1)
+					{
+						if (string.IsNullOrEmpty(extractedString))
+						{
+							extractedString = extractedString.Substring(0, extractedString.Length - 1);
+						}
+						else
+						{
+							break;
+						}
+					}
+
+					n.Dispose();
+					return extractedString.Length > 0 ? extractedString : null;
+				}
+			}
+			n.Dispose();
+			// artifact has no equipped character
+			return null;
+		}
+	}
 }

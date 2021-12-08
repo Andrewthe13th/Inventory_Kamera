@@ -1,77 +1,79 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace InventoryKamera
 {
-    public class Inventory
-    {
-        [JsonProperty] private List<Weapon> weapons;
-        [JsonProperty] private List<Artifact> artifacts;
-        [JsonProperty] private List<Material> materials;
-        [JsonProperty] private List<Material> characterDevelopmentItems;
-        //private List<Artifact> equippedArtifacts;
+	public class Inventory
+	{
+		[JsonProperty] private List<Weapon> weapons;
+		[JsonProperty] private List<Artifact> artifacts;
+		[JsonProperty] private List<Material> materials;
+		[JsonProperty] private List<Material> characterDevelopmentItems;
+		//private List<Artifact> equippedArtifacts;
 
-        public Inventory()
-        {
-            weapons = new List<Weapon>();
-            artifacts = new List<Artifact>();
-            materials = new List<Material>();
-            characterDevelopmentItems = new List<Material>();
-            //equippedArtifacts = new List<Artifact>();
-        }
+		public int size
+		{
+			get => weapons.Count + artifacts.Count;
+			set => size = weapons.Count + artifacts.Count;
+		}
 
-        public List<Artifact> GetArtifactList()
-        {
-            return artifacts;
-        }
+		public Inventory()
+		{
+			weapons = new List<Weapon>();
+			artifacts = new List<Artifact>();
+			materials = new List<Material>();
+			characterDevelopmentItems = new List<Material>();
+			//equippedArtifacts = new List<Artifact>();
+		}
 
-        public List<Weapon> GetWeaponList()
-        {
-            return weapons;
-        }
+		public void Add(Weapon w)
+		{
+			weapons.Add(w);
+		}
 
-        public List<Material> GetMaterialList()
-        {
-            return materials;
-        }
+		public void Add(Artifact a)
+		{
+			artifacts.Add(a);
+		}
 
-        public List<Material> GetCharDevItems()
-        {
-            return characterDevelopmentItems;
-        }
+		public List<Artifact> GetArtifacts()
+		{
+			return artifacts;
+		}
 
-        public void AssignArtifact(Artifact _artifact)
-        {
-            artifacts.Add(_artifact);
-        }
+		public List<Weapon> GetWeapons()
+		{
+			return weapons;
+		}
 
-        public void AssignWeapon(Weapon _weapon)
-        {
-            weapons.Add(_weapon);
-        }
+		public List<Material> GetMaterials()
+		{
+			return materials;
+		}
 
-        public void AssignMaterials(ref List<Material> _material)
-        {
-            materials = _material;
-        }
+		public List<Material> GetCharDevItems()
+		{
+			return characterDevelopmentItems;
+		}
 
-        public void AssignCharacterDevelopmentItems(ref List<Material> _material)
-        {
-            characterDevelopmentItems = _material;
-        }
+		public void SetArtifacts(ref List<Artifact> _artifacts)
+		{
+			artifacts = _artifacts;
+		}
 
-        public void AssignArtifacts(ref List<Artifact> _artifacts)
-        {
-            artifacts = _artifacts;
-        }
+		public void SetWeapons(ref List<Weapon> _weapons)
+		{
+			weapons = _weapons;
+		}
 
-        public void AssignWeapons(ref List<Weapon> _weapons)
-        {
-            weapons = _weapons;
-        }
-    }
+		public void SetMaterials(ref List<Material> _material)
+		{
+			materials = _material;
+		}
+
+		public void SetCharacterDevelopmentItems(ref List<Material> _material)
+		{
+			characterDevelopmentItems = _material;
+		}
+	}
 }

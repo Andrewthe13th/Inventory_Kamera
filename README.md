@@ -1,13 +1,5 @@
 # Inventory Kamera - A Genshin Data Scanner
 
-An OCR Scanner that scans your Characters, Weapons, Artifacts, Materials and Character Development items in your Inventory.</br>
-The scanner supports multiple exporting file formats, including these following:
-
-- `GOOD` .good (JSON) format for [Genshin Optimizer](https://frzyc.github.io/genshin-optimizer/#/) that include Characters, Weapons and Artifacts; and are widely used in many Genshin Impact fan-made projects and services, such as Discord bots.
-- `Seelie` JSON format to be used with [SEELIE.me](https://seelie.inmagi.com/) (Might change later in the future updates)
-
-Currently supports certain game language, screen size, scanning settings, and export options. Please follow the instructions on what you have to do.
-
 ## How to use the Scanner
 1. Make sure that you already have [Microsoft Visual C++ Redistributable packages](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2015-2017-2019-and-2022) installed on your device.
 2. [Download the program (Inventory_Kamera_Vx.x.zip)](https://github.com/Andrewthe13th/Inventory_Kamera/releases/latest) and unzip the downloaded file.
@@ -28,6 +20,7 @@ Currently supports certain game language, screen size, scanning settings, and ex
 
 NOTE: You will not be able to use your computer while the scan is taking place due to require the use of mouse and keyboard inputs.
 
+
 ### Can this get me banned?
  According to [miHoYo's response to Script, Plug-In, and Third-Party Software](https://genshin.mihoyo.com/en/news/detail/5763), I would say no. 
 - This scanner does not exploit the game. It just takes pictures of the game window.
@@ -40,7 +33,6 @@ My account has been used to test this script and has yet to be banned or warned 
 
 ## Contribute or Report an Issue
 If you ran through any issue with our scanner, please [Report an Issue here](https://github.com/Andrewthe13th/Inventory_Kamera/issues). 
-
 NOTE: Before sending an issue, please check that there is no other open issue similar to yours by searching up the issue list.
 
 ## License
