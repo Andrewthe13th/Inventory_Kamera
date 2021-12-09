@@ -18,6 +18,7 @@ namespace InventoryKamera
 	{
 		private static Thread mainThread;
 		private static InventoryKamera data = new InventoryKamera();
+		private static DatabaseManager databaseManager = new DatabaseManager();
 		private static string filePath = "";
 
 		private bool GOODChecked;
@@ -119,7 +120,7 @@ namespace InventoryKamera
 
 		private void Form1_Load(object sender, EventArgs e)
 		{
-			LoadSettings();
+			UpdateKeyTextBoxes();
 
 			GOODChecked = GOOD_CheckBox.Checked;
 			SeelieChecked = Seelie_CheckBox.Checked;
@@ -133,25 +134,8 @@ namespace InventoryKamera
 			Delay = ScannerDelay_TrackBar.Value;
 		}
 
-		private void LoadSettings()
+		private void UpdateKeyTextBoxes()
 		{
-			GOOD_CheckBox.Checked = Properties.Settings.Default.FormatGood;
-			Seelie_CheckBox.Checked = Properties.Settings.Default.FormatSeelie;
-
-			Weapons_CheckBox.Checked = Properties.Settings.Default.ScanWeapons;
-			Artifacts_Checkbox.Checked = Properties.Settings.Default.ScanArtifacts;
-			Characters_CheckBox.Checked = Properties.Settings.Default.ScanCharacters;
-			CharDevItems_CheckBox.Checked = Properties.Settings.Default.ScanCharDevItems;
-			Materials_CheckBox.Checked = Properties.Settings.Default.ScanMaterials;
-
-			ScannerDelay_TrackBar.Value = Properties.Settings.Default.ScannerDelay;
-
-			OutputPath_TextBox.Text = Properties.Settings.Default.OutputPath;
-			if (!Directory.Exists(OutputPath_TextBox.Text))
-			{
-				OutputPath_TextBox.Text = Directory.GetCurrentDirectory() + "\\GenshinData";
-			}
-
 			Navigation.inventoryKey = (VirtualKeyCode)Properties.Settings.Default.InventoryKey;
 			Navigation.characterKey = (VirtualKeyCode)Properties.Settings.Default.CharacterKey;
 
@@ -168,33 +152,6 @@ namespace InventoryKamera
 				characterToolStripTextBox.Text = KeyCodeToUnicode((Keys)Navigation.characterKey);
 			}
 
-			Database_MenuItem.Text = Properties.Settings.Default.OldDatabase;
-		}
-
-		private void SaveSettings()
-		{
-			Properties.Settings.Default.FormatGood = GOOD_CheckBox.Checked;
-			Properties.Settings.Default.FormatSeelie = Seelie_CheckBox.Checked;
-
-			Properties.Settings.Default.ScanWeapons = Weapons_CheckBox.Checked;
-			Properties.Settings.Default.ScanArtifacts = Artifacts_Checkbox.Checked;
-			Properties.Settings.Default.ScanCharacters = Characters_CheckBox.Checked;
-			Properties.Settings.Default.ScanCharDevItems = CharDevItems_CheckBox.Checked;
-			Properties.Settings.Default.ScanMaterials = Materials_CheckBox.Checked;
-
-			Properties.Settings.Default.ScannerDelay = ScannerDelay_TrackBar.Value;
-
-			if (Directory.Exists(OutputPath_TextBox.Text))
-			{
-				Properties.Settings.Default.OutputPath = OutputPath_TextBox.Text;
-			}
-
-			Properties.Settings.Default.InventoryKey = (int)Navigation.inventoryKey;
-			Properties.Settings.Default.CharacterKey = (int)Navigation.characterKey;
-
-			Properties.Settings.Default.OldDatabase = Database_MenuItem.Text.Trim();
-
-			Properties.Settings.Default.Save();
 		}
 
 		private void StartButton_Clicked(object sender, EventArgs e)
@@ -257,7 +214,7 @@ namespace InventoryKamera
 							// Covert to GOOD format
 							GOOD good = new GOOD(data);
 							// Make Json File
-							good.WriteToJSON(OutputPath_TextBox.Text, Database_MenuItem.Text);
+							good.WriteToJSON(OutputPath_TextBox.Text);
 						}
 
 						if (formats[1])
@@ -265,7 +222,7 @@ namespace InventoryKamera
 							// Seelie
 							Seelie seelie = new Seelie(data);
 
-							seelie.WriteToJSON(OutputPath_TextBox.Text, Database_MenuItem.Text);
+							seelie.WriteToJSON(OutputPath_TextBox.Text);
 						}
 
 						UserInterface.SetProgramStatus("Finished");
@@ -342,9 +299,9 @@ namespace InventoryKamera
 			RemoveHotkey();
 		}
 
-		private void SaveSettings(object sender, EventArgs e)
+		private void SaveSettings()
 		{
-			SaveSettings();
+			Properties.Settings.Default.Save();
 		}
 
 		private void Format_CheckboxClick(object sender, EventArgs e)
@@ -365,11 +322,6 @@ namespace InventoryKamera
 				//CharDevItems_CheckBox.Enabled = !CharDevItems_CheckBox.Enabled;
 				//Materials_CheckBox.Enabled = !Materials_CheckBox.Enabled;
 			}
-			else
-			{
-				return;
-			}
-			SaveSettings();
 		}
 
 		private void Weapons_CheckBox_CheckedChanged(object sender, EventArgs e)
@@ -456,14 +408,10 @@ namespace InventoryKamera
 			}
 		}
 
-		private void DatabaseMenuItem_Click(object sender, EventArgs e)
+		private void DatabaseUpdateMenuItem_Click(object sender, EventArgs e)
 		{
-			CommonOpenFileDialog d = new CommonOpenFileDialog
-			{
-				InitialDirectory = Database_MenuItem.Text,
-			};
-
-			d.Filters.Add(new CommonFileDialogFilter("JSON Files", ".json"));
+			var updateForm = new DatabaseUpdateForm();
+			updateForm.ShowDialog();
 		}
 
 		#region Unicode Helper Functions
