@@ -513,11 +513,11 @@ namespace InventoryKamera
 			switch (gearSlot)
 			{
 				// Flower of Life. Flat HP
-				case "floweroflife":
+				case "flower":
 					return Scraper.Stats["hp"];
 
 				// Plume of Death. Flat ATK
-				case "plumeofdeath":
+				case "plume":
 					return Scraper.Stats["atk"];
 
 				// Otherwise it's either sands, goblet or circlet.
