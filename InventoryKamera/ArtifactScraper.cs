@@ -98,7 +98,7 @@ namespace InventoryKamera
 
 				string text = Scraper.AnalyzeText(nBM).Trim();
 				nBM.Dispose();
-				text = Regex.Replace(text, @"[^\d/]", "");
+				text = Regex.Replace(text, @"[^\d/]", string.Empty);
 
 				int count;
 				// Check for dash
@@ -502,7 +502,8 @@ namespace InventoryKamera
 			Scraper.SetInvert(ref n);
 
 			string gearSlot = Scraper.AnalyzeText(n).Trim().ToLower();
-			gearSlot = Regex.Replace(gearSlot, @"[\W_]", "");
+			gearSlot = Regex.Replace(gearSlot, @"[\W_]", string.Empty);
+			gearSlot = Scraper.FindClosestGearSlot(gearSlot);
 			n.Dispose();
 			return gearSlot;
 		}
@@ -513,13 +514,11 @@ namespace InventoryKamera
 			{
 				// Flower of Life. Flat HP
 				case "floweroflife":
-					//Debug.WriteLine($"ScanArtifactMainStat runtime: {ts.Milliseconds}ms");
-					return "hp";
+					return Scraper.Stats["hp"];
 
 				// Plume of Death. Flat ATK
 				case "plumeofdeath":
-					//Debug.WriteLine($"ScanArtifactMainStat runtime: {ts.Milliseconds}ms");
-					return "atk";
+					return Scraper.Stats["atk"];
 
 				// Otherwise it's either sands, goblet or circlet.
 				default:
@@ -531,21 +530,19 @@ namespace InventoryKamera
 
 					// Get Main Stat
 					string mainStat = Scraper.AnalyzeText(n).ToLower().Trim();
+					n.Dispose();
 
 					// Remove anything not a-z as well as removes spaces/underscores
-					mainStat = Regex.Replace(mainStat, @"[\W_0-9]", "");
+					mainStat = Regex.Replace(mainStat, @"[\W_0-9]", string.Empty);
 					// Replace double characters (ex. aanemodmgbonus). Seemed to be a somewhat common problem.
 					mainStat = Regex.Replace(mainStat, "(.)\\1+", "$1");
-
-					//Debug.WriteLine($"ScanArtifactMainStat runtime: {ts.Milliseconds}ms");
 
 					if (mainStat == "def" || mainStat == "atk" || mainStat == "hp")
 					{
 						mainStat += "%";
 					}
 
-					n.Dispose();
-					return mainStat;
+					return Scraper.FindClosestStat(mainStat);
 			}
 		}
 
@@ -558,12 +555,11 @@ namespace InventoryKamera
 
 			// numbersOnly = true => seems to interpret the '+' as a '4'
 			string text = Scraper.AnalyzeText(n, Tesseract.PageSegMode.SingleWord).Trim().ToLower();
+			n.Dispose();
 
 			// Get rid of all non digits
-			text = Regex.Replace(text, @"[\D]", "");
+			text = Regex.Replace(text, @"[\D]", string.Empty);
 
-			//Debug.WriteLine($"ScanArtifactLevel runtime: {ts.Milliseconds}ms");
-			n.Dispose();
 			return int.TryParse(text, out int level) ? level : -1;
 		}
 
@@ -573,6 +569,7 @@ namespace InventoryKamera
 			Scraper.SetBrightness(35, ref n);
 			Scraper.SetContrast(10, ref n);
 			var text = Scraper.AnalyzeText(n, Tesseract.PageSegMode.Auto).ToLower();
+			n.Dispose();
 			List<string> lines = new List<string>(text.Split('\n'));
 			lines.RemoveAll(line => string.IsNullOrWhiteSpace(line));
 
@@ -589,30 +586,21 @@ namespace InventoryKamera
 				int j = i;
 				var task = Task.Factory.StartNew(() =>
 				{
-					var line = Regex.Replace(lines[j], @"(?:^[^a-zA-Z]*)", "").Replace(" ", "");
+					var line = Regex.Replace(lines[j], @"(?:^[^a-zA-Z]*)", string.Empty).Replace(" ", string.Empty);
 
 					if (line.Contains("+"))
 					{
 						SubStat stat = new SubStat();
+						string[] split = line.Split('+');
 
-						var split = line.Split('+');
-						string optional = "";
-						if (split[1].Contains('%'))
-						{
-							split[1] = split[1].Replace("%", "");
-							if (split[0] == "atk" || split[0] == "def" || split[0] == "hp")
-							{
-								optional = "%";
-							}
-						}
-						if (Scraper.stats.Contains(split[0]))
-						{
-							stat.stat = split[0] + optional;
-						}
-						if (!decimal.TryParse(split[1], out stat.value))
+						string name = line.Contains("%") ? split[0] + "%" : split[0];
+
+						stat.stat = Scraper.FindClosestStat(name) ?? "";
+
+						string value = split[1].Replace("%", string.Empty);
+						if (!decimal.TryParse(value, out stat.value))
 						{
 							stat.value = -1;
-							//UserInterface.AddError($"Failed to parse stat value for {stat.stat}");
 						}
 						substats[j] = stat;
 						return null;
@@ -621,7 +609,7 @@ namespace InventoryKamera
 					{
 						var name = line.Trim().ToLower();
 
-						name = Regex.Replace(name, @"[^\w]", "");
+						name = Regex.Replace(name, @"[^\w]", string.Empty);
 
 						name = Scraper.FindClosestSetName(name);
 
@@ -651,8 +639,6 @@ namespace InventoryKamera
 					}
 				}
 			}
-			n.Dispose();
-			//Debug.WriteLine($"ScanArtifactSubStats runtime: {ts.Milliseconds}ms");
 			return substats.ToList();
 		}
 
@@ -661,23 +647,20 @@ namespace InventoryKamera
 			Bitmap n = Scraper.ConvertToGrayscale(bm);
 			Scraper.SetContrast(60.0, ref n);
 
-			string equippedCharacter = Scraper.AnalyzeText(n).ToLower().Trim();
-			equippedCharacter = Regex.Replace(equippedCharacter, @"[^\w:_]", "");
+			string equippedCharacter = Scraper.AnalyzeText(n).ToLower();
+			n.Dispose();
 
 			if (equippedCharacter != "")
 			{
 				if (equippedCharacter.Contains(":"))
 				{
-					equippedCharacter = equippedCharacter.Split(':')[1].Trim();
-					//UserInterface.SetGear_Equipped(bm, equippedCharacter);
-
-					//Debug.WriteLine($"ScanArtifactEquippedCharacter runtime: {ts.Milliseconds}ms");
+					equippedCharacter = Regex.Replace(equippedCharacter.Split(':')[1], @"[\W]", string.Empty);
+					equippedCharacter = Scraper.FindClosestCharacterName(equippedCharacter);
+					
 					return equippedCharacter;
 				}
 			}
 			// artifact has no equipped character
-			//Debug.WriteLine($"ScanArtifactEquippedCharacter runtime: {ts.Milliseconds}ms");
-			n.Dispose();
 			return null;
 		}
 

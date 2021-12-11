@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace InventoryKamera
 {
-	public struct Material
+	[Serializable]
+	public struct Material : ISerializable
 	{
 		public string name;
 		public int count;
@@ -15,6 +19,8 @@ namespace InventoryKamera
 			name = _name;
 			count = _count;
 		}
+
+		public void GetObjectData(SerializationInfo info, StreamingContext context) => info.AddValue(name, count);
 	}
 
 	public enum InventorySection
@@ -27,7 +33,7 @@ namespace InventoryKamera
 
 	public static class MaterialScraper
 	{
-		public static List<Material> Scan_Materials(InventorySection section)
+		public static HashSet<Material> Scan_Materials(InventorySection section)
 		{
 			int maxColumns = 7;
 			int maxRows = 4;
@@ -44,7 +50,7 @@ namespace InventoryKamera
 			int yOffset = Convert.ToInt32((Double)Navigation.GetArea().Bottom * ((Double)14.5 / (Double)90));
 
 			// Scan first Item to check if empty
-			List<Material> materials = new List<Material>();
+			HashSet<Material> materials = new HashSet<Material>();
 			Material material = new Material(null, 0);
 			Material previousMaterial = new Material(null, -1);
 			Material previousRowMaterial = new Material(null ,-1);
@@ -82,6 +88,12 @@ namespace InventoryKamera
 						// Scan Material Number
 						material.count = ScanMaterialCount(currentColumn, currentRow, scrollCount);
 						materials.Add(material);
+						UserInterface.ResetCharacterDisplay();
+						UserInterface.SetMaterial(Navigation.CaptureRegion(
+							(int)( 864.0 / 1280.0 * Navigation.GetWidth() ),
+							(int)( 80.0 / 720.0 * Navigation.GetHeight() ),
+							327,
+							37), material.name, material.count);
 					}
 					previousMaterial.name = material.name;
 				}
@@ -156,14 +168,24 @@ namespace InventoryKamera
 					{
 						break;
 					}
-					else
+					else if (Scraper.IsValidMaterial(material.name))
 					{
 						// Scan material number
 						material.count = ScanMaterialCountEnd(k, i - 1);
-						if (material.count != -1)
+						if (material.count > 0)
 						{
 							materials.Add(material);
 							previousMaterial.name = material.name;
+							UserInterface.ResetCharacterDisplay();
+							UserInterface.SetMaterial(Navigation.CaptureRegion(
+								(int)( 864.0 / 1280.0 * Navigation.GetWidth() ),
+								(int)( 80.0 / 720.0 * Navigation.GetHeight() ),
+								327,
+								37), material.name, material.count);
+						}
+						else
+						{
+							UserInterface.AddError($"Unable to determine quantity for {material.name}");
 						}
 					}
 
@@ -188,11 +210,9 @@ namespace InventoryKamera
 			Scraper.SetInvert(ref n);
 
 			string text = Scraper.AnalyzeText(n);
-			text = Regex.Replace(text, @"[\W]", "").ToLower();
+			text = Regex.Replace(text, @"[\W]", string.Empty).ToLower();
 
 			//UI
-			UserInterface.ResetCharacterDisplay();
-			UserInterface.SetCharacter_NameAndElement(bm, text, "None");
 			n.Dispose();
 			bm.Dispose();
 
@@ -211,18 +231,19 @@ namespace InventoryKamera
 			//                      0  1  2   3  4  5   6   7   8  9 10  11 12 13 14  15 16  17
 
 			int leftIndent = 139; int topIndent = 152;
-			int spacing = 17; int yOffset = 10;
-			int width = 81; int height = 19;
+			int xSpacing = 17; int ySpacing = 10;
+			int width = 81; int height = 22;
 
 			// Grab quantity under item
-			int itemOffsetX = (column * width) + (column * spacing);
-			int itemOffsetY = (row * height) + (row * yOffset) + scrollOffset[additionalOffset % 18];
+			int itemOffsetX = (column * width) + (column * xSpacing);
+			int itemOffsetY = (row * height) + (row * ySpacing) + scrollOffset[additionalOffset % 18];
 
 			Bitmap bm = Navigation.CaptureRegion(leftIndent + itemOffsetX, topIndent + itemOffsetY, 80, height);
+			Scraper.SetContrast(10, ref bm);
+			Bitmap rescaled = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
 
 			// Image Processing
-			Bitmap n  =  Scraper.ConvertToGrayscale(bm);
-			Scraper.SetContrast(20.0, ref n);
+			Bitmap n  =  Scraper.ConvertToGrayscale(rescaled);
 
 			string old_text = Scraper.AnalyzeText(n, Tesseract.PageSegMode.SingleWord);
 			n.Dispose();
@@ -230,65 +251,45 @@ namespace InventoryKamera
 			//replace T with 7
 			old_text = old_text.Replace('T', '7');
 
-			string text = Regex.Replace(old_text, @"[^\d]", "");
+			string text = Regex.Replace(old_text, @"[^\d]", string.Empty);
 
-			//Navigation.DisplayBitmap(bm, text);
-
-			// filter out
 			int count = -1;
-			if (int.TryParse(text, out count))
-			{
-				// UserInterface.SetCharacter_Level(bm, count);
-				bm.Dispose();
-				return count;
-			}
-			else
-			{
-				// UserInterface.SetCharacter_Level(bm, count);
-				bm.Dispose();
-				return 0;
-			}
+			int.TryParse(text, out count);
+
+			bm.Dispose();
+			return count;
 		}
 
 		public static int ScanMaterialCountEnd(int column, int row)
 		{
 			// get the picture
-			int left = 139; int top = 70;
-			int xOffset = 17; int yOffset = 117;
-			int width = 81; int height = 20;
+			int leftIndent = 139; int topIndent = 258;
+			int xSpacing = 17; int ySpacing = 117;
+			int width = 81; int height = 22;
 
 			// Grab item portrait on Right
-			Double itemCount_X = 0;
-			Double itemCount_Y = 188;
 
-			Bitmap bm = new Bitmap(80, height);
-			Graphics g = Graphics.FromImage(bm);
-			int screenLocation_X = Navigation.GetPosition().Left + Convert.ToInt32(itemCount_X);
-			int screenLocation_Y = Navigation.GetPosition().Top + Convert.ToInt32(itemCount_Y);
-			g.CopyFromScreen(left + screenLocation_X + ( ( column * width ) + ( column * xOffset ) ), top + screenLocation_Y + ( row * yOffset ), 0, 0, bm.Size);
+			int itemOffsetX = ( column * width ) + ( column * xSpacing );
+			int itemOffsetY = row * ySpacing;
+
+			Bitmap bm = Navigation.CaptureRegion(leftIndent + itemOffsetX, topIndent + itemOffsetY, 80, height);
+			Scraper.SetContrast(20.0, ref bm);
 
 			// Image Processing
-			//Scraper.SetGrayscale(ref bm);
+			Bitmap n = Scraper.ConvertToGrayscale(bm);
 
-			string old_text = Scraper.AnalyzeText(bm, Tesseract.PageSegMode.SingleWord);
+			string old_text = Scraper.AnalyzeText(n, Tesseract.PageSegMode.SingleWord);
 
 			//replace T with 7
 			old_text = old_text.Replace('T', '7');
 
-			string text = Regex.Replace(old_text, @"[^\d]", "");
+			string text = Regex.Replace(old_text, @"[^\d]", string.Empty);
 
-			// filter out
 			int count = -1;
-			if (int.TryParse(text, out count))
-			{
-				// UserInterface.SetCharacter_Level(bm, count);
-				return count;
-			}
-			else
-			{
-				// UserInterface.SetCharacter_Level(bm, count);
-				return -1;
-			}
+			int.TryParse(text, out count);
+			
+			bm.Dispose();
+			return count;
 		}
 	}
 }

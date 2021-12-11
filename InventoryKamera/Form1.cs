@@ -85,9 +85,6 @@ namespace InventoryKamera
 				// Stop navigating weapons/artifacts
 				mainThread.Abort();
 
-				// Reset data
-				data = new InventoryKamera();
-
 				UserInterface.SetProgramStatus("Scan Stopped");
 
 				Navigation.Reset();
