@@ -220,9 +220,9 @@ namespace InventoryKamera
 						if (formats[1])
 						{
 							// Seelie
-							Seelie seelie = new Seelie(data);
+							// Seelie seelie = new Seelie(data);
 
-							seelie.WriteToJSON(OutputPath_TextBox.Text);
+							// seelie.WriteToJSON(OutputPath_TextBox.Text);
 						}
 
 						UserInterface.SetProgramStatus("Finished");

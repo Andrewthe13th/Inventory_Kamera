@@ -666,6 +666,7 @@
 			// FormatItemsList_Label
 			// 
 			this.FormatItemsList_Label.AutoSize = true;
+			this.FormatItemsList_Label.Enabled = false;
 			this.FormatItemsList_Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.FormatItemsList_Label.Location = new System.Drawing.Point(8, 72);
 			this.FormatItemsList_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
@@ -673,6 +674,7 @@
 			this.FormatItemsList_Label.Size = new System.Drawing.Size(42, 13);
 			this.FormatItemsList_Label.TabIndex = 81;
 			this.FormatItemsList_Label.Text = "Format:";
+			this.FormatItemsList_Label.Visible = false;
 			// 
 			// menuStrip1
 			// 
@@ -721,7 +723,6 @@
 			// inventoryToolStripTextBox
 			// 
 			this.inventoryToolStripTextBox.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
-			this.inventoryToolStripTextBox.Font = new System.Drawing.Font("Segoe UI", 9F);
 			this.inventoryToolStripTextBox.MaxLength = 2;
 			this.inventoryToolStripTextBox.Name = "inventoryToolStripTextBox";
 			this.inventoryToolStripTextBox.Size = new System.Drawing.Size(90, 23);
@@ -741,7 +742,6 @@
 			// characterToolStripTextBox
 			// 
 			this.characterToolStripTextBox.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
-			this.characterToolStripTextBox.Font = new System.Drawing.Font("Segoe UI", 9F);
 			this.characterToolStripTextBox.MaxLength = 2;
 			this.characterToolStripTextBox.Name = "characterToolStripTextBox";
 			this.characterToolStripTextBox.Size = new System.Drawing.Size(90, 23);
@@ -778,6 +778,7 @@
 			this.GOOD_CheckBox.Checked = global::InventoryKamera.Properties.Settings.Default.FormatGood;
 			this.GOOD_CheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.GOOD_CheckBox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::InventoryKamera.Properties.Settings.Default, "FormatGood", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+			this.GOOD_CheckBox.Enabled = false;
 			this.GOOD_CheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.GOOD_CheckBox.Location = new System.Drawing.Point(12, 87);
 			this.GOOD_CheckBox.Margin = new System.Windows.Forms.Padding(2);
@@ -786,6 +787,7 @@
 			this.GOOD_CheckBox.TabIndex = 82;
 			this.GOOD_CheckBox.Text = "GOOD";
 			this.GOOD_CheckBox.UseVisualStyleBackColor = true;
+			this.GOOD_CheckBox.Visible = false;
 			this.GOOD_CheckBox.Click += new System.EventHandler(this.Format_CheckboxClick);
 			// 
 			// Seelie_CheckBox
@@ -795,6 +797,7 @@
 			this.Seelie_CheckBox.Checked = global::InventoryKamera.Properties.Settings.Default.FormatSeelie;
 			this.Seelie_CheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.Seelie_CheckBox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::InventoryKamera.Properties.Settings.Default, "FormatSeelie", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+			this.Seelie_CheckBox.Enabled = false;
 			this.Seelie_CheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.Seelie_CheckBox.Location = new System.Drawing.Point(12, 106);
 			this.Seelie_CheckBox.Margin = new System.Windows.Forms.Padding(2);
@@ -803,6 +806,7 @@
 			this.Seelie_CheckBox.TabIndex = 84;
 			this.Seelie_CheckBox.Text = "Seelie";
 			this.Seelie_CheckBox.UseVisualStyleBackColor = true;
+			this.Seelie_CheckBox.Visible = false;
 			this.Seelie_CheckBox.Click += new System.EventHandler(this.Format_CheckboxClick);
 			// 
 			// CharDevItems_CheckBox
