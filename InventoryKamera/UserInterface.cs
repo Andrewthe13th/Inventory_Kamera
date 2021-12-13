@@ -134,12 +134,12 @@ namespace InventoryKamera
 		{
 			ResetGearDisplay();
 			UpdatePictureBox(bm, gear_PictureBox);
-			int maxLevel = (int)( weapon.ascension ? Math.Floor(weapon.level / 10.0) + 1 * 10 : Math.Floor(weapon.level / 10.0) * 10 );
+			int maxLevel = (int)( weapon.Ascended ? Math.Floor(weapon.Level / 10.0) + 1 * 10 : Math.Floor(weapon.Level / 10.0) * 10 );
 			string text =
-				$"Name: {weapon.name}" + Environment.NewLine +
-				$"Level: {weapon.level} / {maxLevel}" + Environment.NewLine +
-				$"Refinement: {weapon.refinementLevel}" + Environment.NewLine +
-				$"Equipped: {weapon.equippedCharacter}";
+				$"Name: {weapon.Name}" + Environment.NewLine +
+				$"Level: {weapon.Level} / {maxLevel}" + Environment.NewLine +
+				$"Refinement: {weapon.RefinementLevel}" + Environment.NewLine +
+				$"Equipped: {weapon.EquippedCharacter}";
 			UpdateTextBox(text, gear_TextBox);
 		}
 
@@ -148,39 +148,45 @@ namespace InventoryKamera
 			ResetGearDisplay();
 			UpdatePictureBox(bm, gear_PictureBox);
 			string text =
-				$"Rarity: {artifact.rarity}" + Environment.NewLine +
-				$"Level: {artifact.level}" + Environment.NewLine +
-				$"Set: {artifact.setName}" + Environment.NewLine +
-				$"Slot: {artifact.gearSlot}" + Environment.NewLine +
-				$"Stat: {artifact.mainStat}" + Environment.NewLine +
+				$"Rarity: {artifact.Rarity}" + Environment.NewLine +
+				$"Level: {artifact.Level}" + Environment.NewLine +
+				$"Set: {artifact.SetName}" + Environment.NewLine +
+				$"Slot: {artifact.GearSlot}" + Environment.NewLine +
+				$"Stat: {artifact.MainStat}" + Environment.NewLine +
 				$"SubStats:" + Environment.NewLine;
 
-			for (int i = 0; i < artifact.subStats.Length; i++)
+			for (int i = 0; i < artifact.SubStats.Length; i++)
 			{
-				Artifact.SubStat substat = artifact.subStats[i];
+				Artifact.SubStat substat = artifact.SubStats[i];
 				if (string.IsNullOrEmpty(substat.stat)) break;
 				text += $"{i + 1}: {substat}" + Environment.NewLine;
 			}
 
-			text += $"Equipped: {artifact.equippedCharacter}" + Environment.NewLine +
-				$"Locked: {artifact.@lock}";
+			text += $"Equipped: {artifact.EquippedCharacter}" + Environment.NewLine +
+				$"Locked: {artifact.Lock}";
 
 			UpdateTextBox(text, gear_TextBox);
 		}
 
 		public static void SetCharacter_NameAndElement(Bitmap bm, string name, string element)
 		{
-			UpdateElements(bm, $"Name: {name}\nElement: {element}\n", cName_PictureBox, character_TextBox);
+			UpdateElements(bm, $"Name: {name}\nElement: {element}", cName_PictureBox, character_TextBox);
 		}
 
 		public static void SetCharacter_Level(Bitmap bm, int level, int maxLevel)
 		{
-			UpdateElements(bm, $"Level: {level} / {maxLevel}\n", cLevel_PictureBox, character_TextBox);
+			UpdateElements(bm, $"Level: {level} / {maxLevel}", cLevel_PictureBox, character_TextBox);
 		}
 
 		public static void SetCharacter_Constellation(int level)
 		{
-			UpdateTextBox($"Constellation: {level}\n", character_TextBox);
+			UpdateTextBox($"Constellation: {level}", character_TextBox);
+		}
+
+		internal static void SetMaterial(Bitmap nameplate, Bitmap quantity, string name, int count)
+		{
+			UpdateElements(nameplate, $"Name: {name}", cName_PictureBox, character_TextBox);
+			UpdateElements(quantity, $"Count: {count}", cLevel_PictureBox, character_TextBox);
 		}
 
 		public static void SetCharacter_Talent(Bitmap bm, string text, int i)
@@ -188,7 +194,7 @@ namespace InventoryKamera
 			if (i > -1 && i < 3)
 			{
 				UpdatePictureBox(bm, cTalent_PictureBoxes[i]);
-				UpdateTextBox($"Talent {i + 1}: {text}\n", character_TextBox);
+				UpdateTextBox($"Talent {i + 1}: {text}", character_TextBox);
 			}
 		}
 
@@ -232,7 +238,7 @@ namespace InventoryKamera
 
 		public static void AddError(string error)
 		{
-			UpdateTextBox($"{error}\n", error_TextBox);
+			UpdateTextBox($"{error}", error_TextBox);
 		}
 
 		public static void SetNavigation_Image(Bitmap bm)

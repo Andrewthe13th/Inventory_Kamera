@@ -17,6 +17,7 @@ namespace InventoryKamera
 
 			// first character name is used to stop scanning characters
 			int characterCount = 0;
+			firstCharacterName = null; // Static variable might already be set
 			while (ScanCharacter(out Character character) || characterCount < 4)
 			{
 				if (character.IsValid())
@@ -34,6 +35,7 @@ namespace InventoryKamera
 
 		private static bool ScanCharacter(out Character character)
 		{
+			character = null;
 			string name = null; string element = null;
 			bool ascension = false;
 			int experience = 0;
@@ -43,16 +45,16 @@ namespace InventoryKamera
 			// Scan the Name and element of Character. Attempt 20 times max.
 			ScanNameAndElement(ref name, ref element);
 
-			if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(element))
+			if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(element))
 			{
 				UserInterface.AddError("Could not determine character's name or element");
-				goto Fail;
+				return false;
 			}
 
 			// Check if character was first scanned
 			if (name != firstCharacterName)
 			{
-				if (string.IsNullOrEmpty(firstCharacterName))
+				if (string.IsNullOrWhiteSpace(firstCharacterName))
 					firstCharacterName = name;
 
 				// Scan Level and ascension
@@ -60,7 +62,7 @@ namespace InventoryKamera
 				if (level == -1)
 				{
 					UserInterface.AddError($"Could not determine {name}'s level");
-					goto Fail;
+					return false;
 				}
 
 				// Scan Experience
@@ -80,10 +82,10 @@ namespace InventoryKamera
 				// Scale down talents due to constellations
 				if (constellation >= 3)
 				{
-					if (Scraper.characterTalentConstellationOrder.ContainsKey(name))
+					if (Scraper.Characters.ContainsKey(name.ToLower()))
 					{
 						// get talent if character
-						string talent = Scraper.characterTalentConstellationOrder[name][0];
+						string talent = (string)Scraper.Characters[name.ToLower()]["ConstellationOrder"][0];
 						if (constellation >= 5)
 						{
 							talents[1] -= 3;
@@ -99,14 +101,14 @@ namespace InventoryKamera
 						}
 					}
 					else
-						goto Fail;
+						return false;
 				}
 
-				character = new Character(name, element, level, ascension, experience, constellation, talents);
+				var weaponType = Scraper.Characters[name.ToLower()]["WeaponType"].ToObject<int>();
+
+				character = new Character(name, element, level, ascension, experience, constellation, talents, (WeaponType)weaponType);
 				return true;
 			}
-		Fail:
-			character = new Character();
 			return false;
 		}
 
@@ -139,10 +141,10 @@ namespace InventoryKamera
 			if (text != "")
 			{
 				// Only keep a-Z and 0-9
-				text = Regex.Replace(text, @"[\W_]", "").ToLower();
+				text = Regex.Replace(text, @"[\W_]", string.Empty).ToLower();
 
 				// Only keep text up until first space
-				text = Regex.Replace(text, @"\s+\w*", "");
+				text = Regex.Replace(text, @"\s+\w*", string.Empty);
 			}
 			else
 			{
@@ -156,7 +158,7 @@ namespace InventoryKamera
 		private static void ScanNameAndElement(ref string name, ref string element)
 		{
 			int attempts = 0;
-			int maxAttempts = 50;
+			int maxAttempts = 75;
 			Rectangle region = new RECT(
 				Left:   (int)( 85  / 1280.0 * Navigation.GetWidth() ),
 				Top:    (int)( 10  / 720.0 * Navigation.GetHeight() ),
@@ -184,14 +186,19 @@ namespace InventoryKamera
 						element = Scraper.FindElementByName(split[0].Trim());
 
 						// strip each char from name until found in dictionary
-						name = Scraper.FindClosestCharacterName(split[1].Trim().Replace(" ", ""));
+						name = Regex.Replace(split[1], @"[\W]", string.Empty);
+						string scannedName = Scraper.FindClosestCharacterName(name);
+						
+						name = scannedName == "Traveler" ? name : scannedName;
 						if (!string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(element))
 						{
 							UserInterface.SetCharacter_NameAndElement(bm, name, element);
 							return;
 						}
+						
 					}
 					n.Dispose();
+					Navigation.Wait(300);
 				}
 				attempts++;
 				Navigation.SystemRandomWait(Navigation.Speed.Faster);
@@ -203,8 +210,6 @@ namespace InventoryKamera
 		private static int ScanLevel(ref bool ascension)
 		{
 			int level = -1;
-			int attempt = 0;
-			int maxAttempts = 50;
 
 			var xRef = 1280.0;
 			var yRef = 720.0;
@@ -230,7 +235,7 @@ namespace InventoryKamera
 
 				string text = Scraper.AnalyzeText(n).Trim();
 
-				text = Regex.Replace(text, @"(?![0-9/]).", "");
+				text = Regex.Replace(text, @"(?![0-9/]).", string.Empty);
 				if (text.Contains("/"))
 				{
 					var values = text.Split('/');
@@ -246,7 +251,7 @@ namespace InventoryKamera
 					bm.Dispose();
 				}
 				Navigation.SystemRandomWait(Navigation.Speed.Normal);
-			} while (level == -1 && attempt < maxAttempts);
+			} while (level == -1);
 
 			return -1;
 		}
@@ -271,7 +276,7 @@ namespace InventoryKamera
 
 			string text = Scraper.AnalyzeText(bm);
 			text = text.Trim();
-			text = Regex.Replace(text, @"(?![0-9\s/]).", "");
+			text = Regex.Replace(text, @"(?![0-9\s/]).", string.Empty);
 
 			if (Regex.IsMatch(text, "/"))
 			{
@@ -346,10 +351,7 @@ namespace InventoryKamera
 
 			// Check if character has a movement talent like
 			// Mona or Ayaka
-			if (name == "mona" || name == "ayaka")
-			{
-				specialOffset = 1;
-			}
+			if (name.Contains("Mona") || name.Contains("Ayaka")) specialOffset = 1;
 
 			var xRef = 1280.0;
 			var yRef = 720.0;
@@ -386,7 +388,7 @@ namespace InventoryKamera
 					Scraper.SetInvert(ref n);
 
 					string text = Scraper.AnalyzeText(n).Trim();
-					text = Regex.Replace(text, @"\D", "");
+					text = Regex.Replace(text, @"\D", string.Empty);
 
 					if (int.TryParse(text, out int level))
 					{

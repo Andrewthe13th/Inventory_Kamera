@@ -87,8 +87,7 @@
 			this.inventoryToolStripTextBox = new System.Windows.Forms.ToolStripTextBox();
 			this.characterScreenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.characterToolStripTextBox = new System.Windows.Forms.ToolStripTextBox();
-			this.oldDatabasePathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.Database_MenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.DatabaseUpdateMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.Materials_CheckBox = new System.Windows.Forms.CheckBox();
 			this.GOOD_CheckBox = new System.Windows.Forms.CheckBox();
 			this.Seelie_CheckBox = new System.Windows.Forms.CheckBox();
@@ -645,12 +644,14 @@
 			// 
 			this.OutputPath_TextBox.Anchor = System.Windows.Forms.AnchorStyles.None;
 			this.OutputPath_TextBox.BackColor = System.Drawing.Color.White;
+			this.OutputPath_TextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::InventoryKamera.Properties.Settings.Default, "OutputPath", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
 			this.OutputPath_TextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.OutputPath_TextBox.Location = new System.Drawing.Point(202, 137);
 			this.OutputPath_TextBox.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
 			this.OutputPath_TextBox.Name = "OutputPath_TextBox";
 			this.OutputPath_TextBox.Size = new System.Drawing.Size(386, 18);
 			this.OutputPath_TextBox.TabIndex = 79;
+			this.OutputPath_TextBox.Text = global::InventoryKamera.Properties.Settings.Default.OutputPath;
 			// 
 			// Language_Label
 			// 
@@ -665,6 +666,7 @@
 			// FormatItemsList_Label
 			// 
 			this.FormatItemsList_Label.AutoSize = true;
+			this.FormatItemsList_Label.Enabled = false;
 			this.FormatItemsList_Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.FormatItemsList_Label.Location = new System.Drawing.Point(8, 72);
 			this.FormatItemsList_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
@@ -672,6 +674,7 @@
 			this.FormatItemsList_Label.Size = new System.Drawing.Size(42, 13);
 			this.FormatItemsList_Label.TabIndex = 81;
 			this.FormatItemsList_Label.Text = "Format:";
+			this.FormatItemsList_Label.Visible = false;
 			// 
 			// menuStrip1
 			// 
@@ -704,7 +707,7 @@
 			this.keysToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.inventoryToolStripMenuItem,
             this.characterScreenToolStripMenuItem,
-            this.oldDatabasePathToolStripMenuItem});
+            this.DatabaseUpdateMenuItem});
 			this.keysToolStripMenuItem.Name = "keysToolStripMenuItem";
 			this.keysToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
 			this.keysToolStripMenuItem.Text = "Options";
@@ -714,7 +717,7 @@
 			this.inventoryToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.inventoryToolStripTextBox});
 			this.inventoryToolStripMenuItem.Name = "inventoryToolStripMenuItem";
-			this.inventoryToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+			this.inventoryToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
 			this.inventoryToolStripMenuItem.Text = "Inventory Key";
 			// 
 			// inventoryToolStripTextBox
@@ -734,7 +737,7 @@
 			this.characterScreenToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.characterToolStripTextBox});
 			this.characterScreenToolStripMenuItem.Name = "characterScreenToolStripMenuItem";
-			this.characterScreenToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
+			this.characterScreenToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
 			this.characterScreenToolStripMenuItem.Text = "Character Screen Key";
 			// 
 			// characterToolStripTextBox
@@ -749,22 +752,12 @@
 			this.characterToolStripTextBox.ToolTipText = "Key to open character screen";
 			this.characterToolStripTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.OptionsMenuItem_KeyDown);
 			// 
-			// oldDatabasePathToolStripMenuItem
+			// DatabaseUpdateMenuItem
 			// 
-			this.oldDatabasePathToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.Database_MenuItem});
-			this.oldDatabasePathToolStripMenuItem.Name = "oldDatabasePathToolStripMenuItem";
-			this.oldDatabasePathToolStripMenuItem.Size = new System.Drawing.Size(185, 22);
-			this.oldDatabasePathToolStripMenuItem.Text = "Database Path";
-			this.oldDatabasePathToolStripMenuItem.Visible = false;
-			// 
-			// Database_MenuItem
-			// 
-			this.Database_MenuItem.Name = "Database_MenuItem";
-			this.Database_MenuItem.Size = new System.Drawing.Size(77, 22);
-			this.Database_MenuItem.Text = " ";
-			this.Database_MenuItem.ToolTipText = "Click to change";
-			this.Database_MenuItem.Click += new System.EventHandler(this.DatabaseMenuItem_Click);
+			this.DatabaseUpdateMenuItem.Name = "DatabaseUpdateMenuItem";
+			this.DatabaseUpdateMenuItem.Size = new System.Drawing.Size(190, 22);
+			this.DatabaseUpdateMenuItem.Text = "Update Lookup Tables";
+			this.DatabaseUpdateMenuItem.Click += new System.EventHandler(this.DatabaseUpdateMenuItem_Click);
 			// 
 			// Materials_CheckBox
 			// 
@@ -779,7 +772,6 @@
 			this.Materials_CheckBox.Text = "Materials";
 			this.Materials_CheckBox.UseVisualStyleBackColor = true;
 			this.Materials_CheckBox.CheckedChanged += new System.EventHandler(this.Materials_CheckBox_CheckedChanged);
-			this.Materials_CheckBox.Click += new System.EventHandler(this.SaveSettings);
 			// 
 			// GOOD_CheckBox
 			// 
@@ -788,6 +780,7 @@
 			this.GOOD_CheckBox.Checked = global::InventoryKamera.Properties.Settings.Default.FormatGood;
 			this.GOOD_CheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.GOOD_CheckBox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::InventoryKamera.Properties.Settings.Default, "FormatGood", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+			this.GOOD_CheckBox.Enabled = false;
 			this.GOOD_CheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.GOOD_CheckBox.Location = new System.Drawing.Point(12, 87);
 			this.GOOD_CheckBox.Margin = new System.Windows.Forms.Padding(2);
@@ -796,6 +789,7 @@
 			this.GOOD_CheckBox.TabIndex = 82;
 			this.GOOD_CheckBox.Text = "GOOD";
 			this.GOOD_CheckBox.UseVisualStyleBackColor = true;
+			this.GOOD_CheckBox.Visible = false;
 			this.GOOD_CheckBox.Click += new System.EventHandler(this.Format_CheckboxClick);
 			// 
 			// Seelie_CheckBox
@@ -805,6 +799,7 @@
 			this.Seelie_CheckBox.Checked = global::InventoryKamera.Properties.Settings.Default.FormatSeelie;
 			this.Seelie_CheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
 			this.Seelie_CheckBox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::InventoryKamera.Properties.Settings.Default, "FormatSeelie", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+			this.Seelie_CheckBox.Enabled = false;
 			this.Seelie_CheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.Seelie_CheckBox.Location = new System.Drawing.Point(12, 106);
 			this.Seelie_CheckBox.Margin = new System.Windows.Forms.Padding(2);
@@ -813,6 +808,7 @@
 			this.Seelie_CheckBox.TabIndex = 84;
 			this.Seelie_CheckBox.Text = "Seelie";
 			this.Seelie_CheckBox.UseVisualStyleBackColor = true;
+			this.Seelie_CheckBox.Visible = false;
 			this.Seelie_CheckBox.Click += new System.EventHandler(this.Format_CheckboxClick);
 			// 
 			// CharDevItems_CheckBox
@@ -830,7 +826,6 @@
 			this.CharDevItems_CheckBox.Text = "Char Development Items";
 			this.CharDevItems_CheckBox.UseVisualStyleBackColor = true;
 			this.CharDevItems_CheckBox.CheckedChanged += new System.EventHandler(this.CharDevItems_CheckBox_CheckedChanged);
-			this.CharDevItems_CheckBox.Click += new System.EventHandler(this.SaveSettings);
 			// 
 			// Characters_CheckBox
 			// 
@@ -847,7 +842,6 @@
 			this.Characters_CheckBox.Text = "Characters";
 			this.Characters_CheckBox.UseVisualStyleBackColor = true;
 			this.Characters_CheckBox.CheckedChanged += new System.EventHandler(this.Characters_CheckBox_CheckedChanged);
-			this.Characters_CheckBox.Click += new System.EventHandler(this.SaveSettings);
 			// 
 			// Artifacts_Checkbox
 			// 
@@ -864,7 +858,6 @@
 			this.Artifacts_Checkbox.Text = "Artifacts";
 			this.Artifacts_Checkbox.UseVisualStyleBackColor = true;
 			this.Artifacts_Checkbox.CheckedChanged += new System.EventHandler(this.Artifacts_Checkbox_CheckedChanged);
-			this.Artifacts_Checkbox.Click += new System.EventHandler(this.SaveSettings);
 			// 
 			// Weapons_CheckBox
 			// 
@@ -881,7 +874,6 @@
 			this.Weapons_CheckBox.Text = "Weapons";
 			this.Weapons_CheckBox.UseVisualStyleBackColor = true;
 			this.Weapons_CheckBox.CheckedChanged += new System.EventHandler(this.Weapons_CheckBox_CheckedChanged);
-			this.Weapons_CheckBox.Click += new System.EventHandler(this.SaveSettings);
 			// 
 			// ScannerDelay_TrackBar
 			// 
@@ -960,7 +952,7 @@
 			this.MainMenuStrip = this.menuStrip1;
 			this.Margin = new System.Windows.Forms.Padding(2);
 			this.Name = "Form1";
-			this.Text = "Genshin Impact Scanner V0.9";
+			this.Text = "Genshin Impact Scanner V1.0";
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
 			this.Load += new System.EventHandler(this.Form1_Load);
 			((System.ComponentModel.ISupportInitialize)(this.CharacterTalent3_PictureBox)).EndInit();
@@ -1046,11 +1038,10 @@
 		private System.Windows.Forms.ToolStripTextBox inventoryToolStripTextBox;
 		private System.Windows.Forms.ToolStripMenuItem characterScreenToolStripMenuItem;
 		private System.Windows.Forms.ToolStripTextBox characterToolStripTextBox;
-		private System.Windows.Forms.ToolStripMenuItem oldDatabasePathToolStripMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem Database_MenuItem;
 		private System.Windows.Forms.PictureBox GearPictureBox;
 		private System.Windows.Forms.CheckBox Materials_CheckBox;
 		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.ToolStripMenuItem DatabaseUpdateMenuItem;
 	}
 }
 

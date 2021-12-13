@@ -153,6 +153,13 @@
     <Compile Include="Artifact.cs" />
     <Compile Include="ArtifactScraper.cs" />
     <Compile Include="Character.cs" />
+    <Compile Include="DatabaseManager.cs" />
+    <Compile Include="DatabaseUpdateForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DatabaseUpdateForm.Designer.cs">
+      <DependentUpon>DatabaseUpdateForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MaterialScraper.cs" />
     <Compile Include="CharacterScraper.cs" />
     <Compile Include="GOOD.cs" />
@@ -174,6 +181,9 @@
     <Compile Include="UserInterface.cs" />
     <Compile Include="Weapon.cs" />
     <Compile Include="WeaponScraper.cs" />
+    <EmbeddedResource Include="DatabaseUpdateForm.resx">
+      <DependentUpon>DatabaseUpdateForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -224,6 +234,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Tesseract.4.1.1\build\Tesseract.targets" Condition="Exists('..\packages\Tesseract.4.1.1\build\Tesseract.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

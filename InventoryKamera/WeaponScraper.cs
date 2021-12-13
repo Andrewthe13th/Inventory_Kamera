@@ -86,8 +86,8 @@ namespace InventoryKamera
 			BlobCounter blobCounter = new BlobCounter
 			{
 				FilterBlobs = true,
-				MinHeight = card.Height - 15,
-				MaxHeight = card.Height + 15,
+				MinHeight = card.Height - 20,
+				MaxHeight = card.Height + 20,
 				MinWidth  = card.Width - 15,
 				MaxWidth  = card.Width + 15,
 			};
@@ -97,7 +97,7 @@ namespace InventoryKamera
 			Bitmap output = new Bitmap(screenshot); // Copy used to overlay onto in testing
 
 			// Image pre-processing
-			ContrastCorrection contrast = new ContrastCorrection(80);
+			ContrastCorrection contrast = new ContrastCorrection(85);
 			Grayscale grayscale = new Grayscale(0.2125, 0.7154, 0.0721);
 			Edges edges = new Edges();
 			Threshold threshold = new Threshold(15);
@@ -125,12 +125,14 @@ namespace InventoryKamera
 
 			if (blobCounter.ObjectsCount < 1)
 			{
+				blobCounter.Dispose();
 				throw new Exception("No items detected in inventory");
 			}
 
 			// Don't save overlapping blobs
 			List<Rectangle> rectangles = new List<Rectangle>();
 			List<Rectangle> blobRects = blobCounter.GetObjectsRectangles().ToList();
+			blobCounter.Dispose();
 
 			int sWidth = blobRects[0].Width;
 			int sHeight = blobRects[0].Height;
@@ -273,7 +275,7 @@ namespace InventoryKamera
 			else // if (Navigation.GetAspectRatio() == new Size(8, 5))
 			{
 				// Grab image of entire card on Right
-				reference = new Rectangle(862, 80, 328, 640); // In 1280x720
+				reference = new Rectangle(862, 80, 328, 640); // In 1280x800
 
 				int left   = (int)Math.Round(reference.Left   / 1280.0 * width, MidpointRounding.AwayFromZero);
 				int top    = (int)Math.Round(reference.Top    / 800.0 * height, MidpointRounding.AwayFromZero);
@@ -328,7 +330,7 @@ namespace InventoryKamera
 			// Init Variables
 			string name = null;
 			int level = -1;
-			bool ascension = false;
+			bool ascended = false;
 			int refinementLevel = -11;
 			string equippedCharacter = null;
 			int rarity = 0;
@@ -360,7 +362,7 @@ namespace InventoryKamera
 					if (bRarity3) rarity = 3;
 
 					Thread thr1 = new Thread(() => name = ScanName(bm[w_name]));
-					Thread thr2 = new Thread(() => level = ScanLevel(bm[w_level],ref ascension));
+					Thread thr2 = new Thread(() => level = ScanLevel(bm[w_level],ref ascended));
 					Thread thr3 = new Thread(() => refinementLevel = ScanRefinement(bm[w_refinement]));
 					Thread thr4 = new Thread(() => equippedCharacter = ScanEquippedCharacter(bm[w_equippedCharacter]));
 
@@ -373,11 +375,11 @@ namespace InventoryKamera
 				else
 				{
 					name = null; refinementLevel = -1; equippedCharacter = null; rarity = 2;
-					return new Weapon(name, level, ascension, refinementLevel, equippedCharacter, id, 2);
+					return new Weapon(name, level, ascended, refinementLevel, equippedCharacter, id, 2);
 				}
 			}
 
-			Weapon weapon = new Weapon(name, level, ascension, refinementLevel, equippedCharacter, id, rarity);
+			Weapon weapon = new Weapon(name, level, ascended, refinementLevel, equippedCharacter, id, rarity);
 			return weapon;
 		}
 
@@ -403,7 +405,7 @@ namespace InventoryKamera
 			n.Dispose();
 
 			// Remove any non-numeric and '/' characters
-			text = Regex.Replace(text, @"[^\d/]", "");
+			text = Regex.Replace(text, @"[^\d/]", string.Empty);
 
 			int count;
 			// Check for slash
@@ -432,8 +434,8 @@ namespace InventoryKamera
 			Scraper.SetInvert(ref n);
 
 			// Analyze
-			string text = Scraper.AnalyzeText(n).ToLower().Trim();
-			text = Regex.Replace(text, @"[\W]", "");
+			string text = Regex.Replace(Scraper.AnalyzeText(n).ToLower(), @"[\W]", string.Empty);
+			text = Scraper.FindClosestWeapon(text);
 
 			n.Dispose();
 
@@ -448,12 +450,11 @@ namespace InventoryKamera
 			Scraper.SetInvert(ref n);
 
 			// Analyze
-			string text = Scraper.AnalyzeText(n).Trim().ToLower();
+			string text1 = Regex.Replace(Scraper.AnalyzeText(n).ToLower(), @"[\W]", string.Empty);
+			text1 = Scraper.FindClosestMaterialName(text1);
 			n.Dispose();
 
-			text = Regex.Replace(text, @"[\W_]", "");
-
-			return text;
+			return text1;
 		}
 
 		public static int ScanLevel(Bitmap bm, ref bool ascension)
@@ -462,7 +463,8 @@ namespace InventoryKamera
 			Scraper.SetInvert(ref n);
 
 			string text = Scraper.AnalyzeText(n).Trim();
-			text = Regex.Replace(text, @"(?![\d/]).", "");
+			n.Dispose();
+			text = Regex.Replace(text, @"(?![\d/]).", string.Empty);
 
 			if (text.Contains('/'))
 			{
@@ -491,15 +493,14 @@ namespace InventoryKamera
 				Scraper.SetInvert(ref n);
 
 				string text = Scraper.AnalyzeText(n).Trim();
-				text = Regex.Replace(text, @"[^\d]", "");
+				n.Dispose();
+				text = Regex.Replace(text, @"[^\d]", string.Empty);
 
 				// Parse Int
 				if (int.TryParse(text, out int refinementLevel))
 				{
-					n.Dispose();
 					return refinementLevel;
 				}
-				n.Dispose();
 			}
 			return -1;
 		}
@@ -509,44 +510,22 @@ namespace InventoryKamera
 			Bitmap n = Scraper.ConvertToGrayscale(bm);
 			Scraper.SetContrast(60.0, ref n);
 
-			string extractedString = Scraper.AnalyzeText(n).Trim();
+			string extractedString = Scraper.AnalyzeText(n);
+			n.Dispose();
 
 			if (extractedString != "")
 			{
 				var regexItem = new Regex("Equipped:");
 				if (regexItem.IsMatch(extractedString))
 				{
-					string[] tempString = extractedString.Split(':');
-					extractedString = tempString[1].Replace("\n", String.Empty);
+					var name = extractedString.Split(':')[1];
 
-					extractedString = Regex.Replace(extractedString, @"[^\w_]", "").ToLower();
+					name = Regex.Replace(name, @"[\W]", string.Empty).ToLower();
+					name = Scraper.FindClosestCharacterName(name);
 
-					// Assign Traveler Name if not found
-					string character = extractedString;
-					if (Scraper.b_AssignedTravelerName == false && character != null)
-					{
-						Scraper.AssignTravelerName(extractedString);
-						Scraper.b_AssignedTravelerName = true;
-					}
-
-					// Used to match with Traveler Name
-					while (extractedString.Length > 1)
-					{
-						if (string.IsNullOrEmpty(extractedString))
-						{
-							extractedString = extractedString.Substring(0, extractedString.Length - 1);
-						}
-						else
-						{
-							break;
-						}
-					}
-
-					n.Dispose();
-					return extractedString.Length > 0 ? extractedString : null;
+					return name;
 				}
 			}
-			n.Dispose();
 			// artifact has no equipped character
 			return null;
 		}
