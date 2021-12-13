@@ -192,12 +192,12 @@ namespace InventoryKamera
 						List<Size> sizes = new List<Size>
 						{
 							new Size(16,9),
-							//new Size(8,5),
+							new Size(8,5),
 						};
 
-						if (!sizes.Contains(Navigation.GetAspectRatio()) && ( Navigation.GetHeight() != 720 || Navigation.GetWidth() != 1280 ))
+						if (!sizes.Contains(Navigation.GetAspectRatio()))
 						{
-							throw new Exception($"{Navigation.GetSize()} is an invalid resolution.");
+							throw new NotImplementedException($"{Navigation.GetSize().Width}x{Navigation.GetSize().Height} is an invalid resolution.");
 						}
 
 						// Add navigation delay
@@ -206,22 +206,12 @@ namespace InventoryKamera
 						// The Data object of json object
 						data.GatherData(formats, items);
 
-						if (formats[0])
-						{
-							// Covert to GOOD format
-							GOOD good = new GOOD(data);
-							// Make Json File
-							good.WriteToJSON(OutputPath_TextBox.Text);
-						}
+						// Covert to GOOD
+						GOOD good = new GOOD(data);
 
-						if (formats[1])
-						{
-							// Seelie
-							// Seelie seelie = new Seelie(data);
-
-							// seelie.WriteToJSON(OutputPath_TextBox.Text);
-						}
-
+						// Make Json File
+						good.WriteToJSON(OutputPath_TextBox.Text);
+						
 						UserInterface.SetProgramStatus("Finished");
 					}
 					catch (ThreadAbortException)
@@ -229,6 +219,10 @@ namespace InventoryKamera
 						// Workers can get stuck if the thread is aborted or an exception is raised
 						data.StopImageProcessorWorkers();
 						UserInterface.SetProgramStatus("Scan stopped");
+					}
+					catch (NotImplementedException ex)
+					{
+						UserInterface.AddError(ex.Message);
 					}
 					catch (Exception ex)
 					{

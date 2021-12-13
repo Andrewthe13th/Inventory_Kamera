@@ -723,6 +723,7 @@
 			// inventoryToolStripTextBox
 			// 
 			this.inventoryToolStripTextBox.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
+			this.inventoryToolStripTextBox.Font = new System.Drawing.Font("Segoe UI", 9F);
 			this.inventoryToolStripTextBox.MaxLength = 2;
 			this.inventoryToolStripTextBox.Name = "inventoryToolStripTextBox";
 			this.inventoryToolStripTextBox.Size = new System.Drawing.Size(90, 23);
@@ -742,6 +743,7 @@
 			// characterToolStripTextBox
 			// 
 			this.characterToolStripTextBox.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
+			this.characterToolStripTextBox.Font = new System.Drawing.Font("Segoe UI", 9F);
 			this.characterToolStripTextBox.MaxLength = 2;
 			this.characterToolStripTextBox.Name = "characterToolStripTextBox";
 			this.characterToolStripTextBox.Size = new System.Drawing.Size(90, 23);
@@ -950,7 +952,7 @@
 			this.MainMenuStrip = this.menuStrip1;
 			this.Margin = new System.Windows.Forms.Padding(2);
 			this.Name = "Form1";
-			this.Text = "Genshin Impact Scanner V0.9";
+			this.Text = "Genshin Impact Scanner V1.0";
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
 			this.Load += new System.EventHandler(this.Form1_Load);
 			((System.ComponentModel.ISupportInitialize)(this.CharacterTalent3_PictureBox)).EndInit();

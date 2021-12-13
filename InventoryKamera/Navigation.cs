@@ -418,7 +418,7 @@ namespace InventoryKamera
 					break;
 
 				case Speed.SelectNextInventoryItem:
-					value = 100;
+					value = 175;
 					value += delay / 3;
 					break;
 
