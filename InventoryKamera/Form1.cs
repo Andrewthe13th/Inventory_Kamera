@@ -197,7 +197,7 @@ namespace InventoryKamera
 
 						if (!sizes.Contains(Navigation.GetAspectRatio()))
 						{
-							throw new NotImplementedException($"{Navigation.GetSize().Width}x{Navigation.GetSize().Height} is an invalid resolution.");
+							throw new NotImplementedException($"{Navigation.GetSize().Width}x{Navigation.GetSize().Height} is an unsupported resolution.");
 						}
 
 						// Add navigation delay

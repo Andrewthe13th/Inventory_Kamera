@@ -183,9 +183,10 @@ namespace InventoryKamera
 			UpdateTextBox($"Constellation: {level}", character_TextBox);
 		}
 
-		internal static void SetMaterial(Bitmap bm, string name, int count)
+		internal static void SetMaterial(Bitmap nameplate, Bitmap quantity, string name, int count)
 		{
-			UpdateElements(bm, $"Name: {name}{Environment.NewLine}Count: {count}", cName_PictureBox, character_TextBox);
+			UpdateElements(nameplate, $"Name: {name}", cName_PictureBox, character_TextBox);
+			UpdateElements(quantity, $"Count: {count}", cLevel_PictureBox, character_TextBox);
 		}
 
 		public static void SetCharacter_Talent(Bitmap bm, string text, int i)
