@@ -363,9 +363,9 @@ namespace InventoryKamera
 
 			Rectangle region =  new RECT(
 				Left:   (int)( 160 / xRef * Navigation.GetWidth() ),
-				Top:    (int)( 115 / yRef * Navigation.GetHeight() ),
+				Top:    (int)( 116 / yRef * Navigation.GetHeight() ),
 				Right:  (int)( 225 / xRef * Navigation.GetWidth() ),
-				Bottom: (int)( 140 / yRef * Navigation.GetHeight() ));
+				Bottom: (int)( 141 / yRef * Navigation.GetHeight() ));
 
 			for (int i = 0; i < 3; i++)
 			{

@@ -1,4 +1,12 @@
 # Inventory Kamera - A Genshin Data Scanner
+An OCR Scanner that scans your Characters, Weapons, Artifacts, Materials and Character Development items in your Inventory.</br>
+The scanner supports multiple exporting file formats, including these following:
+
+- `GOOD` .good (JSON) format for [Genshin Optimizer](https://frzyc.github.io/genshin-optimizer/#/) that include Characters, Weapons and Artifacts; and are widely used in many Genshin Impact fan-made projects and services, such as Discord bots.
+- `Seelie` JSON format to be used with [SEELIE.me](https://seelie.inmagi.com/) (Might change later in the future updates)
+
+Currently supports certain game language, screen size, scanning settings, and export options. Please follow the instructions on what you have to do.
+
 
 ## How to use the Scanner
 1. Make sure that you already have [Microsoft Visual C++ Redistributable packages](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2015-2017-2019-and-2022) installed on your device.
