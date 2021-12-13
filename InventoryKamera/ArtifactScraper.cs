@@ -134,8 +134,8 @@ namespace InventoryKamera
 			BlobCounter blobCounter = new BlobCounter
 			{
 				FilterBlobs = true,
-				MinHeight = card.Height - 15,
-				MaxHeight = card.Height + 15,
+				MinHeight = card.Height - 20,
+				MaxHeight = card.Height + 20,
 				MinWidth  = card.Width - 15,
 				MaxWidth  = card.Width + 15,
 			};
@@ -145,7 +145,7 @@ namespace InventoryKamera
 			Bitmap output = new Bitmap(screenshot); // Copy used to overlay onto in testing
 
 			// Image pre-processing
-			ContrastCorrection contrast = new ContrastCorrection(80);
+			ContrastCorrection contrast = new ContrastCorrection(85);
 			Grayscale grayscale = new Grayscale(0.2125, 0.7154, 0.0721);
 			Edges edges = new Edges();
 			Threshold threshold = new Threshold(15);
@@ -172,12 +172,14 @@ namespace InventoryKamera
 
 			if (blobCounter.ObjectsCount < 1)
 			{
+				blobCounter.Dispose();
 				throw new Exception("No items detected in inventory");
 			}
 
 			// Don't save overlapping blobs
 			List<Rectangle> rectangles = new List<Rectangle>();
 			List<Rectangle> blobRects = blobCounter.GetObjectsRectangles().ToList();
+			blobCounter.Dispose();
 
 			int sWidth = blobRects[0].Width;
 			int sHeight = blobRects[0].Height;
@@ -282,8 +284,8 @@ namespace InventoryKamera
 
 			//new RectanglesMarker(rectangles, Color.Green).ApplyInPlace(output);
 			//Navigation.DisplayBitmap(output, "Rectangles");
-			//screenshot.Dispose();
-			//output.Dispose();
+			screenshot.Dispose();
+			output.Dispose();
 
 			return (rectangles, colCoords.Count, rowCoords.Count);
 		}
