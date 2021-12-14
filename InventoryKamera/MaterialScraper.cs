@@ -1,11 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
+using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
+using Accord.Imaging.Filters;
+using Accord.Imaging;
+using System.Diagnostics;
 
 namespace InventoryKamera
 {
-	public struct Material
+	[Serializable]
+	public struct Material : ISerializable
 	{
 		public string name;
 		public int count;
@@ -14,6 +20,18 @@ namespace InventoryKamera
 		{
 			name = _name;
 			count = _count;
+		}
+
+		public void GetObjectData(SerializationInfo info, StreamingContext context) => info.AddValue(name, count);
+
+		public override int GetHashCode()
+		{
+			return name.GetHashCode();
+		}
+
+		public override bool Equals(object obj)
+		{
+			return obj is Material material && name == material.name;
 		}
 	}
 
@@ -27,73 +45,65 @@ namespace InventoryKamera
 
 	public static class MaterialScraper
 	{
-		public static List<Material> Scan_Materials(InventorySection section)
+		public static HashSet<Material> Scan_Materials(InventorySection section)
 		{
-			int maxColumns = 7;
-			int maxRows = 4;
-			int currentColumn = 0;
-			int currentRow = 0;
 			int scrollCount = 0;
-			int count = 0;
 
-			Double materialLocation_X = (Double)Navigation.GetArea().Right * ((Double)21 / (Double)160);
-			Double materialLocation_Y = (Double)Navigation.GetArea().Bottom * ((Double)14 / (Double)90);
-
-			// offset used to move mouse to other artifacts
-			int xOffset = Convert.ToInt32((Double)Navigation.GetArea().Right * ((Double)12.25 / (Double)160));
-			int yOffset = Convert.ToInt32((Double)Navigation.GetArea().Bottom * ((Double)14.5 / (Double)90));
-
-			// Scan first Item to check if empty
-			List<Material> materials = new List<Material>();
+			HashSet<Material> materials = new HashSet<Material>();
 			Material material = new Material(null, 0);
 			Material previousMaterial = new Material(null, -1);
-			Material previousRowMaterial = new Material(null ,-1);
+
+			List<Rectangle> rectangles;
 
 			// Keep scanning while not repeating any items names
 			while (true)
 			{
-				// Select Material
-				Navigation.SetCursorPos(Navigation.GetPosition().Left + Convert.ToInt32(materialLocation_X) + ( xOffset * ( count % maxColumns ) ), Navigation.GetPosition().Top + Convert.ToInt32(materialLocation_Y));
-				Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
-				Navigation.Click();
-				Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
+				int rows, cols;
+				// Find all items on the screen
+				(rectangles, cols, rows) = GetPageOfItems(); 
 
-				// Scan Material Name
-				material.name = ScanMaterialName(section);
-				material.count = 0;
+				// Remove last row. Sometimes the bottom of a page of items is caught which results
+				// in a faded quantity that can't be parsed. Removing slightly increases the number of pages that
+				// need to be scrolled but it's fine.
+				var r = rectangles.Take(rectangles.Count() - cols).ToList();
 
-				// Save the first name of each column to check for repeats
-				if (currentColumn == 0)
+				foreach (var rectangle in r)
 				{
-					if (material.name == previousRowMaterial.name)
-						break;
-					previousRowMaterial.name = material.name;
-				}
+					// Select Material
+					Navigation.SetCursorPos(Navigation.GetPosition().Left + rectangle.Center().X, Navigation.GetPosition().Top + rectangle.Center().Y);
+					Navigation.Click();
+					Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
 
-				// Check if new material has been found
-				if (material.name == previousMaterial.name)
-				{
-					break;
-				}
-				else
-				{
-					if (!string.IsNullOrEmpty(material.name))
+					material.name = ScanMaterialName(section, out Bitmap nameplate);
+					material.count = 0;
+
+					// Check if new material has been found
+					if (materials.Contains(material))
 					{
-						// Scan Material Number
-						material.count = ScanMaterialCount(currentColumn, currentRow, scrollCount);
-						materials.Add(material);
+						goto LastPage;
 					}
-					previousMaterial.name = material.name;
+					else
+					{
+						if (!string.IsNullOrEmpty(material.name))
+						{
+							// Scan Material Number
+							material.count = ScanMaterialCount(rectangle, out Bitmap quantity);
+							materials.Add(material);
+							UserInterface.ResetCharacterDisplay();
+							UserInterface.SetMaterial(nameplate, quantity, material.name, material.count);
+							previousMaterial.name = material.name;
+						}
+					}
+					nameplate.Dispose();
+					Navigation.Wait(150);
 				}
 
-				count++;
-				currentColumn++;
-
-				// reach end of row
-				if (currentColumn == maxColumns)
+				Navigation.SetCursorPos(Navigation.GetPosition().Left + r.Last().Center().X, Navigation.GetPosition().Top + r.Last().Center().Y);
+				Navigation.Click();
+				Navigation.Wait(150);
+				// Scroll to next page
+				for (int i = 0; i < rows - 1; i++)
 				{
-					// reset mouse pointer and scroll down weapon list
-					currentColumn = 0;
 					scrollCount++;
 
 					// scroll down
@@ -113,74 +123,300 @@ namespace InventoryKamera
 								else
 								{
 									Navigation.sim.Mouse.VerticalScroll(-1);
-									Navigation.SystemRandomWait(Navigation.Speed.InventoryScroll);
 								}
 							}
 						}
 						Navigation.SystemRandomWait(Navigation.Speed.InventoryScroll);
 					}
-					Navigation.SystemRandomWait(Navigation.Speed.Fast);
 				}
+				Navigation.SystemRandomWait(Navigation.Speed.Normal);
 			}
 
+			LastPage:
 			// scroll down as much as possible
 			for (int i = 0; i < 20; i++)
 			{
 				Navigation.sim.Mouse.VerticalScroll(-1);
 				Navigation.SystemRandomWait(Navigation.Speed.InventoryScroll);
 			}
+
 			Navigation.Wait(500);
 
-			// Scan the last of the material items and stop when repeated again or until max of 28
-			int startPostion = 1;
-			currentColumn = 0;
-			currentRow = 0;
-			previousMaterial.name = null;
-			previousRowMaterial.name = null;
-			for (int i = startPostion; i < 5; i++)
+			(rectangles, _, _) = GetPageOfItems();
+			bool passby = true;
+			for (int i = rectangles.Count - 1; i >= 0; i--) // Click through but backwards to short-circuit after new materials
 			{
-				for (int k = 0; k < maxColumns; k++)
+				// Select Material
+				Rectangle rectangle = rectangles[i];
+				Navigation.SetCursorPos(Navigation.GetPosition().Left + rectangle.Center().X, Navigation.GetPosition().Top + rectangle.Center().Y);
+				Navigation.Click();
+				Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
+
+				material.name = ScanMaterialName(section, out Bitmap nameplate);
+				material.count = 0;
+
+				if (materials.Contains(material) && passby) continue;
+
+				if (!materials.Contains(material))
 				{
-					// Select Material
-					Navigation.SetCursorPos(Navigation.GetPosition().Left + Convert.ToInt32(materialLocation_X) + ( xOffset * ( k % maxColumns ) ), Navigation.GetPosition().Top + Convert.ToInt32(materialLocation_Y) + ( yOffset * ( i % ( maxRows + 1 ) ) ));
-					Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
-					Navigation.Click();
-					Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
-
-					// Scan Material Name
-					material.name = ScanMaterialName(section);
-					material.count = 0;
-
-					// Check if new material has been found
-					if (material.name == previousMaterial.name || string.IsNullOrWhiteSpace(material.name))
+					if (!string.IsNullOrEmpty(material.name))
 					{
-						break;
+						// Scan Material Number
+						material.count = ScanMaterialCount(rectangle, out Bitmap quantity);
+						materials.Add(material);
+						UserInterface.ResetCharacterDisplay();
+						UserInterface.SetMaterial(nameplate, quantity, material.name, material.count);
+						passby = false; // New material found so break on next old material
 					}
-					else
-					{
-						// Scan material number
-						material.count = ScanMaterialCountEnd(k, i - 1);
-						if (material.count != -1)
-						{
-							materials.Add(material);
-							previousMaterial.name = material.name;
-						}
-					}
-
-					count++;
 				}
+				else break;
+				Navigation.Wait(150);
 			}
 
 			return materials;
+
+			{
+				// Scan the last of the material items and stop when repeated again or until max of 28
+				//int startPostion = 1;
+				//currentColumn = 0;
+				//currentRow = 0;
+				//previousMaterial.name = null;
+				//previousRowMaterial.name = null;
+				//for (int i = startPostion; i < 5; i++)
+				//{
+				//	for (int k = 0; k < maxColumns; k++)
+				//	{
+				//		// Select Material
+				//		Navigation.SetCursorPos(Navigation.GetPosition().Left + Convert.ToInt32(materialLocation_X) + ( xOffset * ( k % maxColumns ) ), Navigation.GetPosition().Top + Convert.ToInt32(materialLocation_Y) + ( yOffset * ( i % ( maxRows + 1 ) ) ));
+				//		Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
+				//		Navigation.Click();
+				//		Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
+
+				//		// Scan Material Name
+				//		material.name = ScanMaterialName(section, out Bitmap nameplate);
+				//		material.count = 0;
+
+				//		// Check if new material has been found
+				//		if (material.name == previousMaterial.name || string.IsNullOrWhiteSpace(material.name))
+				//		{
+				//			break;
+				//		}
+				//		else if (Scraper.IsValidMaterial(material.name))
+				//		{
+				//			// Scan material number
+				//			material.count = ScanMaterialCountEnd(k, i - 1, out Bitmap quantity);
+				//			if (material.count > 0)
+				//			{
+				//				materials.Add(material);
+				//				previousMaterial.name = material.name;
+				//				UserInterface.ResetCharacterDisplay();
+				//				UserInterface.SetMaterial(nameplate, quantity, material.name, material.count);
+				//			}
+				//			else
+				//			{
+				//				UserInterface.AddError($"Unable to determine quantity for {material.name}");
+				//			}
+				//		}
+				//	}
+				//}
+
+				//return materials;
+			}
 		}
 
-		public static string ScanMaterialName(InventorySection section)
+		private static (List<Rectangle> rectangles, int cols, int rows) GetPageOfItems()
+		{
+			var card = new RECT(
+				Left: 0,
+				Top: 0,
+				Right: (int)(83 / 1280.0 * Navigation.GetWidth()),
+				Bottom: (int)(100 / 720.0 * Navigation.GetHeight()));
+
+			// Filter for relative size of items in inventory, give or take a few pixels
+			BlobCounter blobCounter = new BlobCounter
+			{
+				FilterBlobs = true,
+				MinHeight = card.Height - (Navigation.GetAspectRatio() == new Size(16, 9) ? 0 : 10),
+				MaxHeight = card.Height + 15,
+				MinWidth  = card.Width - 15,
+				MaxWidth  = card.Width + 15,
+			};
+
+			// Screenshot of inventory
+			Bitmap screenshot = Navigation.CaptureWindow();
+
+			// Copy used to overlay onto in testing
+			Bitmap output = new Bitmap(screenshot);
+
+			// Image pre-processing
+			ContrastCorrection contrast = new ContrastCorrection(90);
+			Grayscale grayscale = new Grayscale(0.2125, 0.7154, 0.0721);
+			Edges edges = new Edges();
+			Threshold threshold = new Threshold(15);
+			FillHoles holes = new FillHoles
+			{
+				CoupledSizeFiltering = true,
+				MaxHoleWidth = card.Width + 10,
+				MaxHoleHeight = card.Height + 10
+			};
+			SobelEdgeDetector sobel = new SobelEdgeDetector();
+
+			screenshot = contrast.Apply(screenshot);
+			screenshot = edges.Apply(screenshot); // Quick way to find ~75% of edges
+			screenshot = grayscale.Apply(screenshot);
+			screenshot = threshold.Apply(screenshot); // Convert to black and white only based on pixel intensity
+
+			screenshot = sobel.Apply(screenshot); // Find some more edges
+			screenshot = holes.Apply(screenshot); // Fill shapes
+			screenshot = sobel.Apply(screenshot); // Find edges of those shapes. A second pass removes edges within item card
+
+			blobCounter.ProcessImage(screenshot);
+			// Note: Processing won't always detect all item rectangles on screen. Since the
+			// background isn't a solid color it's a bit trickier to filter out.
+
+			if (blobCounter.ObjectsCount < 1)
+			{
+				blobCounter.Dispose();
+				throw new Exception("No items detected in inventory");
+			}
+
+			// Don't save overlapping blobs
+			List<Rectangle> rectangles = new List<Rectangle>();
+			List<Rectangle> blobRects = blobCounter.GetObjectsRectangles().ToList();
+			blobCounter.Dispose();
+
+			int sWidth = blobRects[0].Width;
+			int sHeight = blobRects[0].Height;
+			foreach (var rect in blobRects)
+			{
+				bool add = true;
+				foreach (var item in rectangles)
+				{
+					Rectangle r1 = rect;
+					Rectangle r2 = item;
+					Rectangle intersect = Rectangle.Intersect(r1, r2);
+					if (intersect.Width > r1.Width * .2)
+					{
+						add = false;
+						break;
+					}
+				}
+				if (add)
+				{
+					sWidth = Math.Min(sWidth, rect.Width);
+					sHeight = Math.Min(sHeight, rect.Height);
+					rectangles.Add(rect);
+				}
+			}
+
+			// Determine X and Y coordinates for columns and rows, respectively
+			var colCoords = new List<int>();
+			var rowCoords = new List<int>();
+
+			foreach (var item in rectangles)
+			{
+				bool addX = true;
+				bool addY = true;
+				foreach (var x in colCoords)
+				{
+					var xC = item.Center().X;
+					if (x - 10 <= xC && xC <= x + 10)
+					{
+						addX = false;
+						break;
+					}
+				}
+				foreach (var y in rowCoords)
+				{
+					var yC = item.Center().Y;
+					if (y - 10 <= yC && yC <= y + 10)
+					{
+						addY = false;
+						break;
+					}
+				}
+				if (addX)
+				{
+					colCoords.Add(item.Center().X);
+				}
+				if (addY)
+				{
+					rowCoords.Add(item.Center().Y);
+				}
+			}
+
+			// Clear it all because we're going to use X,Y coordinate pairings to build rectangles
+			// around. This won't be perfect but it should algorithmically put rectangles over all
+			// images on the screen. The center of each of these rectangles should be a good enough
+			// spot to click.
+			rectangles.Clear();
+			colCoords.Sort();
+			rowCoords.Sort();
+			foreach (var row in rowCoords)
+			{
+				foreach (var col in colCoords)
+				{
+					int x = (int)( col - (sWidth * .5) );
+					int y = (int)( row - (sHeight * .5) );
+
+					rectangles.Add(new Rectangle(x, y, sWidth, sHeight));
+				}
+			}
+
+			// Remove some rectangles that somehow overlap each other. Don't think this happens
+			// but it doesn't hurt to double check.
+			for (int i = 0; i < rectangles.Count - 1; i++)
+			{
+				for (int j = i + 1; j < rectangles.Count; j++)
+				{
+					Rectangle r1 = rectangles[i];
+					Rectangle r2 = rectangles[j];
+					Rectangle intersect = Rectangle.Intersect(r1, r2);
+					if (intersect.Width > r1.Width * .2)
+					{
+						rectangles.RemoveAt(j);
+					}
+				}
+			}
+
+			// Sort by row then by column within each row
+			rectangles = rectangles.OrderBy(r => r.Top).ThenBy(r => r.Left).ToList();
+
+			Debug.WriteLine($"{colCoords.Count} columns");
+			Debug.WriteLine($"{rowCoords.Count} rows");
+			Debug.WriteLine($"{rectangles.Count} rectangles");
+
+			
+			//new RectanglesMarker(rectangles, Color.Green).ApplyInPlace(output);
+			//Navigation.DisplayBitmap(output, "Rectangles");
+			
+			screenshot.Dispose();
+			output.Dispose();
+
+			return (rectangles, colCoords.Count, rowCoords.Count);
+		}
+
+		public static string ScanMaterialName(InventorySection section, out Bitmap nameplate)
 		{
 			// Grab item name on right
-			int x = (int)(864.0 / 1280.0 * Navigation.GetWidth());
-			int y = (int)(80.0 / 720.0 * Navigation.GetHeight());
+			var refWidth = 1280.0;
+			var refHeight = Navigation.GetAspectRatio() == new Size(16,9) ? 720.0 : 800.0;
 
-			Bitmap bm = Navigation.CaptureRegion(x, y, 327, 37);
+			var width = Navigation.GetWidth();
+			var height = Navigation.GetHeight();
+
+			var reference = new Rectangle(862, 80, 327, 37);
+
+			// Nameplate is in the same place in 16:9 and 16:10
+			var region= new RECT(
+				Left:   (int)( reference.Left   / refWidth  * width),
+				Top:    (int)( reference.Top    / refHeight * height),
+				Right:  (int)( reference.Right  / refWidth  * width),
+				Bottom: (int)( reference.Bottom / refHeight * height));
+
+
+			Bitmap bm = Navigation.CaptureRegion(region);
+			nameplate = (Bitmap)bm.Clone();
 
 			// Alter Image
 			Scraper.SetGamma(0.2, 0.2, 0.2, ref bm);
@@ -188,11 +424,9 @@ namespace InventoryKamera
 			Scraper.SetInvert(ref n);
 
 			string text = Scraper.AnalyzeText(n);
-			text = Regex.Replace(text, @"[\W]", "").ToLower();
+			text = Regex.Replace(text, @"[\W]", string.Empty).ToLower();
 
 			//UI
-			UserInterface.ResetCharacterDisplay();
-			UserInterface.SetCharacter_NameAndElement(bm, text, "None");
 			n.Dispose();
 			bm.Dispose();
 
@@ -205,89 +439,50 @@ namespace InventoryKamera
 			return null;
 		}
 
-		public static int ScanMaterialCount(int column, int row, int additionalOffset = 0)
+		public static int ScanMaterialCount(Rectangle rectangle, out Bitmap quantity)
 		{
-			int[] scrollOffset = { 12, 7, 3, 16, 9, 5, 15, 12, 10, 8, 2, -2, 7, 4, 0, 10, 7, 10};
-			//                      0  1  2   3  4  5   6   7   8  9 10  11 12 13 14  15 16  17
+			var region = new RECT(
+				Left: rectangle.X,
+				Top: (int)(rectangle.Y + (rectangle.Height * 0.8)), // Only get the bottom of inventory item
+				Right: rectangle.Right,
+				Bottom: rectangle.Bottom + 5);
 
-			int leftIndent = 139; int topIndent = 152;
-			int spacing = 17; int yOffset = 10;
-			int width = 81; int height = 19;
-
-			// Grab quantity under item
-			int itemOffsetX = (column * width) + (column * spacing);
-			int itemOffsetY = (row * height) + (row * yOffset) + scrollOffset[additionalOffset % 18];
-
-			Bitmap bm = Navigation.CaptureRegion(leftIndent + itemOffsetX, topIndent + itemOffsetY, 80, height);
-
-			// Image Processing
-			Bitmap n  =  Scraper.ConvertToGrayscale(bm);
-			Scraper.SetContrast(20.0, ref n);
-
-			string old_text = Scraper.AnalyzeText(n, Tesseract.PageSegMode.SingleWord);
-			n.Dispose();
-
-			//replace T with 7
-			old_text = old_text.Replace('T', '7');
-
-			string text = Regex.Replace(old_text, @"[^\d]", "");
-
-			//Navigation.DisplayBitmap(bm, text);
-
-			// filter out
-			int count = -1;
-			if (int.TryParse(text, out count))
+			using (Bitmap bm = Navigation.CaptureRegion(region))
 			{
-				// UserInterface.SetCharacter_Level(bm, count);
-				bm.Dispose();
-				return count;
-			}
-			else
-			{
-				// UserInterface.SetCharacter_Level(bm, count);
-				bm.Dispose();
-				return 0;
-			}
-		}
+				quantity = (Bitmap)bm.Clone();
 
-		public static int ScanMaterialCountEnd(int column, int row)
-		{
-			// get the picture
-			int left = 139; int top = 70;
-			int xOffset = 17; int yOffset = 117;
-			int width = 81; int height = 20;
+				using (Bitmap rescaled = Scraper.ResizeImage(bm, (int)( bm.Width * 3), (int)( bm.Height * 3 )))
+				{
 
-			// Grab item portrait on Right
-			Double itemCount_X = 0;
-			Double itemCount_Y = 188;
+					// Image Processing
+					Bitmap n  =  Scraper.ConvertToGrayscale(rescaled);
+					Scraper.SetContrast(65, ref n); // Setting a high contrast seems to be better than thresholding
+					//Scraper.SetThreshold(165, ref n);
 
-			Bitmap bm = new Bitmap(80, height);
-			Graphics g = Graphics.FromImage(bm);
-			int screenLocation_X = Navigation.GetPosition().Left + Convert.ToInt32(itemCount_X);
-			int screenLocation_Y = Navigation.GetPosition().Top + Convert.ToInt32(itemCount_Y);
-			g.CopyFromScreen(left + screenLocation_X + ( ( column * width ) + ( column * xOffset ) ), top + screenLocation_Y + ( row * yOffset ), 0, 0, bm.Size);
+					string old_text = Scraper.AnalyzeText(n, Tesseract.PageSegMode.SingleWord).Trim().ToLower();
+					
+					// Might be worth it to train some more numbers
+					var cleaned = old_text.Replace("mm", "111").Replace("m", "11").Replace("nn", "11").Replace("n", "1"); // Tesseract struggles with 1's so close together because of font
+					cleaned = cleaned.Replace("a", "4");
+					cleaned = cleaned.Replace("e", "1");
+					//old_text = old_text.Replace("b", "8");
+					//old_text = old_text.Replace("+", "4");
 
-			// Image Processing
-			//Scraper.SetGrayscale(ref bm);
+					string text = Regex.Replace(cleaned, @"[^\d]", string.Empty);
 
-			string old_text = Scraper.AnalyzeText(bm, Tesseract.PageSegMode.SingleWord);
+					_ = int.TryParse(text, out int count);
 
-			//replace T with 7
-			old_text = old_text.Replace('T', '7');
+					//Debug.WriteLine($"{old_text} -> {cleaned} -> {count}");
 
-			string text = Regex.Replace(old_text, @"[^\d]", "");
+					//if (count > 3000 || count == 0)
+					//{
+					//	//Navigation.DisplayBitmap(n);
+					//}
 
-			// filter out
-			int count = -1;
-			if (int.TryParse(text, out count))
-			{
-				// UserInterface.SetCharacter_Level(bm, count);
-				return count;
-			}
-			else
-			{
-				// UserInterface.SetCharacter_Level(bm, count);
-				return -1;
+					n.Dispose();
+					return count;
+
+				}
 			}
 		}
 	}

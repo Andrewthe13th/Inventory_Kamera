@@ -5,75 +5,68 @@ namespace InventoryKamera
 {
 	public class Inventory
 	{
-		[JsonProperty] private List<Weapon> weapons;
-		[JsonProperty] private List<Artifact> artifacts;
-		[JsonProperty] private List<Material> materials;
-		[JsonProperty] private List<Material> characterDevelopmentItems;
+		[JsonProperty]
+		public List<Weapon> Weapons { get; private set; }
+
+		[JsonProperty]
+		public List<Artifact> Artifacts { get; private set; }
+
+		[JsonProperty]
+		public HashSet<Material> Materials { get; private set; }
+
+		[JsonProperty]
+		public HashSet<Material> DevMaterials { get; private set; }
+
+		[JsonProperty]
+		public HashSet<Material> AllMaterials
+		{ 
+			get 
+			{
+				var all = new HashSet<Material>();
+				all.UnionWith(Materials);
+				all.UnionWith(DevMaterials);
+				return all;
+			}
+			private set { } 
+		}
 		//private List<Artifact> equippedArtifacts;
 
-		public int size
+		public int Size
 		{
-			get => weapons.Count + artifacts.Count;
-			set => size = weapons.Count + artifacts.Count;
+			get
+			{
+				return Weapons.Count + Artifacts.Count + Materials.Count + DevMaterials.Count;
+			}
+
+			set => Size = Weapons.Count + Artifacts.Count + AllMaterials.Count;
 		}
 
 		public Inventory()
 		{
-			weapons = new List<Weapon>();
-			artifacts = new List<Artifact>();
-			materials = new List<Material>();
-			characterDevelopmentItems = new List<Material>();
-			//equippedArtifacts = new List<Artifact>();
+			Weapons = new List<Weapon>();
+			Artifacts = new List<Artifact>();
+			Materials = new HashSet<Material>();
+			DevMaterials = new HashSet<Material>();
 		}
 
 		public void Add(Weapon w)
 		{
-			weapons.Add(w);
+			Weapons.Add(w);
 		}
 
 		public void Add(Artifact a)
 		{
-			artifacts.Add(a);
+			Artifacts.Add(a);
 		}
 
-		public List<Artifact> GetArtifacts()
+		public void AddMaterials(ref HashSet<Material> _material)
 		{
-			return artifacts;
+			Materials.UnionWith(_material);
 		}
 
-		public List<Weapon> GetWeapons()
+		public void AddDevItems(ref HashSet<Material> _material)
 		{
-			return weapons;
-		}
-
-		public List<Material> GetMaterials()
-		{
-			return materials;
-		}
-
-		public List<Material> GetCharDevItems()
-		{
-			return characterDevelopmentItems;
-		}
-
-		public void SetArtifacts(ref List<Artifact> _artifacts)
-		{
-			artifacts = _artifacts;
-		}
-
-		public void SetWeapons(ref List<Weapon> _weapons)
-		{
-			weapons = _weapons;
-		}
-
-		public void SetMaterials(ref List<Material> _material)
-		{
-			materials = _material;
-		}
-
-		public void SetCharacterDevelopmentItems(ref List<Material> _material)
-		{
-			characterDevelopmentItems = _material;
+			DevMaterials.UnionWith(_material);
 		}
 	}
 }
