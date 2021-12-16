@@ -440,6 +440,11 @@ namespace InventoryKamera
 			delay = _delay;
 		}
 
+		public static int GetDelay()
+        {
+			return delay;
+        }
+
 		public enum Speed
 		{
 			Slowest,

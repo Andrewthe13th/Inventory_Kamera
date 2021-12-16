@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Timers;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
@@ -24,18 +25,22 @@ namespace InventoryKamera
 			int offset = 0;
 			UserInterface.SetWeapon_Max(weaponCount);
 
+			// Determine Delay if delay has not been found before
+			Scraper.FindDelay(rectangles);
+
+
 			// Go through weapon list
 			while (cardsQueued < weaponCount)
 			{
 				int cardsRemaining =  weaponCount - cardsQueued ;
 				// Go through each "page" of items and queue. In the event that not a full page of
-				// items are scolled to, offset the index of rectangle to start clicking from
+				// items are scrolled to, offset the index of rectangle to start clicking from
 				for (int i = cardsRemaining < fullPage ? ( rows - ( totalRows - rowsQueued ) ) * cols : 0; i < rectangles.Count; i++)
 				{
 					Rectangle item = rectangles[i];
 					Navigation.SetCursorPos(Navigation.GetPosition().Left + item.Center().X, Navigation.GetPosition().Top + item.Center().Y + offset);
 					Navigation.Click();
-					Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
+					Navigation.Wait(Navigation.GetDelay());
 
 					// Queue card for scanning
 					QueueScan(cardsQueued);
