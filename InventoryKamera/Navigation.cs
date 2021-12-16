@@ -171,8 +171,8 @@ namespace InventoryKamera
 
 		public static void SelectCharacterDevelopmentInventory()
 		{
-			int buttonX = (int)(512 / 1280.0 * GetWidth()); // (Double)GetWidth() * ((Double)64 / (Double)160);
-			int buttonY = (int)(40  / 720.0 * GetHeight()); // (Double)GetHeight() * ((Double)5 / (Double)90);
+			int buttonX = (int)(512 / 1280.0 * GetWidth());
+			int buttonY = (int)(40  / 720.0 * GetHeight());
 			SetCursorPos(position.Left + buttonX, position.Top + buttonY);
 			Click();
 			SystemRandomWait(Speed.UI);
@@ -180,9 +180,9 @@ namespace InventoryKamera
 
 		public static void SelectMaterialInventory()
 		{
-			Double artifactButtonLocation_X = (Double)area.Right * ((Double)78 / (Double)160);
-			Double artifactButtonLocation_Y = (Double)area.Bottom * ((Double)5 / (Double)90);
-			SetCursorPos(position.Left + Convert.ToInt32(artifactButtonLocation_X), position.Top + Convert.ToInt32(artifactButtonLocation_Y));
+			int buttonX = (int)(636 / 1280.0 * GetWidth());
+			int buttonY = (int)(30  / 720.0 * GetHeight());
+			SetCursorPos(position.Left + buttonX, position.Top + buttonY);
 			Click();
 			SystemRandomWait(Speed.UI);
 		}
@@ -418,7 +418,7 @@ namespace InventoryKamera
 					break;
 
 				case Speed.SelectNextInventoryItem:
-					value = 100;
+					value = 175;
 					value += delay / 3;
 					break;
 

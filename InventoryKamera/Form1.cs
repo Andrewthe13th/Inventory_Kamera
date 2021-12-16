@@ -18,6 +18,7 @@ namespace InventoryKamera
 	{
 		private static Thread mainThread;
 		private static InventoryKamera data = new InventoryKamera();
+		private static DatabaseManager databaseManager = new DatabaseManager();
 		private static string filePath = "";
 
 		private bool GOODChecked;
@@ -84,9 +85,6 @@ namespace InventoryKamera
 				// Stop navigating weapons/artifacts
 				mainThread.Abort();
 
-				// Reset data
-				data = new InventoryKamera();
-
 				UserInterface.SetProgramStatus("Scan Stopped");
 
 				Navigation.Reset();
@@ -119,7 +117,7 @@ namespace InventoryKamera
 
 		private void Form1_Load(object sender, EventArgs e)
 		{
-			LoadSettings();
+			UpdateKeyTextBoxes();
 
 			GOODChecked = GOOD_CheckBox.Checked;
 			SeelieChecked = Seelie_CheckBox.Checked;
@@ -133,25 +131,8 @@ namespace InventoryKamera
 			Delay = ScannerDelay_TrackBar.Value;
 		}
 
-		private void LoadSettings()
+		private void UpdateKeyTextBoxes()
 		{
-			GOOD_CheckBox.Checked = Properties.Settings.Default.FormatGood;
-			Seelie_CheckBox.Checked = Properties.Settings.Default.FormatSeelie;
-
-			Weapons_CheckBox.Checked = Properties.Settings.Default.ScanWeapons;
-			Artifacts_Checkbox.Checked = Properties.Settings.Default.ScanArtifacts;
-			Characters_CheckBox.Checked = Properties.Settings.Default.ScanCharacters;
-			CharDevItems_CheckBox.Checked = Properties.Settings.Default.ScanCharDevItems;
-			Materials_CheckBox.Checked = Properties.Settings.Default.ScanMaterials;
-
-			ScannerDelay_TrackBar.Value = Properties.Settings.Default.ScannerDelay;
-
-			OutputPath_TextBox.Text = Properties.Settings.Default.OutputPath;
-			if (!Directory.Exists(OutputPath_TextBox.Text))
-			{
-				OutputPath_TextBox.Text = Directory.GetCurrentDirectory() + "\\GenshinData";
-			}
-
 			Navigation.inventoryKey = (VirtualKeyCode)Properties.Settings.Default.InventoryKey;
 			Navigation.characterKey = (VirtualKeyCode)Properties.Settings.Default.CharacterKey;
 
@@ -168,33 +149,6 @@ namespace InventoryKamera
 				characterToolStripTextBox.Text = KeyCodeToUnicode((Keys)Navigation.characterKey);
 			}
 
-			Database_MenuItem.Text = Properties.Settings.Default.OldDatabase;
-		}
-
-		private void SaveSettings()
-		{
-			Properties.Settings.Default.FormatGood = GOOD_CheckBox.Checked;
-			Properties.Settings.Default.FormatSeelie = Seelie_CheckBox.Checked;
-
-			Properties.Settings.Default.ScanWeapons = Weapons_CheckBox.Checked;
-			Properties.Settings.Default.ScanArtifacts = Artifacts_Checkbox.Checked;
-			Properties.Settings.Default.ScanCharacters = Characters_CheckBox.Checked;
-			Properties.Settings.Default.ScanCharDevItems = CharDevItems_CheckBox.Checked;
-			Properties.Settings.Default.ScanMaterials = Materials_CheckBox.Checked;
-
-			Properties.Settings.Default.ScannerDelay = ScannerDelay_TrackBar.Value;
-
-			if (Directory.Exists(OutputPath_TextBox.Text))
-			{
-				Properties.Settings.Default.OutputPath = OutputPath_TextBox.Text;
-			}
-
-			Properties.Settings.Default.InventoryKey = (int)Navigation.inventoryKey;
-			Properties.Settings.Default.CharacterKey = (int)Navigation.characterKey;
-
-			Properties.Settings.Default.OldDatabase = Database_MenuItem.Text.Trim();
-
-			Properties.Settings.Default.Save();
 		}
 
 		private void StartButton_Clicked(object sender, EventArgs e)
@@ -238,12 +192,12 @@ namespace InventoryKamera
 						List<Size> sizes = new List<Size>
 						{
 							new Size(16,9),
-							//new Size(8,5),
+							new Size(8,5),
 						};
 
-						if (!sizes.Contains(Navigation.GetAspectRatio()) && ( Navigation.GetHeight() != 720 || Navigation.GetWidth() != 1280 ))
+						if (!sizes.Contains(Navigation.GetAspectRatio()))
 						{
-							throw new Exception($"{Navigation.GetSize()} is an invalid resolution.");
+							throw new NotImplementedException($"{Navigation.GetSize().Width}x{Navigation.GetSize().Height} is an unsupported resolution.");
 						}
 
 						// Add navigation delay
@@ -252,22 +206,12 @@ namespace InventoryKamera
 						// The Data object of json object
 						data.GatherData(formats, items);
 
-						if (formats[0])
-						{
-							// Covert to GOOD format
-							GOOD good = new GOOD(data);
-							// Make Json File
-							good.WriteToJSON(OutputPath_TextBox.Text, Database_MenuItem.Text);
-						}
+						// Covert to GOOD
+						GOOD good = new GOOD(data);
 
-						if (formats[1])
-						{
-							// Seelie
-							Seelie seelie = new Seelie(data);
-
-							seelie.WriteToJSON(OutputPath_TextBox.Text, Database_MenuItem.Text);
-						}
-
+						// Make Json File
+						good.WriteToJSON(OutputPath_TextBox.Text);
+						
 						UserInterface.SetProgramStatus("Finished");
 					}
 					catch (ThreadAbortException)
@@ -275,6 +219,10 @@ namespace InventoryKamera
 						// Workers can get stuck if the thread is aborted or an exception is raised
 						data.StopImageProcessorWorkers();
 						UserInterface.SetProgramStatus("Scan stopped");
+					}
+					catch (NotImplementedException ex)
+					{
+						UserInterface.AddError(ex.Message);
 					}
 					catch (Exception ex)
 					{
@@ -342,9 +290,9 @@ namespace InventoryKamera
 			RemoveHotkey();
 		}
 
-		private void SaveSettings(object sender, EventArgs e)
+		private void SaveSettings()
 		{
-			SaveSettings();
+			Properties.Settings.Default.Save();
 		}
 
 		private void Format_CheckboxClick(object sender, EventArgs e)
@@ -365,11 +313,6 @@ namespace InventoryKamera
 				//CharDevItems_CheckBox.Enabled = !CharDevItems_CheckBox.Enabled;
 				//Materials_CheckBox.Enabled = !Materials_CheckBox.Enabled;
 			}
-			else
-			{
-				return;
-			}
-			SaveSettings();
 		}
 
 		private void Weapons_CheckBox_CheckedChanged(object sender, EventArgs e)
@@ -456,14 +399,10 @@ namespace InventoryKamera
 			}
 		}
 
-		private void DatabaseMenuItem_Click(object sender, EventArgs e)
+		private void DatabaseUpdateMenuItem_Click(object sender, EventArgs e)
 		{
-			CommonOpenFileDialog d = new CommonOpenFileDialog
-			{
-				InitialDirectory = Database_MenuItem.Text,
-			};
-
-			d.Filters.Add(new CommonFileDialogFilter("JSON Files", ".json"));
+			var updateForm = new DatabaseUpdateForm();
+			updateForm.ShowDialog();
 		}
 
 		#region Unicode Helper Functions

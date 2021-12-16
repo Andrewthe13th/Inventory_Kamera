@@ -9,7 +9,7 @@ namespace InventoryKamera
 	{
 		[JsonProperty] private List<SeelieItem> inventory; // char dev item list
 
-		private string[] charDevItems = {
+		private readonly string[] charDevItems = {
             // character exp materials
             "xp|xp|0",
 			"xp|xp_sub_1|0",
@@ -220,7 +220,7 @@ namespace InventoryKamera
 			"wam|mask_w|0",
 		};
 
-		private string[] materialItems =
+		private readonly string[] materialItems =
 		{
             // material
             "",
@@ -406,63 +406,32 @@ namespace InventoryKamera
 			inventory = new List<SeelieItem>();
 		}
 
-		public Seelie(InventoryKamera genshinData)
+		public Seelie(InventoryKamera genshinData) : this()
 		{
-			inventory = new List<SeelieItem>();
-
-			// Assign CharDevItems
-			List<Material> _charDevItems = genshinData.GetInventory().GetCharDevItems();
-			foreach (Material x in _charDevItems)
+			foreach (var material in genshinData.Inventory.AllMaterials)
 			{
-				SeelieItem temp = new SeelieItem();
+				//if (!Scraper.AllMaterials.ContainsValue(material.name)) continue;
 
-				// Look up name in Dictionary
-				string itemString = Scraper.charDevItems.Contains(x.name) ? charDevItems[Scraper.charDevItems.IndexOf(x.name)] : (string)null ;
-				if (itemString != "")
-				{
-					string[] itemInfo = itemString.Split('|');
+				//SeelieItem temp = new SeelieItem();
+				//// Look up name in Dictionary
+				
+				//string[] itemInfo = material.name.Split('|');
 
-					// check if it splits into 3 sections
-					if (itemInfo.Length != 3)
-					{
-						break;
-					}
+				//// check if it splits into 3 sections
+				//if (itemInfo.Length != 3)
+				//{
+				//	break;
+				//}
 
-					temp.type = itemInfo[0];
-					temp.item = itemInfo[1];
-					temp.tier = Int16.Parse(itemInfo[2]);
-					temp.value = x.count;
-					inventory.Add(temp);
-				}
-			}
-
-			// Assign Materials
-			List<Material> _materials = genshinData.GetInventory().GetMaterials();
-			foreach (Material x in _materials)
-			{
-				SeelieItem temp = new SeelieItem();
-				// Look up name in Dictionary
-				string itemString =  Scraper.materials.Contains(x.name) ? materialItems[Scraper.materials.IndexOf(x.name)] : (string)null ;
-				if (itemString != "")
-				{
-					string[] itemInfo = itemString.Split('|');
-
-					// check if it splits into 3 sections
-					if (itemInfo.Length != 3)
-					{
-						break;
-					}
-
-					temp.type = itemInfo[0];
-					temp.item = itemInfo[1];
-					temp.tier = Int16.Parse(itemInfo[2]);
-					temp.value = x.count;
-					inventory.Add(temp);
-				}
+				//temp.type = itemInfo[0];
+				//temp.item = itemInfo[1];
+				//temp.tier = Int16.Parse(itemInfo[2]);
+				//temp.value = material.count;
+				//inventory.Add(temp);
 			}
 		}
 
-		private struct SeelieItem // char dev Item
+		private struct SeelieItem
 		{
 			[JsonProperty] public string type;
 			[JsonProperty] public string item;

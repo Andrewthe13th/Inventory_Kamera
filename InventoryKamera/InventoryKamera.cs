@@ -8,26 +8,29 @@ namespace InventoryKamera
 	public class InventoryKamera
 	{
 		[JsonProperty]
-		private static List<Character> characters = new List<Character>();
+		public List<Character> Characters { get; private set; }
 
 		[JsonProperty]
-		private static Inventory inventory = new Inventory();
+		public Inventory Inventory { get; private set; }
 
-		private static List<Artifact> equippedArtifacts = new List<Artifact>();
-		private static List<Weapon> equippedWeapons = new List<Weapon>();
-		public static Queue<OCRImage> workerQueue = new Queue<OCRImage>();
-		private static List<Thread> ImageProcessors = new List<Thread>();
+		private static List<Artifact> equippedArtifacts;
+		private static List<Weapon> equippedWeapons;
+		private static HashSet<Material> Materials;
+		public static Queue<OCRImage> workerQueue;
+		private static List<Thread> ImageProcessors;
 		private static volatile bool b_threadCancel = false;
 		private static int maxProcessors = 2; // TODO: Add support for more processors
 											  // TODO add language option
 
 		public InventoryKamera()
 		{
-			characters = new List<Character>();
-			inventory = new Inventory();
+			Characters = new List<Character>();
+			Inventory = new Inventory();
 			equippedArtifacts = new List<Artifact>();
 			equippedWeapons = new List<Weapon>();
+			Materials = new HashSet<Material>();
 			ImageProcessors = new List<Thread>();
+			workerQueue = new Queue<OCRImage>();
 		}
 
 		public void StopImageProcessorWorkers()
@@ -39,12 +42,7 @@ namespace InventoryKamera
 
 		public List<Character> GetCharacters()
 		{
-			return characters;
-		}
-
-		public Inventory GetInventory()
-		{
-			return inventory;
+			return Characters;
 		}
 
 		public void GatherData(bool[] formats, bool[] checkbox)
@@ -93,8 +91,8 @@ namespace InventoryKamera
 				{
 					// Get characters
 					Navigation.CharacterScreen();
-					characters = new List<Character>();
-					characters = CharacterScraper.ScanCharacters();
+					Characters = new List<Character>();
+					Characters = CharacterScraper.ScanCharacters();
 					Navigation.MainMenuScreen();
 				}
 
@@ -119,8 +117,8 @@ namespace InventoryKamera
 					// Get Materials
 					Navigation.InventoryScreen();
 					Navigation.SelectCharacterDevelopmentInventory();
-					List<Material> materials = MaterialScraper.Scan_Materials(InventorySection.CharacterDevelopmentItems);
-					inventory.SetCharacterDevelopmentItems(ref materials);
+					HashSet<Material> devItems = MaterialScraper.Scan_Materials(InventorySection.CharacterDevelopmentItems);
+					Inventory.AddDevItems(ref devItems);
 					Navigation.MainMenuScreen();
 				}
 
@@ -130,8 +128,8 @@ namespace InventoryKamera
 					// Get Materials
 					Navigation.InventoryScreen();
 					Navigation.SelectMaterialInventory();
-					List<Material> materials = MaterialScraper.Scan_Materials(InventorySection.Materials);
-					inventory.SetMaterials(ref materials);
+					HashSet<Material> materials = MaterialScraper.Scan_Materials(InventorySection.Materials);
+					Inventory.AddMaterials(ref materials);
 					Navigation.MainMenuScreen();
 				}
 			}
@@ -167,14 +165,14 @@ namespace InventoryKamera
 							{
 								// Scan as weapon
 								Weapon w = WeaponScraper.CatalogueFromBitmaps(image.bm, image.id);
-								if (w.rarity >= 3) // TODO: Add options for choosing rarities
+								if (w.Rarity >= 3) // TODO: Add options for choosing rarities
 								{
 									if (w.IsValid())
 									{
 										UserInterface.IncrementWeaponCount();
-										inventory.Add(w);
+										Inventory.Add(w);
 										UserInterface.SetGear(image.bm[4], w);
-										if (!string.IsNullOrEmpty(w.equippedCharacter))
+										if (!string.IsNullOrWhiteSpace(w.EquippedCharacter))
 											equippedWeapons.Add(w);
 									}
 									else
@@ -190,16 +188,16 @@ namespace InventoryKamera
 							// Scan as artifact
 							Artifact artifact = ArtifactScraper.CatalogueFromBitmapsAsync(image.bm, image.id).Result;
 
-							if (artifact.rarity >= 4) // TODO: Add options for choosing rarities
+							if (artifact.Rarity >= 4) // TODO: Add options for choosing rarities
 							{
 								if (artifact.IsValid())
 								{
 									UserInterface.IncrementArtifactCount();
 
-									inventory.Add(artifact);
+									Inventory.Add(artifact);
 
 									UserInterface.SetGear(image.bm[7], artifact);
-									if (!string.IsNullOrEmpty(artifact.equippedCharacter))
+									if (!string.IsNullOrWhiteSpace(artifact.EquippedCharacter))
 										equippedArtifacts.Add(artifact);
 								}
 								else
@@ -235,11 +233,12 @@ namespace InventoryKamera
 		{
 			foreach (Artifact artifact in equippedArtifacts)
 			{
-				foreach (Character character in characters)
+				foreach (Character character in Characters)
 				{
-					if (artifact.GetEquippedCharacter() == character.GetName())
+					if (artifact.EquippedCharacter == character.Name)
 					{
-						character.AssignArtifact(artifact);
+						Debug.WriteLine($"Assigned {artifact.GearSlot} to {character.Name}");
+						character.AssignArtifact(artifact); // Do we even need to do this?
 						break;
 					}
 				}
@@ -248,16 +247,20 @@ namespace InventoryKamera
 
 		public void AssignWeapons()
 		{
-			foreach (Weapon weapon in equippedWeapons)
+			foreach (Character character in Characters)
 			{
-				foreach (Character character in characters)
+				foreach (Weapon weapon in equippedWeapons)
 				{
-					if (weapon.equippedCharacter == character.name)
+					if (weapon.EquippedCharacter == character.Name)
 					{
-						Debug.WriteLine($"Assigned {weapon.name} to {character.name}");
+						Debug.WriteLine($"Assigned {weapon.Name} to {character.Name}");
 						character.AssignWeapon(weapon);
 						break;
 					}
+				}
+				if (character.Weapon is null)
+				{
+					Inventory.Add(new Weapon(character.WeaponType, character.Name));
 				}
 			}
 		}

@@ -1,80 +1,98 @@
 ﻿using System;
+using System.ComponentModel;
 using Newtonsoft.Json;
 
 namespace InventoryKamera
 {
+	[Serializable]
 	public class Artifact
 	{
-		[JsonProperty] public string gearSlot { get; private set; }
-		[JsonProperty] public int rarity { get; private set; }
-		[JsonProperty] public string mainStat { get; private set; }
-		[JsonProperty] public int level { get; private set; }
-		[JsonProperty] public SubStat[] subStats { get; private set; }
-		[JsonProperty] public int subStatsCount { get; private set; }
-		[JsonProperty] public string setName { get; private set; }
-		[JsonProperty] public string equippedCharacter { get; private set; }
-		[JsonProperty] public bool @lock { get; private set; }
-		[JsonProperty] public int id { get; private set; }
+		[JsonProperty("setKey")]
+		public string SetName { get; private set; }
+
+		[JsonProperty("slotKey")]
+		public string GearSlot { get; private set; }
+
+		[JsonProperty("rarity")]
+		public int Rarity { get; private set; }
+
+		[JsonProperty("mainStatKey")]
+		public string MainStat { get; private set; }
+
+		[JsonProperty("level")]
+		public int Level { get; private set; }
+
+		[JsonProperty("substats")] 
+		public SubStat[] SubStats { get; private set; }
+
+		[JsonProperty("location")]
+		public string EquippedCharacter { get; private set; }
+
+		[JsonProperty("lock")] 
+		public bool Lock { get; private set; }
+
+		public int SubStatsCount { get; private set; }
+
+		public int Id { get; private set; }
 
 		public Artifact()
 		{
-			rarity = -1;
-			gearSlot = null;
-			mainStat = null;
-			level = -1;
-			subStats = new SubStat[4];
-			subStatsCount = 4;
-			setName = null;
-			equippedCharacter = null;
-			@lock = false;
-			id = 0;
+			Rarity = -1;
+			GearSlot = null;
+			MainStat = null;
+			Level = -1;
+			SubStats = new SubStat[4];
+			SubStatsCount = 4;
+			SetName = null;
+			EquippedCharacter = null;
+			Lock = false;
+			Id = 0;
 		}
 
 		public Artifact(int _rarity, string _gearSlot, string _mainStat, int _level, SubStat[] _subStats, int _subStatsCount, string _setName, string _equippedCharacter = null, int _id = 0, bool _Lock = false)
 		{
-			gearSlot = _gearSlot;
-			rarity = _rarity;
-			mainStat = _mainStat;
-			level = _level;
-			subStats = _subStats;
-			subStatsCount = _subStatsCount;
-			setName = _setName;
-			equippedCharacter = _equippedCharacter;
-			@lock = _Lock;
-			id = _id;
-		}
-
-		public string GetGearSlot()
-		{
-			return gearSlot;
+			GearSlot = _gearSlot;
+			Rarity = _rarity;
+			MainStat = _mainStat;
+			Level = _level;
+			SubStats = _subStats;
+			SubStatsCount = _subStatsCount;
+			SetName = _setName;
+			EquippedCharacter = string.IsNullOrWhiteSpace(_equippedCharacter) ? "" : _equippedCharacter;
+			Lock = _Lock;
+			Id = _id;
 		}
 
 		public bool IsValid()
 		{
 			// Check subStats
-			for (int i = 0; i < subStatsCount; i++)
+			for (int i = 0; i < SubStatsCount; i++)
 			{
-				if (subStats[i].stat == null)
-				{
-					continue;
-				}
-				if (!Scraper.IsValidStat(subStats[i].stat) || subStats[i].value == (decimal)( -1.0 ))
+				if (!Scraper.IsValidStat(SubStats[i].stat) || SubStats[i].value == (decimal)( -1.0 ))
 				{
 					return false;
 				}
 			}
 
-			return 0 <= level && level <= 20 && rarity != 0 && Scraper.IsValidSlot(gearSlot) && Scraper.IsValidSetName(setName) && Scraper.IsValidStat(mainStat);
+			return 0 <= Level
+				&& Level <= 20
+				&& 0 < Rarity
+				&& Scraper.IsValidSlot(GearSlot)
+				&& Scraper.IsValidSetName(SetName)
+				&& Scraper.IsValidStat(MainStat)
+				&& (string.IsNullOrWhiteSpace(EquippedCharacter) || Scraper.IsValidCharacter(EquippedCharacter));
 		}
 
-		public string GetEquippedCharacter()
-		{
-			return equippedCharacter;
-		}
-
+		[Serializable]
 		public struct SubStat
 		{
+			
+			[JsonProperty("key")]
+			[DefaultValue("")]
 			public string stat;
+
+			[JsonProperty("value")]
+			[DefaultValue(0)]
 			public decimal value;
 
 			public override string ToString()
@@ -102,18 +120,18 @@ namespace InventoryKamera
 				return false;
 			}
 
-			return gearSlot == artifact.gearSlot
-				&& rarity == artifact.rarity
-				&& mainStat == artifact.mainStat
-				&& level == artifact.level
-				&& subStats == artifact.subStats
-				&& subStatsCount == artifact.subStatsCount
-				&& setName == artifact.setName
-				&& equippedCharacter == artifact.equippedCharacter
-				&& @lock == artifact.@lock;
+			return GearSlot == artifact.GearSlot
+				&& Rarity == artifact.Rarity
+				&& MainStat == artifact.MainStat
+				&& Level == artifact.Level
+				&& SubStats == artifact.SubStats
+				&& SubStatsCount == artifact.SubStatsCount
+				&& SetName == artifact.SetName
+				&& EquippedCharacter == artifact.EquippedCharacter
+				&& Lock == artifact.Lock;
 		}
 
-		public override int GetHashCode() => (gearSlot, rarity, mainStat, level, subStats, subStatsCount, setName, equippedCharacter, @lock).GetHashCode();
+		public override int GetHashCode() => (GearSlot, Rarity, MainStat, Level, SubStats, SubStatsCount, SetName, EquippedCharacter, Lock).GetHashCode();
 
 		public static bool operator ==(Artifact lhs, Artifact rhs)
 		{
