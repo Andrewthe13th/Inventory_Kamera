@@ -344,13 +344,13 @@ namespace InventoryKamera
 		public static string FindClosestDevelopmentName(string name)
 		{
 			string value = FindClosestInDict(name, DevMaterials);
-			return string.IsNullOrWhiteSpace(value) ? value : FindClosestInDict(name, AllMaterials);
+			return !string.IsNullOrWhiteSpace(value) ? value : FindClosestInDict(name, AllMaterials);
 		}
 
 		public static string FindClosestMaterialName(string name)
 		{
 			string value = FindClosestInDict(name, Materials);
-			return string.IsNullOrWhiteSpace(value) ? value : FindClosestInDict(name, AllMaterials);
+			return !string.IsNullOrWhiteSpace(value) ? value : FindClosestInDict(name, AllMaterials);
 		}
 
 		private static string FindClosestInDict(string source, Dictionary<string, string> targets)
