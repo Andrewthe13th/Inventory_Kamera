@@ -30,7 +30,7 @@ namespace InventoryKamera
 			{
 				int cardsRemaining = artifactCount - cardsQueued;
 				// Go through each "page" of items and queue. In the event that not a full page of
-				// items are scolled to, offset the index of rectangle to start clicking from
+				// items are scrolled to, offset the index of rectangle to start clicking from
 				for (int i = cardsRemaining < fullPage ? ( rows - ( totalRows - rowsQueued ) ) * cols : 0; i < rectangles.Count; i++)
 				{
 					Rectangle item = rectangles[i];
