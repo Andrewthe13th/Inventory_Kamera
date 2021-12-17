@@ -353,8 +353,7 @@ namespace InventoryKamera
 		public static void SystemRandomWait(Speed type = Speed.Normal)
 		{
 			Random r = new Random();
-			int value = 0;
-
+			int value;
 			switch (type)
 			{
 				case Speed.Fastest:

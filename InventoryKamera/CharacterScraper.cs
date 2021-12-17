@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Text.RegularExpressions;
 using Accord.Imaging;
+using System.Linq;
 
 namespace InventoryKamera
 {
@@ -18,6 +19,7 @@ namespace InventoryKamera
 			// first character name is used to stop scanning characters
 			int characterCount = 0;
 			firstCharacterName = null; // Static variable might already be set
+			UserInterface.ResetCharacterDisplay();
 			while (ScanCharacter(out Character character) || characterCount < 4)
 			{
 				if (character.IsValid())
@@ -42,12 +44,13 @@ namespace InventoryKamera
 
 			Navigation.SelectCharacterAttributes();
 
-			// Scan the Name and element of Character. Attempt 20 times max.
+			// Scan the Name and element of Character. Attempt 75 times max.
 			ScanNameAndElement(ref name, ref element);
 
-			if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(element))
+			if (string.IsNullOrWhiteSpace(name))
 			{
-				UserInterface.AddError("Could not determine character's name or element");
+				if (string.IsNullOrWhiteSpace(name)) UserInterface.AddError("Could not determine character's name");
+				if (string.IsNullOrWhiteSpace(element)) UserInterface.AddError("Could not determine character's element");
 				return false;
 			}
 
@@ -145,6 +148,8 @@ namespace InventoryKamera
 
 				// Only keep text up until first space
 				text = Regex.Replace(text, @"\s+\w*", string.Empty);
+
+				UserInterface.SetMainCharacterName(text);
 			}
 			else
 			{
@@ -167,6 +172,7 @@ namespace InventoryKamera
 
 			do
 			{
+
 				Navigation.SystemRandomWait(Navigation.Speed.Fast);
 				using (Bitmap bm = Navigation.CaptureRegion(region))
 				{
@@ -175,34 +181,47 @@ namespace InventoryKamera
 					Scraper.SetInvert(ref n);
 
 					n = Scraper.ResizeImage(n, n.Width * 2, n.Height * 2);
+					string block = Scraper.AnalyzeText(n, Tesseract.PageSegMode.Auto).ToLower().Trim();
+					string line = Scraper.AnalyzeText(n, Tesseract.PageSegMode.SingleLine).ToLower().Trim();
 
-					string text = Scraper.AnalyzeText(n).ToLower().Trim();
+					// Characters with wrapped names will not have a slash
+					string nameAndElement = line.Contains("/") ? line : block;
 
-					if (text.Contains("/"))
+					if (nameAndElement.Contains("/"))
 					{
-						var split = text.Split('/');
+						var split = nameAndElement.Split('/');
 
-						// search for element in block
-						element = Scraper.FindElementByName(split[0].Trim());
+						// Search for element and character name in block
 
-						// strip each char from name until found in dictionary
-						name = Regex.Replace(split[1], @"[\W]", string.Empty);
-						string scannedName = Scraper.FindClosestCharacterName(name);
-						
-						name = scannedName == "Traveler" ? name : scannedName;
-						if (!string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(element))
+						// Long name characters might look like
+						// <Element>   <First Name>
+						// /           <Last Name>
+						element = !split[0].Contains(" ") ? Scraper.FindElementByName(split[0].Trim()) : Scraper.FindElementByName(split[0].Split(' ')[0].Trim());
+
+						// Find character based on string after /
+						// Long name characters might search by their last name only but it'll still work.
+						name = Scraper.FindClosestCharacterName(Regex.Replace(split[1], @"[\W]", string.Empty));
+						if (name == "Traveler")
 						{
-							UserInterface.SetCharacter_NameAndElement(bm, name, element);
-							return;
+							foreach (var item in from item in Scraper.Characters
+												 where item.Value["GOOD"].ToString() == "Traveler"
+												 select item)
+							{
+								name = item.Key;
+							}
 						}
-						
 					}
 					n.Dispose();
-					Navigation.Wait(300);
+
+					if (!string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(element))
+					{
+						UserInterface.SetCharacter_NameAndElement(bm, name, element);
+						return;
+					}
 				}
 				attempts++;
-				Navigation.SystemRandomWait(Navigation.Speed.Faster);
-			} while (( string.IsNullOrEmpty(name) || string.IsNullOrEmpty(element) ) && ( attempts < maxAttempts ));
+				Navigation.SystemRandomWait(Navigation.Speed.Normal);
+			} while (( string.IsNullOrWhiteSpace(name) || string.IsNullOrEmpty(element) ) && ( attempts < maxAttempts ));
 			name = null;
 			element = null;
 		}
