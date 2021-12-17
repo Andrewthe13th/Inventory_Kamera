@@ -164,7 +164,7 @@ namespace InventoryKamera
 							if (!WeaponScraper.IsEnhancementOre(image.bm[0]))
 							{
 								// Scan as weapon
-								Weapon w = WeaponScraper.CatalogueFromBitmaps(image.bm, image.id);
+								Weapon w = WeaponScraper.CatalogueFromBitmapsAsync(image.bm, image.id).Result;
 								if (w.Rarity >= 3) // TODO: Add options for choosing rarities
 								{
 									if (w.IsValid())
