@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
+using System.Threading.Tasks;
 using Accord.Imaging;
 using Accord.Imaging.Filters;
 
@@ -65,6 +65,11 @@ namespace InventoryKamera
 				}
 				else
 				{
+					// Scroll back one to keep it from getting too crazy
+					if (rowsQueued % 15 == 0)
+					{
+						Navigation.sim.Mouse.VerticalScroll(1);
+					}
 					for (int i = 0; i < 10 * rows - 1; i++)
 					{
 						Navigation.sim.Mouse.VerticalScroll(-1);
@@ -325,7 +330,7 @@ namespace InventoryKamera
 			InventoryKamera.workerQueue.Enqueue(new OCRImage(weaponImages, "weapon", id));
 		}
 
-		public static Weapon CatalogueFromBitmaps(List<Bitmap> bm, int id)
+		public static async Task<Weapon> CatalogueFromBitmapsAsync(List<Bitmap> bm, int id)
 		{
 			// Init Variables
 			string name = null;
@@ -346,7 +351,9 @@ namespace InventoryKamera
 				Color threeStar = Color.FromArgb(255, 81, 127, 203);
 
 				// Check for equipped color
-				Color equipped = Color.FromArgb(255, 255, 231, 187);
+				Color equippedColor = Color.FromArgb(255, 255, 231, 187);
+				Color equippedStatus = bm[w_equippedCharacter].GetPixel(5, 5);
+
 
 				// Scan different parts of the weapon
 				bool bRarity5 = Scraper.CompareColors(fiveStar, rarityColor);
@@ -361,16 +368,26 @@ namespace InventoryKamera
 					if (bRarity4) rarity = 4;
 					if (bRarity3) rarity = 3;
 
-					Thread thr1 = new Thread(() => name = ScanName(bm[w_name]));
-					Thread thr2 = new Thread(() => level = ScanLevel(bm[w_level],ref ascended));
-					Thread thr3 = new Thread(() => refinementLevel = ScanRefinement(bm[w_refinement]));
-					Thread thr4 = new Thread(() => equippedCharacter = ScanEquippedCharacter(bm[w_equippedCharacter]));
+					bool b_equipped = Scraper.CompareColors(equippedColor, equippedStatus);
 
-					// Start Threads
-					thr1.Start(); thr2.Start(); thr3.Start(); thr4.Start();
+					List<Task> tasks = new List<Task>();
 
-					// End Threads
-					thr1.Join(); thr2.Join(); thr3.Join(); thr4.Join();
+					var taskName = Task.Run(() => name = ScanName(bm[w_name]));
+					var taskLevel = Task.Run(() => level = ScanLevel(bm[w_level], ref ascended));
+					var taskRefinement = Task.Run(() => refinementLevel = ScanRefinement(bm[w_refinement]));
+					var taskEquipped = Task.Run(() => equippedCharacter = ScanEquippedCharacter(bm[w_equippedCharacter]));
+
+					tasks.Add(taskName);
+					tasks.Add(taskLevel);
+					tasks.Add(taskRefinement);
+
+					if (b_equipped)
+					{
+						tasks.Add(taskEquipped);
+					}
+
+					await Task.WhenAll(tasks.ToArray());
+
 				}
 				else
 				{
