@@ -168,6 +168,11 @@ namespace InventoryKamera
 			UpdateTextBox(text, gear_TextBox);
 		}
 
+		internal static void SetMainCharacterName(string text)
+		{
+			UpdateTextBox($"Traveler name: {text}", character_TextBox);
+		}
+
 		public static void SetCharacter_NameAndElement(Bitmap bm, string name, string element)
 		{
 			UpdateElements(bm, $"Name: {name}\nElement: {element}", cName_PictureBox, character_TextBox);

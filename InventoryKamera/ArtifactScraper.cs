@@ -604,6 +604,11 @@ namespace InventoryKamera
 						{
 							stat.value = -1;
 						}
+
+						// Sometimes the decimal is missed by the scanner for stat% boosts.
+						// 46.6% is the theoretical max value for any % boost.
+						if (stat.stat.Contains("_") && stat.value > 50) stat.value /= 10; 
+
 						substats[j] = stat;
 						return null;
 					}

@@ -6,11 +6,8 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
-<<<<<<< HEAD
 using System.Runtime.InteropServices;
-=======
 using System.Linq;
->>>>>>> development
 using System.Threading;
 using Accord;
 using Accord.Imaging;
@@ -349,13 +346,13 @@ namespace InventoryKamera
 		public static string FindClosestDevelopmentName(string name)
 		{
 			string value = FindClosestInDict(name, DevMaterials);
-			return string.IsNullOrWhiteSpace(value) ? value : FindClosestInDict(name, AllMaterials);
+			return !string.IsNullOrWhiteSpace(value) ? value : FindClosestInDict(name, AllMaterials);
 		}
 
 		public static string FindClosestMaterialName(string name)
 		{
 			string value = FindClosestInDict(name, Materials);
-			return string.IsNullOrWhiteSpace(value) ? value : FindClosestInDict(name, AllMaterials);
+			return !string.IsNullOrWhiteSpace(value) ? value : FindClosestInDict(name, AllMaterials);
 		}
 
 		private static string FindClosestInDict(string source, Dictionary<string, string> targets)
