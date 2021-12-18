@@ -48,7 +48,7 @@ namespace InventoryKamera
 
 		public Character(string _name, string _element, int _level, bool _ascension, int _experience, int _constellation, int[] _talents, WeaponType _weaponType) : this()
 		{
-			Name = (string)Scraper.Characters[_name.ToLower()]["GOOD"];
+			Name = string.IsNullOrWhiteSpace(_name) ? "" : (string)Scraper.Characters[_name.ToLower()]["GOOD"];
 			Element = _element;
 			Level = _level;
 			Ascended = _ascension;
@@ -65,12 +65,34 @@ namespace InventoryKamera
 
 		public bool IsValid()
 		{
+			return HasValidName() && HasValidLevel() && HasValidElement() && HasValidConstellation() && HasValidTalents();
+		}
+
+		public bool HasValidName()
+		{
+			return Scraper.IsValidCharacter(Name);
+		}
+
+		public bool HasValidLevel()
+		{
+			return 1 <= Level && Level <= 90;
+		}
+
+		public bool HasValidElement()
+		{
+			return Scraper.IsValidElement(Element);
+		}
+
+		public bool HasValidConstellation()
+		{
+			return 0 <= Constellation && Constellation <= 6;
+		}
+
+		public bool HasValidTalents()
+		{
 			foreach (var value in Talents.Values) if (value < 1 || value > 15) return false;
-			
-			return Scraper.IsValidCharacter(Name)
-				&& 0 < Level
-				&& Scraper.IsValidElement(Element)
-				&& 0 <= Constellation;
+
+			return true;
 		}
 
 		public void AssignWeapon(Weapon newWeapon)
@@ -114,6 +136,21 @@ namespace InventoryKamera
 				return 6;
 			}
 			return 0;
+		}
+
+		public override string ToString()
+		{
+			string output = "Character\n";
+			output += $"Name: {Name}\n";
+			output += $"Element: {Element}\n";
+			output += $"Level: {Level}{( Ascended ? "+" : "" )}\n";
+			output += $"Ascension Level: {Ascension}\n";
+			output += $"Constellation: {Constellation}\n";
+			foreach (var item in Talents)
+			{
+				output += $"{item.Key.ToUpper()} : {item.Value}\n";
+			}
+			return output;
 		}
 	}
 }

@@ -243,7 +243,7 @@ namespace InventoryKamera
 
 		public static void AddError(string error)
 		{
-			UpdateTextBox($"{error}", error_TextBox);
+			UpdateTextBox($"{error.Replace("\n", Environment.NewLine)}" + Environment.NewLine, error_TextBox);
 		}
 
 		public static void SetNavigation_Image(Bitmap bm)
