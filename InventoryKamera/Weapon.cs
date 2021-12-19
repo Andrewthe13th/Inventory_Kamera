@@ -76,7 +76,7 @@ namespace InventoryKamera
 
 		public Weapon(string _name, int _level, bool _ascended, int _refinementLevel, string _equippedCharacter = null, int _id = 0, int _rarity = -1)
 		{
-			Name = _name;
+			Name = string.IsNullOrWhiteSpace(_name) ? "" : _name;
 			Level = _level;
 			Ascended = _ascended;
 			RefinementLevel = _refinementLevel;
@@ -87,12 +87,27 @@ namespace InventoryKamera
 
 		public bool IsValid()
 		{
-			return 1 <= Level
-				&& Level <= 90
-				&& 0 <= RefinementLevel
-				&& RefinementLevel <= 5
-				&& Scraper.IsValidWeapon(Name)
-				&& (string.IsNullOrWhiteSpace(EquippedCharacter) || Scraper.IsValidCharacter(EquippedCharacter));
+			return HasValidLevel() && HasValidRefinementLevel() && HasValidWeaponName() && HasValidEquippedCharacter();
+		}
+
+		public bool HasValidLevel()
+		{
+			return 1 <= Level && Level <= 90;
+		}
+
+		public bool HasValidRefinementLevel()
+		{
+			return 0 <= RefinementLevel && RefinementLevel <= 5;
+		}
+
+		public bool HasValidWeaponName()
+		{
+			return Scraper.IsValidWeapon(Name);
+		}
+
+		public bool HasValidEquippedCharacter()
+		{
+			return string.IsNullOrWhiteSpace(EquippedCharacter) || Scraper.IsValidCharacter(EquippedCharacter) ;
 		}
 
 		public int AscensionCount()
@@ -170,6 +185,17 @@ namespace InventoryKamera
 		}
 
 		public static bool operator !=(Weapon lhs, Weapon rhs) => !( lhs == rhs );
+
+		public override string ToString()
+		{
+			string output = $"Weapon ID: {Id}\n"
+				   + $"Name: {Name}\n"
+				   + $"Level {Level}{(Ascended ? "+" : "")}\n"
+				   + $"Refinement: {RefinementLevel}\n"
+				   + $"Locked: {Lock}\n";
+			if (!string.IsNullOrWhiteSpace(EquippedCharacter)) output += $"Equipped character: {EquippedCharacter}";
+			return output;
+		}
 	}
 
 	public enum WeaponType
