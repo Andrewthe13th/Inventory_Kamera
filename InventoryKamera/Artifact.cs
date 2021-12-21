@@ -125,7 +125,9 @@ namespace InventoryKamera
 
 			public override string ToString()
 			{
-				return stat.Contains("%") || stat.Contains("crit") || stat.Contains("bonus") ? $"{stat.Replace("%", "")} + {value}%" : $"{stat} + {value}";
+				return stat is null
+					? "NULL"
+					: stat.Contains("%") || stat.Contains("crit") || stat.Contains("bonus") ? $"{stat.Replace("%", "")} + {value}%" : $"{stat} + {value}";
 			}
 		}
 

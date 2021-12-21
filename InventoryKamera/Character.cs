@@ -43,23 +43,36 @@ namespace InventoryKamera
 
 		public Character()
 		{
+			Talents = new Dictionary<string, int>
+			{
+				["auto"] = 0,
+				["skill"] = 0,
+				["burst"] = 0
+			};
 			Artifacts = new Dictionary<string, Artifact>();
 		}
 
 		public Character(string _name, string _element, int _level, bool _ascension, int _experience, int _constellation, int[] _talents, WeaponType _weaponType) : this()
 		{
-			Name = string.IsNullOrWhiteSpace(_name) ? "" : (string)Scraper.Characters[_name.ToLower()]["GOOD"];
+			try
+			{
+				Name = (string)Scraper.Characters[_name.ToLower()]["GOOD"];
+			}
+			catch (Exception)
+			{ }
 			Element = _element;
 			Level = _level;
 			Ascended = _ascension;
 			Experience = _experience;
 			Constellation = _constellation;
-			Talents = new Dictionary<string, int>()
+			try
 			{
-				["auto"] = _talents[0],
-				["skill"] = _talents[1],
-				["burst"] = _talents[2]
-			};
+				Talents["auto"]  = _talents[0];
+				Talents["skill"] = _talents[1];
+				Talents["burst"] = _talents[2];
+			}
+			catch (Exception)
+			{ }
 			WeaponType = _weaponType;
 		}
 
@@ -70,7 +83,7 @@ namespace InventoryKamera
 
 		public bool HasValidName()
 		{
-			return Scraper.IsValidCharacter(Name);
+			return !string.IsNullOrWhiteSpace(Name) && Scraper.IsValidCharacter(Name);
 		}
 
 		public bool HasValidLevel()
@@ -80,7 +93,7 @@ namespace InventoryKamera
 
 		public bool HasValidElement()
 		{
-			return Scraper.IsValidElement(Element);
+			return !string.IsNullOrWhiteSpace(Element) && Scraper.IsValidElement(Element);
 		}
 
 		public bool HasValidConstellation()
@@ -90,6 +103,8 @@ namespace InventoryKamera
 
 		public bool HasValidTalents()
 		{
+			if (Talents is null || Talents.Keys.Count != 3) return false;
+
 			foreach (var value in Talents.Values) if (value < 1 || value > 15) return false;
 
 			return true;
