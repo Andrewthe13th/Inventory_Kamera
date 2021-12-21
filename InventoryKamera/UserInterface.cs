@@ -101,7 +101,7 @@ namespace InventoryKamera
 			{
 				MethodInvoker textBoxAction = delegate
 				{
-					textBox.AppendText(text);
+					textBox.AppendText(text.Replace("\n", Environment.NewLine));
 					textBox.AppendText(Environment.NewLine);
 					textBox.Refresh();
 				};
@@ -133,38 +133,24 @@ namespace InventoryKamera
 		public static void SetGear(Bitmap bm, Weapon weapon)
 		{
 			ResetGearDisplay();
-			UpdatePictureBox(bm, gear_PictureBox);
-			int maxLevel = (int)( weapon.Ascended ? Math.Floor(weapon.Level / 10.0) + 1 * 10 : Math.Floor(weapon.Level / 10.0) * 10 );
-			string text =
-				$"Name: {weapon.Name}" + Environment.NewLine +
-				$"Level: {weapon.Level} / {maxLevel}" + Environment.NewLine +
-				$"Refinement: {weapon.RefinementLevel}" + Environment.NewLine +
-				$"Equipped: {weapon.EquippedCharacter}";
-			UpdateTextBox(text, gear_TextBox);
+			SetGearPictureBox(bm);
+			SetGearTextBox(weapon.ToString());
 		}
 
 		public static void SetGear(Bitmap bm, Artifact artifact)
 		{
 			ResetGearDisplay();
+			SetGearPictureBox(bm);
+			SetGearTextBox(artifact.ToString());
+		}
+
+		public static void SetGearPictureBox(Bitmap bm)
+		{
 			UpdatePictureBox(bm, gear_PictureBox);
-			string text =
-				$"Rarity: {artifact.Rarity}" + Environment.NewLine +
-				$"Level: {artifact.Level}" + Environment.NewLine +
-				$"Set: {artifact.SetName}" + Environment.NewLine +
-				$"Slot: {artifact.GearSlot}" + Environment.NewLine +
-				$"Stat: {artifact.MainStat}" + Environment.NewLine +
-				$"SubStats:" + Environment.NewLine;
+		}
 
-			for (int i = 0; i < artifact.SubStats.Length; i++)
-			{
-				Artifact.SubStat substat = artifact.SubStats[i];
-				if (string.IsNullOrEmpty(substat.stat)) break;
-				text += $"{i + 1}: {substat}" + Environment.NewLine;
-			}
-
-			text += $"Equipped: {artifact.EquippedCharacter}" + Environment.NewLine +
-				$"Locked: {artifact.Lock}";
-
+		public static void SetGearTextBox(string text)
+		{
 			UpdateTextBox(text, gear_TextBox);
 		}
 

@@ -61,18 +61,6 @@ namespace InventoryKamera.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool FormatGood {
-            get {
-                return ((bool)(this["FormatGood"]));
-            }
-            set {
-                this["FormatGood"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
         public int ScannerDelay {
             get {
@@ -145,13 +133,25 @@ namespace InventoryKamera.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool FormatSeelie {
+        [global::System.Configuration.DefaultSettingValueAttribute("3")]
+        public decimal MinimumWeaponRarity {
             get {
-                return ((bool)(this["FormatSeelie"]));
+                return ((decimal)(this["MinimumWeaponRarity"]));
             }
             set {
-                this["FormatSeelie"] = value;
+                this["MinimumWeaponRarity"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("4")]
+        public decimal MinimumArtifactRarity {
+            get {
+                return ((decimal)(this["MinimumArtifactRarity"]));
+            }
+            set {
+                this["MinimumArtifactRarity"] = value;
             }
         }
     }

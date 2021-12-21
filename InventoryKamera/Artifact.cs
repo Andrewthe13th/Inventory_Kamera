@@ -164,20 +164,20 @@ namespace InventoryKamera
 		public override string ToString()
 {
 			string output = $"Artifact ID: {Id}\n"
+				+ $"Set: {SetName}\n"
 				+ $"Rarity: {Rarity}\n"
 				+ $"Level: {Level}\n"
-				+ $"Set: {SetName}\n"
 				+ $"Slot: {GearSlot}\n"
 				+ $"Main Stat: {MainStat}\n";
 
 			for (int i = 0; i < SubStatsCount; i++)
 			{
-				output += $"Substat {i + 1}: {SubStats[i]}\n";
+				if (!string.IsNullOrWhiteSpace(SubStats[i].stat)) output += $"Substat {i + 1}: {SubStats[i]}\n";
 			}
 
 			output += $"Locked: {Lock}\n";
 
-			if (!string.IsNullOrWhiteSpace(EquippedCharacter)) output += $"Equipped character: {EquippedCharacter}";
+			if (!string.IsNullOrWhiteSpace(EquippedCharacter)) output += $"Equipped character: {EquippedCharacter}\n";
 			return output;
 		}
 
