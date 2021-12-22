@@ -51,7 +51,7 @@ namespace InventoryKamera
 			return Characters;
 		}
 
-		public void GatherData(bool[] formats, bool[] checkbox)
+		public void GatherData()
 		{
 			// Initize Image Processors
 			for (int i = 0; i < maxProcessors; i++)
@@ -69,76 +69,72 @@ namespace InventoryKamera
 			Scraper.AssignTravelerName(mainCharacterName);
 			Scraper.b_AssignedTravelerName = true;
 
-			if (formats[0])
+			if (Properties.Settings.Default.ScanWeapons)
 			{
-				if (checkbox[0])
-				{
-					// Get Weapons
-					Navigation.InventoryScreen();
-					Navigation.SelectWeaponInventory();
-					WeaponScraper.ScanWeapons();
-					//inventory.AssignWeapons(ref equippedWeapons);
-					Navigation.MainMenuScreen();
-				}
-
-				if (checkbox[1])
-				{
-					// Get Artifacts
-					Navigation.InventoryScreen();
-					Navigation.SelectArtifactInventory();
-					ArtifactScraper.ScanArtifacts();
-					//inventory.AssignArtifacts(ref equippedArtifacts);
-					Navigation.MainMenuScreen();
-				}
-
-				workerQueue.Enqueue(new OCRImage(null, "END", 0));
-
-				if (checkbox[2])
-				{
-					// Get characters
-					Navigation.CharacterScreen();
-					Characters = new List<Character>();
-					Characters = CharacterScraper.ScanCharacters();
-					Navigation.MainMenuScreen();
-				}
-
-				// Wait for Image Processors to finish
-				AwaitProcessors();
-
-				if (checkbox[2])
-				{
-					// Assign Artifacts to Characters
-					if (checkbox[1])
-						AssignArtifacts();
-					if (checkbox[0])
-						AssignWeapons();
-				}
+				// Get Weapons
+				Navigation.InventoryScreen();
+				Navigation.SelectWeaponInventory();
+				WeaponScraper.ScanWeapons();
+				//inventory.AssignWeapons(ref equippedWeapons);
+				Navigation.MainMenuScreen();
 			}
 
-			if (formats[1])
+			if (Properties.Settings.Default.ScanArtifacts)
 			{
-				// Scan Character Development Items
-				if (checkbox[3])
-				{
-					// Get Materials
-					Navigation.InventoryScreen();
-					Navigation.SelectCharacterDevelopmentInventory();
-					HashSet<Material> devItems = MaterialScraper.Scan_Materials(InventorySection.CharacterDevelopmentItems);
-					Inventory.AddDevItems(ref devItems);
-					Navigation.MainMenuScreen();
-				}
-
-				// Scan Materials
-				if (checkbox[4])
-				{
-					// Get Materials
-					Navigation.InventoryScreen();
-					Navigation.SelectMaterialInventory();
-					HashSet<Material> materials = MaterialScraper.Scan_Materials(InventorySection.Materials);
-					Inventory.AddMaterials(ref materials);
-					Navigation.MainMenuScreen();
-				}
+				// Get Artifacts
+				Navigation.InventoryScreen();
+				Navigation.SelectArtifactInventory();
+				ArtifactScraper.ScanArtifacts();
+				//inventory.AssignArtifacts(ref equippedArtifacts);
+				Navigation.MainMenuScreen();
 			}
+
+			workerQueue.Enqueue(new OCRImage(null, "END", 0));
+
+			if (Properties.Settings.Default.ScanCharacters)
+			{
+				// Get characters
+				Navigation.CharacterScreen();
+				Characters = new List<Character>();
+				Characters = CharacterScraper.ScanCharacters();
+				Navigation.MainMenuScreen();
+			}
+
+			// Wait for Image Processors to finish
+			AwaitProcessors();
+
+			if (Properties.Settings.Default.ScanCharacters)
+			{
+				// Assign Artifacts to Characters
+				if (Properties.Settings.Default.ScanArtifacts)
+					AssignArtifacts();
+				if (Properties.Settings.Default.ScanWeapons)
+					AssignWeapons();
+			}
+			
+
+			// Scan Character Development Items
+			if (Properties.Settings.Default.ScanCharDevItems)
+			{
+				// Get Materials
+				Navigation.InventoryScreen();
+				Navigation.SelectCharacterDevelopmentInventory();
+				HashSet<Material> devItems = MaterialScraper.Scan_Materials(InventorySection.CharacterDevelopmentItems);
+				Inventory.AddDevItems(ref devItems);
+				Navigation.MainMenuScreen();
+			}
+
+			// Scan Materials
+			if (Properties.Settings.Default.ScanMaterials)
+			{
+				// Get Materials
+				Navigation.InventoryScreen();
+				Navigation.SelectMaterialInventory();
+				HashSet<Material> materials = MaterialScraper.Scan_Materials(InventorySection.Materials);
+				Inventory.AddMaterials(ref materials);
+				Navigation.MainMenuScreen();
+			}
+			
 		}
 
 		private void AwaitProcessors()
@@ -169,15 +165,17 @@ namespace InventoryKamera
 						{
 							if (!WeaponScraper.IsEnhancementOre(image.bm[0]))
 							{
+								UserInterface.SetGearPictureBox(image.bm[4]);
+
 								// Scan as weapon
 								Weapon weapon = WeaponScraper.CatalogueFromBitmapsAsync(image.bm, image.id).Result;
 								UserInterface.SetGear(image.bm[4], weapon);
 
-								if (weapon.Rarity >= 3) // TODO: Add options for choosing rarities
+								if (weapon.Rarity >= (int)Properties.Settings.Default.MinimumWeaponRarity) // TODO: Add options for choosing rarities
 								{
 									try
 									{
-										if (!weapon.IsValid())
+										if (weapon.IsValid())
 										{
 											UserInterface.IncrementWeaponCount();
 											Inventory.Add(weapon);
@@ -198,21 +196,21 @@ namespace InventoryKamera
 										UserInterface.AddError(error + weapon.ToString());
 										image.bm[4].Save($"./logging/weapons/weapon{weapon.Id}.png");
 									}
-									
 								}
 							}
 						}
 						else if (image.type == "artifact")
 						{
+							UserInterface.SetGearPictureBox(image.bm[7]);
 							// Scan as artifact
 							Artifact artifact = ArtifactScraper.CatalogueFromBitmapsAsync(image.bm, image.id).Result;
 							UserInterface.SetGear(image.bm[7], artifact);
 
-							if (artifact.Rarity >= 4) // TODO: Add options for choosing rarities
+							if (artifact.Rarity >= (int)Properties.Settings.Default.MinimumArtifactRarity) // TODO: Add options for choosing rarities
 							{
 								try
 								{
-									if (!artifact.IsValid())
+									if (artifact.IsValid())
 									{
 										UserInterface.IncrementArtifactCount();
 

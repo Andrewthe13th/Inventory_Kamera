@@ -13,6 +13,8 @@ namespace InventoryKamera
 {
 	public static class ArtifactScraper
 	{
+		public static bool StopScanning { get; set; }
+
 		public static void ScanArtifacts(int count = 0)
 		{
 			// Get Max artifacts from screen
@@ -24,6 +26,8 @@ namespace InventoryKamera
 			int rowsQueued = 0;
 			int offset = 0;
 			UserInterface.SetArtifact_Max(artifactCount);
+
+			StopScanning = false;
 
 			// Go through artifact list
 			while (cardsQueued < artifactCount)
@@ -41,7 +45,7 @@ namespace InventoryKamera
 					// Queue card for scanning
 					QueueScan(cardsQueued);
 					cardsQueued++;
-					if (cardsQueued >= artifactCount)
+					if (cardsQueued >= artifactCount || StopScanning)
 					{
 						return;
 					}
@@ -397,8 +401,28 @@ namespace InventoryKamera
 			artifactImages.Add(locked); //6
 			artifactImages.Add(card);
 
-			// Send Image to Worker Queue
-			InventoryKamera.workerQueue.Enqueue(new OCRImage(artifactImages, "artifact", id));
+
+			try
+			{
+				if (GetRarity(card.GetPixel(5,5)) < Properties.Settings.Default.MinimumArtifactRarity)
+				{
+					artifactImages.ForEach(i => i.Dispose());
+					StopScanning = true;
+				}
+				else // Send images to Worker Queue
+					InventoryKamera.workerQueue.Enqueue(new OCRImage(artifactImages, "artifact", id));
+			}
+			catch (ArgumentException ex)
+			{
+				UserInterface.AddError($"{ex.Message} for artifact ID#{id}");
+				card.Save($"./logging/artifacts/artifact{id}.png");
+			}
+			catch (Exception ex)
+			{
+				UserInterface.AddError($"Unexpected error {ex.Message} for artifact ID#{id}");
+				UserInterface.AddError($"{ex.StackTrace}");
+				card.Save($"./logging/artifacts/artifact{id}.png");
+			}
 		}
 
 		public static async Task<Artifact> CatalogueFromBitmapsAsync(List<Bitmap> bm, int id)
@@ -425,73 +449,56 @@ namespace InventoryKamera
 
 				// Get Rarity
 				Color rarityColor = bm[a_rarity].GetPixel(0, 0);
-
-				Color fiveStar = Color.FromArgb(255, 188, 105, 50);
-				Color fourStar = Color.FromArgb(255, 161, 86, 224);
-				Color threeStar = Color.FromArgb(255, 81, 127, 203);
-				Color twoStar = Color.FromArgb(255, 42, 143, 114);
-				Color oneStar = Color.FromArgb(255, 114, 119, 138);
+				rarity = GetRarity(rarityColor);
 
 				// Check for equipped color
 				Color equippedColor = Color.FromArgb(255, 255, 231, 187);
 				Color equippedStatus = bm[a_equippedCharacter].GetPixel(5, 5);
+				bool b_equipped = Scraper.CompareColors(equippedColor, equippedStatus);
 
 				// Check for lock color
 				Color lockedColor = Color.FromArgb(255, 70, 80, 100); // Dark area around red lock
 				Color lockStatus = bm[a_lock].GetPixel(5, 5);
+				_lock = Scraper.CompareColors(lockedColor, lockStatus);
 
-				// Only scan 4 and 5-star artifacts
-				if (Scraper.CompareColors(fiveStar, rarityColor) || Scraper.CompareColors(fourStar, rarityColor))
-				{
-					rarity = Scraper.CompareColors(fiveStar, rarityColor) ? 5 : 4;
-					bool b_equipped = Scraper.CompareColors(equippedColor, equippedStatus);
-					_lock = Scraper.CompareColors(lockedColor, lockStatus);
+				// Improved Scanning using multi threading
+				List<Task> tasks = new List<Task>();
 
-					// Improved Scanning using multi threading
-					List<Task> tasks = new List<Task>();
+				var taskGear  = Task.Run(() => gearSlot = ScanArtifactGearSlot(bm[a_gearSlot]));
+				var taskMain  = taskGear.ContinueWith( (antecedent) => mainStat = ScanArtifactMainStat(bm[a_mainStat], antecedent.Result));
+				var taskLevel = Task.Run(() => level = ScanArtifactLevel(bm[a_level]));
+				var taskSubs  = Task.Run(() => subStats = ScanArtifactSubStats(bm[a_subStats], ref setName));
+				var taskEquip = Task.Run(() => equippedCharacter = ScanArtifactEquippedCharacter(bm[a_equippedCharacter]));
 
-					var taskGear  = Task.Run(() => gearSlot = ScanArtifactGearSlot(bm[a_gearSlot]));
-					var taskMain  = taskGear.ContinueWith( (antecedent) => mainStat = ScanArtifactMainStat(bm[a_mainStat], antecedent.Result));
-					var taskLevel = Task.Run(() => level = ScanArtifactLevel(bm[a_level]));
-					var taskSubs  = Task.Run(() => subStats = ScanArtifactSubStats(bm[a_subStats], ref setName));
-					var taskEquip = Task.Run(() => equippedCharacter = ScanArtifactEquippedCharacter(bm[a_equippedCharacter]));
+				tasks.Add(taskGear);
+				tasks.Add(taskMain);
+				tasks.Add(taskLevel);
+				tasks.Add(taskSubs);
+				if (b_equipped)
+				{
+					tasks.Add(taskEquip);
+				}
 
-					tasks.Add(taskGear);
-					tasks.Add(taskMain);
-					tasks.Add(taskLevel);
-					tasks.Add(taskSubs);
-					if (b_equipped)
-					{
-						tasks.Add(taskEquip);
-					}
-
-					await Task.WhenAll(tasks.ToArray());
-				}
-				else if (Scraper.CompareColors(threeStar, rarityColor))
-				{
-					rarity = 3; equippedCharacter = null; setName = null; level = -1; gearSlot = null;
-					//rarity = 3;
-				}
-				else if (Scraper.CompareColors(twoStar, rarityColor))
-				{
-					rarity = 2; equippedCharacter = null; setName = null; level = -1; gearSlot = null;
-					//rarity = 2;
-				}
-				else if (Scraper.CompareColors(oneStar, rarityColor))
-				{
-					rarity = 1; equippedCharacter = null; setName = null; level = -1; gearSlot = null;
-					//rarity = 1;
-				}
-				else
-				{
-					// Not found
-					rarity = 0; equippedCharacter = null; setName = null; level = -1; gearSlot = null;
-					//rarity = 0;
-					UserInterface.AddError("Couldn't determine rarity for artifact");
-				}
+				await Task.WhenAll(tasks.ToArray());
 			}
 
 			return new Artifact(rarity, gearSlot, mainStat, level, subStats.ToArray(), subStats.Count, setName, equippedCharacter, id, _lock);
+		}
+
+		private static int GetRarity(Color rarityColor)
+		{
+			Color fiveStar    = Color.FromArgb(255, 188, 105,  50);
+			Color fourStar    = Color.FromArgb(255, 161,  86, 224);
+			Color threeStar   = Color.FromArgb(255,  81, 127, 203);
+			Color twoStar     = Color.FromArgb(255,  42, 143, 114);
+			Color oneStar     = Color.FromArgb(255, 114, 119, 138);
+
+			if (Scraper.CompareColors(fiveStar, rarityColor)) return 5;
+			else if (Scraper.CompareColors(fourStar, rarityColor)) return 4;
+			else if (Scraper.CompareColors(threeStar, rarityColor)) return 3;
+			else if (Scraper.CompareColors(twoStar, rarityColor)) return 2;
+			else if (Scraper.CompareColors(oneStar, rarityColor)) return 1;
+			else throw new ArgumentException("Unable to determine artifact rarity");
 		}
 
 		#region Task Methods
@@ -575,7 +582,7 @@ namespace InventoryKamera
 			List<string> lines = new List<string>(text.Split('\n'));
 			lines.RemoveAll(line => string.IsNullOrWhiteSpace(line));
 
-			var index = lines.FindIndex(line => line.Contains("piece") || line.Contains("set") || line.Length < 5);
+			var index = lines.FindIndex(line => line.Contains("piece") || line.Contains("set"));
 			if (index >= 0)
 			{
 				lines.RemoveRange(index, lines.Count - index);
@@ -612,7 +619,7 @@ namespace InventoryKamera
 						substats[j] = stat;
 						return null;
 					}
-					else// if (line.Contains(":")) // Sometimes Tesseract wouldn't detect a ':' making this check troublesome
+					else // if (line.Contains(":")) // Sometimes Tesseract wouldn't detect a ':' making this check troublesome
 					{
 						var name = line.Trim().ToLower();
 
@@ -620,13 +627,14 @@ namespace InventoryKamera
 
 						name = Scraper.FindClosestSetName(name);
 
-						return !string.IsNullOrEmpty(name) ? name : null;
+						return !string.IsNullOrWhiteSpace(name) ? name : null;
 					}
 				});
 				tasks.Add(task);
 			}
-
-			while (tasks.Count > 0)
+			Stopwatch stopwatch = new Stopwatch();
+			stopwatch.Start();
+			while (tasks.Count > 0 && stopwatch.Elapsed.TotalSeconds < 10)
 			{
 				for (int i = 0; i < tasks.Count; i++)
 				{
@@ -635,15 +643,9 @@ namespace InventoryKamera
 					{
 						continue;
 					}
-					if (!task.IsFaulted && task.Result != null)
-					{
-						setName = task.Result;
-					}
-					if (task.IsCompleted)
-					{
-						tasks.Remove(task);
-						break;
-					}
+					setName = setName ?? task.Result;
+					tasks.Remove(task);
+					break;
 				}
 			}
 			return substats.ToList();

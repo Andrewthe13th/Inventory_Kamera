@@ -13,6 +13,9 @@ namespace InventoryKamera
 {
 	public static class WeaponScraper
 	{
+
+		public static bool StopScanning { get; set; }
+
 		public static void ScanWeapons(int count = 0)
 		{
 			// Determine maximum number of weapons to scan
@@ -26,8 +29,9 @@ namespace InventoryKamera
 			UserInterface.SetWeapon_Max(weaponCount);
 
 			// Determine Delay if delay has not been found before
-			Scraper.FindDelay(rectangles);
+			// Scraper.FindDelay(rectangles);
 
+			StopScanning = false;
 
 			// Go through weapon list
 			while (cardsQueued < weaponCount)
@@ -40,12 +44,12 @@ namespace InventoryKamera
 					Rectangle item = rectangles[i];
 					Navigation.SetCursorPos(Navigation.GetPosition().Left + item.Center().X, Navigation.GetPosition().Top + item.Center().Y + offset);
 					Navigation.Click();
-					Navigation.Wait(Navigation.GetDelay());
+					Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
 
 					// Queue card for scanning
 					QueueScan(cardsQueued);
 					cardsQueued++;
-					if (cardsQueued >= weaponCount)
+					if (cardsQueued >= weaponCount || StopScanning)
 					{
 						return;
 					}
@@ -332,7 +336,28 @@ namespace InventoryKamera
 			weaponImages.Add(equipped);
 			weaponImages.Add(card);
 
-			InventoryKamera.workerQueue.Enqueue(new OCRImage(weaponImages, "weapon", id));
+			try
+			{
+				if (GetRarity(name.GetPixel(5, 5)) < Properties.Settings.Default.MinimumWeaponRarity)
+				{
+					weaponImages.ForEach(i => i.Dispose());
+					StopScanning = true;
+					return;
+				}
+				else // Send images to worker queue
+					InventoryKamera.workerQueue.Enqueue(new OCRImage(weaponImages, "weapon", id));
+			}
+			catch (ArgumentException ex)
+			{
+				UserInterface.AddError($"{ex.Message} for weapon ID#{id}");
+				card.Save($"./logging/weapons/weapon{id}.png");
+			}
+			catch (Exception ex)
+			{
+				UserInterface.AddError($"Unexpected error {ex.Message} for weapon ID#{id}");
+				UserInterface.AddError($"{ex.StackTrace}");
+				card.Save($"./logging/weapons/weapon{id}.png");
+			}
 		}
 
 		public static async Task<Weapon> CatalogueFromBitmapsAsync(List<Bitmap> bm, int id)
@@ -350,59 +375,52 @@ namespace InventoryKamera
 				int w_name = 0; int w_level = 1; int w_refinement = 2; int w_equippedCharacter = 3;
 
 				// Check for Rarity
-				Color rarityColor = bm[0].GetPixel(5, 5);
-				Color fiveStar = Color.FromArgb(255, 188, 105, 50);
-				Color fourthStar = Color.FromArgb(255, 161, 86, 224);
-				Color threeStar = Color.FromArgb(255, 81, 127, 203);
+				Color rarityColor = bm[w_name].GetPixel(5, 5);
+
+				rarity = GetRarity(rarityColor);
 
 				// Check for equipped color
 				Color equippedColor = Color.FromArgb(255, 255, 231, 187);
 				Color equippedStatus = bm[w_equippedCharacter].GetPixel(5, 5);
 
+				bool b_equipped = Scraper.CompareColors(equippedColor, equippedStatus);
 
-				// Scan different parts of the weapon
-				bool bRarity5 = Scraper.CompareColors(fiveStar, rarityColor);
-				bool bRarity4 = Scraper.CompareColors(fourthStar, rarityColor);
-				bool bRarity3 = Scraper.CompareColors(threeStar, rarityColor);
+				List<Task> tasks = new List<Task>();
 
-				bool b_RarityAboveTwo = bRarity5 || bRarity4 || bRarity3;
+				var taskName = Task.Run(() => name = ScanName(bm[w_name]));
+				var taskLevel = Task.Run(() => level = ScanLevel(bm[w_level], ref ascended));
+				var taskRefinement = Task.Run(() => refinementLevel = ScanRefinement(bm[w_refinement]));
+				var taskEquipped = Task.Run(() => equippedCharacter = ScanEquippedCharacter(bm[w_equippedCharacter]));
 
-				if (b_RarityAboveTwo)
+				tasks.Add(taskName);
+				tasks.Add(taskLevel);
+				tasks.Add(taskRefinement);
+
+				if (b_equipped)
 				{
-					if (bRarity5) rarity = 5;
-					if (bRarity4) rarity = 4;
-					if (bRarity3) rarity = 3;
-
-					bool b_equipped = Scraper.CompareColors(equippedColor, equippedStatus);
-
-					List<Task> tasks = new List<Task>();
-
-					var taskName = Task.Run(() => name = ScanName(bm[w_name]));
-					var taskLevel = Task.Run(() => level = ScanLevel(bm[w_level], ref ascended));
-					var taskRefinement = Task.Run(() => refinementLevel = ScanRefinement(bm[w_refinement]));
-					var taskEquipped = Task.Run(() => equippedCharacter = ScanEquippedCharacter(bm[w_equippedCharacter]));
-
-					tasks.Add(taskName);
-					tasks.Add(taskLevel);
-					tasks.Add(taskRefinement);
-
-					if (b_equipped)
-					{
-						tasks.Add(taskEquipped);
-					}
-
-					await Task.WhenAll(tasks.ToArray());
-
+					tasks.Add(taskEquipped);
 				}
-				else
-				{
-					name = null; refinementLevel = -1; equippedCharacter = null; rarity = 2;
-					return new Weapon(name, level, ascended, refinementLevel, equippedCharacter, id, 2);
-				}
+
+				await Task.WhenAll(tasks.ToArray());
 			}
 
-			Weapon weapon = new Weapon(name, level, ascended, refinementLevel, equippedCharacter, id, rarity);
-			return weapon;
+			return new Weapon(name, level, ascended, refinementLevel, equippedCharacter, id, rarity);
+		}
+
+		private static int GetRarity(Color rarityColor)
+		{
+			Color fiveStar    = Color.FromArgb(255, 188, 105,  50);
+			Color fourStar    = Color.FromArgb(255, 161,  86, 224);
+			Color threeStar   = Color.FromArgb(255,  81, 127, 203);
+			Color twoStar     = Color.FromArgb(255,  42, 143, 114);
+			Color oneStar     = Color.FromArgb(255, 114, 119, 138);
+
+			if (Scraper.CompareColors(fiveStar, rarityColor)) return 5;
+			else if (Scraper.CompareColors(fourStar, rarityColor)) return 4;
+			else if (Scraper.CompareColors(threeStar, rarityColor)) return 3;
+			else if (Scraper.CompareColors(twoStar, rarityColor)) return 2;
+			else if (Scraper.CompareColors(oneStar, rarityColor)) return 1;
+			else throw new ArgumentException("Unable to determine weapon rarity");
 		}
 
 		public static bool IsEnhancementOre(Bitmap nameBitmap)

@@ -79,7 +79,7 @@ namespace InventoryKamera
 			Name = string.IsNullOrWhiteSpace(_name) ? "" : _name;
 			Level = _level;
 			Ascended = _ascended;
-			RefinementLevel = _refinementLevel;
+			RefinementLevel = _rarity > 2 ?_refinementLevel : 1; // 2 and 1 star weapons do not have refinement levels
 			EquippedCharacter = string.IsNullOrWhiteSpace(_equippedCharacter) ? "" : _equippedCharacter;
 			Id = _id;
 			Rarity = _rarity;
@@ -87,7 +87,7 @@ namespace InventoryKamera
 
 		public bool IsValid()
 		{
-			return HasValidLevel() && HasValidRefinementLevel() && HasValidWeaponName() && HasValidEquippedCharacter();
+			return HasValidWeaponName() && HasValidLevel() && HasValidEquippedCharacter() && HasValidRefinementLevel();
 		}
 
 		public bool HasValidLevel()
@@ -97,7 +97,7 @@ namespace InventoryKamera
 
 		public bool HasValidRefinementLevel()
 		{
-			return 0 <= RefinementLevel && RefinementLevel <= 5;
+			return 1 <= RefinementLevel && RefinementLevel <= 5;
 		}
 
 		public bool HasValidWeaponName()
@@ -190,9 +190,11 @@ namespace InventoryKamera
 		{
 			string output = $"Weapon ID: {Id}\n"
 				   + $"Name: {Name}\n"
+				   + $"Rarity: {Rarity}\n"
 				   + $"Level {Level}{(Ascended ? "+" : "")}\n"
 				   + $"Refinement: {RefinementLevel}\n"
 				   + $"Locked: {Lock}\n";
+
 			if (!string.IsNullOrWhiteSpace(EquippedCharacter)) output += $"Equipped character: {EquippedCharacter}";
 			return output;
 		}
