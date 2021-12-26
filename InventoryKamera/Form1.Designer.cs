@@ -703,6 +703,7 @@
 			// inventoryToolStripTextBox
 			// 
 			this.inventoryToolStripTextBox.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
+			this.inventoryToolStripTextBox.Font = new System.Drawing.Font("Segoe UI", 9F);
 			this.inventoryToolStripTextBox.MaxLength = 2;
 			this.inventoryToolStripTextBox.Name = "inventoryToolStripTextBox";
 			this.inventoryToolStripTextBox.Size = new System.Drawing.Size(90, 23);
@@ -722,6 +723,7 @@
 			// characterToolStripTextBox
 			// 
 			this.characterToolStripTextBox.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
+			this.characterToolStripTextBox.Font = new System.Drawing.Font("Segoe UI", 9F);
 			this.characterToolStripTextBox.MaxLength = 2;
 			this.characterToolStripTextBox.Name = "characterToolStripTextBox";
 			this.characterToolStripTextBox.Size = new System.Drawing.Size(90, 23);
@@ -815,7 +817,6 @@
 			this.Materials_CheckBox.TabIndex = 86;
 			this.Materials_CheckBox.Text = "Materials";
 			this.Materials_CheckBox.UseVisualStyleBackColor = true;
-			this.Materials_CheckBox.CheckedChanged += new System.EventHandler(this.Materials_CheckBox_CheckedChanged);
 			// 
 			// CharDevItems_CheckBox
 			// 
@@ -831,7 +832,6 @@
 			this.CharDevItems_CheckBox.TabIndex = 83;
 			this.CharDevItems_CheckBox.Text = "Char Development Items";
 			this.CharDevItems_CheckBox.UseVisualStyleBackColor = true;
-			this.CharDevItems_CheckBox.CheckedChanged += new System.EventHandler(this.CharDevItems_CheckBox_CheckedChanged);
 			// 
 			// Characters_CheckBox
 			// 
@@ -847,7 +847,6 @@
 			this.Characters_CheckBox.TabIndex = 73;
 			this.Characters_CheckBox.Text = "Characters";
 			this.Characters_CheckBox.UseVisualStyleBackColor = true;
-			this.Characters_CheckBox.CheckedChanged += new System.EventHandler(this.Characters_CheckBox_CheckedChanged);
 			// 
 			// Artifacts_Checkbox
 			// 
@@ -863,7 +862,6 @@
 			this.Artifacts_Checkbox.TabIndex = 72;
 			this.Artifacts_Checkbox.Text = "Artifacts";
 			this.Artifacts_Checkbox.UseVisualStyleBackColor = true;
-			this.Artifacts_Checkbox.CheckedChanged += new System.EventHandler(this.Artifacts_Checkbox_CheckedChanged);
 			// 
 			// Weapons_CheckBox
 			// 
@@ -879,7 +877,6 @@
 			this.Weapons_CheckBox.TabIndex = 70;
 			this.Weapons_CheckBox.Text = "Weapons";
 			this.Weapons_CheckBox.UseVisualStyleBackColor = true;
-			this.Weapons_CheckBox.CheckedChanged += new System.EventHandler(this.Weapons_CheckBox_CheckedChanged);
 			// 
 			// OutputPath_TextBox
 			// 

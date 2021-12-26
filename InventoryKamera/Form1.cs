@@ -18,14 +18,7 @@ namespace InventoryKamera
 	{
 		private static Thread mainThread;
 		private static InventoryKamera data = new InventoryKamera();
-		private static DatabaseManager databaseManager = new DatabaseManager();
 		private static string filePath = "";
-
-		private bool WeaponsChecked;
-		private bool ArtifactsChecked;
-		private bool CharactersChecked;
-		private bool MaterialsChecked;
-		private bool CharDevItemsChecked;
 
 		private int Delay;
 
@@ -90,9 +83,6 @@ namespace InventoryKamera
 
 		private void ResetUI()
 		{
-			// Reset data
-			data = new InventoryKamera();
-
 			Navigation.Reset();
 
 			// Need to invoke method from the UI's handle, not the worker thread
@@ -115,12 +105,6 @@ namespace InventoryKamera
 		private void Form1_Load(object sender, EventArgs e)
 		{
 			UpdateKeyTextBoxes();
-
-			WeaponsChecked = Weapons_CheckBox.Checked;
-			ArtifactsChecked = Artifacts_Checkbox.Checked;
-			CharactersChecked = Characters_CheckBox.Checked;
-			CharDevItemsChecked = CharDevItems_CheckBox.Checked;
-			MaterialsChecked = Materials_CheckBox.Checked;
 
 			Delay = ScannerDelay_TrackBar.Value;
 
@@ -183,6 +167,8 @@ namespace InventoryKamera
 						{
 							throw new NotImplementedException($"{Navigation.GetSize().Width}x{Navigation.GetSize().Height} is an unsupported resolution.");
 						}
+
+						data = new InventoryKamera();
 
 						// Add navigation delay
 						Navigation.SetDelay(ScannerDelayValue(Delay));
@@ -277,31 +263,6 @@ namespace InventoryKamera
 		private void SaveSettings()
 		{
 			Properties.Settings.Default.Save();
-		}
-
-		private void Weapons_CheckBox_CheckedChanged(object sender, EventArgs e)
-		{
-			WeaponsChecked = ( (CheckBox)sender ).Checked;
-		}
-
-		private void Artifacts_Checkbox_CheckedChanged(object sender, EventArgs e)
-		{
-			ArtifactsChecked = ( (CheckBox)sender ).Checked;
-		}
-
-		private void Characters_CheckBox_CheckedChanged(object sender, EventArgs e)
-		{
-			CharactersChecked = ( (CheckBox)sender ).Checked;
-		}
-
-		private void CharDevItems_CheckBox_CheckedChanged(object sender, EventArgs e)
-		{
-			CharDevItemsChecked = ( (CheckBox)sender ).Checked;
-		}
-
-		private void Materials_CheckBox_CheckedChanged(object sender, EventArgs e)
-		{
-			MaterialsChecked = ( (CheckBox)sender ).Checked;
 		}
 
 		private void ScannerDelay_TrackBar_ValueChanged(object sender, EventArgs e)
