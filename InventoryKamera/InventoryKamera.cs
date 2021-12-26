@@ -74,8 +74,14 @@ namespace InventoryKamera
 				// Get Weapons
 				Navigation.InventoryScreen();
 				Navigation.SelectWeaponInventory();
-				WeaponScraper.ScanWeapons();
-				//inventory.AssignWeapons(ref equippedWeapons);
+				try
+				{
+					WeaponScraper.ScanWeapons();
+				}
+				catch (System.Exception ex)
+				{
+					UserInterface.AddError(ex.Message + "\n" + ex.StackTrace);
+				}
 				Navigation.MainMenuScreen();
 			}
 
@@ -84,8 +90,14 @@ namespace InventoryKamera
 				// Get Artifacts
 				Navigation.InventoryScreen();
 				Navigation.SelectArtifactInventory();
-				ArtifactScraper.ScanArtifacts();
-				//inventory.AssignArtifacts(ref equippedArtifacts);
+				try
+				{
+					ArtifactScraper.ScanArtifacts();
+				}
+				catch (System.Exception ex)
+				{
+					UserInterface.AddError(ex.Message + "\n" + ex.StackTrace);
+				}
 				Navigation.MainMenuScreen();
 			}
 
@@ -95,8 +107,16 @@ namespace InventoryKamera
 			{
 				// Get characters
 				Navigation.CharacterScreen();
-				Characters = new List<Character>();
-				Characters = CharacterScraper.ScanCharacters();
+				var c = new List<Character>();
+				try
+				{
+					CharacterScraper.ScanCharacters(ref c);
+				}
+				catch (System.Exception ex)
+				{
+					UserInterface.AddError(ex.Message + "\n" + ex.StackTrace);
+				}
+				Characters = c;
 				Navigation.MainMenuScreen();
 			}
 
@@ -119,7 +139,15 @@ namespace InventoryKamera
 				// Get Materials
 				Navigation.InventoryScreen();
 				Navigation.SelectCharacterDevelopmentInventory();
-				HashSet<Material> devItems = MaterialScraper.Scan_Materials(InventorySection.CharacterDevelopmentItems);
+				HashSet<Material> devItems = new HashSet<Material>();
+				try
+				{
+					MaterialScraper.Scan_Materials(InventorySection.CharacterDevelopmentItems, ref devItems);
+				}
+				catch (System.Exception ex)
+				{
+					UserInterface.AddError(ex.Message + "\n" + ex.StackTrace);
+				}
 				Inventory.AddDevItems(ref devItems);
 				Navigation.MainMenuScreen();
 			}
@@ -130,7 +158,15 @@ namespace InventoryKamera
 				// Get Materials
 				Navigation.InventoryScreen();
 				Navigation.SelectMaterialInventory();
-				HashSet<Material> materials = MaterialScraper.Scan_Materials(InventorySection.Materials);
+				HashSet<Material> materials = new HashSet<Material>();
+				try
+				{
+					MaterialScraper.Scan_Materials(InventorySection.Materials, ref materials);
+				}
+				catch (System.Exception ex)
+				{
+					UserInterface.AddError(ex.Message + "\n" + ex.StackTrace);
+				}
 				Inventory.AddMaterials(ref materials);
 				Navigation.MainMenuScreen();
 			}
@@ -171,72 +207,75 @@ namespace InventoryKamera
 								Weapon weapon = WeaponScraper.CatalogueFromBitmapsAsync(image.bm, image.id).Result;
 								UserInterface.SetGear(image.bm[4], weapon);
 
-								if (weapon.Rarity >= (int)Properties.Settings.Default.MinimumWeaponRarity) // TODO: Add options for choosing rarities
+								try
 								{
-									try
+									if (weapon.IsValid())
 									{
-										if (weapon.IsValid())
+										if (weapon.Rarity >= (int)Properties.Settings.Default.MinimumWeaponRarity)
 										{
 											UserInterface.IncrementWeaponCount();
 											Inventory.Add(weapon);
 											if (!string.IsNullOrWhiteSpace(weapon.EquippedCharacter))
 												equippedWeapons.Add(weapon);
 										}
-										else throw new System.Exception();
-									}
-									catch (System.Exception)
-									{
-										UserInterface.AddError($"Unable to validate information for weapon ID#{weapon.Id}");
-										// Save card in directory to see what an issue might be\\
-										string error = "";
-										if (!weapon.HasValidWeaponName()) error += "Invalid weapon name\n";
-										if (!weapon.HasValidLevel()) error += "Invalid weapon level\n";
-										if (!weapon.HasValidEquippedCharacter()) error += "Inavlid equipped character\n";
-										if (!weapon.HasValidRefinementLevel()) error += "Invalid refinement level\n";
-										UserInterface.AddError(error + weapon.ToString());
-										image.bm[4].Save($"./logging/weapons/weapon{weapon.Id}.png");
-									}
-								}
-							}
-						}
-						else if (image.type == "artifact")
-						{
-							UserInterface.SetGearPictureBox(image.bm[7]);
-							// Scan as artifact
-							Artifact artifact = ArtifactScraper.CatalogueFromBitmapsAsync(image.bm, image.id).Result;
-							UserInterface.SetGear(image.bm[7], artifact);
-
-							if (artifact.Rarity >= (int)Properties.Settings.Default.MinimumArtifactRarity) // TODO: Add options for choosing rarities
-							{
-								try
-								{
-									if (artifact.IsValid())
-									{
-										UserInterface.IncrementArtifactCount();
-
-										Inventory.Add(artifact);
-
-										if (!string.IsNullOrWhiteSpace(artifact.EquippedCharacter))
-											equippedArtifacts.Add(artifact);
 									}
 									else throw new System.Exception();
 								}
 								catch (System.Exception)
 								{
-									UserInterface.AddError($"Unable to validate information for artifact ID#{artifact.Id}");
-									// Save card in directory to see what an issue might be
+									UserInterface.AddError($"Unable to validate information for weapon ID#{weapon.Id}");
 									string error = "";
-									if (!artifact.HasValidLevel()) error += "Invalid artifact level\n";
-									if (!artifact.HasValidRarity()) error += "Invalid artifact rarity\n";
-									if (!artifact.HasValidSlot()) error += "Invalid artifact slot\n";
-									if (!artifact.HasValidSetName()) error += "Invalid artifact set name\n";
-									if (!artifact.HasValidMainStat()) error += "Invalid artifact main stat\n";
-									if (!artifact.HasValidSubStats()) error += "Invalid artifact sub stats\n";
-									if (!artifact.HasValidEquippedCharacter()) error += "Invalid equipped character\n";
-									UserInterface.AddError(error + artifact.ToString());
-									image.bm[7].Save($"./logging/artifacts/artifact{artifact.Id}.png");
+									if (!weapon.HasValidRarity()) error += "Invalid weapon rarity\n";
+									if (!weapon.HasValidWeaponName()) error += "Invalid weapon name\n";
+									if (!weapon.HasValidLevel()) error += "Invalid weapon level\n";
+									if (!weapon.HasValidEquippedCharacter()) error += "Inavlid equipped character\n";
+									if (!weapon.HasValidRefinementLevel()) error += "Invalid refinement level\n";
+									UserInterface.AddError(error + weapon.ToString());
+
+									// Save card in directory to see what an issue might be
+									image.bm[4].Save($"./logging/weapons/weapon{weapon.Id}.png");
 								}
+								
+
 							}
+						}
+						else if (image.type == "artifact")
+						{
+							UserInterface.SetGearPictureBox(image.bm[6]);
+							// Scan as artifact
+							Artifact artifact = ArtifactScraper.CatalogueFromBitmapsAsync(image.bm, image.id).Result;
+							UserInterface.SetGear(image.bm[6], artifact);
+							try
+							{
+								if (artifact.IsValid())
+								{
+									if (artifact.Rarity >= (int)Properties.Settings.Default.MinimumArtifactRarity)
+									{
+										UserInterface.IncrementArtifactCount();
+										Inventory.Add(artifact);
+										if (!string.IsNullOrWhiteSpace(artifact.EquippedCharacter))
+											equippedArtifacts.Add(artifact);
+									}
+								}
+								else throw new System.Exception();
+							}
+							catch (System.Exception)
+							{
+								UserInterface.AddError($"Unable to validate information for artifact ID#{artifact.Id}");
+								string error = "";
+								if (!artifact.HasValidSetName()) error += "Invalid artifact set name\n";
+								if (!artifact.HasValidRarity()) error += "Invalid artifact rarity\n";
+								if (!artifact.HasValidLevel()) error += "Invalid artifact level\n";
+								if (!artifact.HasValidSlot()) error += "Invalid artifact slot\n";
+								if (!artifact.HasValidMainStat()) error += "Invalid artifact main stat\n";
+								if (!artifact.HasValidSubStats()) error += "Invalid artifact sub stats\n";
+								if (!artifact.HasValidEquippedCharacter()) error += "Invalid equipped character\n";
+								UserInterface.AddError(error + artifact.ToString());
+
+								// Save card in directory to see what an issue might be
+								image.bm[7].Save($"./logging/artifacts/artifact{artifact.Id}.png");
+							}
+							
 						}
 						else // not supposed to happen
 						{

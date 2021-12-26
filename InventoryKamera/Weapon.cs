@@ -87,7 +87,12 @@ namespace InventoryKamera
 
 		public bool IsValid()
 		{
-			return HasValidWeaponName() && HasValidLevel() && HasValidEquippedCharacter() && HasValidRefinementLevel();
+			return HasValidWeaponName() && HasValidLevel() && HasValidEquippedCharacter() && HasValidRefinementLevel() && HasValidRarity();
+		}
+
+		public bool HasValidRarity()
+		{
+			return 1 <= Rarity && Rarity <= 5;
 		}
 
 		public bool HasValidLevel()

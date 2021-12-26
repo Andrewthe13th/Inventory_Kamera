@@ -12,9 +12,8 @@ namespace InventoryKamera
 	{
 		private static string firstCharacterName = null;
 
-		public static List<Character> ScanCharacters()
+		public static void ScanCharacters(ref List<Character> characters)
 		{
-			List<Character> characters = new List<Character>();
 
 			// first character name is used to stop scanning characters
 			int characterCount = 0;
@@ -31,8 +30,6 @@ namespace InventoryKamera
 				Navigation.SelectNextCharacter();
 				UserInterface.ResetCharacterDisplay();
 			}
-
-			return characters;
 		}
 
 		private static bool ScanCharacter(out Character character)
@@ -260,7 +257,7 @@ namespace InventoryKamera
 					if (int.TryParse(values[0], out level) && int.TryParse(values[1], out int maxLevel))
 					{
 						maxLevel = (int)Math.Round(maxLevel / 10.0, MidpointRounding.AwayFromZero) * 10;
-						ascended = level < maxLevel;
+						ascended = 20 <= level && level < maxLevel;
 						UserInterface.SetCharacter_Level(bm, level, maxLevel);
 						n.Dispose();
 						bm.Dispose();

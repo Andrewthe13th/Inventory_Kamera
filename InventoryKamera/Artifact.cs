@@ -49,7 +49,7 @@ namespace InventoryKamera
 			Id = 0;
 		}
 
-		public Artifact(int _rarity, string _gearSlot, string _mainStat, int _level, SubStat[] _subStats, int _subStatsCount, string _setName, string _equippedCharacter = null, int _id = 0, bool _Lock = false)
+		public Artifact(string _setName, int _rarity, int _level, string _gearSlot, string _mainStat, SubStat[] _subStats, int _subStatsCount, string _equippedCharacter = null, int _id = 0, bool _Lock = false)
 		{
 			GearSlot = string.IsNullOrWhiteSpace(_gearSlot) ? "" : _gearSlot ;
 			Rarity = _rarity;
@@ -127,7 +127,7 @@ namespace InventoryKamera
 			{
 				return stat is null
 					? "NULL"
-					: stat.Contains("%") || stat.Contains("crit") || stat.Contains("bonus") ? $"{stat.Replace("%", "")} + {value}%" : $"{stat} + {value}";
+					: stat.Contains("_") ? $"{stat} + {value}%" : $"{stat} + {value}";
 			}
 		}
 
