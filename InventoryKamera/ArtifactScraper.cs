@@ -595,24 +595,25 @@ namespace InventoryKamera
 
 					if (line.Contains("+"))
 					{
-						SubStat stat = new SubStat();
+						SubStat substat = new SubStat();
 						string[] split = line.Split('+');
 
 						string name = line.Contains("%") ? split[0] + "%" : split[0];
 
-						stat.stat = Scraper.FindClosestStat(name) ?? "";
+						substat.stat = Scraper.FindClosestStat(name) ?? "";
 
-						string value = split[1].Replace("%", string.Empty).Replace(",", ".");
-						if (!decimal.TryParse(value, out stat.value))
+						// Remove any non digits.
+						string value = Regex.Replace(split[1], @"[^0-9]", string.Empty);
+
+						if (!decimal.TryParse(value, out substat.value))
 						{
-							stat.value = -1;
+							substat.value = -1;
 						}
 
-						// Sometimes the decimal is missed by the scanner for stat% boosts.
-						// 46.6% is the theoretical max value for any % boost.
-						if (stat.stat.Contains("_") && stat.value > 50) stat.value /= 10; 
+						// Need to retain the decimal place for percent boosts
+						if (substat.stat.Contains("_")) substat.value /= 10; 
 
-						substats[j] = stat;
+						substats[j] = substat;
 						return null;
 					}
 					else // if (line.Contains(":")) // Sometimes Tesseract wouldn't detect a ':' making this check troublesome
