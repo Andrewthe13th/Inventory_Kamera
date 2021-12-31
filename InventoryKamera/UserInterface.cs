@@ -180,6 +180,12 @@ namespace InventoryKamera
 			UpdateElements(quantity, $"Count: {count}", cLevel_PictureBox, character_TextBox);
 		}
 
+		public static void SetMora(Bitmap mora, int count)
+		{
+			UpdateElements(mora, $"Mora: {count}", navigation_PictureBox, character_TextBox);
+		}
+
+
 		public static void SetCharacter_Talent(Bitmap bm, string text, int i)
 		{
 			if (i > -1 && i < 3)

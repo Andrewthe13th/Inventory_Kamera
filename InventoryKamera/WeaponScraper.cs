@@ -28,6 +28,12 @@ namespace InventoryKamera
 			int offset = 0;
 			UserInterface.SetWeapon_Max(weaponCount);
 
+			// Enhancement ores being in the same inventory as weapons
+			// can throw off scrolling through the inventory in certain circumstances
+			// This fix is fine for now since most people don't scan below 3 stars
+			// TODO: Rewrite this method to allow for scanning enhancement ore quantities
+			weaponCount += 3;
+
 			// Determine Delay if delay has not been found before
 			// Scraper.FindDelay(rectangles);
 
