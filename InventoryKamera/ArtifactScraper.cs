@@ -600,7 +600,8 @@ namespace InventoryKamera
 						stat.stat = Scraper.FindClosestStat(name) ?? "";
 
 						string value = split[1].Replace("%", string.Empty);
-						if (!decimal.TryParse(value, out stat.value))
+						var cultureInfo = new CultureInfo("en-US");
+						if (!decimal.TryParse(value, System.Globalization.NumberStyles.Number, cultureInfo, out stat.value))
 						{
 							stat.value = -1;
 						}
