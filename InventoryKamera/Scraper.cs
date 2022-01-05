@@ -362,7 +362,7 @@ namespace InventoryKamera
 
 			HashSet<string> keys = new HashSet<string>(targets.Keys);
 
-			if (source.Length > 5 && keys.Where(key => key.Contains(source)).Count() == 1) return targets[keys.First(key => key.Contains(source))];
+			if (keys.Where(key => key.Contains(source)).Count() == 1) return targets[keys.First(key => key.Contains(source))];
 
 			source = FindClosestInList(source, keys);
 
