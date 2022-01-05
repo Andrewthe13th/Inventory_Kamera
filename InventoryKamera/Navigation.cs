@@ -51,6 +51,13 @@ namespace InventoryKamera
 			using (Graphics gfxBmp = Graphics.FromImage(bmp))
 			{
 				gfxBmp.CopyFromScreen(position.Left, position.Top, 0, 0, bmp.Size);
+
+				var uidRegion = new RECT(
+					Left: (int)( 1070 / 1280.0 * bmp.Width ),
+					Top: (int)( 695 / 720.0 * bmp.Height ),
+					Right: bmp.Width,
+					Bottom: bmp.Height);
+				gfxBmp.FillRectangle(new SolidBrush(Color.Black), uidRegion);
 			}
 			return bmp;
 		}
