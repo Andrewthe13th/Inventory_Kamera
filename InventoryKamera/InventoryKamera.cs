@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using Newtonsoft.Json;
 
@@ -142,13 +143,12 @@ namespace InventoryKamera
 				HashSet<Material> devItems = new HashSet<Material>();
 				try
 				{
-					MaterialScraper.Scan_Materials(InventorySection.CharacterDevelopmentItems, ref devItems);
+					MaterialScraper.Scan_Materials(InventorySection.CharacterDevelopmentItems, ref Materials);
 				}
 				catch (System.Exception ex)
 				{
 					UserInterface.AddError(ex.Message + "\n" + ex.StackTrace);
 				}
-				Inventory.AddDevItems(ref devItems);
 				Navigation.MainMenuScreen();
 			}
 
@@ -161,15 +161,16 @@ namespace InventoryKamera
 				HashSet<Material> materials = new HashSet<Material>();
 				try
 				{
-					MaterialScraper.Scan_Materials(InventorySection.Materials, ref materials);
+					MaterialScraper.Scan_Materials(InventorySection.Materials, ref Materials);
 				}
 				catch (System.Exception ex)
 				{
 					UserInterface.AddError(ex.Message + "\n" + ex.StackTrace);
 				}
-				Inventory.AddMaterials(ref materials);
 				Navigation.MainMenuScreen();
 			}
+
+			Inventory.AddMaterials(ref Materials);
 			
 		}
 
@@ -199,13 +200,13 @@ namespace InventoryKamera
 					{
 						if (image.type == "weapon")
 						{
-							if (!WeaponScraper.IsEnhancementOre(image.bm[0]))
+							if (!WeaponScraper.IsEnhancementOre(image.bm.First()))
 							{
-								UserInterface.SetGearPictureBox(image.bm[4]);
+								UserInterface.SetGearPictureBox(image.bm.Last());
 
 								// Scan as weapon
 								Weapon weapon = WeaponScraper.CatalogueFromBitmapsAsync(image.bm, image.id).Result;
-								UserInterface.SetGear(image.bm[4], weapon);
+								UserInterface.SetGear(image.bm.Last(), weapon);
 
 								try
 								{
@@ -233,18 +234,16 @@ namespace InventoryKamera
 									UserInterface.AddError(error + weapon.ToString());
 
 									// Save card in directory to see what an issue might be
-									image.bm[4].Save($"./logging/weapons/weapon{weapon.Id}.png");
+									image.bm.Last().Save($"./logging/weapons/weapon{weapon.Id}.png");
 								}
-								
-
 							}
 						}
 						else if (image.type == "artifact")
 						{
-							UserInterface.SetGearPictureBox(image.bm[6]);
+							UserInterface.SetGearPictureBox(image.bm.Last());
 							// Scan as artifact
 							Artifact artifact = ArtifactScraper.CatalogueFromBitmapsAsync(image.bm, image.id).Result;
-							UserInterface.SetGear(image.bm[6], artifact);
+							UserInterface.SetGear(image.bm.Last(), artifact);
 							try
 							{
 								if (artifact.IsValid())
@@ -273,7 +272,7 @@ namespace InventoryKamera
 								UserInterface.AddError(error + artifact.ToString());
 
 								// Save card in directory to see what an issue might be
-								image.bm[7].Save($"./logging/artifacts/artifact{artifact.Id}.png");
+								image.bm.Last().Save($"./logging/artifacts/artifact{artifact.Id}.png");
 							}
 							
 						}

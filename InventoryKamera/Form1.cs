@@ -18,7 +18,6 @@ namespace InventoryKamera
 	{
 		private static Thread mainThread;
 		private static InventoryKamera data = new InventoryKamera();
-		private static string filePath = "";
 
 		private int Delay;
 
@@ -109,6 +108,10 @@ namespace InventoryKamera
 			Delay = ScannerDelay_TrackBar.Value;
 
 			ProgramStatus_Label.Text = "";
+			if (string.IsNullOrWhiteSpace(OutputPath_TextBox.Text))
+			{
+				OutputPath_TextBox.Text = Directory.GetCurrentDirectory() + @"\GenshinData";
+			}
 		}
 
 		private void UpdateKeyTextBoxes()
@@ -243,14 +246,13 @@ namespace InventoryKamera
 			// A nicer file browser
 			CommonOpenFileDialog d = new CommonOpenFileDialog
 			{
-				InitialDirectory = filePath,
+				InitialDirectory = Directory.GetCurrentDirectory(),
 				IsFolderPicker = true
 			};
 
 			if (d.ShowDialog() == CommonFileDialogResult.Ok)
 			{
 				OutputPath_TextBox.Text = d.FileName;
-				filePath = d.FileName;
 			}
 		}
 

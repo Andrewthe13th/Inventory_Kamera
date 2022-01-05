@@ -47,6 +47,11 @@ namespace InventoryKamera
 	{
 		public static void Scan_Materials(InventorySection section, ref HashSet<Material> materials)
 		{
+			if (!materials.Contains(new Material("Mora", 0)))
+			{
+				materials.Add(new Material("Mora", ScanMora()));
+			}
+
 			int scrollCount = 0;
 
 			Material material = new Material(null, 0);
@@ -170,6 +175,39 @@ namespace InventoryKamera
 				}
 				else break;
 				Navigation.Wait(150);
+			}
+		}
+
+		private static int ScanMora()
+		{
+
+			var region = new Rectangle(
+				x: (int)(261 / 1280.0 * Navigation.GetWidth()),
+				y: (int)(668 / 720.0 * Navigation.GetHeight()),
+				width: (int)(120 / 1280.0 * Navigation.GetWidth()),
+				height: (int)(24 / 720.0 * Navigation.GetHeight()));
+
+			if (Navigation.GetAspectRatio() == new Size(8,5))
+			{
+				region.Y = (int)( 748 / 800.0 * Navigation.GetHeight());
+			}
+
+			using (var bm = Navigation.CaptureRegion(region))
+			{
+				var mora = Regex.Replace(Scraper.AnalyzeText(bm), @"[^0-9]", string.Empty);
+
+				if (int.TryParse(mora, out int count))
+				{
+					UserInterface.ResetCharacterDisplay();
+					UserInterface.SetMora(bm, count);
+				}
+				else
+				{
+					UserInterface.SetNavigation_Image(bm);
+					UserInterface.AddError("Unable to parse mora count");
+					bm.Save("./logging/materials/mora.png");
+				}
+				return count;
 			}
 		}
 
