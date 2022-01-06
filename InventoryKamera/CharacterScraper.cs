@@ -134,7 +134,7 @@ namespace InventoryKamera
 			Bitmap n = Scraper.ConvertToGrayscale(nameBitmap);
 			Scraper.SetContrast(40.0, ref n);
 
-			UserInterface.SetNavigation_Image(n);
+			UserInterface.SetNavigation_Image(nameBitmap);
 
 			string text = Scraper.AnalyzeText(n).Trim();
 			if (text != "")

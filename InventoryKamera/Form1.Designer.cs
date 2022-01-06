@@ -86,7 +86,6 @@
 			this.characterScreenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.characterToolStripTextBox = new System.Windows.Forms.ToolStripTextBox();
 			this.DatabaseUpdateMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.label1 = new System.Windows.Forms.Label();
 			this.label2 = new System.Windows.Forms.Label();
 			this.ArtifactRarityControl = new System.Windows.Forms.NumericUpDown();
 			this.label3 = new System.Windows.Forms.Label();
@@ -457,7 +456,7 @@
 			// 
 			this.Instructions2b_Label.AutoSize = true;
 			this.Instructions2b_Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.3F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.Instructions2b_Label.Location = new System.Drawing.Point(181, 80);
+			this.Instructions2b_Label.Location = new System.Drawing.Point(174, 67);
 			this.Instructions2b_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
 			this.Instructions2b_Label.Name = "Instructions2b_Label";
 			this.Instructions2b_Label.Size = new System.Drawing.Size(235, 13);
@@ -468,7 +467,7 @@
 			// 
 			this.Instruction3_Label.AutoSize = true;
 			this.Instruction3_Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.3F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.Instruction3_Label.Location = new System.Drawing.Point(159, 94);
+			this.Instruction3_Label.Location = new System.Drawing.Point(159, 83);
 			this.Instruction3_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
 			this.Instruction3_Label.Name = "Instruction3_Label";
 			this.Instruction3_Label.Size = new System.Drawing.Size(293, 13);
@@ -739,16 +738,6 @@
 			this.DatabaseUpdateMenuItem.Text = "Update Lookup Tables";
 			this.DatabaseUpdateMenuItem.Click += new System.EventHandler(this.DatabaseUpdateMenuItem_Click);
 			// 
-			// label1
-			// 
-			this.label1.AutoSize = true;
-			this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.3F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.label1.Location = new System.Drawing.Point(181, 67);
-			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(295, 13);
-			this.label1.TabIndex = 87;
-			this.label1.Text = "2a. Under Graphics, set display mode to 1280x720 Windowed";
-			// 
 			// label2
 			// 
 			this.label2.AutoSize = true;
@@ -913,7 +902,6 @@
 			this.Controls.Add(this.ArtifactRarityControl);
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.WeaponRarityControl);
-			this.Controls.Add(this.label1);
 			this.Controls.Add(this.Materials_CheckBox);
 			this.Controls.Add(this.CharDevItems_CheckBox);
 			this.Controls.Add(this.Characters_CheckBox);
@@ -1046,7 +1034,6 @@
 		private System.Windows.Forms.ToolStripTextBox characterToolStripTextBox;
 		private System.Windows.Forms.PictureBox GearPictureBox;
 		private System.Windows.Forms.CheckBox Materials_CheckBox;
-		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.ToolStripMenuItem DatabaseUpdateMenuItem;
 		private System.Windows.Forms.NumericUpDown WeaponRarityControl;
 		private System.Windows.Forms.Label label2;
