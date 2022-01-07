@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Timers;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
@@ -12,6 +13,9 @@ namespace InventoryKamera
 {
 	public static class WeaponScraper
 	{
+
+		public static bool StopScanning { get; set; }
+
 		public static void ScanWeapons(int count = 0)
 		{
 			// Determine maximum number of weapons to scan
@@ -24,12 +28,23 @@ namespace InventoryKamera
 			int offset = 0;
 			UserInterface.SetWeapon_Max(weaponCount);
 
+			// Enhancement ores being in the same inventory as weapons
+			// can throw off scrolling through the inventory in certain circumstances
+			// This fix is fine for now since most people don't scan below 3 stars
+			// TODO: Rewrite this method to allow for scanning enhancement ore quantities
+			weaponCount += 3;
+
+			// Determine Delay if delay has not been found before
+			// Scraper.FindDelay(rectangles);
+
+			StopScanning = false;
+
 			// Go through weapon list
 			while (cardsQueued < weaponCount)
 			{
 				int cardsRemaining =  weaponCount - cardsQueued ;
 				// Go through each "page" of items and queue. In the event that not a full page of
-				// items are scolled to, offset the index of rectangle to start clicking from
+				// items are scrolled to, offset the index of rectangle to start clicking from
 				for (int i = cardsRemaining < fullPage ? ( rows - ( totalRows - rowsQueued ) ) * cols : 0; i < rectangles.Count; i++)
 				{
 					Rectangle item = rectangles[i];
@@ -40,7 +55,7 @@ namespace InventoryKamera
 					// Queue card for scanning
 					QueueScan(cardsQueued);
 					cardsQueued++;
-					if (cardsQueued >= weaponCount)
+					if (cardsQueued >= weaponCount || StopScanning)
 					{
 						return;
 					}
@@ -81,169 +96,180 @@ namespace InventoryKamera
 
 		private static (List<Rectangle> rectangles, int cols, int rows) GetPageOfItems()
 		{
+			// Size of an item card is the same in 16:10 to 16:9. Also accounts for character icon and resolution size. 
 			var card = new RECT(
 				Left: 0,
 				Top: 0,
-				Right: (int)(80 / 1280.0 * Navigation.GetWidth()),
-				Bottom: (int)(100 / 720.0 * Navigation.GetHeight()));
+				Right: (int)(85 / 1280.0 * Navigation.GetWidth()),
+				Bottom: (int)(105 / 720.0 * Navigation.GetHeight()));
 
 			// Filter for relative size of items in inventory, give or take a few pixels
-			BlobCounter blobCounter = new BlobCounter
+			using (BlobCounter blobCounter = new BlobCounter
 			{
 				FilterBlobs = true,
-				MinHeight = card.Height - 20,
-				MaxHeight = card.Height + 20,
-				MinWidth  = card.Width - 15,
-				MaxWidth  = card.Width + 15,
-			};
-
-			// Screenshot of inventory
-			Bitmap screenshot = Navigation.CaptureWindow();
-			Bitmap output = new Bitmap(screenshot); // Copy used to overlay onto in testing
-
-			// Image pre-processing
-			ContrastCorrection contrast = new ContrastCorrection(85);
-			Grayscale grayscale = new Grayscale(0.2125, 0.7154, 0.0721);
-			Edges edges = new Edges();
-			Threshold threshold = new Threshold(15);
-			FillHoles holes = new FillHoles
+				MinHeight = card.Height - 10,
+				MaxHeight = card.Height + 10,
+				MinWidth = card.Width - 10,
+				MaxWidth = card.Width + 10,
+			})
 			{
-				CoupledSizeFiltering = true,
-				MaxHoleWidth = card.Width + 10,
-				MaxHoleHeight = card.Height + 10
-			};
-			SobelEdgeDetector sobel = new SobelEdgeDetector();
 
-			screenshot = contrast.Apply(screenshot);
-			screenshot = edges.Apply(screenshot); // Quick way to find ~75% of edges
-			screenshot = grayscale.Apply(screenshot);
-			screenshot = threshold.Apply(screenshot); // Convert to black and white only based on pixel intensity
+				// Screenshot of inventory
+				Bitmap screenshot = Navigation.CaptureWindow();
+				Bitmap output = new Bitmap(screenshot); // Copy used to overlay onto in testing
 
-			screenshot = sobel.Apply(screenshot); // Find some more edges
-			screenshot = holes.Apply(screenshot); // Fill shapes
-			screenshot = sobel.Apply(screenshot); // Find edges of those shapes. A second pass removes edges within item card
-												  //Navigation.DisplayBitmap(screenshot);
+				// Image pre-processing
+				ContrastCorrection contrast = new ContrastCorrection(85);
+				Grayscale grayscale = new Grayscale(0.2125, 0.7154, 0.0721);
+				Edges edges = new Edges();
+				Threshold threshold = new Threshold(15);
+				FillHoles holes = new FillHoles
+				{
+					CoupledSizeFiltering = true,
+					MaxHoleWidth = card.Width + 10,
+					MaxHoleHeight = card.Height + 10
+				};
+				SobelEdgeDetector sobel = new SobelEdgeDetector();
 
-			blobCounter.ProcessImage(screenshot);
-			// Note: Processing won't always detect all item rectangles on screen. Since the
-			// background isn't a solid color it's a bit trickier to filter out.
+				screenshot = contrast.Apply(screenshot);
+				screenshot = edges.Apply(screenshot); // Quick way to find ~75% of edges
+				screenshot = grayscale.Apply(screenshot);
+				screenshot = threshold.Apply(screenshot); // Convert to black and white only based on pixel intensity
 
-			if (blobCounter.ObjectsCount < 1)
-			{
-				blobCounter.Dispose();
-				throw new Exception("No items detected in inventory");
-			}
+				screenshot = sobel.Apply(screenshot); // Find some more edges
+				screenshot = holes.Apply(screenshot); // Fill shapes
+				screenshot = sobel.Apply(screenshot); // Find edges of those shapes. A second pass removes edges within item card
+													  //Navigation.DisplayBitmap(screenshot);
 
-			// Don't save overlapping blobs
-			List<Rectangle> rectangles = new List<Rectangle>();
-			List<Rectangle> blobRects = blobCounter.GetObjectsRectangles().ToList();
-			blobCounter.Dispose();
+				blobCounter.ProcessImage(screenshot);
+				// Note: Processing won't always detect all item rectangles on screen. Since the
+				// background isn't a solid color it's a bit trickier to filter out.
 
-			int sWidth = blobRects[0].Width;
-			int sHeight = blobRects[0].Height;
-			foreach (var rect in blobRects)
-			{
-				bool add = true;
+				if (blobCounter.ObjectsCount < 7)
+				{
+					output.Save("./logging/weapons/WeaponInventory.png");
+
+					screenshot.Dispose();
+					output.Dispose();
+					throw new Exception("Insufficient items found in weapon inventory");
+				}
+
+				// Don't save overlapping blobs
+				List<Rectangle> rectangles = new List<Rectangle>();
+				List<Rectangle> blobRects = blobCounter.GetObjectsRectangles().ToList();
+
+				int sWidth = blobRects[0].Width;
+				int sHeight = blobRects[0].Height;
+				foreach (var rect in blobRects)
+				{
+					bool add = true;
+					foreach (var item in rectangles)
+					{
+						Rectangle r1 = rect;
+						Rectangle r2 = item;
+						Rectangle intersect = Rectangle.Intersect(r1, r2);
+						if (intersect.Width > r1.Width * .2)
+						{
+							add = false;
+							break;
+						}
+					}
+					if (add)
+					{
+						sWidth = Math.Min(sWidth, rect.Width);
+						sHeight = Math.Min(sHeight, rect.Height);
+						rectangles.Add(rect);
+					}
+				}
+
+				// Items originally detected
+				// new RectanglesMarker(rectangles, Color.Red).ApplyInPlace(output);
+
+				// Determine X and Y coordinates for columns and rows, respectively
+				var colCoords = new List<int>();
+				var rowCoords = new List<int>();
+
 				foreach (var item in rectangles)
 				{
-					Rectangle r1 = rect;
-					Rectangle r2 = item;
-					Rectangle intersect = Rectangle.Intersect(r1, r2);
-					if (intersect.Width > r1.Width * .2)
+					bool addX = true;
+					bool addY = true;
+					foreach (var x in colCoords)
 					{
-						add = false;
-						break;
+						var xC = item.Center().X;
+						if (x - 10 <= xC && xC <= x + 10)
+						{
+							addX = false;
+							break;
+						}
+					}
+					foreach (var y in rowCoords)
+					{
+						var yC = item.Center().Y;
+						if (y - 10 <= yC && yC <= y + 10)
+						{
+							addY = false;
+							break;
+						}
+					}
+					if (addX)
+					{
+						colCoords.Add(item.Center().X);
+					}
+					if (addY)
+					{
+						rowCoords.Add(item.Center().Y);
 					}
 				}
-				if (add)
-				{
-					sWidth = Math.Min(sWidth, rect.Width);
-					sHeight = Math.Min(sHeight, rect.Height);
-					rectangles.Add(rect);
-				}
-			}
 
-			// Determine X and Y coordinates for columns and rows, respectively
-			var colCoords = new List<int>();
-			var rowCoords = new List<int>();
-
-			foreach (var item in rectangles)
-			{
-				bool addX = true;
-				bool addY = true;
-				foreach (var x in colCoords)
+				// Clear it all because we're going to use X,Y coordinate pairings to build rectangles
+				// around. This won't be perfect but it should algorithmically put rectangles over all
+				// images on the screen. The center of each of these rectangles should be a good enough
+				// spot to click.
+				rectangles.Clear();
+				colCoords.Sort();
+				rowCoords.Sort();
+				foreach (var row in rowCoords)
 				{
-					var xC = item.Center().X;
-					if (x - 10 <= xC && xC <= x + 10)
+					foreach (var col in colCoords)
 					{
-						addX = false;
-						break;
+						int x = (int)( col - (sWidth * .5) );
+						int y = (int)( row - (sHeight * .5) );
+
+						rectangles.Add(new Rectangle(x, y, sWidth, sHeight));
 					}
 				}
-				foreach (var y in rowCoords)
+
+				// Remove some rectangles that somehow overlap each other. Don't think this happens
+				// but it doesn't hurt to double check.
+				for (int i = 0; i < rectangles.Count - 1; i++)
 				{
-					var yC = item.Center().Y;
-					if (y - 10 <= yC && yC <= y + 10)
+					for (int j = i + 1; j < rectangles.Count; j++)
 					{
-						addY = false;
-						break;
+						Rectangle r1 = rectangles[i];
+						Rectangle r2 = rectangles[j];
+						Rectangle intersect = Rectangle.Intersect(r1, r2);
+						if (intersect.Width > r1.Width * .2)
+						{
+							rectangles.RemoveAt(j);
+						}
 					}
 				}
-				if (addX)
-				{
-					colCoords.Add(item.Center().X);
-				}
-				if (addY)
-				{
-					rowCoords.Add(item.Center().Y);
-				}
+
+				// Sort by row then by column within each row
+				rectangles = rectangles.OrderBy(r => r.Top).ThenBy(r => r.Left).ToList();
+
+				Debug.WriteLine($"{colCoords.Count} columns");
+				Debug.WriteLine($"{rowCoords.Count} rows");
+				Debug.WriteLine($"{rectangles.Count} rectangles");
+
+				// Generated rectangles
+				//new RectanglesMarker(rectangles, Color.Green).ApplyInPlace(output);
+				//Navigation.DisplayBitmap(output, "Rectangles");
+
+				screenshot.Dispose();
+				output.Dispose();
+				return (rectangles, colCoords.Count, rowCoords.Count);
 			}
-
-			// Clear it all because we're going to use X,Y coordinate pairings to build rectangles
-			// around. This won't be perfect but it should algorithmically put rectangles over all
-			// images on the screen. The center of each of these rectangles should be a good enough
-			// spot to click.
-			rectangles.Clear();
-			colCoords.Sort();
-			rowCoords.Sort();
-			foreach (var row in rowCoords)
-			{
-				foreach (var col in colCoords)
-				{
-					int x = (int)( col - (sWidth * .5) );
-					int y = (int)( row - (sHeight * .5) );
-
-					rectangles.Add(new Rectangle(x, y, sWidth, sHeight));
-				}
-			}
-
-			// Remove some rectangles that somehow overlap each other. Don't think this happens
-			// but it doesn't hurt to double check.
-			for (int i = 0; i < rectangles.Count - 1; i++)
-			{
-				for (int j = i + 1; j < rectangles.Count; j++)
-				{
-					Rectangle r1 = rectangles[i];
-					Rectangle r2 = rectangles[j];
-					Rectangle intersect = Rectangle.Intersect(r1, r2);
-					if (intersect.Width > r1.Width * .2)
-					{
-						rectangles.RemoveAt(j);
-					}
-				}
-			}
-
-			// Sort by row then by column within each row
-			rectangles = rectangles.OrderBy(r => r.Top).ThenBy(r => r.Left).ToList();
-
-			Debug.WriteLine($"{colCoords.Count} columns");
-			Debug.WriteLine($"{rowCoords.Count} rows");
-			Debug.WriteLine($"{rectangles.Count} rectangles");
-
-			//new RectanglesMarker(rectangles, Color.Green).ApplyInPlace(output);
-			//Navigation.DisplayBitmap(output, "Rectangles");
-
-			return (rectangles, colCoords.Count, rowCoords.Count);
 		}
 
 		public static void QueueScan(int id)
@@ -327,7 +353,24 @@ namespace InventoryKamera
 			weaponImages.Add(equipped);
 			weaponImages.Add(card);
 
-			InventoryKamera.workerQueue.Enqueue(new OCRImage(weaponImages, "weapon", id));
+			try
+			{
+				int rarity = GetRarity(name.GetPixel(5, 5));
+				if (0 < rarity && rarity < Properties.Settings.Default.MinimumWeaponRarity)
+				{
+					weaponImages.ForEach(i => i.Dispose());
+					StopScanning = true;
+					return;
+				}
+				else // Send images to worker queue
+					InventoryKamera.workerQueue.Enqueue(new OCRImage(weaponImages, "weapon", id));
+			}
+			catch (Exception ex)
+			{
+				UserInterface.AddError($"Unexpected error {ex.Message} for weapon ID#{id}");
+				UserInterface.AddError($"{ex.StackTrace}");
+				card.Save($"./logging/weapons/weapon{id}.png");
+			}
 		}
 
 		public static async Task<Weapon> CatalogueFromBitmapsAsync(List<Bitmap> bm, int id)
@@ -345,59 +388,52 @@ namespace InventoryKamera
 				int w_name = 0; int w_level = 1; int w_refinement = 2; int w_equippedCharacter = 3;
 
 				// Check for Rarity
-				Color rarityColor = bm[0].GetPixel(5, 5);
-				Color fiveStar = Color.FromArgb(255, 188, 105, 50);
-				Color fourthStar = Color.FromArgb(255, 161, 86, 224);
-				Color threeStar = Color.FromArgb(255, 81, 127, 203);
+				Color rarityColor = bm[w_name].GetPixel(5, 5);
+
+				rarity = GetRarity(rarityColor);
 
 				// Check for equipped color
 				Color equippedColor = Color.FromArgb(255, 255, 231, 187);
 				Color equippedStatus = bm[w_equippedCharacter].GetPixel(5, 5);
 
+				bool b_equipped = Scraper.CompareColors(equippedColor, equippedStatus);
 
-				// Scan different parts of the weapon
-				bool bRarity5 = Scraper.CompareColors(fiveStar, rarityColor);
-				bool bRarity4 = Scraper.CompareColors(fourthStar, rarityColor);
-				bool bRarity3 = Scraper.CompareColors(threeStar, rarityColor);
+				List<Task> tasks = new List<Task>();
 
-				bool b_RarityAboveTwo = bRarity5 || bRarity4 || bRarity3;
+				var taskName = Task.Run(() => name = ScanName(bm[w_name]));
+				var taskLevel = Task.Run(() => level = ScanLevel(bm[w_level], ref ascended));
+				var taskRefinement = Task.Run(() => refinementLevel = ScanRefinement(bm[w_refinement]));
+				var taskEquipped = Task.Run(() => equippedCharacter = ScanEquippedCharacter(bm[w_equippedCharacter]));
 
-				if (b_RarityAboveTwo)
+				tasks.Add(taskName);
+				tasks.Add(taskLevel);
+				tasks.Add(taskRefinement);
+
+				if (b_equipped)
 				{
-					if (bRarity5) rarity = 5;
-					if (bRarity4) rarity = 4;
-					if (bRarity3) rarity = 3;
-
-					bool b_equipped = Scraper.CompareColors(equippedColor, equippedStatus);
-
-					List<Task> tasks = new List<Task>();
-
-					var taskName = Task.Run(() => name = ScanName(bm[w_name]));
-					var taskLevel = Task.Run(() => level = ScanLevel(bm[w_level], ref ascended));
-					var taskRefinement = Task.Run(() => refinementLevel = ScanRefinement(bm[w_refinement]));
-					var taskEquipped = Task.Run(() => equippedCharacter = ScanEquippedCharacter(bm[w_equippedCharacter]));
-
-					tasks.Add(taskName);
-					tasks.Add(taskLevel);
-					tasks.Add(taskRefinement);
-
-					if (b_equipped)
-					{
-						tasks.Add(taskEquipped);
-					}
-
-					await Task.WhenAll(tasks.ToArray());
-
+					tasks.Add(taskEquipped);
 				}
-				else
-				{
-					name = null; refinementLevel = -1; equippedCharacter = null; rarity = 2;
-					return new Weapon(name, level, ascended, refinementLevel, equippedCharacter, id, 2);
-				}
+
+				await Task.WhenAll(tasks.ToArray());
 			}
 
-			Weapon weapon = new Weapon(name, level, ascended, refinementLevel, equippedCharacter, id, rarity);
-			return weapon;
+			return new Weapon(name, level, ascended, refinementLevel, equippedCharacter, id, rarity);
+		}
+
+		private static int GetRarity(Color rarityColor)
+		{
+			Color fiveStar    = Color.FromArgb(255, 188, 105,  50);
+			Color fourStar    = Color.FromArgb(255, 161,  86, 224);
+			Color threeStar   = Color.FromArgb(255,  81, 127, 203);
+			Color twoStar     = Color.FromArgb(255,  42, 143, 114);
+			Color oneStar     = Color.FromArgb(255, 114, 119, 138);
+
+			if (Scraper.CompareColors(fiveStar, rarityColor)) return 5;
+			else if (Scraper.CompareColors(fourStar, rarityColor)) return 4;
+			else if (Scraper.CompareColors(threeStar, rarityColor)) return 3;
+			else if (Scraper.CompareColors(twoStar, rarityColor)) return 2;
+			else if (Scraper.CompareColors(oneStar, rarityColor)) return 1;
+			else return 0; //throw new ArgumentException("Unable to determine weapon rarity");
 		}
 
 		public static bool IsEnhancementOre(Bitmap nameBitmap)
@@ -474,7 +510,7 @@ namespace InventoryKamera
 			return text1;
 		}
 
-		public static int ScanLevel(Bitmap bm, ref bool ascension)
+		public static int ScanLevel(Bitmap bm, ref bool ascended)
 		{
 			Bitmap n = Scraper.ConvertToGrayscale(bm);
 			Scraper.SetInvert(ref n);
@@ -491,7 +527,8 @@ namespace InventoryKamera
 				{
 					if (int.TryParse(temp[0], out int level) && int.TryParse(temp[1], out int maxLevel))
 					{
-						ascension = level < maxLevel;
+						maxLevel = (int)Math.Round(maxLevel / 10.0, MidpointRounding.AwayFromZero) * 10;
+						ascended = 20 <= level && level < maxLevel;
 						return level;
 					}
 					else

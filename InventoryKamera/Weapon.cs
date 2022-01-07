@@ -76,10 +76,10 @@ namespace InventoryKamera
 
 		public Weapon(string _name, int _level, bool _ascended, int _refinementLevel, string _equippedCharacter = null, int _id = 0, int _rarity = -1)
 		{
-			Name = _name;
+			Name = string.IsNullOrWhiteSpace(_name) ? "" : _name;
 			Level = _level;
 			Ascended = _ascended;
-			RefinementLevel = _refinementLevel;
+			RefinementLevel = _rarity > 2 ?_refinementLevel : 1; // 2 and 1 star weapons do not have refinement levels
 			EquippedCharacter = string.IsNullOrWhiteSpace(_equippedCharacter) ? "" : _equippedCharacter;
 			Id = _id;
 			Rarity = _rarity;
@@ -87,12 +87,32 @@ namespace InventoryKamera
 
 		public bool IsValid()
 		{
-			return 1 <= Level
-				&& Level <= 90
-				&& 0 <= RefinementLevel
-				&& RefinementLevel <= 5
-				&& Scraper.IsValidWeapon(Name)
-				&& (string.IsNullOrWhiteSpace(EquippedCharacter) || Scraper.IsValidCharacter(EquippedCharacter));
+			return HasValidWeaponName() && HasValidLevel() && HasValidEquippedCharacter() && HasValidRefinementLevel() && HasValidRarity();
+		}
+
+		public bool HasValidRarity()
+		{
+			return 1 <= Rarity && Rarity <= 5;
+		}
+
+		public bool HasValidLevel()
+		{
+			return 1 <= Level && Level <= 90;
+		}
+
+		public bool HasValidRefinementLevel()
+		{
+			return 1 <= RefinementLevel && RefinementLevel <= 5;
+		}
+
+		public bool HasValidWeaponName()
+		{
+			return Scraper.IsValidWeapon(Name);
+		}
+
+		public bool HasValidEquippedCharacter()
+		{
+			return string.IsNullOrWhiteSpace(EquippedCharacter) || Scraper.IsValidCharacter(EquippedCharacter) ;
 		}
 
 		public int AscensionCount()
@@ -170,6 +190,19 @@ namespace InventoryKamera
 		}
 
 		public static bool operator !=(Weapon lhs, Weapon rhs) => !( lhs == rhs );
+
+		public override string ToString()
+		{
+			string output = $"Weapon ID: {Id}\n"
+				   + $"Name: {Name}\n"
+				   + $"Rarity: {Rarity}\n"
+				   + $"Level {Level}{(Ascended ? "+" : "")}\n"
+				   + $"Refinement: {RefinementLevel}\n"
+				   + $"Locked: {Lock}\n";
+
+			if (!string.IsNullOrWhiteSpace(EquippedCharacter)) output += $"Equipped character: {EquippedCharacter}";
+			return output;
+		}
 	}
 
 	public enum WeaponType

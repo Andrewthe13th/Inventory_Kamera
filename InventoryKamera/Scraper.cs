@@ -6,9 +6,11 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Linq;
 using System.Threading;
 using Accord;
+using Accord.Imaging;
 using Accord.Imaging.Filters;
 using Newtonsoft.Json.Linq;
 using Tesseract;
@@ -360,7 +362,7 @@ namespace InventoryKamera
 
 			HashSet<string> keys = new HashSet<string>(targets.Keys);
 
-			if (source.Length > 5 && keys.Where(key => key.Contains(source)).Count() == 1) return targets[keys.First(key => key.Contains(source))];
+			if (keys.Where(key => key.Contains(source)).Count() == 1) return targets[keys.First(key => key.Contains(source))];
 
 			source = FindClosestInList(source, keys);
 
@@ -490,9 +492,136 @@ namespace InventoryKamera
 			return diff[0] < 10 && diff[1] < 10 && diff[2] < 10;
 		}
 
+		public static void FindDelay(List<Rectangle> rectangles)
+        {
+			Navigation.SetDelay(180);
+			int delayOffset = 20;
+			bool bStoppedOnce = false; bool bStop = false;
+			Bitmap card1; Bitmap card2; Bitmap card3;
+			Rectangle item1 = rectangles[0];
+
+			RECT reference; int width = Navigation.GetWidth(); int height = Navigation.GetHeight();
+			#region Get first card
+			if (Navigation.GetAspectRatio() == new Size(16, 9))
+            {
+                reference = new RECT(new Rectangle(862, 80, 327, 560));
+
+                int left = (int)Math.Round(reference.Left / 1280.0 * width, MidpointRounding.AwayFromZero);
+                int top = (int)Math.Round(reference.Top / 720.0 * height, MidpointRounding.AwayFromZero);
+                int right = (int)Math.Round(reference.Right / 1280.0 * width, MidpointRounding.AwayFromZero);
+                int bottom = (int)Math.Round(reference.Bottom / 720.0 * height, MidpointRounding.AwayFromZero);
+
+                card1 = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
+            }
+            else // if (Navigation.GetAspectRatio() == new Size(8, 5))
+            {
+                reference = new RECT(new Rectangle(862, 80, 327, 640));
+
+                int left = (int)Math.Round(reference.Left / 1280.0 * width, MidpointRounding.AwayFromZero);
+                int top = (int)Math.Round(reference.Top / 800.0 * height, MidpointRounding.AwayFromZero);
+                int right = (int)Math.Round(reference.Right / 1280.0 * width, MidpointRounding.AwayFromZero);
+                int bottom = (int)Math.Round(reference.Bottom / 800.0 * height, MidpointRounding.AwayFromZero);
+
+                card1 = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
+            }
+            #endregion
+
+            do
+            {
+				if (bStoppedOnce)
+					delayOffset = 10;
+
+                // Do mouse movement to first and second UI element in Inventory
+                Navigation.SetCursorPos(Navigation.GetPosition().Left + item1.Center().X, Navigation.GetPosition().Top + item1.Center().Y);
+                Navigation.Click();
+                Navigation.Wait(Navigation.GetDelay() - delayOffset);
+
+                Rectangle item2 = rectangles[1];
+                Navigation.SetCursorPos(Navigation.GetPosition().Left + item2.Center().X, Navigation.GetPosition().Top + item2.Center().Y);
+                Navigation.Click();
+				Navigation.Wait(Navigation.GetDelay() - delayOffset);
+
+				// Take image after second click
+				if (Navigation.GetAspectRatio() == new Size(16, 9))
+                {
+                    int left = (int)Math.Round(reference.Left / 1280.0 * width, MidpointRounding.AwayFromZero);
+                    int top = (int)Math.Round(reference.Top / 720.0 * height, MidpointRounding.AwayFromZero);
+                    int right = (int)Math.Round(reference.Right / 1280.0 * width, MidpointRounding.AwayFromZero);
+                    int bottom = (int)Math.Round(reference.Bottom / 720.0 * height, MidpointRounding.AwayFromZero);
+
+                    card2 = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
+                }
+                else
+                {
+                    int left = (int)Math.Round(reference.Left / 1280.0 * width, MidpointRounding.AwayFromZero);
+                    int top = (int)Math.Round(reference.Top / 800.0 * height, MidpointRounding.AwayFromZero);
+                    int right = (int)Math.Round(reference.Right / 1280.0 * width, MidpointRounding.AwayFromZero);
+                    int bottom = (int)Math.Round(reference.Bottom / 800.0 * height, MidpointRounding.AwayFromZero);
+
+                    card2 = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
+                }
+
+                Rectangle item3 = rectangles[2];
+                Navigation.SetCursorPos(Navigation.GetPosition().Left + item3.Center().X, Navigation.GetPosition().Top + item3.Center().Y);
+                Navigation.Click();
+                Navigation.Wait(Navigation.GetDelay() - delayOffset);
+
+                // Take image after third click
+                if (Navigation.GetAspectRatio() == new Size(16, 9))
+                {
+                    int left = (int)Math.Round(reference.Left / 1280.0 * width, MidpointRounding.AwayFromZero);
+                    int top = (int)Math.Round(reference.Top / 720.0 * height, MidpointRounding.AwayFromZero);
+                    int right = (int)Math.Round(reference.Right / 1280.0 * width, MidpointRounding.AwayFromZero);
+                    int bottom = (int)Math.Round(reference.Bottom / 720.0 * height, MidpointRounding.AwayFromZero);
+
+                    card3 = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
+                }
+                else
+                {
+                    int left = (int)Math.Round(reference.Left / 1280.0 * width, MidpointRounding.AwayFromZero);
+                    int top = (int)Math.Round(reference.Top / 800.0 * height, MidpointRounding.AwayFromZero);
+                    int right = (int)Math.Round(reference.Right / 1280.0 * width, MidpointRounding.AwayFromZero);
+                    int bottom = (int)Math.Round(reference.Bottom / 800.0 * height, MidpointRounding.AwayFromZero);
+
+                    card3 = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
+                }
+
+                // logic for continuing to run
+                if (!CompareBitmapsFast(card1, card2) && !CompareBitmapsFast(card2,card3))
+                {
+					Navigation.SetDelay(Navigation.GetDelay() - delayOffset);
+					//Navigation.SystemRandomWait();
+
+                    Navigation.SetCursorPos(Navigation.GetPosition().Left + item1.Center().X, Navigation.GetPosition().Top + item1.Center().Y);
+                    Navigation.Click();
+					//Navigation.SystemRandomWait();
+				}
+                else
+                {
+					if (bStoppedOnce)
+                    {
+						bStop = true;
+                    }
+					bStoppedOnce = true;
+                }
+
+            } while (!bStoppedOnce && (Navigation.GetDelay() - delayOffset > 0));
+
+			// delay of compare function
+			Navigation.SetDelay(Navigation.GetDelay() + 7);
+			Debug.WriteLine($"Delay found:  {Navigation.GetDelay()}");
+			card1.Dispose(); card2.Dispose();
+
+			// set back to first element
+			Navigation.SystemRandomWait(Navigation.Speed.Slowest);
+			Navigation.SetCursorPos(Navigation.GetPosition().Left + item1.Center().X, Navigation.GetPosition().Top + item1.Center().Y);
+            Navigation.Click();
+            Navigation.SystemRandomWait(Navigation.Speed.Slower);
+        }
+
 		#region Image Operations
 
-		public static Bitmap ResizeImage(Image image, int width, int height)
+		public static Bitmap ResizeImage(System.Drawing.Image image, int width, int height)
 		{
 			var destRect = new Rectangle(0, 0, width, height);
 			var destImage = new Bitmap(width, height);
@@ -659,6 +788,42 @@ namespace InventoryKamera
 			colorFilter.ApplyInPlace(bm);
 		}
 
-		#endregion Image Operations
-	}
+        public static bool CompareBitmapsFast(Bitmap bmp1, Bitmap bmp2)
+        {
+            if (bmp1 == null || bmp2 == null)
+                return false;
+            if (object.Equals(bmp1, bmp2))
+                return true;
+            if (!bmp1.Size.Equals(bmp2.Size) || !bmp1.PixelFormat.Equals(bmp2.PixelFormat))
+                return false;
+
+            int bytes = bmp1.Width * bmp1.Height * (System.Drawing.Image.GetPixelFormatSize(bmp1.PixelFormat) / 8);
+
+            bool result = true;
+            byte[] b1bytes = new byte[bytes];
+            byte[] b2bytes = new byte[bytes];
+
+            BitmapData bitmapData1 = bmp1.LockBits(new Rectangle(0, 0, bmp1.Width, bmp1.Height), ImageLockMode.ReadOnly, bmp1.PixelFormat);
+            BitmapData bitmapData2 = bmp2.LockBits(new Rectangle(0, 0, bmp2.Width, bmp2.Height), ImageLockMode.ReadOnly, bmp2.PixelFormat);
+
+            Marshal.Copy(bitmapData1.Scan0, b1bytes, 0, bytes);
+            Marshal.Copy(bitmapData2.Scan0, b2bytes, 0, bytes);
+
+            for (int n = 0; n <= bytes - 1; n++)
+            {
+                if (b1bytes[n] != b2bytes[n])
+                {
+                    result = false;
+                    break;
+                }
+            }
+
+            bmp1.UnlockBits(bitmapData1);
+            bmp2.UnlockBits(bitmapData2);
+
+            return result;
+        }
+
+        #endregion Image Operations
+    }
 }

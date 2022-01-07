@@ -38,18 +38,22 @@ namespace InventoryKamera
 	public enum InventorySection
 	{
 		CharacterDevelopmentItems,
-		Food,
 		Materials,
+		Food,
 		Furnishings,
 	}
 
 	public static class MaterialScraper
 	{
-		public static HashSet<Material> Scan_Materials(InventorySection section)
+		public static void Scan_Materials(InventorySection section, ref HashSet<Material> materials)
 		{
+			if (!materials.Contains(new Material("Mora", 0)))
+			{
+				materials.Add(new Material("Mora", ScanMora()));
+			}
+
 			int scrollCount = 0;
 
-			HashSet<Material> materials = new HashSet<Material>();
 			Material material = new Material(null, 0);
 			Material previousMaterial = new Material(null, -1);
 
@@ -60,7 +64,7 @@ namespace InventoryKamera
 			{
 				int rows, cols;
 				// Find all items on the screen
-				(rectangles, cols, rows) = GetPageOfItems(); 
+				(rectangles, cols, rows) = GetPageOfItems(section); 
 
 				// Remove last row. Sometimes the bottom of a page of items is caught which results
 				// in a faded quantity that can't be parsed. Removing slightly increases the number of pages that
@@ -142,7 +146,7 @@ namespace InventoryKamera
 
 			Navigation.Wait(500);
 
-			(rectangles, _, _) = GetPageOfItems();
+			(rectangles, _, _) = GetPageOfItems(section);
 			bool passby = true;
 			for (int i = rectangles.Count - 1; i >= 0; i--) // Click through but backwards to short-circuit after new materials
 			{
@@ -172,59 +176,42 @@ namespace InventoryKamera
 				else break;
 				Navigation.Wait(150);
 			}
+		}
 
-			return materials;
+		private static int ScanMora()
+		{
 
+			var region = new Rectangle(
+				x: (int)(261 / 1280.0 * Navigation.GetWidth()),
+				y: (int)(668 / 720.0 * Navigation.GetHeight()),
+				width: (int)(120 / 1280.0 * Navigation.GetWidth()),
+				height: (int)(24 / 720.0 * Navigation.GetHeight()));
+
+			if (Navigation.GetAspectRatio() == new Size(8,5))
 			{
-				// Scan the last of the material items and stop when repeated again or until max of 28
-				//int startPostion = 1;
-				//currentColumn = 0;
-				//currentRow = 0;
-				//previousMaterial.name = null;
-				//previousRowMaterial.name = null;
-				//for (int i = startPostion; i < 5; i++)
-				//{
-				//	for (int k = 0; k < maxColumns; k++)
-				//	{
-				//		// Select Material
-				//		Navigation.SetCursorPos(Navigation.GetPosition().Left + Convert.ToInt32(materialLocation_X) + ( xOffset * ( k % maxColumns ) ), Navigation.GetPosition().Top + Convert.ToInt32(materialLocation_Y) + ( yOffset * ( i % ( maxRows + 1 ) ) ));
-				//		Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
-				//		Navigation.Click();
-				//		Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
+				region.Y = (int)( 748 / 800.0 * Navigation.GetHeight());
+			}
 
-				//		// Scan Material Name
-				//		material.name = ScanMaterialName(section, out Bitmap nameplate);
-				//		material.count = 0;
+			using (var bm = Navigation.CaptureRegion(region))
+			{
+				var mora = Regex.Replace(Scraper.AnalyzeText(bm), @"[^0-9]", string.Empty);
 
-				//		// Check if new material has been found
-				//		if (material.name == previousMaterial.name || string.IsNullOrWhiteSpace(material.name))
-				//		{
-				//			break;
-				//		}
-				//		else if (Scraper.IsValidMaterial(material.name))
-				//		{
-				//			// Scan material number
-				//			material.count = ScanMaterialCountEnd(k, i - 1, out Bitmap quantity);
-				//			if (material.count > 0)
-				//			{
-				//				materials.Add(material);
-				//				previousMaterial.name = material.name;
-				//				UserInterface.ResetCharacterDisplay();
-				//				UserInterface.SetMaterial(nameplate, quantity, material.name, material.count);
-				//			}
-				//			else
-				//			{
-				//				UserInterface.AddError($"Unable to determine quantity for {material.name}");
-				//			}
-				//		}
-				//	}
-				//}
-
-				//return materials;
+				if (int.TryParse(mora, out int count))
+				{
+					UserInterface.ResetCharacterDisplay();
+					UserInterface.SetMora(bm, count);
+				}
+				else
+				{
+					UserInterface.SetNavigation_Image(bm);
+					UserInterface.AddError("Unable to parse mora count");
+					bm.Save("./logging/materials/mora.png");
+				}
+				return count;
 			}
 		}
 
-		private static (List<Rectangle> rectangles, int cols, int rows) GetPageOfItems()
+		private static (List<Rectangle> rectangles, int cols, int rows) GetPageOfItems(InventorySection section)
 		{
 			var card = new RECT(
 				Left: 0,
@@ -233,167 +220,171 @@ namespace InventoryKamera
 				Bottom: (int)(100 / 720.0 * Navigation.GetHeight()));
 
 			// Filter for relative size of items in inventory, give or take a few pixels
-			BlobCounter blobCounter = new BlobCounter
+			using (BlobCounter blobCounter = new BlobCounter
 			{
 				FilterBlobs = true,
-				MinHeight = card.Height - (Navigation.GetAspectRatio() == new Size(16, 9) ? 0 : 10),
+				MinHeight = card.Height - ( Navigation.GetAspectRatio() == new Size(16, 9) ? 0 : 10 ),
 				MaxHeight = card.Height + 15,
-				MinWidth  = card.Width - 15,
-				MaxWidth  = card.Width + 15,
-			};
-
-			// Screenshot of inventory
-			Bitmap screenshot = Navigation.CaptureWindow();
-
-			// Copy used to overlay onto in testing
-			Bitmap output = new Bitmap(screenshot);
-
-			// Image pre-processing
-			ContrastCorrection contrast = new ContrastCorrection(90);
-			Grayscale grayscale = new Grayscale(0.2125, 0.7154, 0.0721);
-			Edges edges = new Edges();
-			Threshold threshold = new Threshold(15);
-			FillHoles holes = new FillHoles
+				MinWidth = card.Width - 15,
+				MaxWidth = card.Width + 15,
+			})
 			{
-				CoupledSizeFiltering = true,
-				MaxHoleWidth = card.Width + 10,
-				MaxHoleHeight = card.Height + 10
-			};
-			SobelEdgeDetector sobel = new SobelEdgeDetector();
 
-			screenshot = contrast.Apply(screenshot);
-			screenshot = edges.Apply(screenshot); // Quick way to find ~75% of edges
-			screenshot = grayscale.Apply(screenshot);
-			screenshot = threshold.Apply(screenshot); // Convert to black and white only based on pixel intensity
+				// Screenshot of inventory
+				Bitmap screenshot = Navigation.CaptureWindow();
 
-			screenshot = sobel.Apply(screenshot); // Find some more edges
-			screenshot = holes.Apply(screenshot); // Fill shapes
-			screenshot = sobel.Apply(screenshot); // Find edges of those shapes. A second pass removes edges within item card
+				// Copy used to overlay onto in testing
+				Bitmap output = new Bitmap(screenshot);
 
-			blobCounter.ProcessImage(screenshot);
-			// Note: Processing won't always detect all item rectangles on screen. Since the
-			// background isn't a solid color it's a bit trickier to filter out.
+				// Image pre-processing
+				ContrastCorrection contrast = new ContrastCorrection(90);
+				Grayscale grayscale = new Grayscale(0.2125, 0.7154, 0.0721);
+				Edges edges = new Edges();
+				Threshold threshold = new Threshold(15);
+				FillHoles holes = new FillHoles
+				{
+					CoupledSizeFiltering = true,
+					MaxHoleWidth = card.Width + 10,
+					MaxHoleHeight = card.Height + 10
+				};
+				SobelEdgeDetector sobel = new SobelEdgeDetector();
 
-			if (blobCounter.ObjectsCount < 1)
-			{
-				blobCounter.Dispose();
-				throw new Exception("No items detected in inventory");
-			}
+				screenshot = contrast.Apply(screenshot);
+				screenshot = edges.Apply(screenshot); // Quick way to find ~75% of edges
+				screenshot = grayscale.Apply(screenshot);
+				screenshot = threshold.Apply(screenshot); // Convert to black and white only based on pixel intensity
 
-			// Don't save overlapping blobs
-			List<Rectangle> rectangles = new List<Rectangle>();
-			List<Rectangle> blobRects = blobCounter.GetObjectsRectangles().ToList();
-			blobCounter.Dispose();
+				screenshot = sobel.Apply(screenshot); // Find some more edges
+				screenshot = holes.Apply(screenshot); // Fill shapes
+				screenshot = sobel.Apply(screenshot); // Find edges of those shapes. A second pass removes edges within item card
 
-			int sWidth = blobRects[0].Width;
-			int sHeight = blobRects[0].Height;
-			foreach (var rect in blobRects)
-			{
-				bool add = true;
+				blobCounter.ProcessImage(screenshot);
+				// Note: Processing won't always detect all item rectangles on screen. Since the
+				// background isn't a solid color it's a bit trickier to filter out.
+
+				if (blobCounter.ObjectsCount < 7)
+				{
+					output.Save($"./logging/materials/{section}Inventory.png");
+
+					screenshot.Dispose();
+					output.Dispose();
+					throw new Exception($"Insufficient items found in {section} inventory");
+				}
+
+				// Don't save overlapping blobs
+				List<Rectangle> rectangles = new List<Rectangle>();
+				List<Rectangle> blobRects = blobCounter.GetObjectsRectangles().ToList();
+
+				int sWidth = blobRects[0].Width;
+				int sHeight = blobRects[0].Height;
+				foreach (var rect in blobRects)
+				{
+					bool add = true;
+					foreach (var item in rectangles)
+					{
+						Rectangle r1 = rect;
+						Rectangle r2 = item;
+						Rectangle intersect = Rectangle.Intersect(r1, r2);
+						if (intersect.Width > r1.Width * .2)
+						{
+							add = false;
+							break;
+						}
+					}
+					if (add)
+					{
+						sWidth = Math.Min(sWidth, rect.Width);
+						sHeight = Math.Min(sHeight, rect.Height);
+						rectangles.Add(rect);
+					}
+				}
+
+				// Determine X and Y coordinates for columns and rows, respectively
+				var colCoords = new List<int>();
+				var rowCoords = new List<int>();
+
 				foreach (var item in rectangles)
 				{
-					Rectangle r1 = rect;
-					Rectangle r2 = item;
-					Rectangle intersect = Rectangle.Intersect(r1, r2);
-					if (intersect.Width > r1.Width * .2)
+					bool addX = true;
+					bool addY = true;
+					foreach (var x in colCoords)
 					{
-						add = false;
-						break;
+						var xC = item.Center().X;
+						if (x - 10 <= xC && xC <= x + 10)
+						{
+							addX = false;
+							break;
+						}
+					}
+					foreach (var y in rowCoords)
+					{
+						var yC = item.Center().Y;
+						if (y - 10 <= yC && yC <= y + 10)
+						{
+							addY = false;
+							break;
+						}
+					}
+					if (addX)
+					{
+						colCoords.Add(item.Center().X);
+					}
+					if (addY)
+					{
+						rowCoords.Add(item.Center().Y);
 					}
 				}
-				if (add)
-				{
-					sWidth = Math.Min(sWidth, rect.Width);
-					sHeight = Math.Min(sHeight, rect.Height);
-					rectangles.Add(rect);
-				}
-			}
 
-			// Determine X and Y coordinates for columns and rows, respectively
-			var colCoords = new List<int>();
-			var rowCoords = new List<int>();
-
-			foreach (var item in rectangles)
-			{
-				bool addX = true;
-				bool addY = true;
-				foreach (var x in colCoords)
+				// Clear it all because we're going to use X,Y coordinate pairings to build rectangles
+				// around. This won't be perfect but it should algorithmically put rectangles over all
+				// images on the screen. The center of each of these rectangles should be a good enough
+				// spot to click.
+				rectangles.Clear();
+				colCoords.Sort();
+				rowCoords.Sort();
+				foreach (var row in rowCoords)
 				{
-					var xC = item.Center().X;
-					if (x - 10 <= xC && xC <= x + 10)
+					foreach (var col in colCoords)
 					{
-						addX = false;
-						break;
+						int x = (int)( col - (sWidth * .5) );
+						int y = (int)( row - (sHeight * .5) );
+
+						rectangles.Add(new Rectangle(x, y, sWidth, sHeight));
 					}
 				}
-				foreach (var y in rowCoords)
+
+				// Remove some rectangles that somehow overlap each other. Don't think this happens
+				// but it doesn't hurt to double check.
+				for (int i = 0; i < rectangles.Count - 1; i++)
 				{
-					var yC = item.Center().Y;
-					if (y - 10 <= yC && yC <= y + 10)
+					for (int j = i + 1; j < rectangles.Count; j++)
 					{
-						addY = false;
-						break;
+						Rectangle r1 = rectangles[i];
+						Rectangle r2 = rectangles[j];
+						Rectangle intersect = Rectangle.Intersect(r1, r2);
+						if (intersect.Width > r1.Width * .2)
+						{
+							rectangles.RemoveAt(j);
+						}
 					}
 				}
-				if (addX)
-				{
-					colCoords.Add(item.Center().X);
-				}
-				if (addY)
-				{
-					rowCoords.Add(item.Center().Y);
-				}
+
+				// Sort by row then by column within each row
+				rectangles = rectangles.OrderBy(r => r.Top).ThenBy(r => r.Left).ToList();
+
+				Debug.WriteLine($"{colCoords.Count} columns");
+				Debug.WriteLine($"{rowCoords.Count} rows");
+				Debug.WriteLine($"{rectangles.Count} rectangles");
+
+
+				//new RectanglesMarker(rectangles, Color.Green).ApplyInPlace(output);
+				//Navigation.DisplayBitmap(output, "Rectangles");
+
+				screenshot.Dispose();
+				output.Dispose();
+
+				return (rectangles, colCoords.Count, rowCoords.Count);
 			}
-
-			// Clear it all because we're going to use X,Y coordinate pairings to build rectangles
-			// around. This won't be perfect but it should algorithmically put rectangles over all
-			// images on the screen. The center of each of these rectangles should be a good enough
-			// spot to click.
-			rectangles.Clear();
-			colCoords.Sort();
-			rowCoords.Sort();
-			foreach (var row in rowCoords)
-			{
-				foreach (var col in colCoords)
-				{
-					int x = (int)( col - (sWidth * .5) );
-					int y = (int)( row - (sHeight * .5) );
-
-					rectangles.Add(new Rectangle(x, y, sWidth, sHeight));
-				}
-			}
-
-			// Remove some rectangles that somehow overlap each other. Don't think this happens
-			// but it doesn't hurt to double check.
-			for (int i = 0; i < rectangles.Count - 1; i++)
-			{
-				for (int j = i + 1; j < rectangles.Count; j++)
-				{
-					Rectangle r1 = rectangles[i];
-					Rectangle r2 = rectangles[j];
-					Rectangle intersect = Rectangle.Intersect(r1, r2);
-					if (intersect.Width > r1.Width * .2)
-					{
-						rectangles.RemoveAt(j);
-					}
-				}
-			}
-
-			// Sort by row then by column within each row
-			rectangles = rectangles.OrderBy(r => r.Top).ThenBy(r => r.Left).ToList();
-
-			Debug.WriteLine($"{colCoords.Count} columns");
-			Debug.WriteLine($"{rowCoords.Count} rows");
-			Debug.WriteLine($"{rectangles.Count} rectangles");
-
-			
-			//new RectanglesMarker(rectangles, Color.Green).ApplyInPlace(output);
-			//Navigation.DisplayBitmap(output, "Rectangles");
-			
-			screenshot.Dispose();
-			output.Dispose();
-
-			return (rectangles, colCoords.Count, rowCoords.Count);
 		}
 
 		public static string ScanMaterialName(InventorySection section, out Bitmap nameplate)

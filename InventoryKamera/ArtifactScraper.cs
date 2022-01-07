@@ -13,6 +13,8 @@ namespace InventoryKamera
 {
 	public static class ArtifactScraper
 	{
+		public static bool StopScanning { get; set; }
+
 		public static void ScanArtifacts(int count = 0)
 		{
 			// Get Max artifacts from screen
@@ -25,12 +27,14 @@ namespace InventoryKamera
 			int offset = 0;
 			UserInterface.SetArtifact_Max(artifactCount);
 
+			StopScanning = false;
+
 			// Go through artifact list
 			while (cardsQueued < artifactCount)
 			{
 				int cardsRemaining = artifactCount - cardsQueued;
 				// Go through each "page" of items and queue. In the event that not a full page of
-				// items are scolled to, offset the index of rectangle to start clicking from
+				// items are scrolled to, offset the index of rectangle to start clicking from
 				for (int i = cardsRemaining < fullPage ? ( rows - ( totalRows - rowsQueued ) ) * cols : 0; i < rectangles.Count; i++)
 				{
 					Rectangle item = rectangles[i];
@@ -41,7 +45,7 @@ namespace InventoryKamera
 					// Queue card for scanning
 					QueueScan(cardsQueued);
 					cardsQueued++;
-					if (cardsQueued >= artifactCount)
+					if (cardsQueued >= artifactCount || StopScanning)
 					{
 						return;
 					}
@@ -124,170 +128,179 @@ namespace InventoryKamera
 
 		private static (List<Rectangle> rectangles, int cols, int rows) GetPageOfItems()
 		{
+			// Size of an item card is the same in 16:10 to 16:9. Also accounts for character icon and resolution size.
 			var card = new RECT(
 				Left: 0,
 				Top: 0,
-				Right: (int)(80 / 1280.0 * Navigation.GetWidth()),
-				Bottom: (int)(100 / 720.0 * Navigation.GetHeight()));
+				Right: (int)(85 / 1280.0 * Navigation.GetWidth()),
+				Bottom: (int)(105 / 720.0 * Navigation.GetHeight()));
 
 			// Filter for relative size of items in inventory, give or take a few pixels
-			BlobCounter blobCounter = new BlobCounter
+			using (BlobCounter blobCounter = new BlobCounter
 			{
 				FilterBlobs = true,
-				MinHeight = card.Height - 20,
-				MaxHeight = card.Height + 20,
-				MinWidth  = card.Width - 15,
-				MaxWidth  = card.Width + 15,
-			};
-
-			// Screenshot of inventory
-			Bitmap screenshot = Navigation.CaptureWindow();
-			Bitmap output = new Bitmap(screenshot); // Copy used to overlay onto in testing
-
-			// Image pre-processing
-			ContrastCorrection contrast = new ContrastCorrection(85);
-			Grayscale grayscale = new Grayscale(0.2125, 0.7154, 0.0721);
-			Edges edges = new Edges();
-			Threshold threshold = new Threshold(15);
-			FillHoles holes = new FillHoles
+				MinHeight = card.Height - 10,
+				MaxHeight = card.Height + 10,
+				MinWidth = card.Width - 10,
+				MaxWidth = card.Width + 10,
+			})
 			{
-				CoupledSizeFiltering = true,
-				MaxHoleWidth = card.Width + 10,
-				MaxHoleHeight = card.Height + 10
-			};
-			SobelEdgeDetector sobel = new SobelEdgeDetector();
 
-			screenshot = contrast.Apply(screenshot);
-			screenshot = edges.Apply(screenshot); // Quick way to find ~75% of edges
-			screenshot = grayscale.Apply(screenshot);
-			screenshot = threshold.Apply(screenshot); // Convert to black and white only based on pixel intensity
+				// Screenshot of inventory
+				Bitmap screenshot = Navigation.CaptureWindow();
+				Bitmap output = new Bitmap(screenshot); // Copy used to overlay onto in testing
 
-			screenshot = sobel.Apply(screenshot); // Find some more edges
-			screenshot = holes.Apply(screenshot); // Fill shapes
-			screenshot = sobel.Apply(screenshot); // Find edges of those shapes. A second pass removes edges within item card
+				// Image pre-processing
+				ContrastCorrection contrast = new ContrastCorrection(85);
+				Grayscale grayscale = new Grayscale(0.2125, 0.7154, 0.0721);
+				Edges edges = new Edges();
+				Threshold threshold = new Threshold(15);
+				FillHoles holes = new FillHoles
+				{
+					CoupledSizeFiltering = true,
+					MaxHoleWidth = card.Width + 10,
+					MaxHoleHeight = card.Height + 10
+				};
+				SobelEdgeDetector sobel = new SobelEdgeDetector();
 
-			blobCounter.ProcessImage(screenshot);
-			// Note: Processing won't always detect all item rectangles on screen. Since the
-			// background isn't a solid color it's a bit trickier to filter out.
+				screenshot = contrast.Apply(screenshot);
+				screenshot = edges.Apply(screenshot); // Quick way to find ~75% of edges
+				screenshot = grayscale.Apply(screenshot);
+				screenshot = threshold.Apply(screenshot); // Convert to black and white only based on pixel intensity
 
-			if (blobCounter.ObjectsCount < 1)
-			{
-				blobCounter.Dispose();
-				throw new Exception("No items detected in inventory");
-			}
+				screenshot = sobel.Apply(screenshot); // Find some more edges
+				screenshot = holes.Apply(screenshot); // Fill shapes
+				screenshot = sobel.Apply(screenshot); // Find edges of those shapes. A second pass removes edges within item card
 
-			// Don't save overlapping blobs
-			List<Rectangle> rectangles = new List<Rectangle>();
-			List<Rectangle> blobRects = blobCounter.GetObjectsRectangles().ToList();
-			blobCounter.Dispose();
+				blobCounter.ProcessImage(screenshot);
+				// Note: Processing won't always detect all item rectangles on screen. Since the
+				// background isn't a solid color it's a bit trickier to filter out.
 
-			int sWidth = blobRects[0].Width;
-			int sHeight = blobRects[0].Height;
-			foreach (var rect in blobRects)
-			{
-				bool add = true;
+				if (blobCounter.ObjectsCount < 7)
+				{
+					output.Save("./logging/artifacts/ArtifactInventory.png");
+
+					screenshot.Dispose();
+					output.Dispose();
+					throw new Exception("Insufficient items found in artifact inventory");
+				}
+
+				// Don't save overlapping blobs
+				List<Rectangle> rectangles = new List<Rectangle>();
+				List<Rectangle> blobRects = blobCounter.GetObjectsRectangles().ToList();
+
+				int sWidth = blobRects[0].Width;
+				int sHeight = blobRects[0].Height;
+				foreach (var rect in blobRects)
+				{
+					bool add = true;
+					foreach (var item in rectangles)
+					{
+						Rectangle r1 = rect;
+						Rectangle r2 = item;
+						Rectangle intersect = Rectangle.Intersect(r1, r2);
+						if (intersect.Width > r1.Width * .2)
+						{
+							add = false;
+							break;
+						}
+					}
+					if (add)
+					{
+						sWidth = Math.Min(sWidth, rect.Width);
+						sHeight = Math.Min(sHeight, rect.Height);
+						rectangles.Add(rect);
+					}
+				}
+
+				// Items originally detected
+				// new RectanglesMarker(rectangles, Color.Red).ApplyInPlace(output);
+
+				// Determine X and Y coordinates for columns and rows, respectively
+				var colCoords = new List<int>();
+				var rowCoords = new List<int>();
+
 				foreach (var item in rectangles)
 				{
-					Rectangle r1 = rect;
-					Rectangle r2 = item;
-					Rectangle intersect = Rectangle.Intersect(r1, r2);
-					if (intersect.Width > r1.Width * .2)
+					bool addX = true;
+					bool addY = true;
+					foreach (var x in colCoords)
 					{
-						add = false;
-						break;
+						var xC = item.Center().X;
+						if (x - 10 <= xC && xC <= x + 10)
+						{
+							addX = false;
+							break;
+						}
+					}
+					foreach (var y in rowCoords)
+					{
+						var yC = item.Center().Y;
+						if (y - 10 <= yC && yC <= y + 10)
+						{
+							addY = false;
+							break;
+						}
+					}
+					if (addX)
+					{
+						colCoords.Add(item.Center().X);
+					}
+					if (addY)
+					{
+						rowCoords.Add(item.Center().Y);
 					}
 				}
-				if (add)
-				{
-					sWidth = Math.Min(sWidth, rect.Width);
-					sHeight = Math.Min(sHeight, rect.Height);
-					rectangles.Add(rect);
-				}
-			}
 
-			// Determine X and Y coordinates for columns and rows, respectively
-			var colCoords = new List<int>();
-			var rowCoords = new List<int>();
-
-			foreach (var item in rectangles)
-			{
-				bool addX = true;
-				bool addY = true;
-				foreach (var x in colCoords)
+				// Clear it all because we're going to use X,Y coordinate pairings to build rectangles
+				// around. This won't be perfect but it should algorithmically put rectangles over all
+				// images on the screen. The center of each of these rectangles should be a good enough
+				// spot to click.
+				rectangles.Clear();
+				colCoords.Sort();
+				rowCoords.Sort();
+				foreach (var row in rowCoords)
 				{
-					var xC = item.Center().X;
-					if (x - 10 <= xC && xC <= x + 10)
+					foreach (var col in colCoords)
 					{
-						addX = false;
-						break;
+						int x = (int)( col - (sWidth * .5) );
+						int y = (int)( row - (sHeight * .5) );
+
+						rectangles.Add(new Rectangle(x, y, sWidth, sHeight));
 					}
 				}
-				foreach (var y in rowCoords)
+
+				// Remove some rectangles that somehow overlap each other. Don't think this happens
+				// but it doesn't hurt to double check.
+				for (int i = 0; i < rectangles.Count - 1; i++)
 				{
-					var yC = item.Center().Y;
-					if (y - 10 <= yC && yC <= y + 10)
+					for (int j = i + 1; j < rectangles.Count; j++)
 					{
-						addY = false;
-						break;
+						Rectangle r1 = rectangles[i];
+						Rectangle r2 = rectangles[j];
+						Rectangle intersect = Rectangle.Intersect(r1, r2);
+						if (intersect.Width > r1.Width * .2)
+						{
+							rectangles.RemoveAt(j);
+						}
 					}
 				}
-				if (addX)
-				{
-					colCoords.Add(item.Center().X);
-				}
-				if (addY)
-				{
-					rowCoords.Add(item.Center().Y);
-				}
+
+				// Sort by row then by column within each row
+				rectangles = rectangles.OrderBy(r => r.Top).ThenBy(r => r.Left).ToList();
+
+				Debug.WriteLine($"{colCoords.Count} columns");
+				Debug.WriteLine($"{rowCoords.Count} rows");
+				Debug.WriteLine($"{rectangles.Count} rectangles");
+
+				// Generated rectangles
+				//new RectanglesMarker(rectangles, Color.Green).ApplyInPlace(output);
+				//Navigation.DisplayBitmap(output, "Rectangles");
+
+				screenshot.Dispose();
+				output.Dispose();
+				return (rectangles, colCoords.Count, rowCoords.Count);
 			}
-
-			// Clear it all because we're going to use X,Y coordinate pairings to build rectangles
-			// around. This won't be perfect but it should algorithmically put rectangles over all
-			// images on the screen. The center of each of these rectangles should be a good enough
-			// spot to click.
-			rectangles.Clear();
-			colCoords.Sort();
-			rowCoords.Sort();
-			foreach (var row in rowCoords)
-			{
-				foreach (var col in colCoords)
-				{
-					int x = (int)( col - (sWidth * .5) );
-					int y = (int)( row - (sHeight * .5) );
-
-					rectangles.Add(new Rectangle(x, y, sWidth, sHeight));
-				}
-			}
-
-			// Remove some rectangles that somehow overlap each other. Don't think this happens
-			// but it doesn't hurt to double check.
-			for (int i = 0; i < rectangles.Count - 1; i++)
-			{
-				for (int j = i + 1; j < rectangles.Count; j++)
-				{
-					Rectangle r1 = rectangles[i];
-					Rectangle r2 = rectangles[j];
-					Rectangle intersect = Rectangle.Intersect(r1, r2);
-					if (intersect.Width > r1.Width * .2)
-					{
-						rectangles.RemoveAt(j);
-					}
-				}
-			}
-
-			// Sort by row then by column within each row
-			rectangles = rectangles.OrderBy(r => r.Top).ThenBy(r => r.Left).ToList();
-
-			Debug.WriteLine($"{colCoords.Count} columns");
-			Debug.WriteLine($"{rowCoords.Count} rows");
-			Debug.WriteLine($"{rectangles.Count} rectangles");
-
-			//new RectanglesMarker(rectangles, Color.Green).ApplyInPlace(output);
-			//Navigation.DisplayBitmap(output, "Rectangles");
-			screenshot.Dispose();
-			output.Dispose();
-
-			return (rectangles, colCoords.Count, rowCoords.Count);
 		}
 
 		public static void QueueScan(int id)
@@ -300,7 +313,7 @@ namespace InventoryKamera
 
 			Bitmap card;
 			RECT reference;
-			Bitmap gearSlot, mainStat, subStats, level, equipped, rarity, locked;
+			Bitmap gearSlot, mainStat, subStats, level, equipped, locked;
 
 			if (Navigation.GetAspectRatio() == new Size(16, 9))
 			{
@@ -371,14 +384,6 @@ namespace InventoryKamera
 				Bottom: (int)( 370.0 / reference.Height * card.Height )), card.PixelFormat);
 			//Navigation.DisplayBitmap(subStats);
 
-			// Rarity
-			rarity = card.Clone(new RECT(
-				Left: 1,
-				Top: 0,
-				Right: card.Width,
-				Bottom: 1), card.PixelFormat);
-			//Navigation.DisplayBitmap(rarity);
-
 			// Locked Status
 			locked = card.Clone(new RECT(
 				Left: (int)( 284.0 / reference.Width * card.Width ),
@@ -393,12 +398,26 @@ namespace InventoryKamera
 			artifactImages.Add(level);
 			artifactImages.Add(subStats);
 			artifactImages.Add(equipped);
-			artifactImages.Add(rarity);
-			artifactImages.Add(locked); //6
+			artifactImages.Add(locked); //5
 			artifactImages.Add(card);
 
-			// Send Image to Worker Queue
-			InventoryKamera.workerQueue.Enqueue(new OCRImage(artifactImages, "artifact", id));
+			try
+			{
+				int rarity = GetRarity(card.GetPixel(5, 5));
+				if (0 < rarity && rarity < Properties.Settings.Default.MinimumArtifactRarity)
+				{
+					artifactImages.ForEach(i => i.Dispose());
+					StopScanning = true;
+				}
+				else // Send images to Worker Queue
+					InventoryKamera.workerQueue.Enqueue(new OCRImage(artifactImages, "artifact", id));
+			}
+			catch (Exception ex)
+			{
+				UserInterface.AddError($"Unexpected error {ex.Message} for artifact ID#{id}");
+				UserInterface.AddError($"{ex.StackTrace}");
+				card.Save($"./logging/artifacts/artifact{id}.png");
+			}
 		}
 
 		public static async Task<Artifact> CatalogueFromBitmapsAsync(List<Bitmap> bm, int id)
@@ -419,79 +438,62 @@ namespace InventoryKamera
 
 			bool _lock = false;
 
-			if (bm.Count >= 7)
+			if (bm.Count >= 6)
 			{
-				int a_gearSlot = 0; int a_mainStat = 1; int a_level = 2; int a_subStats = 3; int a_equippedCharacter = 4; int a_rarity = 5; int a_lock = 6;
+				int a_gearSlot = 0; int a_mainStat = 1; int a_level = 2; int a_subStats = 3; int a_equippedCharacter = 4; int a_lock = 5; int a_card = 6;
 
 				// Get Rarity
-				Color rarityColor = bm[a_rarity].GetPixel(0, 0);
-
-				Color fiveStar = Color.FromArgb(255, 188, 105, 50);
-				Color fourStar = Color.FromArgb(255, 161, 86, 224);
-				Color threeStar = Color.FromArgb(255, 81, 127, 203);
-				Color twoStar = Color.FromArgb(255, 42, 143, 114);
-				Color oneStar = Color.FromArgb(255, 114, 119, 138);
+				Color rarityColor = bm[a_card].GetPixel(5, 5);
+				rarity = GetRarity(rarityColor);
 
 				// Check for equipped color
 				Color equippedColor = Color.FromArgb(255, 255, 231, 187);
 				Color equippedStatus = bm[a_equippedCharacter].GetPixel(5, 5);
+				bool b_equipped = Scraper.CompareColors(equippedColor, equippedStatus);
 
 				// Check for lock color
 				Color lockedColor = Color.FromArgb(255, 70, 80, 100); // Dark area around red lock
 				Color lockStatus = bm[a_lock].GetPixel(5, 5);
+				_lock = Scraper.CompareColors(lockedColor, lockStatus);
 
-				// Only scan 4 and 5-star artifacts
-				if (Scraper.CompareColors(fiveStar, rarityColor) || Scraper.CompareColors(fourStar, rarityColor))
-				{
-					rarity = Scraper.CompareColors(fiveStar, rarityColor) ? 5 : 4;
-					bool b_equipped = Scraper.CompareColors(equippedColor, equippedStatus);
-					_lock = Scraper.CompareColors(lockedColor, lockStatus);
+				// Improved Scanning using multi threading
+				List<Task> tasks = new List<Task>();
 
-					// Improved Scanning using multi threading
-					List<Task> tasks = new List<Task>();
+				var taskGear  = Task.Run(() => gearSlot = ScanArtifactGearSlot(bm[a_gearSlot]));
+				var taskMain  = taskGear.ContinueWith( (antecedent) => mainStat = ScanArtifactMainStat(bm[a_mainStat], antecedent.Result));
+				var taskLevel = Task.Run(() => level = ScanArtifactLevel(bm[a_level]));
+				var taskSubs  = Task.Run(() => subStats = ScanArtifactSubStats(bm[a_subStats], ref setName));
+				var taskEquip = Task.Run(() => equippedCharacter = ScanArtifactEquippedCharacter(bm[a_equippedCharacter]));
 
-					var taskGear  = Task.Run(() => gearSlot = ScanArtifactGearSlot(bm[a_gearSlot]));
-					var taskMain  = taskGear.ContinueWith( (antecedent) => mainStat = ScanArtifactMainStat(bm[a_mainStat], antecedent.Result));
-					var taskLevel = Task.Run(() => level = ScanArtifactLevel(bm[a_level]));
-					var taskSubs  = Task.Run(() => subStats = ScanArtifactSubStats(bm[a_subStats], ref setName));
-					var taskEquip = Task.Run(() => equippedCharacter = ScanArtifactEquippedCharacter(bm[a_equippedCharacter]));
+				tasks.Add(taskGear);
+				tasks.Add(taskMain);
+				tasks.Add(taskLevel);
+				tasks.Add(taskSubs);
+				if (b_equipped)
+				{
+					tasks.Add(taskEquip);
+				}
 
-					tasks.Add(taskGear);
-					tasks.Add(taskMain);
-					tasks.Add(taskLevel);
-					tasks.Add(taskSubs);
-					if (b_equipped)
-					{
-						tasks.Add(taskEquip);
-					}
-
-					await Task.WhenAll(tasks.ToArray());
-				}
-				else if (Scraper.CompareColors(threeStar, rarityColor))
-				{
-					rarity = 3; equippedCharacter = null; setName = null; level = -1; gearSlot = null;
-					//rarity = 3;
-				}
-				else if (Scraper.CompareColors(twoStar, rarityColor))
-				{
-					rarity = 2; equippedCharacter = null; setName = null; level = -1; gearSlot = null;
-					//rarity = 2;
-				}
-				else if (Scraper.CompareColors(oneStar, rarityColor))
-				{
-					rarity = 1; equippedCharacter = null; setName = null; level = -1; gearSlot = null;
-					//rarity = 1;
-				}
-				else
-				{
-					// Not found
-					rarity = 0; equippedCharacter = null; setName = null; level = -1; gearSlot = null;
-					//rarity = 0;
-					UserInterface.AddError("Couldn't determine rarity for artifact");
-				}
+				await Task.WhenAll(tasks.ToArray());
 			}
 
-			return new Artifact(rarity, gearSlot, mainStat, level, subStats.ToArray(), subStats.Count, setName, equippedCharacter, id, _lock);
+			return new Artifact(setName, rarity, level, gearSlot, mainStat, subStats.ToArray(), subStats.Count, equippedCharacter, id, _lock);
+		}
+
+		private static int GetRarity(Color rarityColor)
+		{
+			Color fiveStar    = Color.FromArgb(255, 188, 105,  50);
+			Color fourStar    = Color.FromArgb(255, 161,  86, 224);
+			Color threeStar   = Color.FromArgb(255,  81, 127, 203);
+			Color twoStar     = Color.FromArgb(255,  42, 143, 114);
+			Color oneStar     = Color.FromArgb(255, 114, 119, 138);
+
+			if (Scraper.CompareColors(fiveStar, rarityColor)) return 5;
+			else if (Scraper.CompareColors(fourStar, rarityColor)) return 4;
+			else if (Scraper.CompareColors(threeStar, rarityColor)) return 3;
+			else if (Scraper.CompareColors(twoStar, rarityColor)) return 2;
+			else if (Scraper.CompareColors(oneStar, rarityColor)) return 1;
+			else return 0; // throw new ArgumentException("Unable to determine artifact rarity");
 		}
 
 		#region Task Methods
@@ -567,20 +569,23 @@ namespace InventoryKamera
 
 		private static List<SubStat> ScanArtifactSubStats(Bitmap artifactImage, ref string setName)
 		{
-			Bitmap n = (Bitmap)artifactImage.Clone();
-			Scraper.SetBrightness(35, ref n);
-			Scraper.SetContrast(10, ref n);
+			Bitmap bm = (Bitmap)artifactImage.Clone();
+			Scraper.SetBrightness(-30, ref bm);
+			Scraper.SetContrast(85, ref bm);
+			var n = Scraper.ConvertToGrayscale(bm);
 			var text = Scraper.AnalyzeText(n, Tesseract.PageSegMode.Auto).ToLower();
-			n.Dispose();
+
 			List<string> lines = new List<string>(text.Split('\n'));
 			lines.RemoveAll(line => string.IsNullOrWhiteSpace(line));
 
-			var index = lines.FindIndex(line => line.Contains("piece") || line.Contains("set") || line.Length < 5);
+			var index = lines.FindIndex(line => line.Contains("piece") || line.Contains("set") || line.Contains("2-"));
 			if (index >= 0)
 			{
 				lines.RemoveRange(index, lines.Count - index);
 			}
 
+			n.Dispose();
+			bm.Dispose();
 			SubStat[] substats = new SubStat[4];
 			List<Task<string>> tasks = new List<Task<string>>();
 			for (int i = 0; i < lines.Count; i++)
@@ -590,29 +595,33 @@ namespace InventoryKamera
 				{
 					var line = Regex.Replace(lines[j], @"(?:^[^a-zA-Z]*)", string.Empty).Replace(" ", string.Empty);
 
-					if (line.Contains("+"))
+					if (line.Any(char.IsDigit))
 					{
-						SubStat stat = new SubStat();
-						string[] split = line.Split('+');
+						SubStat substat = new SubStat();
+						Regex re = new Regex(@"([\w]+\W*)(\d+.*\d+)");
+						var result = re.Match(line);
+						var stat = Regex.Replace(result.Groups[1].Value, @"[^\w]", string.Empty); 
+						var value = result.Groups[2].Value;
 
-						string name = line.Contains("%") ? split[0] + "%" : split[0];
+						string name = line.Contains("%") ? stat + "%" : stat;
 
-						stat.stat = Scraper.FindClosestStat(name) ?? "";
+						substat.stat = Scraper.FindClosestStat(name) ?? "";
 
-						string value = split[1].Replace("%", string.Empty);
-						if (!decimal.TryParse(value, out stat.value))
+						// Remove any non digits.
+					    value = Regex.Replace(value, @"[^0-9]", string.Empty);
+
+						if (!decimal.TryParse(value, out substat.value))
 						{
-							stat.value = -1;
+							substat.value = -1;
 						}
 
-						// Sometimes the decimal is missed by the scanner for stat% boosts.
-						// 46.6% is the theoretical max value for any % boost.
-						if (stat.stat.Contains("_") && stat.value > 50) stat.value /= 10; 
+						// Need to retain the decimal place for percent boosts
+						if (substat.stat.Contains("_")) substat.value /= 10; 
 
-						substats[j] = stat;
+						substats[j] = substat;
 						return null;
 					}
-					else// if (line.Contains(":")) // Sometimes Tesseract wouldn't detect a ':' making this check troublesome
+					else // if (line.Contains(":")) // Sometimes Tesseract wouldn't detect a ':' making this check troublesome
 					{
 						var name = line.Trim().ToLower();
 
@@ -620,13 +629,14 @@ namespace InventoryKamera
 
 						name = Scraper.FindClosestSetName(name);
 
-						return !string.IsNullOrEmpty(name) ? name : null;
+						return !string.IsNullOrWhiteSpace(name) ? name : null;
 					}
 				});
 				tasks.Add(task);
 			}
-
-			while (tasks.Count > 0)
+			Stopwatch stopwatch = new Stopwatch();
+			stopwatch.Start();
+			while (tasks.Count > 0 && stopwatch.Elapsed.TotalSeconds < 10)
 			{
 				for (int i = 0; i < tasks.Count; i++)
 				{
@@ -635,15 +645,9 @@ namespace InventoryKamera
 					{
 						continue;
 					}
-					if (!task.IsFaulted && task.Result != null)
-					{
-						setName = task.Result;
-					}
-					if (task.IsCompleted)
-					{
-						tasks.Remove(task);
-						break;
-					}
+					setName = string.IsNullOrWhiteSpace(setName) ? task.Result : setName;
+					tasks.Remove(task);
+					break;
 				}
 			}
 			return substats.ToList();

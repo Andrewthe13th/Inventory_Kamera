@@ -133,6 +133,8 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -145,6 +147,7 @@
     <Reference Include="Tesseract, Version=4.1.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Tesseract.4.1.1\lib\net45\Tesseract.dll</HintPath>
     </Reference>
+    <Reference Include="WindowsBase" />
     <Reference Include="WindowsInput, Version=1.0.4.0, Culture=neutral, PublicKeyToken=9b287f7dc5073cad, processorArchitecture=MSIL">
       <HintPath>..\packages\InputSimulator.1.0.4.0\lib\net20\WindowsInput.dll</HintPath>
     </Reference>

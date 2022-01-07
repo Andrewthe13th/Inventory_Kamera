@@ -12,15 +12,14 @@ namespace InventoryKamera
 	{
 		private static string firstCharacterName = null;
 
-		public static List<Character> ScanCharacters()
+		public static void ScanCharacters(ref List<Character> characters)
 		{
-			List<Character> characters = new List<Character>();
 
 			// first character name is used to stop scanning characters
 			int characterCount = 0;
 			firstCharacterName = null; // Static variable might already be set
 			UserInterface.ResetCharacterDisplay();
-			while (ScanCharacter(out Character character) || characterCount < 4)
+			while (ScanCharacter(out Character character) || characterCount <= 4)
 			{
 				if (character.IsValid())
 				{
@@ -31,18 +30,14 @@ namespace InventoryKamera
 				Navigation.SelectNextCharacter();
 				UserInterface.ResetCharacterDisplay();
 			}
-
-			return characters;
 		}
 
 		private static bool ScanCharacter(out Character character)
 		{
-			character = null;
-			string name = null; string element = null;
-			bool ascension = false;
-			int experience = 0;
-
+			character = new Character();
 			Navigation.SelectCharacterAttributes();
+			string name = null;
+			string element = null;
 
 			// Scan the Name and element of Character. Attempt 75 times max.
 			ScanNameAndElement(ref name, ref element);
@@ -60,8 +55,9 @@ namespace InventoryKamera
 				if (string.IsNullOrWhiteSpace(firstCharacterName))
 					firstCharacterName = name;
 
+				bool ascended = false;
 				// Scan Level and ascension
-				int level = ScanLevel(ref ascension);
+				int level = ScanLevel(ref ascended);
 				if (level == -1)
 				{
 					UserInterface.AddError($"Could not determine {name}'s level");
@@ -88,13 +84,12 @@ namespace InventoryKamera
 					if (Scraper.Characters.ContainsKey(name.ToLower()))
 					{
 						// get talent if character
-						string talent = (string)Scraper.Characters[name.ToLower()]["ConstellationOrder"][0];
 						if (constellation >= 5)
 						{
 							talents[1] -= 3;
 							talents[2] -= 3;
 						}
-						else if (talent == "skill")
+						else if ((string)Scraper.Characters[name.ToLower()]["ConstellationOrder"][0] == "skill")
 						{
 							talents[1] -= 3;
 						}
@@ -109,7 +104,8 @@ namespace InventoryKamera
 
 				var weaponType = Scraper.Characters[name.ToLower()]["WeaponType"].ToObject<int>();
 
-				character = new Character(name, element, level, ascension, experience, constellation, talents, (WeaponType)weaponType);
+				int experience = 0;
+				character = new Character(name, element, level, ascended, experience, constellation, talents, (WeaponType)weaponType);
 				return true;
 			}
 			return false;
@@ -138,7 +134,7 @@ namespace InventoryKamera
 			Bitmap n = Scraper.ConvertToGrayscale(nameBitmap);
 			Scraper.SetContrast(40.0, ref n);
 
-			UserInterface.SetNavigation_Image(n);
+			UserInterface.SetNavigation_Image(nameBitmap);
 
 			string text = Scraper.AnalyzeText(n).Trim();
 			if (text != "")
@@ -226,7 +222,7 @@ namespace InventoryKamera
 			element = null;
 		}
 
-		private static int ScanLevel(ref bool ascension)
+		private static int ScanLevel(ref bool ascended)
 		{
 			int level = -1;
 
@@ -260,7 +256,8 @@ namespace InventoryKamera
 					var values = text.Split('/');
 					if (int.TryParse(values[0], out level) && int.TryParse(values[1], out int maxLevel))
 					{
-						ascension = level < maxLevel;
+						maxLevel = (int)Math.Round(maxLevel / 10.0, MidpointRounding.AwayFromZero) * 10;
+						ascended = 20 <= level && level < maxLevel;
 						UserInterface.SetCharacter_Level(bm, level, maxLevel);
 						n.Dispose();
 						bm.Dispose();
