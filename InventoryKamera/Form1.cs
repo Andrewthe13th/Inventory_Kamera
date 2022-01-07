@@ -18,17 +18,6 @@ namespace InventoryKamera
 	{
 		private static Thread mainThread;
 		private static InventoryKamera data = new InventoryKamera();
-		private static DatabaseManager databaseManager = new DatabaseManager();
-		private static string filePath = "";
-
-		private bool GOODChecked;
-		private bool SeelieChecked;
-
-		private bool WeaponsChecked;
-		private bool ArtifactsChecked;
-		private bool CharactersChecked;
-		private bool MaterialsChecked;
-		private bool CharDevItemsChecked;
 
 		private int Delay;
 
@@ -93,9 +82,6 @@ namespace InventoryKamera
 
 		private void ResetUI()
 		{
-			// Reset data
-			data = new InventoryKamera();
-
 			Navigation.Reset();
 
 			// Need to invoke method from the UI's handle, not the worker thread
@@ -119,16 +105,13 @@ namespace InventoryKamera
 		{
 			UpdateKeyTextBoxes();
 
-			GOODChecked = GOOD_CheckBox.Checked;
-			SeelieChecked = Seelie_CheckBox.Checked;
-
-			WeaponsChecked = Weapons_CheckBox.Checked;
-			ArtifactsChecked = Artifacts_Checkbox.Checked;
-			CharactersChecked = Characters_CheckBox.Checked;
-			CharDevItemsChecked = CharDevItems_CheckBox.Checked;
-			MaterialsChecked = Materials_CheckBox.Checked;
-
 			Delay = ScannerDelay_TrackBar.Value;
+
+			ProgramStatus_Label.Text = "";
+			if (string.IsNullOrWhiteSpace(OutputPath_TextBox.Text))
+			{
+				OutputPath_TextBox.Text = Directory.GetCurrentDirectory() + @"\GenshinData";
+			}
 		}
 
 		private void UpdateKeyTextBoxes()
@@ -168,18 +151,6 @@ namespace InventoryKamera
 				}
 				running = true;
 
-				// Create boolean array
-				bool[] items = new bool[5];
-				items[0] = WeaponsChecked;
-				items[1] = ArtifactsChecked;
-				items[2] = CharactersChecked;
-				items[3] = CharDevItemsChecked;
-				items[4] = MaterialsChecked;
-
-				bool[] formats = new bool[2];
-				formats[0] = GOODChecked;
-				formats[1] = SeelieChecked;
-
 				HotkeyManager.Current.AddOrReplace("Stop", Keys.Enter, Hotkey_Pressed);
 
 				mainThread = new Thread(() =>
@@ -200,11 +171,13 @@ namespace InventoryKamera
 							throw new NotImplementedException($"{Navigation.GetSize().Width}x{Navigation.GetSize().Height} is an unsupported resolution.");
 						}
 
+						data = new InventoryKamera();
+
 						// Add navigation delay
 						Navigation.SetDelay(ScannerDelayValue(Delay));
 
 						// The Data object of json object
-						data.GatherData(formats, items);
+						data.GatherData();
 
 						// Covert to GOOD
 						GOOD good = new GOOD(data);
@@ -273,14 +246,13 @@ namespace InventoryKamera
 			// A nicer file browser
 			CommonOpenFileDialog d = new CommonOpenFileDialog
 			{
-				InitialDirectory = filePath,
+				InitialDirectory = Directory.GetCurrentDirectory(),
 				IsFolderPicker = true
 			};
 
 			if (d.ShowDialog() == CommonFileDialogResult.Ok)
 			{
 				OutputPath_TextBox.Text = d.FileName;
-				filePath = d.FileName;
 			}
 		}
 
@@ -293,51 +265,6 @@ namespace InventoryKamera
 		private void SaveSettings()
 		{
 			Properties.Settings.Default.Save();
-		}
-
-		private void Format_CheckboxClick(object sender, EventArgs e)
-		{
-			CheckBox box = (CheckBox) sender;
-			if (box.Name.Contains("GOOD") && Seelie_CheckBox.Checked)
-			{
-				box.Checked = !box.Checked;
-				//Seelie_CheckBox.Enabled = !Seelie_CheckBox.Enabled;
-				//Weapons_CheckBox.Enabled = Weapons_CheckBox.Enabled ? false : true ;
-				//Artifacts_Checkbox.Enabled = !Artifacts_Checkbox.Enabled;
-				//Characters_CheckBox.Enabled = !Characters_CheckBox.Enabled;
-			}
-			else if (box.Name.Contains("Seelie") && GOOD_CheckBox.Checked)
-			{
-				box.Checked = !box.Checked;
-				//GOOD_CheckBox.Enabled = !GOOD_CheckBox.Enabled;
-				//CharDevItems_CheckBox.Enabled = !CharDevItems_CheckBox.Enabled;
-				//Materials_CheckBox.Enabled = !Materials_CheckBox.Enabled;
-			}
-		}
-
-		private void Weapons_CheckBox_CheckedChanged(object sender, EventArgs e)
-		{
-			WeaponsChecked = ( (CheckBox)sender ).Checked;
-		}
-
-		private void Artifacts_Checkbox_CheckedChanged(object sender, EventArgs e)
-		{
-			ArtifactsChecked = ( (CheckBox)sender ).Checked;
-		}
-
-		private void Characters_CheckBox_CheckedChanged(object sender, EventArgs e)
-		{
-			CharactersChecked = ( (CheckBox)sender ).Checked;
-		}
-
-		private void CharDevItems_CheckBox_CheckedChanged(object sender, EventArgs e)
-		{
-			CharDevItemsChecked = ( (CheckBox)sender ).Checked;
-		}
-
-		private void Materials_CheckBox_CheckedChanged(object sender, EventArgs e)
-		{
-			MaterialsChecked = ( (CheckBox)sender ).Checked;
 		}
 
 		private void ScannerDelay_TrackBar_ValueChanged(object sender, EventArgs e)

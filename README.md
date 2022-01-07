@@ -1,37 +1,36 @@
 # Inventory Kamera - A Genshin Data Scanner
-An OCR Scanner that scans your Characters, Weapons, Artifacts, Materials and Character Development items in your Inventory.</br>
-The scanner supports multiple exporting file formats, including these following:
+An OCR Scanner that scans your Characters, Weapons, Artifacts, Materials and Character Development items in your Inventory.
 
-- `GOOD` .good (JSON) format for [Genshin Optimizer](https://frzyc.github.io/genshin-optimizer/#/) that include Characters, Weapons and Artifacts; and are widely used in many Genshin Impact fan-made projects and services, such as Discord bots.
-- `Seelie` JSON format to be used with [SEELIE.me](https://seelie.inmagi.com/) (Might change later in the future updates)
+This scanner exports in GOOD formatting. This format is supported in a variety of tools like [Genshin Optimizer](https://frzyc.github.io/genshin-optimizer/#/) and [SEELIE.me](https://seelie.me/).
+
 
 Currently supports certain game language, screen size, scanning settings, and export options. Please follow the instructions on what you have to do.
+
 
 
 ## How to use the Scanner
 1. Make sure that you already have [Microsoft Visual C++ Redistributable packages](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2015-2017-2019-and-2022) installed on your device.
 2. [Download the program (Inventory_Kamera_Vx.x.zip)](https://github.com/Andrewthe13th/Inventory_Kamera/releases/latest) and unzip the downloaded file.
-3. Open the folder, and double click `InventoryKamera` to start up the scanner.
-    - This might prompt you with Security or/and User Access prompt. Allow the access to continue.
+3. Open the folder, and double click `InventoryKamera.exe` to start up the scanner.
+    - This will likely prompt you for Security or/and User Access. Allow access to continue.
 4. Open Genshin Impact > Log In > and click 'Start'. 
-5. Press `ESC` (or eqivalent keystroke) to open Paimon menu.
+5. Press `ESC` to open Paimon menu.
 6. Go to `Settings` (cog button) and set to these setup.
    - Under `Languages`, set Game Language to `English`.
-   - Under `Graphics`, set Display Mode to `1280x720 Windowed`.
-   - Under `Controls`, set Control Type to `Keyboard`.
+   - Under `Graphics`, set Display Mode to any windowed resolution that is 16:9 or 16:10. [Here](https://andrew.hedges.name/experiments/aspect_ratio/) is a website that you can use to determine the aspect ratio of a given resoltuion. Please make sure the entire window is visible on the screen!
+   - Under `Controls`, set Control Type to `Keyboard`. If you have rebound the inventory key or character screen key (B and C respectively), you may choose to rebind them in game or in Inventory Kamera.
 7. Exit `Settings` and leave the game in Paimon Menu
 8. Go back to the scanner application, then click SCAN.
    - (optional) Set the scanner delays to improve performance (default : 0ms)
    - (optional) Set the export destination in File Location
-9. You can stop the scanner at any time by pressing `ENTER` key
-10. If there's an Error on the Error Log, copy it; understand it; explain it all in [Report an Issue](https://github.com/Andrewthe13th/Inventory_Kamera/issues)
+9. You can stop the scanner at any time by pressing `ENTER` key. However, anything scanned will not be exported.
 
-NOTE: You will not be able to use your computer while the scan is taking place due to require the use of mouse and keyboard inputs.
+**NOTE**: Please **do not** use your mouse or keyboard while scanning as Inventory Kamera simulates their inputs to interact with Genshin. 
 
 
 ### Can this get me banned?
  According to [miHoYo's response to Script, Plug-In, and Third-Party Software](https://genshin.mihoyo.com/en/news/detail/5763), I would say no. 
-- This scanner does not exploit the game. It just takes pictures of the game window.
+- This scanner does not exploit the game. It just takes pictures of the game window and navigates menus.
 - This scanner does not provide artificial in-game progress.
 - This scanner does nothing to provide account selling/exchanging.
 - Doesn't provide Top-up Primogem. 
@@ -40,8 +39,21 @@ Also this scanner has random duration of pauses which makes the scanner prevent 
 My account has been used to test this script and has yet to be banned or warned of the use of scripts. 
 
 ## Contribute or Report an Issue
-If you ran through any issue with our scanner, please [Report an Issue here](https://github.com/Andrewthe13th/Inventory_Kamera/issues). 
-NOTE: Before sending an issue, please check that there is no other open issue similar to yours by searching up the issue list.
+If you ran through any issue with our scanner, please [report your issue here](https://github.com/Andrewthe13th/Inventory_Kamera/issues).
+
+Please be descriptive when describing your issue. Helpful information includes:
+
+* Error output including message and first few lines of stack trace
+* Window Resolution
+* One or two screenshots that might have been generated by Inventory Kamera. These can be found in their respective subfolders under `logging` in the application's folder. These screenshots are not generated for every error.
+
+
+
+
+**NOTES**:
+* Before sending an issue, please check that there are no other similar issues already open.
+* Screenshots are usually only generated when Inventory Kamera cannot determine how many artifacts/weapons/materials can be found on the screen or when a weapon/artifact was scanned and found to be not valid.
+* **Any screenshots saved under `logging` should be cleaned out periodically** for now. It is ok to completely delete the `logging` folder.
 
 ## License
 * This project is under the [MIT](LICENSE.md) license.

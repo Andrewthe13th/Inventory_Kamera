@@ -49,15 +49,15 @@ namespace InventoryKamera
 			Id = 0;
 		}
 
-		public Artifact(int _rarity, string _gearSlot, string _mainStat, int _level, SubStat[] _subStats, int _subStatsCount, string _setName, string _equippedCharacter = null, int _id = 0, bool _Lock = false)
+		public Artifact(string _setName, int _rarity, int _level, string _gearSlot, string _mainStat, SubStat[] _subStats, int _subStatsCount, string _equippedCharacter = null, int _id = 0, bool _Lock = false)
 		{
-			GearSlot = _gearSlot;
+			GearSlot = string.IsNullOrWhiteSpace(_gearSlot) ? "" : _gearSlot ;
 			Rarity = _rarity;
-			MainStat = _mainStat;
+			MainStat = string.IsNullOrWhiteSpace(_mainStat) ? "" : _mainStat;
 			Level = _level;
 			SubStats = _subStats;
 			SubStatsCount = _subStatsCount;
-			SetName = _setName;
+			SetName = string.IsNullOrWhiteSpace(_setName) ? "" : _setName;
 			EquippedCharacter = string.IsNullOrWhiteSpace(_equippedCharacter) ? "" : _equippedCharacter;
 			Lock = _Lock;
 			Id = _id;
@@ -65,22 +65,50 @@ namespace InventoryKamera
 
 		public bool IsValid()
 		{
-			// Check subStats
+			return HasValidLevel() && HasValidRarity() && HasValidSlot() && HasValidSetName() && HasValidMainStat() && HasValidSubStats() && HasValidEquippedCharacter();
+		}
+
+		public bool HasValidLevel()
+		{
+			return 0 <= Level && Level <= 20;
+		}
+
+		public bool HasValidRarity()
+		{
+			return 1 <= Rarity && Rarity <= 5;
+		}
+
+		public bool HasValidSlot()
+		{
+			return Scraper.IsValidSlot(GearSlot);
+		}
+
+		public bool HasValidSetName()
+		{
+			return Scraper.IsValidSetName(SetName);
+		}
+
+		public bool HasValidMainStat()
+		{
+			return Scraper.IsValidStat(MainStat);
+		}
+
+		public bool HasValidSubStats()
+		{
+			bool valid = true;
 			for (int i = 0; i < SubStatsCount; i++)
 			{
 				if (!Scraper.IsValidStat(SubStats[i].stat) || SubStats[i].value == (decimal)( -1.0 ))
 				{
-					return false;
+					valid = false;
 				}
 			}
+			return valid;
+		}
 
-			return 0 <= Level
-				&& Level <= 20
-				&& 0 < Rarity
-				&& Scraper.IsValidSlot(GearSlot)
-				&& Scraper.IsValidSetName(SetName)
-				&& Scraper.IsValidStat(MainStat)
-				&& (string.IsNullOrWhiteSpace(EquippedCharacter) || Scraper.IsValidCharacter(EquippedCharacter));
+		public bool	HasValidEquippedCharacter()
+		{
+			return  string.IsNullOrWhiteSpace(EquippedCharacter) || Scraper.IsValidCharacter(EquippedCharacter) ;
 		}
 
 		[Serializable]
@@ -97,7 +125,9 @@ namespace InventoryKamera
 
 			public override string ToString()
 			{
-				return stat.Contains("%") || stat.Contains("crit") || stat.Contains("bonus") ? $"{stat.Replace("%", "")} + {value}%" : $"{stat} + {value}";
+				return stat is null
+					? "NULL"
+					: stat.Contains("_") ? $"{stat} + {value}%" : $"{stat} + {value}";
 			}
 		}
 
@@ -129,6 +159,26 @@ namespace InventoryKamera
 				&& SetName == artifact.SetName
 				&& EquippedCharacter == artifact.EquippedCharacter
 				&& Lock == artifact.Lock;
+		}
+
+		public override string ToString()
+{
+			string output = $"Artifact ID: {Id}\n"
+				+ $"Set: {SetName}\n"
+				+ $"Rarity: {Rarity}\n"
+				+ $"Level: {Level}\n"
+				+ $"Slot: {GearSlot}\n"
+				+ $"Main Stat: {MainStat}\n";
+
+			for (int i = 0; i < SubStatsCount; i++)
+			{
+				if (!string.IsNullOrWhiteSpace(SubStats[i].stat)) output += $"Substat {i + 1}: {SubStats[i]}\n";
+			}
+
+			output += $"Locked: {Lock}\n";
+
+			if (!string.IsNullOrWhiteSpace(EquippedCharacter)) output += $"Equipped character: {EquippedCharacter}\n";
+			return output;
 		}
 
 		public override int GetHashCode() => (GearSlot, Rarity, MainStat, Level, SubStats, SubStatsCount, SetName, EquippedCharacter, Lock).GetHashCode();
