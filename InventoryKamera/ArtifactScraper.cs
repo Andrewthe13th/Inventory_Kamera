@@ -610,7 +610,8 @@ namespace InventoryKamera
 						// Remove any non digits.
 					    value = Regex.Replace(value, @"[^0-9]", string.Empty);
 
-						if (!decimal.TryParse(value, out substat.value))
+						var cultureInfo = new CultureInfo("en-US");
+						if (!decimal.TryParse(value, System.Globalization.NumberStyles.Number, cultureInfo, out stat.value))
 						{
 							substat.value = -1;
 						}
