@@ -570,19 +570,21 @@ namespace InventoryKamera
 		private static List<SubStat> ScanArtifactSubStats(Bitmap artifactImage, ref string setName)
 		{
 			Bitmap bm = (Bitmap)artifactImage.Clone();
-			Scraper.SetBrightness(35, ref bm);
-			Scraper.SetContrast(-20, ref bm);
-			var text = Scraper.AnalyzeText(bm, Tesseract.PageSegMode.Auto).ToLower();
+			Scraper.SetBrightness(-30, ref bm);
+			Scraper.SetContrast(85, ref bm);
+			var n = Scraper.ConvertToGrayscale(bm);
+			var text = Scraper.AnalyzeText(n, Tesseract.PageSegMode.Auto).ToLower();
 
 			List<string> lines = new List<string>(text.Split('\n'));
 			lines.RemoveAll(line => string.IsNullOrWhiteSpace(line));
 
-			var index = lines.FindIndex(line => line.Contains("piece") || line.Contains("set") || line.Length < 5);
+			var index = lines.FindIndex(line => line.Contains("piece") || line.Contains("set") || line.Contains("2-"));
 			if (index >= 0)
 			{
 				lines.RemoveRange(index, lines.Count - index);
 			}
 
+			n.Dispose();
 			bm.Dispose();
 			SubStat[] substats = new SubStat[4];
 			List<Task<string>> tasks = new List<Task<string>>();
@@ -593,17 +595,20 @@ namespace InventoryKamera
 				{
 					var line = Regex.Replace(lines[j], @"(?:^[^a-zA-Z]*)", string.Empty).Replace(" ", string.Empty);
 
-					if (line.Contains("+"))
+					if (line.Any(char.IsDigit))
 					{
 						SubStat substat = new SubStat();
-						string[] split = line.Split('+');
+						Regex re = new Regex(@"([\w]+\W*)(\d+.*\d+)");
+						var result = re.Match(line);
+						var stat = Regex.Replace(result.Groups[1].Value, @"[^\w]", string.Empty); 
+						var value = result.Groups[2].Value;
 
-						string name = line.Contains("%") ? split[0] + "%" : split[0];
+						string name = line.Contains("%") ? stat + "%" : stat;
 
 						substat.stat = Scraper.FindClosestStat(name) ?? "";
 
 						// Remove any non digits.
-						string value = Regex.Replace(split[1], @"[^0-9]", string.Empty);
+					    value = Regex.Replace(value, @"[^0-9]", string.Empty);
 
 						if (!decimal.TryParse(value, out substat.value))
 						{

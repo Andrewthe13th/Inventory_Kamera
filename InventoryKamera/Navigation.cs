@@ -124,6 +124,8 @@ namespace InventoryKamera
 
 		public static Size GetAspectRatio()
 		{
+			if (area.Width == 0) throw new DivideByZeroException("Genshin's window width cannot be 0");
+			if (area.Height == 0) throw new DivideByZeroException("Genshin's window height cannot be 0");
 			int x = area.Width/GCD(area.Width, area.Height);
 			int y = area.Height/GCD(area.Width, area.Height);
 			return new Size(x, y);
