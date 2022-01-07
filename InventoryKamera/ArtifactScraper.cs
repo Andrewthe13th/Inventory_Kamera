@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -611,7 +612,7 @@ namespace InventoryKamera
 					    value = Regex.Replace(value, @"[^0-9]", string.Empty);
 
 						var cultureInfo = new CultureInfo("en-US");
-						if (!decimal.TryParse(value, System.Globalization.NumberStyles.Number, cultureInfo, out stat.value))
+						if (!decimal.TryParse(value, NumberStyles.Number, cultureInfo, out substat.value))
 						{
 							substat.value = -1;
 						}
