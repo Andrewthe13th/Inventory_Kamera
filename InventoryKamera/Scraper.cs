@@ -28,9 +28,6 @@ namespace InventoryKamera
 		private static readonly string tesseractDatapath = $"{Directory.GetCurrentDirectory()}\\tessdata";
 		private static readonly string tesseractLanguage = "genshin_fast_09_04_21";
 
-		// GLOBALS
-		public static bool b_AssignedTravelerName = false;
-
 		public static readonly Dictionary<string, string> Stats = new Dictionary<string, string>
 		{
 			["hp"] = "hp",
@@ -320,42 +317,42 @@ namespace InventoryKamera
 
 		public static string FindClosestStat(string stat)
 		{
-			return FindClosestInDict(stat, Stats);
+			return FindClosestInDict(source: stat, targets: Stats, maxEdits: 5);
 		}
 
 		public static string FindElementByName(string name)
 		{
-			return FindClosestInDict(name, Elements);
+			return FindClosestInDict(source: name, targets: Elements, maxEdits: 5);
 		}
 
 		public static string FindClosestWeapon(string name)
 		{
-			return FindClosestInDict(name, Weapons);
+			return FindClosestInDict(source: name, targets: Weapons, maxEdits: 7);
 		}
 
 		public static string FindClosestSetName(string name)
 		{
-			return FindClosestInDict(name, Artifacts);
+			return FindClosestInDict(source: name, targets: Artifacts, maxEdits: 15);
 		}
 
 		public static string FindClosestCharacterName(string name)
 		{
-			return FindClosestInDict(name, Characters);
+			return FindClosestInDict(source: name, targets: Characters, maxEdits: 10);
 		}
 
 		public static string FindClosestDevelopmentName(string name)
 		{
-			string value = FindClosestInDict(name, DevMaterials);
-			return !string.IsNullOrWhiteSpace(value) ? value : FindClosestInDict(name, AllMaterials);
+			string value = FindClosestInDict(source: name, targets: DevMaterials, maxEdits: 15);
+			return !string.IsNullOrWhiteSpace(value) ? value : FindClosestInDict(source: name, targets: AllMaterials, maxEdits: 15);
 		}
 
 		public static string FindClosestMaterialName(string name)
 		{
-			string value = FindClosestInDict(name, Materials);
-			return !string.IsNullOrWhiteSpace(value) ? value : FindClosestInDict(name, AllMaterials);
+			string value = FindClosestInDict(source: name, targets: Materials, maxEdits: 15);
+			return !string.IsNullOrWhiteSpace(value) ? value : FindClosestInDict(source: name, targets: AllMaterials, maxEdits: 15);
 		}
 
-		private static string FindClosestInDict(string source, Dictionary<string, string> targets)
+		private static string FindClosestInDict(string source, Dictionary<string, string> targets, int maxEdits = 5)
 		{
 			if (string.IsNullOrWhiteSpace(source)) return "";
 			if (targets.TryGetValue(source, out string value)) return value;
@@ -364,12 +361,12 @@ namespace InventoryKamera
 
 			if (keys.Where(key => key.Contains(source)).Count() == 1) return targets[keys.First(key => key.Contains(source))];
 
-			source = FindClosestInList(source, keys);
+			source = FindClosestInList(source, keys, maxEdits);
 
 			return targets.TryGetValue(source, out value) ? value : source;
 		}
 
-		private static string FindClosestInDict(string source, Dictionary<string, JObject> targets)
+		private static string FindClosestInDict(string source, Dictionary<string, JObject> targets, int maxEdits = 5)
 		{
 			if (string.IsNullOrWhiteSpace(source)) return "";
 			if (targets.TryGetValue(source, out JObject value)) return (string)value["GOOD"];
@@ -378,18 +375,17 @@ namespace InventoryKamera
 
 			if (keys.Where(key => key.Contains(source)).Count() == 1) return (string)targets[keys.First(key => key.Contains(source))]["GOOD"];
 
-			source = FindClosestInList(source, keys);
+			source = FindClosestInList(source, keys, maxEdits);
 
 			return targets.TryGetValue(source, out value) ? (string)value["GOOD"] : source;
 		}
 
-		private static string FindClosestInList(string source, HashSet<string> targets)
+		private static string FindClosestInList(string source, HashSet<string> targets, int maxEdits)
 		{
 			if (targets.Contains(source)) return source;
 			if (string.IsNullOrWhiteSpace(source)) return null;
 
 			string value = "";
-			int maxEdits = 15;
 
 			foreach (var target in targets)
 			{
