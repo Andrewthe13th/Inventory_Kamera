@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -24,23 +25,33 @@ namespace InventoryKamera
 		public static VirtualKeyCode characterKey = VirtualKeyCode.VK_C;
 		public static VirtualKeyCode inventoryKey = VirtualKeyCode.VK_B;
 
-		public static void Initialize(string processName)
+		public static void Initialize()
 		{
-			try
+			var executables = new List<string>
 			{
-				InitializeProcess(processName);
-			}
-			catch (NullReferenceException)
-			{
-				throw;
-			}
-			IntPtr handle;
+				"GenshinImpact",
+				"YuanShen"
+			};
 
-			// Get area and position
-			handle = genshinImpact.MainWindowHandle;
-			ClientToScreen(handle, ref position);
-			GetClientRect(handle, ref area);
-			return;
+			foreach (var processName in executables)
+			{
+				Debug.WriteLine($"Checking for {processName}.exe");
+				if (InitializeProcess(processName))
+				{
+					IntPtr handle;
+
+					// Get area and position
+					handle = genshinImpact.MainWindowHandle;
+					ClientToScreen(handle, ref position);
+					GetClientRect(handle, ref area);
+
+					Debug.WriteLine($"Found {processName}.exe");
+					return;
+				}
+				Debug.WriteLine($"Could not find {processName}.exe");
+			}
+
+			throw new NullReferenceException("Cannot find Genshin Impact process");
 		}
 
 		#region Window Capturing
@@ -313,7 +324,7 @@ namespace InventoryKamera
 			Restore = 9, ShowDefault = 10, ForceMinimized = 11
 		};
 
-		public static void InitializeProcess(string processName)
+		public static bool InitializeProcess(string processName)
 		{
 			// get the process
 			genshinImpact = Process.GetProcessesByName(processName).FirstOrDefault();
@@ -330,14 +341,9 @@ namespace InventoryKamera
 
 				// set user the focus to the window
 				SetForegroundWindow(genshinImpact.MainWindowHandle);
-				SystemRandomWait(Speed.Slow);
+				return true;
 			}
-			else
-			{
-				// the process is not running, so start it
-				UserInterface.AddError("Cannot find Genshin Impact process");
-				throw new NullReferenceException();
-			}
+			return false;
 		}
 
 		#endregion Window Focusing

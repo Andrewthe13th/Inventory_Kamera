@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 using Microsoft.WindowsAPICodePack.Dialogs;
@@ -16,8 +18,8 @@ namespace InventoryKamera
 {
 	public partial class Form1 : Form
 	{
-		private static Thread mainThread;
-		private static InventoryKamera data = new InventoryKamera();
+		private static Thread scannerThread;
+		private static InventoryKamera data;
 
 		private int Delay;
 
@@ -28,6 +30,11 @@ namespace InventoryKamera
 			InitializeComponent();
 
 			Language_ComboBox.SelectedItem = "ENG";
+
+			var version = Regex.Replace(Assembly.GetExecutingAssembly().GetName().Version.ToString(), @"[.0]*$", string.Empty);
+
+			Text = $"Inventory Kamera V{version}";
+
 			UserInterface.Init(
 				GearPictureBox,
 				ArtifactOutput_TextBox,
@@ -69,10 +76,10 @@ namespace InventoryKamera
 		{
 			e.Handled = true;
 			// Check if scanner is running
-			if (mainThread.IsAlive)
+			if (scannerThread.IsAlive)
 			{
 				// Stop navigating weapons/artifacts
-				mainThread.Abort();
+				scannerThread.Abort();
 
 				UserInterface.SetProgramStatus("Scan Stopped");
 
@@ -95,7 +102,7 @@ namespace InventoryKamera
 
 		public static void UnexpectedError(string error)
 		{
-			if (mainThread.IsAlive)
+			if (scannerThread.IsAlive)
 			{
 				UserInterface.AddError(error);
 			}
@@ -136,8 +143,6 @@ namespace InventoryKamera
 
 		private void StartButton_Clicked(object sender, EventArgs e)
 		{
-			SaveSettings();
-
 			UserInterface.ResetAll();
 
 			UserInterface.SetProgramStatus("Scanning");
@@ -153,12 +158,12 @@ namespace InventoryKamera
 
 				HotkeyManager.Current.AddOrReplace("Stop", Keys.Enter, Hotkey_Pressed);
 
-				mainThread = new Thread(() =>
+				scannerThread = new Thread(() =>
 				{
 					try
 					{
 						// Get Screen Location and Size
-						Navigation.Initialize("GenshinImpact");
+						Navigation.Initialize();
 
 						List<Size> sizes = new List<Size>
 						{
@@ -170,6 +175,8 @@ namespace InventoryKamera
 						{
 							throw new NotImplementedException($"{Navigation.GetSize().Width}x{Navigation.GetSize().Height} is an unsupported resolution.");
 						}
+
+						if (Navigation.GetSize() != Navigation.CaptureWindow().Size) throw new FormatException("Window size and screenshot size mismatch. Please make sure the game is not in a fullscreen mode.");
 
 						data = new InventoryKamera();
 
@@ -190,7 +197,7 @@ namespace InventoryKamera
 					catch (ThreadAbortException)
 					{
 						// Workers can get stuck if the thread is aborted or an exception is raised
-						data.StopImageProcessorWorkers();
+						if (!( data is null )) data.StopImageProcessorWorkers();
 						UserInterface.SetProgramStatus("Scan stopped");
 					}
 					catch (NotImplementedException ex)
@@ -200,7 +207,7 @@ namespace InventoryKamera
 					catch (Exception ex)
 					{
 						// Workers can get stuck if the thread is aborted or an exception is raised
-						data.StopImageProcessorWorkers();
+						if (!( data is null )) data.StopImageProcessorWorkers();
 						Debug.WriteLine($"{ex.Message}\n{ex.StackTrace}\n");
 						UserInterface.AddError($"{ex.Message}" + Environment.NewLine + $"{ex.StackTrace}");
 						UserInterface.SetProgramStatus("Scan aborted", ok: false);
@@ -215,7 +222,7 @@ namespace InventoryKamera
 				{
 					IsBackground = true
 				};
-				mainThread.Start();
+				scannerThread.Start();
 			}
 			else
 			{
@@ -270,6 +277,7 @@ namespace InventoryKamera
 		private void ScannerDelay_TrackBar_ValueChanged(object sender, EventArgs e)
 		{
 			Delay = ( (TrackBar)sender ).Value;
+			SaveSettings();
 		}
 
 		private void Exit_MenuItem_Click(object sender, EventArgs e)
@@ -368,5 +376,10 @@ namespace InventoryKamera
 		private static extern int ToUnicodeEx(uint wVirtKey, uint wScanCode, byte[] lpKeyState, [Out, MarshalAs(UnmanagedType.LPWStr)] StringBuilder pwszBuff, int cchBuff, uint wFlags, IntPtr dwhkl);
 
 		#endregion Unicode Helper Functions
+
+		private void SaveSettings(object sender, EventArgs e)
+		{
+			SaveSettings();
+		}
 	}
 }
