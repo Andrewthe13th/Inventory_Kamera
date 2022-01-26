@@ -58,13 +58,14 @@ namespace InventoryKamera
 			Material previousMaterial = new Material(null, -1);
 
 			List<Rectangle> rectangles;
+			int page = 0;
 
 			// Keep scanning while not repeating any items names
 			while (true)
 			{
 				int rows, cols;
 				// Find all items on the screen
-				(rectangles, cols, rows) = GetPageOfItems(section); 
+				(rectangles, cols, rows) = GetPageOfItems(section, page); 
 
 				// Remove last row. Sometimes the bottom of a page of items is caught which results
 				// in a faded quantity that can't be parsed. Removing slightly increases the number of pages that
@@ -92,9 +93,15 @@ namespace InventoryKamera
 						{
 							// Scan Material Number
 							material.count = ScanMaterialCount(rectangle, out Bitmap quantity);
+							if (material.count == 0)
+							{
+								UserInterface.AddError($"Failed to parse quantity for {material.name}");
+								quantity.Save($"./logging/materials/{material.name}_Quantity.png");
+							}
 							materials.Add(material);
 							UserInterface.ResetCharacterDisplay();
 							UserInterface.SetMaterial(nameplate, quantity, material.name, material.count);
+
 							previousMaterial.name = material.name;
 						}
 					}
@@ -134,6 +141,7 @@ namespace InventoryKamera
 					}
 				}
 				Navigation.SystemRandomWait(Navigation.Speed.Normal);
+				++page;
 			}
 
 			LastPage:
@@ -146,7 +154,7 @@ namespace InventoryKamera
 
 			Navigation.Wait(500);
 
-			(rectangles, _, _) = GetPageOfItems(section);
+			(rectangles, _, _) = GetPageOfItems(section, page);
 			bool passby = true;
 			for (int i = rectangles.Count - 1; i >= 0; i--) // Click through but backwards to short-circuit after new materials
 			{
@@ -167,13 +175,23 @@ namespace InventoryKamera
 					{
 						// Scan Material Number
 						material.count = ScanMaterialCount(rectangle, out Bitmap quantity);
+						if (material.count == 0)
+						{
+							UserInterface.AddError($"Failed to parse quantity for {material.name}");
+							quantity.Save($"./logging/materials/{material.name}_Quantity.png");
+						}
 						materials.Add(material);
 						UserInterface.ResetCharacterDisplay();
 						UserInterface.SetMaterial(nameplate, quantity, material.name, material.count);
 						passby = false; // New material found so break on next old material
+						quantity.Dispose();
 					}
 				}
-				else break;
+				else
+				{
+					nameplate.Dispose();
+					break;
+				}
 				Navigation.Wait(150);
 			}
 		}
@@ -182,19 +200,22 @@ namespace InventoryKamera
 		{
 
 			var region = new Rectangle(
-				x: (int)(261 / 1280.0 * Navigation.GetWidth()),
-				y: (int)(668 / 720.0 * Navigation.GetHeight()),
-				width: (int)(120 / 1280.0 * Navigation.GetWidth()),
-				height: (int)(24 / 720.0 * Navigation.GetHeight()));
+				x: (int)(125 / 1280.0 * Navigation.GetWidth()),
+				y: (int)(665 / 720.0 * Navigation.GetHeight()),
+				width: (int)(300 / 1280.0 * Navigation.GetWidth()),
+				height: (int)(30 / 720.0 * Navigation.GetHeight()));
 
 			if (Navigation.GetAspectRatio() == new Size(8,5))
 			{
-				region.Y = (int)( 748 / 800.0 * Navigation.GetHeight());
+				region.Y = (int)( 740 / 800.0 * Navigation.GetHeight());
 			}
 
 			using (var bm = Navigation.CaptureRegion(region))
 			{
-				var mora = Regex.Replace(Scraper.AnalyzeText(bm), @"[^0-9]", string.Empty);
+
+				var input = Scraper.AnalyzeText(bm).Split(' ').ToList();
+				input.RemoveAll(e => Regex.IsMatch(e.Trim(), @"[^0-9]") || string.IsNullOrWhiteSpace(e.Trim()));
+				var mora = input.LastOrDefault();
 
 				if (int.TryParse(mora, out int count))
 				{
@@ -211,7 +232,7 @@ namespace InventoryKamera
 			}
 		}
 
-		private static (List<Rectangle> rectangles, int cols, int rows) GetPageOfItems(InventorySection section)
+		private static (List<Rectangle> rectangles, int cols, int rows) GetPageOfItems(InventorySection section, int page)
 		{
 			var card = new RECT(
 				Left: 0,
@@ -223,7 +244,7 @@ namespace InventoryKamera
 			using (BlobCounter blobCounter = new BlobCounter
 			{
 				FilterBlobs = true,
-				MinHeight = card.Height - ( Navigation.GetAspectRatio() == new Size(16, 9) ? 0 : 10 ),
+				MinHeight = card.Height - 15,
 				MaxHeight = card.Height + 15,
 				MinWidth = card.Width - 15,
 				MaxWidth = card.Width + 15,
@@ -264,7 +285,7 @@ namespace InventoryKamera
 
 				if (blobCounter.ObjectsCount < 7)
 				{
-					output.Save($"./logging/materials/{section}Inventory.png");
+					output.Save($"./logging/materials/{section}Inventory{page}.png");
 
 					screenshot.Dispose();
 					output.Dispose();
@@ -377,8 +398,14 @@ namespace InventoryKamera
 				Debug.WriteLine($"{rectangles.Count} rectangles");
 
 
-				//new RectanglesMarker(rectangles, Color.Green).ApplyInPlace(output);
+				new RectanglesMarker(rectangles, Color.Green).ApplyInPlace(output);
 				//Navigation.DisplayBitmap(output, "Rectangles");
+
+				if (colCoords.Count < 7 || rowCoords.Count < 4)
+				{
+					screenshot.Save($"./logging/materials/{section}Inventory{page}.png");
+					output.Save($"./logging/materials/{section}Inventory{page}_{colCoords.Count}x{rowCoords.Count}.png");
+				}
 
 				screenshot.Dispose();
 				output.Dispose();
@@ -434,9 +461,9 @@ namespace InventoryKamera
 		{
 			var region = new RECT(
 				Left: rectangle.X,
-				Top: (int)(rectangle.Y + (rectangle.Height * 0.8)), // Only get the bottom of inventory item
+				Top: (int)(rectangle.Y + (0.8 * rectangle.Height)), // Only get the bottom of inventory item
 				Right: rectangle.Right,
-				Bottom: rectangle.Bottom + 5);
+				Bottom: rectangle.Bottom + 10);
 
 			using (Bitmap bm = Navigation.CaptureRegion(region))
 			{
@@ -444,9 +471,10 @@ namespace InventoryKamera
 
 				using (Bitmap rescaled = Scraper.ResizeImage(bm, (int)( bm.Width * 3), (int)( bm.Height * 3 )))
 				{
-
+					Bitmap copy = (Bitmap)rescaled.Clone();
+					Scraper.SetGamma(0.7, 0.7, 0.7, ref copy);
 					// Image Processing
-					Bitmap n  =  Scraper.ConvertToGrayscale(rescaled);
+					Bitmap n  =  Scraper.ConvertToGrayscale(copy);
 					Scraper.SetContrast(65, ref n); // Setting a high contrast seems to be better than thresholding
 					//Scraper.SetThreshold(165, ref n);
 
@@ -459,17 +487,17 @@ namespace InventoryKamera
 					//old_text = old_text.Replace("b", "8");
 					//old_text = old_text.Replace("+", "4");
 
-					string text = Regex.Replace(cleaned, @"[^\d]", string.Empty);
+					cleaned = Regex.Replace(cleaned, @"[^0-9]", string.Empty);
 
-					_ = int.TryParse(text, out int count);
+					_ = int.TryParse(cleaned, out int count);
 
-					//Debug.WriteLine($"{old_text} -> {cleaned} -> {count}");
+					Debug.WriteLine($"{old_text} -> {cleaned} -> {count}");
 
 					//if (count > 3000 || count == 0)
 					//{
 					//	//Navigation.DisplayBitmap(n);
 					//}
-
+					copy.Dispose();
 					n.Dispose();
 					return count;
 
