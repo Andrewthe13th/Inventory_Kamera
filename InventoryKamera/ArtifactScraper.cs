@@ -88,33 +88,43 @@ namespace InventoryKamera
 		private static int ScanArtifactCount()
 		{
 			//Find artifact count
-			int left = (int)(1028 / 1280.0 * Navigation.GetWidth());
-			int top = (int)(20 / 720.0 * Navigation.GetHeight());
-			int right = (int)(1208 / 1280.0 * Navigation.GetWidth());
-			int bottom = (int)(45 / 720.0 * Navigation.GetHeight());
+			var region = new Rectangle(
+				x: (int)(1030 / 1280.0 * Navigation.GetWidth()),
+				y: (int)(20 / 720.0 * Navigation.GetHeight()),
+				width: (int)( 175 / 1280.0 * Navigation.GetWidth() ),
+				height: (int)( 25 / 720.0 * Navigation.GetHeight() ));
 
-			using (Bitmap bm = Navigation.CaptureRegion(new RECT(left, top, right, bottom)))
+			using (Bitmap countBitmap = Navigation.CaptureRegion(region))
 			{
-				UserInterface.SetNavigation_Image(bm);
+				UserInterface.SetNavigation_Image(countBitmap);
 
-				Bitmap nBM = Scraper.ConvertToGrayscale(bm);
-				Scraper.SetContrast(60.0, ref nBM);
-				Scraper.SetInvert(ref nBM);
+				Bitmap n = Scraper.ConvertToGrayscale(countBitmap);
+				Scraper.SetContrast(60.0, ref n);
+				Scraper.SetInvert(ref n);
 
-				string text = Scraper.AnalyzeText(nBM).Trim();
-				nBM.Dispose();
+				string text = Scraper.AnalyzeText(n).Trim();
+				n.Dispose();
+
+				// Remove any non-numeric and '/' characters
 				text = Regex.Replace(text, @"[^\d/]", string.Empty);
+
+				if (string.IsNullOrWhiteSpace(text))
+				{
+					countBitmap.Save($"./logging/artifacts/ArtifactCount.png");
+					Navigation.CaptureWindow().Save($"./logging/artifacts/ArtifactWindow_{Navigation.GetWidth()}x{Navigation.GetHeight()}.png");
+					throw new FormatException("Unable to locate artifact count.");
+				}
 
 				int count;
 				// Check for dash
 				if (Regex.IsMatch(text, "/"))
 				{
-					count = Int32.Parse(text.Split('/')[0]);
+					count = int.Parse(text.Split('/')[0]);
 				}
 				else
 				{
 					// divide by the number on the right if both numbers fused
-					count = Int32.Parse(text) / 1500;
+					count = int.Parse(text) / 1500;
 				}
 
 				// Check if larger than 1500
@@ -129,7 +139,7 @@ namespace InventoryKamera
 
 		private static (List<Rectangle> rectangles, int cols, int rows) GetPageOfItems()
 		{
-			// Size of an item card is the same in 16:10 to 16:9. Also accounts for character icon and resolution size.
+			// Size of an item card is the same in 16:10 and 16:9. Also accounts for character icon and resolution size.
 			var card = new RECT(
 				Left: 0,
 				Top: 0,
@@ -149,7 +159,9 @@ namespace InventoryKamera
 
 				// Screenshot of inventory
 				Bitmap screenshot = Navigation.CaptureWindow();
-				Bitmap output = new Bitmap(screenshot); // Copy used to overlay onto in testing
+
+				// Copy used to overlay onto in testing
+				Bitmap output = new Bitmap(screenshot); 
 
 				// Image pre-processing
 				ContrastCorrection contrast = new ContrastCorrection(85);
@@ -295,8 +307,13 @@ namespace InventoryKamera
 				Debug.WriteLine($"{rectangles.Count} rectangles");
 
 				// Generated rectangles
-				//new RectanglesMarker(rectangles, Color.Green).ApplyInPlace(output);
+				new RectanglesMarker(rectangles, Color.Green).ApplyInPlace(output);
 				//Navigation.DisplayBitmap(output, "Rectangles");
+
+				if (colCoords.Count < 7 || rowCoords.Count < 5)
+				{
+					output.Save($"./logging/artifacts/ArtifactInventory_{colCoords.Count}x{rowCoords.Count}.png");
+				}
 
 				screenshot.Dispose();
 				output.Dispose();
@@ -404,7 +421,7 @@ namespace InventoryKamera
 
 			try
 			{
-				int rarity = GetRarity(card.GetPixel(5, 5));
+				int rarity = GetRarity(card);
 				if (0 < rarity && rarity < Properties.Settings.Default.MinimumArtifactRarity)
 				{
 					artifactImages.ForEach(i => i.Dispose());
@@ -444,8 +461,7 @@ namespace InventoryKamera
 				int a_gearSlot = 0; int a_mainStat = 1; int a_level = 2; int a_subStats = 3; int a_equippedCharacter = 4; int a_lock = 5; int a_card = 6;
 
 				// Get Rarity
-				Color rarityColor = bm[a_card].GetPixel(5, 5);
-				rarity = GetRarity(rarityColor);
+				rarity = GetRarity(bm[a_card]);
 
 				// Check for equipped color
 				Color equippedColor = Color.FromArgb(255, 255, 231, 187);
@@ -481,8 +497,14 @@ namespace InventoryKamera
 			return new Artifact(setName, rarity, level, gearSlot, mainStat, subStats.ToArray(), subStats.Count, equippedCharacter, id, _lock);
 		}
 
-		private static int GetRarity(Color rarityColor)
+		private static int GetRarity(Bitmap bitmap)
 		{
+
+			int x = (int)(10/1280.0 * Navigation.GetWidth());
+			int y = (int)(10/720.0 * Navigation.GetHeight());
+
+			Color rarityColor = bitmap.GetPixel(x,y);
+
 			Color fiveStar    = Color.FromArgb(255, 188, 105,  50);
 			Color fourStar    = Color.FromArgb(255, 161,  86, 224);
 			Color threeStar   = Color.FromArgb(255,  81, 127, 203);
@@ -495,6 +517,25 @@ namespace InventoryKamera
 			else if (Scraper.CompareColors(twoStar, rarityColor)) return 2;
 			else if (Scraper.CompareColors(oneStar, rarityColor)) return 1;
 			else return 0; // throw new ArgumentException("Unable to determine artifact rarity");
+		}
+
+		public static bool IsEnhancementMaterial(Bitmap nameBitmap)
+		{
+			return Scraper.enhancementMaterials.Contains(ScanEnhancementMaterialName(nameBitmap).ToLower());
+		}
+
+		private static string ScanEnhancementMaterialName(Bitmap bm)
+		{
+			Scraper.SetGamma(0.2, 0.2, 0.2, ref bm);
+			Bitmap n = Scraper.ConvertToGrayscale(bm);
+			Scraper.SetInvert(ref n);
+
+			// Analyze
+			string name = Regex.Replace(Scraper.AnalyzeText(n).ToLower(), @"[\W]", string.Empty);
+			name = Scraper.FindClosestMaterialName(name);
+			n.Dispose();
+
+			return name;
 		}
 
 		#region Task Methods

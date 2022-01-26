@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Timers;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
@@ -94,9 +93,59 @@ namespace InventoryKamera
 			}
 		}
 
+		public static int ScanWeaponCount()
+		{
+			//Find weapon count
+			Rectangle region = new Rectangle(
+				x: (int)( 1030 / 1280.0 * Navigation.GetWidth() ),
+				y: (int)( 20 / 720.0 * Navigation.GetHeight() ),
+				width: (int)( 175 / 1280.0 * Navigation.GetWidth() ),
+				height: (int)( 25 / 720.0 * Navigation.GetHeight() ));
+
+			using (Bitmap countBitmap = Navigation.CaptureRegion(region))
+			{
+				Bitmap n = Scraper.ConvertToGrayscale(countBitmap);
+				Scraper.SetContrast(60.0, ref n);
+				Scraper.SetInvert(ref n);
+				UserInterface.SetNavigation_Image(n);
+
+				string text = Scraper.AnalyzeText(n);
+				n.Dispose();
+
+				// Remove any non-numeric and '/' characters
+				text = Regex.Replace(text, @"[^\d/]", string.Empty);
+
+				if (string.IsNullOrWhiteSpace(text))
+				{
+					countBitmap.Save($"./logging/weapons/WeaponCount.png");
+					Navigation.CaptureWindow().Save($"./logging/weapons/WeaponWindow_{Navigation.GetWidth()}x{Navigation.GetHeight()}.png");
+					throw new FormatException("Unable to locate weapon count.");
+				}
+
+				int count;
+				// Check for slash
+				if (Regex.IsMatch(text, "/"))
+				{
+					count = int.Parse(text.Split('/')[0]);
+				}
+				else
+				{
+					// divide by the number on the right if both numbers fused
+					count = int.Parse(text) / 2000;
+				}
+
+				// Check if larger than 1000
+				while (count > 2000)
+				{
+					count /= 10;
+				}
+				return count;
+			}
+		}
+
 		private static (List<Rectangle> rectangles, int cols, int rows) GetPageOfItems()
 		{
-			// Size of an item card is the same in 16:10 to 16:9. Also accounts for character icon and resolution size. 
+			// Size of an item card is the same in 16:10 and 16:9. Also accounts for character icon and resolution size. 
 			var card = new RECT(
 				Left: 0,
 				Top: 0,
@@ -263,8 +312,13 @@ namespace InventoryKamera
 				Debug.WriteLine($"{rectangles.Count} rectangles");
 
 				// Generated rectangles
-				//new RectanglesMarker(rectangles, Color.Green).ApplyInPlace(output);
+				new RectanglesMarker(rectangles, Color.Green).ApplyInPlace(output);
 				//Navigation.DisplayBitmap(output, "Rectangles");
+
+				if (colCoords.Count < 7 || rowCoords.Count < 5)
+				{
+					output.Save($"./logging/weapons/WeaponInventory_{colCoords.Count}x{rowCoords.Count}.png");
+				}
 
 				screenshot.Dispose();
 				output.Dispose();
@@ -355,7 +409,7 @@ namespace InventoryKamera
 
 			try
 			{
-				int rarity = GetRarity(name.GetPixel(5, 5));
+				int rarity = GetRarity(name);
 				if (0 < rarity && rarity < Properties.Settings.Default.MinimumWeaponRarity)
 				{
 					weaponImages.ForEach(i => i.Dispose());
@@ -388,9 +442,7 @@ namespace InventoryKamera
 				int w_name = 0; int w_level = 1; int w_refinement = 2; int w_equippedCharacter = 3;
 
 				// Check for Rarity
-				Color rarityColor = bm[w_name].GetPixel(5, 5);
-
-				rarity = GetRarity(rarityColor);
+				rarity = GetRarity(bm[w_name]);
 
 				// Check for equipped color
 				Color equippedColor = Color.FromArgb(255, 255, 231, 187);
@@ -420,8 +472,13 @@ namespace InventoryKamera
 			return new Weapon(name, level, ascended, refinementLevel, equippedCharacter, id, rarity);
 		}
 
-		private static int GetRarity(Color rarityColor)
+		private static int GetRarity(Bitmap bitmap)
 		{
+			int x = (int)(10/1280.0 * Navigation.GetWidth());
+			int y = (int)(10/720.0 * Navigation.GetHeight());
+
+			Color rarityColor = bitmap.GetPixel(x,y);
+
 			Color fiveStar    = Color.FromArgb(255, 188, 105,  50);
 			Color fourStar    = Color.FromArgb(255, 161,  86, 224);
 			Color threeStar   = Color.FromArgb(255,  81, 127, 203);
@@ -436,50 +493,26 @@ namespace InventoryKamera
 			else return 0; //throw new ArgumentException("Unable to determine weapon rarity");
 		}
 
-		public static bool IsEnhancementOre(Bitmap nameBitmap)
+		public static bool IsEnhancementMaterial(Bitmap nameBitmap)
 		{
-			return Scraper.enhancementMaterials.Contains(ScanEnchancementOreName(nameBitmap));
+			return Scraper.enhancementMaterials.Contains(ScanEnchancementOreName(nameBitmap).ToLower());
 		}
 
-		public static int ScanWeaponCount()
+		public static string ScanEnchancementOreName(Bitmap bm)
 		{
-			//Find weapon count
-			Bitmap countBitmap = Navigation.CaptureRegion(new Rectangle(x: (int)(1030 / 1280.0 * Navigation.GetWidth()),
-															   y: (int)(20 / 720.0 * Navigation.GetHeight()),
-															   width: (int)(175 / 1280.0 * Navigation.GetWidth()),
-															   height: (int)(25 / 720.0 * Navigation.GetHeight())));
-
-			Bitmap n = Scraper.ConvertToGrayscale(countBitmap);
-			Scraper.SetContrast(60.0, ref n);
+			Scraper.SetGamma(0.2, 0.2, 0.2, ref bm);
+			Bitmap n = Scraper.ConvertToGrayscale(bm);
 			Scraper.SetInvert(ref n);
-			UserInterface.SetNavigation_Image(n);
 
-			string text = Scraper.AnalyzeText(n);
+			// Analyze
+			string name = Regex.Replace(Scraper.AnalyzeText(n).ToLower(), @"[\W]", string.Empty);
+			name = Scraper.FindClosestMaterialName(name);
 			n.Dispose();
 
-			// Remove any non-numeric and '/' characters
-			text = Regex.Replace(text, @"[^\d/]", string.Empty);
-
-			int count;
-			// Check for slash
-			if (Regex.IsMatch(text, "/"))
-			{
-				count = Int32.Parse(text.Split('/')[0]);
-			}
-			else
-			{
-				// divide by the number on the right if both numbers fused
-				count = Int32.Parse(text) / 2000;
-			}
-
-			// Check if larger than 1000
-			while (count > 2000)
-			{
-				count /= 20;
-			}
-			return count;
+			return name;
 		}
 
+		#region Task Methods
 		public static string ScanName(Bitmap bm)
 		{
 			Scraper.SetGamma(0.2, 0.2, 0.2, ref bm);
@@ -494,20 +527,6 @@ namespace InventoryKamera
 
 			// Check in Dictionary
 			return text;
-		}
-
-		public static string ScanEnchancementOreName(Bitmap bm)
-		{
-			Scraper.SetGamma(0.2, 0.2, 0.2, ref bm);
-			Bitmap n = Scraper.ConvertToGrayscale(bm);
-			Scraper.SetInvert(ref n);
-
-			// Analyze
-			string text1 = Regex.Replace(Scraper.AnalyzeText(n).ToLower(), @"[\W]", string.Empty);
-			text1 = Scraper.FindClosestMaterialName(text1);
-			n.Dispose();
-
-			return text1;
 		}
 
 		public static int ScanLevel(Bitmap bm, ref bool ascended)
@@ -583,5 +602,6 @@ namespace InventoryKamera
 			// artifact has no equipped character
 			return null;
 		}
+		#endregion Task Methods
 	}
 }
