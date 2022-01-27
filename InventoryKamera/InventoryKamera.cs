@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -34,6 +35,13 @@ namespace InventoryKamera
 			ImageProcessors = new List<Thread>();
 			workerQueue = new Queue<OCRImage>();
 
+			ResetLogging();
+		}
+
+		private void ResetLogging()
+		{
+			Directory.Delete("./logging", true);
+
 			Directory.CreateDirectory("./logging/weapons");
 			Directory.CreateDirectory("./logging/artifacts");
 			Directory.CreateDirectory("./logging/characters");
@@ -68,7 +76,6 @@ namespace InventoryKamera
 			// Scan Main character Name
 			string mainCharacterName = CharacterScraper.ScanMainCharacterName();
 			Scraper.AssignTravelerName(mainCharacterName);
-			Scraper.b_AssignedTravelerName = true;
 
 			if (Properties.Settings.Default.ScanWeapons)
 			{
@@ -79,7 +86,9 @@ namespace InventoryKamera
 				{
 					WeaponScraper.ScanWeapons();
 				}
-				catch (System.Exception ex)
+				catch (FormatException ex) { UserInterface.AddError(ex.Message); }
+				catch (ThreadAbortException) { }
+				catch (Exception ex)
 				{
 					UserInterface.AddError(ex.Message + "\n" + ex.StackTrace);
 				}
@@ -95,7 +104,9 @@ namespace InventoryKamera
 				{
 					ArtifactScraper.ScanArtifacts();
 				}
-				catch (System.Exception ex)
+				catch (FormatException ex) { UserInterface.AddError(ex.Message); }
+				catch (ThreadAbortException) { }
+				catch (Exception ex)
 				{
 					UserInterface.AddError(ex.Message + "\n" + ex.StackTrace);
 				}
@@ -113,7 +124,8 @@ namespace InventoryKamera
 				{
 					CharacterScraper.ScanCharacters(ref c);
 				}
-				catch (System.Exception ex)
+				catch (ThreadAbortException) { }
+				catch (Exception ex)
 				{
 					UserInterface.AddError(ex.Message + "\n" + ex.StackTrace);
 				}
@@ -145,7 +157,9 @@ namespace InventoryKamera
 				{
 					MaterialScraper.Scan_Materials(InventorySection.CharacterDevelopmentItems, ref Materials);
 				}
-				catch (System.Exception ex)
+				catch (FormatException ex) { UserInterface.AddError(ex.Message); }
+				catch (ThreadAbortException) { }
+				catch (Exception ex)
 				{
 					UserInterface.AddError(ex.Message + "\n" + ex.StackTrace);
 				}
@@ -163,7 +177,9 @@ namespace InventoryKamera
 				{
 					MaterialScraper.Scan_Materials(InventorySection.Materials, ref Materials);
 				}
-				catch (System.Exception ex)
+				catch (FormatException ex) { UserInterface.AddError(ex.Message); }
+				catch (ThreadAbortException) { }
+				catch (Exception ex)
 				{
 					UserInterface.AddError(ex.Message + "\n" + ex.StackTrace);
 				}
@@ -198,47 +214,45 @@ namespace InventoryKamera
 				{
 					if (image.type != "END" && image.bm != null)
 					{
-						if (image.type == "weapon")
+						if (image.type == "weapon" && !WeaponScraper.IsEnhancementMaterial(image.bm.First()))
 						{
-							if (!WeaponScraper.IsEnhancementOre(image.bm.First()))
+							UserInterface.SetGearPictureBox(image.bm.Last());
+
+							// Scan as weapon
+							Weapon weapon = WeaponScraper.CatalogueFromBitmapsAsync(image.bm, image.id).Result;
+							UserInterface.SetGear(image.bm.Last(), weapon);
+
+							try
 							{
-								UserInterface.SetGearPictureBox(image.bm.Last());
-
-								// Scan as weapon
-								Weapon weapon = WeaponScraper.CatalogueFromBitmapsAsync(image.bm, image.id).Result;
-								UserInterface.SetGear(image.bm.Last(), weapon);
-
-								try
+								if (weapon.IsValid())
 								{
-									if (weapon.IsValid())
+									if (weapon.Rarity >= (int)Properties.Settings.Default.MinimumWeaponRarity)
 									{
-										if (weapon.Rarity >= (int)Properties.Settings.Default.MinimumWeaponRarity)
-										{
-											UserInterface.IncrementWeaponCount();
-											Inventory.Add(weapon);
-											if (!string.IsNullOrWhiteSpace(weapon.EquippedCharacter))
-												equippedWeapons.Add(weapon);
-										}
+										UserInterface.IncrementWeaponCount();
+										Inventory.Add(weapon);
+										if (!string.IsNullOrWhiteSpace(weapon.EquippedCharacter))
+											equippedWeapons.Add(weapon);
 									}
-									else throw new System.Exception();
 								}
-								catch (System.Exception)
-								{
-									UserInterface.AddError($"Unable to validate information for weapon ID#{weapon.Id}");
-									string error = "";
-									if (!weapon.HasValidRarity()) error += "Invalid weapon rarity\n";
-									if (!weapon.HasValidWeaponName()) error += "Invalid weapon name\n";
-									if (!weapon.HasValidLevel()) error += "Invalid weapon level\n";
-									if (!weapon.HasValidEquippedCharacter()) error += "Inavlid equipped character\n";
-									if (!weapon.HasValidRefinementLevel()) error += "Invalid refinement level\n";
-									UserInterface.AddError(error + weapon.ToString());
-
-									// Save card in directory to see what an issue might be
-									image.bm.Last().Save($"./logging/weapons/weapon{weapon.Id}.png");
-								}
+								else throw new System.Exception();
 							}
+							catch (System.Exception)
+							{
+								UserInterface.AddError($"Unable to validate information for weapon ID#{weapon.Id}");
+								string error = "";
+								if (!weapon.HasValidRarity()) error += "Invalid weapon rarity\n";
+								if (!weapon.HasValidWeaponName()) error += "Invalid weapon name\n";
+								if (!weapon.HasValidLevel()) error += "Invalid weapon level\n";
+								if (!weapon.HasValidEquippedCharacter()) error += "Inavlid equipped character\n";
+								if (!weapon.HasValidRefinementLevel()) error += "Invalid refinement level\n";
+								UserInterface.AddError(error + weapon.ToString());
+
+								// Save card in directory to see what an issue might be
+								image.bm.Last().Save($"./logging/weapons/weapon{weapon.Id}.png");
+							}
+							
 						}
-						else if (image.type == "artifact")
+						else if (image.type == "artifact" && !ArtifactScraper.IsEnhancementMaterial(image.bm.Last()))
 						{
 							UserInterface.SetGearPictureBox(image.bm.Last());
 							// Scan as artifact

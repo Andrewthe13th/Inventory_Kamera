@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Markup;
 using Accord.Imaging;
 using Accord.Imaging.Filters;
 using static InventoryKamera.Artifact;
@@ -519,9 +520,17 @@ namespace InventoryKamera
 			else return 0; // throw new ArgumentException("Unable to determine artifact rarity");
 		}
 
-		public static bool IsEnhancementMaterial(Bitmap nameBitmap)
+		public static bool IsEnhancementMaterial(Bitmap card)
 		{
-			return Scraper.enhancementMaterials.Contains(ScanEnhancementMaterialName(nameBitmap).ToLower());
+			RECT reference = Navigation.GetAspectRatio() == new Size(16, 9) ? 
+				new RECT(new Rectangle(862, 80, 327, 560)) : (RECT)new Rectangle(862, 80, 328, 640);
+			Bitmap nameBitmap = card.Clone(new RECT(
+				Left: 0,
+				Top: 0,
+				Right: card.Width,
+				Bottom: (int)( 38.0 / reference.Height * card.Height )), card.PixelFormat);
+			string material = ScanEnhancementMaterialName(nameBitmap);
+			return !string.IsNullOrWhiteSpace(material) && Scraper.enhancementMaterials.Contains(material.ToLower());
 		}
 
 		private static string ScanEnhancementMaterialName(Bitmap bm)
@@ -532,7 +541,7 @@ namespace InventoryKamera
 
 			// Analyze
 			string name = Regex.Replace(Scraper.AnalyzeText(n).ToLower(), @"[\W]", string.Empty);
-			name = Scraper.FindClosestMaterialName(name);
+			name = Scraper.FindClosestMaterialName(name, 3);
 			n.Dispose();
 
 			return name;

@@ -80,7 +80,7 @@ namespace InventoryKamera
 			"sanctifyingessence",
 		};
 
-		public static ConcurrentBag<TesseractEngine> engines = new ConcurrentBag<TesseractEngine>();
+		public static ConcurrentBag<TesseractEngine> engines;
 
 
 		public static readonly Dictionary<string, string> Artifacts, Weapons, DevMaterials, Materials, AllMaterials, Elements;
@@ -89,6 +89,7 @@ namespace InventoryKamera
 
 		static Scraper()
 		{
+			engines = new ConcurrentBag<TesseractEngine>();
 			for (int i = 0; i < numEngines; i++)
 			{
 				engines.Add(new TesseractEngine(tesseractDatapath, tesseractLanguage, EngineMode.LstmOnly));
@@ -105,6 +106,7 @@ namespace InventoryKamera
 			Elements = new Dictionary<string, string>();
 
 			foreach (var element in elements)	Elements.Add(element, char.ToUpper(element[0]) + element.Substring(1));
+			Debug.WriteLine("Scraper initialized");
 		}
 
 		public static void AddTravelerToCharacterList(string traveler)
@@ -140,6 +142,7 @@ namespace InventoryKamera
 
 		public static void RestartEngines()
 		{
+			if (engines is null) engines = new ConcurrentBag<TesseractEngine>();
 			lock (engines)
 			{
 				while (!engines.IsEmpty)
@@ -153,6 +156,7 @@ namespace InventoryKamera
 					engines.Add(new TesseractEngine(tesseractDatapath, tesseractLanguage, EngineMode.LstmOnly));
 				}
 			}
+			Debug.WriteLine("Engines restarted");
 		}
 
 		/// <summary> Use Tesseract OCR to find words on picture to string </summary>
@@ -315,41 +319,41 @@ namespace InventoryKamera
 			return null;
 		}
 
-		public static string FindClosestStat(string stat)
+		public static string FindClosestStat(string stat, int maxEdits = 15)
 		{
-			return FindClosestInDict(source: stat, targets: Stats, maxEdits: 5);
+			return FindClosestInDict(source: stat, targets: Stats, maxEdits: maxEdits);
 		}
 
-		public static string FindElementByName(string name)
+		public static string FindElementByName(string name, int maxEdits = 5)
 		{
-			return FindClosestInDict(source: name, targets: Elements, maxEdits: 5);
+			return FindClosestInDict(source: name, targets: Elements, maxEdits: maxEdits);
 		}
 
-		public static string FindClosestWeapon(string name)
+		public static string FindClosestWeapon(string name, int maxEdits = 7)
 		{
-			return FindClosestInDict(source: name, targets: Weapons, maxEdits: 7);
+			return FindClosestInDict(source: name, targets: Weapons, maxEdits: maxEdits);
 		}
 
-		public static string FindClosestSetName(string name)
+		public static string FindClosestSetName(string name, int maxEdits = 15)
 		{
-			return FindClosestInDict(source: name, targets: Artifacts, maxEdits: 15);
+			return FindClosestInDict(source: name, targets: Artifacts, maxEdits: maxEdits);
 		}
 
-		public static string FindClosestCharacterName(string name)
+		public static string FindClosestCharacterName(string name, int maxEdits = 10)
 		{
-			return FindClosestInDict(source: name, targets: Characters, maxEdits: 10);
+			return FindClosestInDict(source: name, targets: Characters, maxEdits: maxEdits);
 		}
 
-		public static string FindClosestDevelopmentName(string name)
+		public static string FindClosestDevelopmentName(string name, int maxEdits = 15)
 		{
-			string value = FindClosestInDict(source: name, targets: DevMaterials, maxEdits: 15);
-			return !string.IsNullOrWhiteSpace(value) ? value : FindClosestInDict(source: name, targets: AllMaterials, maxEdits: 15);
+			string value = FindClosestInDict(source: name, targets: DevMaterials, maxEdits: maxEdits);
+			return !string.IsNullOrWhiteSpace(value) ? value : FindClosestInDict(source: name, targets: AllMaterials, maxEdits: maxEdits);
 		}
 
-		public static string FindClosestMaterialName(string name)
+		public static string FindClosestMaterialName(string name, int maxEdits = 15)
 		{
-			string value = FindClosestInDict(source: name, targets: Materials, maxEdits: 15);
-			return !string.IsNullOrWhiteSpace(value) ? value : FindClosestInDict(source: name, targets: AllMaterials, maxEdits: 15);
+			string value = FindClosestInDict(source: name, targets: Materials, maxEdits: maxEdits);
+			return !string.IsNullOrWhiteSpace(value) ? value : FindClosestInDict(source: name, targets: AllMaterials, maxEdits: maxEdits);
 		}
 
 		private static string FindClosestInDict(string source, Dictionary<string, string> targets, int maxEdits = 5)

@@ -495,7 +495,8 @@ namespace InventoryKamera
 
 		public static bool IsEnhancementMaterial(Bitmap nameBitmap)
 		{
-			return Scraper.enhancementMaterials.Contains(ScanEnchancementOreName(nameBitmap).ToLower());
+			string material = ScanEnchancementOreName(nameBitmap);
+			return !string.IsNullOrWhiteSpace(material) && Scraper.enhancementMaterials.Contains(material.ToLower());
 		}
 
 		public static string ScanEnchancementOreName(Bitmap bm)
@@ -506,7 +507,7 @@ namespace InventoryKamera
 
 			// Analyze
 			string name = Regex.Replace(Scraper.AnalyzeText(n).ToLower(), @"[\W]", string.Empty);
-			name = Scraper.FindClosestMaterialName(name);
+			name = Scraper.FindClosestMaterialName(name, 3);
 			n.Dispose();
 
 			return name;
