@@ -147,7 +147,7 @@ namespace InventoryKamera
 
 			UserInterface.SetProgramStatus("Scanning");
 
-			if (Directory.Exists(OutputPath_TextBox.Text))
+			if (Directory.Exists(OutputPath_TextBox.Text) || Directory.CreateDirectory(OutputPath_TextBox.Text).Exists)
 			{
 				if (running)
 				{
@@ -253,7 +253,7 @@ namespace InventoryKamera
 			// A nicer file browser
 			CommonOpenFileDialog d = new CommonOpenFileDialog
 			{
-				InitialDirectory = Directory.GetCurrentDirectory(),
+				InitialDirectory = !Directory.Exists(OutputPath_TextBox.Text) ? Directory.GetCurrentDirectory() : OutputPath_TextBox.Text,
 				IsFolderPicker = true
 			};
 
