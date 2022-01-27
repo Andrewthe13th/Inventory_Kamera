@@ -212,10 +212,12 @@ namespace InventoryKamera
 
 				if (workerQueue.TryDequeue(out OCRImage image))
 				{
-					if (image.type != "END" && image.bm != null)
+
+					switch (image.type)
 					{
-						if (image.type == "weapon" && !WeaponScraper.IsEnhancementMaterial(image.bm.First()))
-						{
+						case "weapon":
+							if (WeaponScraper.IsEnhancementMaterial(image.bm.First())) break;
+
 							UserInterface.SetGearPictureBox(image.bm.Last());
 
 							// Scan as weapon
@@ -234,9 +236,9 @@ namespace InventoryKamera
 											equippedWeapons.Add(weapon);
 									}
 								}
-								else throw new System.Exception();
+								else throw new Exception();
 							}
-							catch (System.Exception)
+							catch (Exception)
 							{
 								UserInterface.AddError($"Unable to validate information for weapon ID#{weapon.Id}");
 								string error = "";
@@ -250,10 +252,12 @@ namespace InventoryKamera
 								// Save card in directory to see what an issue might be
 								image.bm.Last().Save($"./logging/weapons/weapon{weapon.Id}.png");
 							}
-							
-						}
-						else if (image.type == "artifact" && !ArtifactScraper.IsEnhancementMaterial(image.bm.Last()))
-						{
+
+							break;
+
+						case "artifact":
+							if (ArtifactScraper.IsEnhancementMaterial(image.bm.Last())) break;
+
 							UserInterface.SetGearPictureBox(image.bm.Last());
 							// Scan as artifact
 							Artifact artifact = ArtifactScraper.CatalogueFromBitmapsAsync(image.bm, image.id).Result;
@@ -270,9 +274,9 @@ namespace InventoryKamera
 											equippedArtifacts.Add(artifact);
 									}
 								}
-								else throw new System.Exception();
+								else throw new Exception();
 							}
-							catch (System.Exception)
+							catch (Exception)
 							{
 								UserInterface.AddError($"Unable to validate information for artifact ID#{artifact.Id}");
 								string error = "";
@@ -288,20 +292,18 @@ namespace InventoryKamera
 								// Save card in directory to see what an issue might be
 								image.bm.Last().Save($"./logging/artifacts/artifact{artifact.Id}.png");
 							}
-							
-						}
-						else // not supposed to happen
-						{
-							Form1.UnexpectedError("Unknown Image type for Image Processor");
-						}
+							break;
 
-						// Dispose of everything
-						image.bm.ForEach(b => b.Dispose());
+						case "END":
+							b_threadCancel = true;
+							break;
+						default:
+							Form1.UnexpectedError("Unknown Image type for Image Processor");
+							break;
 					}
-					else
-					{
-						b_threadCancel = true;
-					}
+
+					// Dispose of everything
+					image.bm.ForEach(b => b.Dispose());
 				}
 				else
 				{
