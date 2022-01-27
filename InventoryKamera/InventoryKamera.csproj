@@ -180,7 +180,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rect.cs" />
     <Compile Include="Scraper.cs" />
-    <Compile Include="Seelie.cs" />
     <Compile Include="UserInterface.cs" />
     <Compile Include="Weapon.cs" />
     <Compile Include="WeaponScraper.cs" />

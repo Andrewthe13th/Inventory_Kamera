@@ -10,7 +10,7 @@ Currently supports certain game language, screen size, scanning settings, and ex
 
 ## How to use the Scanner
 1. Make sure that you already have [Microsoft Visual C++ Redistributable packages](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2015-2017-2019-and-2022) installed on your device.
-2. [Download the program (Inventory_Kamera_Vx.x.zip)](https://github.com/Andrewthe13th/Inventory_Kamera/releases/latest) and unzip the downloaded file.
+2. [Download the program (Inventory_Kamera_Vx.x.zip)](https://github.com/Andrewthe13th/Inventory_Kamera/releases) and unzip the downloaded file.
 3. Open the folder, and double click `InventoryKamera.exe` to start up the scanner.
     - This will likely prompt you for Security or/and User Access. Allow access to continue.
 4. Open Genshin Impact > Log In > and click 'Start'. 
