@@ -252,7 +252,8 @@ namespace InventoryKamera
 								// Save card in directory to see what an issue might be
 								image.bm.Last().Save($"./logging/weapons/weapon{weapon.Id}.png");
 							}
-
+							// Dispose of everything
+							image.bm.ForEach(b => b.Dispose());
 							break;
 
 						case "artifact":
@@ -292,6 +293,8 @@ namespace InventoryKamera
 								// Save card in directory to see what an issue might be
 								image.bm.Last().Save($"./logging/artifacts/artifact{artifact.Id}.png");
 							}
+							// Dispose of everything
+							image.bm.ForEach(b => b.Dispose());
 							break;
 
 						case "END":
@@ -301,9 +304,6 @@ namespace InventoryKamera
 							Form1.UnexpectedError("Unknown Image type for Image Processor");
 							break;
 					}
-
-					// Dispose of everything
-					image.bm.ForEach(b => b.Dispose());
 				}
 				else
 				{
