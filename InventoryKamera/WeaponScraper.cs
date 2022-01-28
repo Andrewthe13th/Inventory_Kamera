@@ -12,7 +12,6 @@ namespace InventoryKamera
 {
 	public static class WeaponScraper
 	{
-
 		public static bool StopScanning { get; set; }
 
 		public static void ScanWeapons(int count = 0)
@@ -104,16 +103,17 @@ namespace InventoryKamera
 
 			using (Bitmap countBitmap = Navigation.CaptureRegion(region))
 			{
+				UserInterface.SetNavigation_Image(countBitmap);
+
 				Bitmap n = Scraper.ConvertToGrayscale(countBitmap);
 				Scraper.SetContrast(60.0, ref n);
 				Scraper.SetInvert(ref n);
-				UserInterface.SetNavigation_Image(n);
 
-				string text = Scraper.AnalyzeText(n);
+				string text = Scraper.AnalyzeText(n).Trim();
 				n.Dispose();
 
 				// Remove any non-numeric and '/' characters
-				text = Regex.Replace(text, @"[^\d/]", string.Empty);
+				text = Regex.Replace(text, @"[^0-9/]", string.Empty);
 
 				if (string.IsNullOrWhiteSpace(text))
 				{
@@ -123,29 +123,32 @@ namespace InventoryKamera
 				}
 
 				int count;
+
 				// Check for slash
 				if (Regex.IsMatch(text, "/"))
 				{
 					count = int.Parse(text.Split('/')[0]);
+					Debug.WriteLine($"Parsed {count} for weapon count");
 				}
-				else
+				else if (Regex.Matches(text, "2000").Count == 1) // Remove the inventory limit from number
 				{
-					// divide by the number on the right if both numbers fused
-					count = int.Parse(text) / 2000;
+					text = text.Replace("2000", string.Empty);
+					count = int.Parse(text);
+					Debug.WriteLine($"Parsed {count} for weapon count");
+				}
+				else // Extreme worst case
+				{
+					count = 2000;
+					Debug.WriteLine("Defaulted to 2000 for weapon count");
 				}
 
-				// Check if larger than 1000
-				while (count > 2000)
-				{
-					count /= 10;
-				}
 				return count;
 			}
 		}
 
 		private static (List<Rectangle> rectangles, int cols, int rows) GetPageOfItems()
 		{
-			// Size of an item card is the same in 16:10 and 16:9. Also accounts for character icon and resolution size. 
+			// Size of an item card is the same in 16:10 and 16:9. Also accounts for character icon and resolution size.
 			var card = new RECT(
 				Left: 0,
 				Top: 0,
@@ -162,7 +165,6 @@ namespace InventoryKamera
 				MaxWidth = card.Width + 10,
 			})
 			{
-
 				// Screenshot of inventory
 				Bitmap screenshot = Navigation.CaptureWindow();
 				Bitmap output = new Bitmap(screenshot); // Copy used to overlay onto in testing
@@ -514,6 +516,7 @@ namespace InventoryKamera
 		}
 
 		#region Task Methods
+
 		public static string ScanName(Bitmap bm)
 		{
 			Scraper.SetGamma(0.2, 0.2, 0.2, ref bm);
@@ -603,6 +606,7 @@ namespace InventoryKamera
 			// artifact has no equipped character
 			return null;
 		}
+
 		#endregion Task Methods
 	}
 }

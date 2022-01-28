@@ -6,7 +6,6 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Windows.Markup;
 using Accord.Imaging;
 using Accord.Imaging.Filters;
 using static InventoryKamera.Artifact;
@@ -107,7 +106,7 @@ namespace InventoryKamera
 				n.Dispose();
 
 				// Remove any non-numeric and '/' characters
-				text = Regex.Replace(text, @"[^\d/]", string.Empty);
+				text = Regex.Replace(text, @"[^0-9/]", string.Empty);
 
 				if (string.IsNullOrWhiteSpace(text))
 				{
@@ -117,21 +116,23 @@ namespace InventoryKamera
 				}
 
 				int count;
-				// Check for dash
+
+				// Check for slash
 				if (Regex.IsMatch(text, "/"))
 				{
 					count = int.Parse(text.Split('/')[0]);
+					Debug.WriteLine($"Parsed {count} for artifact count");
 				}
-				else
+				else if (Regex.Matches(text, "1500").Count == 1) // Remove the inventory limit from number
 				{
-					// divide by the number on the right if both numbers fused
-					count = int.Parse(text) / 1500;
+					text = text.Replace("1500", string.Empty);
+					count = int.Parse(text);
+					Debug.WriteLine($"Parsed {count} for artifact count");
 				}
-
-				// Check if larger than 1500
-				while (count > 1500)
+				else // Extreme worst case
 				{
-					count /= 10;
+					count = 1500;
+					Debug.WriteLine("Defaulted to 1500 for artifact count");
 				}
 
 				return count;
@@ -157,12 +158,11 @@ namespace InventoryKamera
 				MaxWidth = card.Width + 10,
 			})
 			{
-
 				// Screenshot of inventory
 				Bitmap screenshot = Navigation.CaptureWindow();
 
 				// Copy used to overlay onto in testing
-				Bitmap output = new Bitmap(screenshot); 
+				Bitmap output = new Bitmap(screenshot);
 
 				// Image pre-processing
 				ContrastCorrection contrast = new ContrastCorrection(85);
@@ -500,7 +500,6 @@ namespace InventoryKamera
 
 		private static int GetRarity(Bitmap bitmap)
 		{
-
 			int x = (int)(10/1280.0 * Navigation.GetWidth());
 			int y = (int)(10/720.0 * Navigation.GetHeight());
 
@@ -522,7 +521,7 @@ namespace InventoryKamera
 
 		public static bool IsEnhancementMaterial(Bitmap card)
 		{
-			RECT reference = Navigation.GetAspectRatio() == new Size(16, 9) ? 
+			RECT reference = Navigation.GetAspectRatio() == new Size(16, 9) ?
 				new RECT(new Rectangle(862, 80, 327, 560)) : (RECT)new Rectangle(862, 80, 328, 640);
 			Bitmap nameBitmap = card.Clone(new RECT(
 				Left: 0,
@@ -651,7 +650,7 @@ namespace InventoryKamera
 						SubStat substat = new SubStat();
 						Regex re = new Regex(@"([\w]+\W*)(\d+.*\d+)");
 						var result = re.Match(line);
-						var stat = Regex.Replace(result.Groups[1].Value, @"[^\w]", string.Empty); 
+						var stat = Regex.Replace(result.Groups[1].Value, @"[^\w]", string.Empty);
 						var value = result.Groups[2].Value;
 
 						string name = line.Contains("%") ? stat + "%" : stat;
@@ -668,7 +667,7 @@ namespace InventoryKamera
 						}
 
 						// Need to retain the decimal place for percent boosts
-						if (substat.stat.Contains("_")) substat.value /= 10; 
+						if (substat.stat.Contains("_")) substat.value /= 10;
 
 						substats[j] = substat;
 						return null;
@@ -719,7 +718,7 @@ namespace InventoryKamera
 				{
 					equippedCharacter = Regex.Replace(equippedCharacter.Split(':')[1], @"[\W]", string.Empty);
 					equippedCharacter = Scraper.FindClosestCharacterName(equippedCharacter);
-					
+
 					return equippedCharacter;
 				}
 			}
