@@ -40,7 +40,11 @@ namespace InventoryKamera
 
 		private void ResetLogging()
 		{
-			Directory.Delete("./logging", true);
+			try
+			{
+				Directory.Delete("./logging", true);
+			}
+			catch { }
 
 			Directory.CreateDirectory("./logging/weapons");
 			Directory.CreateDirectory("./logging/artifacts");
