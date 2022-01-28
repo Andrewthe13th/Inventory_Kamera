@@ -35,5 +35,8 @@
     <Setting Name="MinimumArtifactRarity" Type="System.Decimal" Scope="User">
       <Value Profile="(Default)">4</Value>
     </Setting>
+    <Setting Name="UpgradeNeeded" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

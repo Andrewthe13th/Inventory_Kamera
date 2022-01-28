@@ -110,6 +110,16 @@ namespace InventoryKamera
 
 		private void Form1_Load(object sender, EventArgs e)
 		{
+			if (Properties.Settings.Default.UpgradeNeeded)
+			{
+				try
+				{
+					Properties.Settings.Default.Upgrade();
+				}
+				catch (Exception) { }
+				Properties.Settings.Default.UpgradeNeeded = false;
+			}
+
 			UpdateKeyTextBoxes();
 
 			Delay = ScannerDelay_TrackBar.Value;
