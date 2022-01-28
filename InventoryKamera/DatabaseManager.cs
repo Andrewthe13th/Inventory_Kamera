@@ -9,7 +9,6 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Media.Media3D;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -18,6 +17,7 @@ namespace InventoryKamera
 	public class DatabaseManager
 	{
 		private string _listdir = @".\inventorylists\";
+		private string versionJson = "versions.json";
 
 		public string ListsDir
 		{
@@ -38,6 +38,7 @@ namespace InventoryKamera
 
 		// This is the best place I think we can find easily accessible and up-to-date lists of information
 		private const string CharactersURL = "https://raw.githubusercontent.com/Dimbreath/GenshinData/master/ExcelBinOutput/AvatarExcelConfigData.json";
+
 		private const string ConstellationsURL = "https://raw.githubusercontent.com/Dimbreath/GenshinData/master/ExcelBinOutput/AvatarTalentExcelConfigData.json";
 		private const string SkillsURL = "https://raw.githubusercontent.com/Dimbreath/GenshinData/master/ExcelBinOutput/AvatarSkillExcelConfigData.json";
 		private const string ArtifactsURL = "https://raw.githubusercontent.com/Dimbreath/GenshinData/master/ExcelBinOutput/DisplayItemExcelConfigData.json";
@@ -65,6 +66,7 @@ namespace InventoryKamera
 
 		private int _completed;
 		private int _todo;
+		private Dictionary<string, string> localVersions;
 
 		public int TotalCompleted
 		{
@@ -143,6 +145,13 @@ namespace InventoryKamera
 		public DatabaseManager()
 		{
 			Directory.CreateDirectory(ListsDir);
+
+			if (!File.Exists(ListsDir + versionJson))
+			{
+				File.Create(ListsDir + versionJson);
+			}
+
+			localVersions = JToken.Parse(LoadJsonFromFile(versionJson)).ToObject<Dictionary<string, string>>();
 		}
 
 		private void LoadMappings()
@@ -240,8 +249,6 @@ namespace InventoryKamera
 
 		public bool UpdateAllLists(bool @new = false)
 		{
-			LoadMappings();
-
 			bool pass = true;
 
 			var lists = Enum.GetValues(typeof(ListType)).Cast<ListType>().ToList();
@@ -261,8 +268,6 @@ namespace InventoryKamera
 
 		public bool UpdateLists(IEnumerable<ListType> lists, bool @new = false)
 		{
-			LoadMappings();
-
 			bool pass = true;
 
 			if (lists.Contains(ListType.AllMaterials)) lists = lists.Where(list => list != ListType.Materials && list != ListType.CharacterDevelopmentItems);
@@ -321,12 +326,30 @@ namespace InventoryKamera
 
 		private bool UpdateCharacters(bool @new = false)
 		{
-			if (@new) File.Delete(ListsDir + CharactersJson);
+			var localVersion = !localVersions.TryGetValue("characters", out string v) ? new Version() : new Version(v);
+			var remoteVersion = GetRemoteVersion();
+
+			if (remoteVersion == new Version()) return false;
+
+			if (@new)
+			{
+				localVersion = new Version();
+				File.Delete(ListsDir + CharactersJson);
+			}
+
+			if (localVersion.CompareTo(remoteVersion) >= 0)
+			{
+				Debug.WriteLine("Local characters up to date");
+				return true;
+			}
+			else
+			{
+				Debug.WriteLine("Local characters out of date");
+				LoadMappings();
+			}
 
 			try
 			{
-				bool JsonNeedsUpdate = false;
-
 				Dictionary<string, JObject> data = JToken.Parse( LoadJsonFromFile(CharactersJson)).ToObject<Dictionary<string, JObject>>();
 
 				List<JObject> characters = JArray.Parse(LoadJsonFromURLAsync(CharactersURL)).ToObject<List<JObject>>();
@@ -335,7 +358,7 @@ namespace InventoryKamera
 
 				// Only playable characters have this key. NPCs don't.
 				characters.RemoveAll(character => !character.ContainsKey("UseType")
-									            || character["UseType"].ToString() != "AVATAR_FORMAL");
+												|| character["UseType"].ToString() != "AVATAR_FORMAL");
 				CharactersTodo = characters.Count;
 				Debug.WriteLine($"Added {_charactersTodo} characters. Total {TotalTodo}");
 
@@ -393,7 +416,6 @@ namespace InventoryKamera
 							};
 
 							data.Add(nameKey, value);
-							JsonNeedsUpdate = true;
 						}
 						++CharactersCompleted;
 					}
@@ -401,10 +423,9 @@ namespace InventoryKamera
 					{ }
 				}
 
-				if (JsonNeedsUpdate)
-				{
-					SaveJson(JsonConvert.SerializeObject(data), CharactersJson);
-				}
+				SaveJson(JsonConvert.SerializeObject(data), CharactersJson);
+				localVersions["characters"] = remoteVersion.ToString();
+				SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
 			}
 			catch (Exception ex)
 			{
@@ -417,7 +438,27 @@ namespace InventoryKamera
 
 		private bool UpdateWeapons(bool @new = false)
 		{
-			if (@new) File.Delete(ListsDir + WeaponsJson);
+			var localVersion = !localVersions.TryGetValue("weapons", out string v) ? new Version() : new Version(v);
+			var remoteVersion = GetRemoteVersion();
+
+			if (remoteVersion == new Version()) return false;
+
+			if (@new)
+			{
+				localVersion = new Version();
+				File.Delete(ListsDir + WeaponsJson);
+			}
+
+			if (localVersion.CompareTo(remoteVersion) >= 0)
+			{
+				Debug.WriteLine("Local weapons up to date");
+				return true;
+			}
+			else
+			{
+				Debug.WriteLine("Local weapons out of date");
+				LoadMappings();
+			}
 
 			try
 			{
@@ -427,8 +468,6 @@ namespace InventoryKamera
 				WeaponsTodo = weapons.Count;
 				Debug.WriteLine($"Added {_weapons_todo} weapons. Total {TotalTodo}");
 
-				bool JsonNeedsUpdate = false;
-
 				foreach (var weapon in weapons)
 				{
 					try
@@ -437,12 +476,11 @@ namespace InventoryKamera
 
 						string PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name);
 						string nameGOOD = Regex.Replace(PascalCase, @"[\W]", string.Empty);  // DullBlade
-						string nameKey = nameGOOD.ToLower();								 // dullblade
+						string nameKey = nameGOOD.ToLower();                                 // dullblade
 
 						if (!data.ContainsKey(nameKey))
 						{
 							data.Add(nameKey, nameGOOD);
-							JsonNeedsUpdate = true;
 						}
 						++WeaponsCompleted;
 					}
@@ -450,10 +488,9 @@ namespace InventoryKamera
 					{ }
 				}
 
-				if (JsonNeedsUpdate)
-				{
-					SaveJson(JsonConvert.SerializeObject(data), WeaponsJson);
-				}
+				SaveJson(JsonConvert.SerializeObject(data), WeaponsJson);
+				localVersions["weapons"] = remoteVersion.ToString();
+				SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
 			}
 			catch (Exception)
 			{
@@ -464,7 +501,27 @@ namespace InventoryKamera
 
 		private bool UpdateArtifacts(bool @new = false)
 		{
-			if (@new) File.Delete(ListsDir + ArtifactsJson);
+			var localVersion = !localVersions.TryGetValue("artifacts", out string v) ? new Version() : new Version(v);
+			var remoteVersion = GetRemoteVersion();
+
+			if (remoteVersion == new Version()) return false;
+
+			if (@new)
+			{
+				localVersion = new Version();
+				File.Delete(ListsDir + ArtifactsJson);
+			}
+
+			if (localVersion.CompareTo(remoteVersion) >= 0)
+			{
+				Debug.WriteLine("Local artifacts up to date");
+				return true;
+			}
+			else
+			{
+				Debug.WriteLine("Local artifacts out of date");
+				LoadMappings();
+			}
 
 			try
 			{
@@ -473,9 +530,8 @@ namespace InventoryKamera
 				artifacts.RemoveAll(artifact => artifact["Icon"].ToString().Contains("DisplayItemIcon")); // These are the Strongbox variants. We don't want these
 
 				ArtifactsTodo = artifacts.Count;
-				Debug.WriteLine($"Added {_artifactsTodo} weapons. Total {TotalTodo}");
+				Debug.WriteLine($"Added {_artifactsTodo} artifacts. Total {TotalTodo}");
 
-				bool JsonNeedsUpdate = false;
 				foreach (var artifact in artifacts)
 				{
 					try
@@ -484,12 +540,11 @@ namespace InventoryKamera
 
 						string PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name);
 						string nameGOOD = Regex.Replace(PascalCase, @"[\W]", string.Empty);  // ArchaicPetra
-						string nameKey = nameGOOD.ToLower();								 // archaicpetra
+						string nameKey = nameGOOD.ToLower();                                 // archaicpetra
 
 						if (!data.ContainsKey(nameKey))
 						{
 							data.Add(nameKey, nameGOOD);
-							JsonNeedsUpdate = true;
 						}
 						++ArtifactsCompleted;
 					}
@@ -497,10 +552,9 @@ namespace InventoryKamera
 					{ }
 				}
 
-				if (JsonNeedsUpdate)
-				{
-					SaveJson(JsonConvert.SerializeObject(data), ArtifactsJson);
-				}
+				SaveJson(JsonConvert.SerializeObject(data), ArtifactsJson);
+				localVersions["artifacts"] = remoteVersion.ToString();
+				SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
 			}
 			catch (Exception)
 			{
@@ -511,11 +565,30 @@ namespace InventoryKamera
 
 		private bool UpdateDevItems(bool @new = false)
 		{
-			if (@new) File.Delete(ListsDir + DevMaterialsJson);
+			var localVersion = !localVersions.TryGetValue("devmaterials", out string v) ? new Version() : new Version(v);
+			var remoteVersion = GetRemoteVersion();
+
+			if (remoteVersion == new Version()) return false;
+
+			if (@new)
+			{
+				localVersion = new Version();
+				File.Delete(ListsDir + DevMaterialsJson);
+			}
+
+			if (localVersion.CompareTo(remoteVersion) >= 0)
+			{
+				Debug.WriteLine("Local dev materials up to date");
+				return true;
+			}
+			else
+			{
+				Debug.WriteLine("Local dev materials out of date");
+				LoadMappings();
+			}
 
 			try
 			{
-				bool JsonNeedsUpdate  = false;
 				var categories = new List<string>()
 				{
 					"MATERIAL_EXP_FRUIT",
@@ -527,7 +600,6 @@ namespace InventoryKamera
 				materials.RemoveAll(material => !material.ContainsKey("MaterialType") || !categories.Contains(material["MaterialType"].ToString()));
 				DevMaterialsTodo = materials.Count;
 				Debug.WriteLine($"Added {_devTodo} dev materials. Total {TotalTodo}");
-
 
 				foreach (var material in materials)
 				{
@@ -542,7 +614,6 @@ namespace InventoryKamera
 						if (!data.ContainsKey(nameKey))
 						{
 							data.Add(nameKey, nameGOOD);
-							JsonNeedsUpdate = true;
 						}
 					}
 					catch (Exception)
@@ -550,10 +621,9 @@ namespace InventoryKamera
 					++DevMaterialsCompleted;
 				}
 
-				if (JsonNeedsUpdate)
-				{
-					SaveJson(JsonConvert.SerializeObject(data), DevMaterialsJson);
-				}
+				SaveJson(JsonConvert.SerializeObject(data), DevMaterialsJson);
+				localVersions["devmaterials"] = remoteVersion.ToString();
+				SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
 			}
 			catch (Exception)
 			{
@@ -564,11 +634,30 @@ namespace InventoryKamera
 
 		private bool UpdateMaterials(bool @new = false)
 		{
-			if (@new) File.Delete(ListsDir + MaterialsJson);
+			var localVersion = !localVersions.TryGetValue("materials", out string v) ? new Version() : new Version(v);
+			var remoteVersion = GetRemoteVersion();
+
+			if (remoteVersion == new Version()) return false;
+
+			if (@new)
+			{
+				localVersion = new Version();
+				File.Delete(ListsDir + MaterialsJson);
+			}
+
+			if (localVersion.CompareTo(remoteVersion) >= 0)
+			{
+				Debug.WriteLine("Local materials up to date");
+				return true;
+			}
+			else
+			{
+				Debug.WriteLine("Local materials out of date");
+				LoadMappings();
+			}
 
 			try
 			{
-				bool JsonNeedsUpdate  = false;
 				var categories = new List<string>()
 				{
 					"MATERIAL_EXCHANGE",
@@ -584,7 +673,6 @@ namespace InventoryKamera
 				MaterialsTodo = materials.Count;
 				Debug.WriteLine($"Added {_materialsTodo} materials. Total {_todo}");
 
-
 				foreach (var material in materials)
 				{
 					try
@@ -593,12 +681,11 @@ namespace InventoryKamera
 
 						string PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name);
 						string nameGOOD = Regex.Replace(PascalCase, @"[\W]", string.Empty);  // IronChunk
-						string nameKey = nameGOOD.ToLower();								 // ironchunk
+						string nameKey = nameGOOD.ToLower();                                 // ironchunk
 
 						if (!data.ContainsKey(nameKey))
 						{
 							data.Add(nameKey, nameGOOD);
-							JsonNeedsUpdate = true;
 						}
 						Interlocked.Increment(ref _completed);
 					}
@@ -607,10 +694,9 @@ namespace InventoryKamera
 					++MaterialsCompleted;
 				}
 
-				if (JsonNeedsUpdate)
-				{
-					SaveJson(JsonConvert.SerializeObject(data), MaterialsJson);
-				}
+				SaveJson(JsonConvert.SerializeObject(data), MaterialsJson);
+				localVersions["materials"] = remoteVersion.ToString();
+				SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
 			}
 			catch (Exception)
 			{
@@ -621,7 +707,27 @@ namespace InventoryKamera
 
 		private bool UpdateAllMaterials(bool @new = false)
 		{
-			if (@new) File.Delete(ListsDir + MaterialsCompleteJson);
+			var localVersion = !localVersions.TryGetValue("allmaterials", out string v) ? new Version() : new Version(v);
+			var remoteVersion = GetRemoteVersion();
+
+			if (remoteVersion == new Version()) return false;
+
+			if (@new)
+			{
+				localVersion = new Version();
+				File.Delete(ListsDir + MaterialsCompleteJson);
+			}
+
+			if (localVersion.CompareTo(remoteVersion) >= 0)
+			{
+				Debug.WriteLine("All local materials up to date");
+				return true;
+			}
+			else
+			{
+				Debug.WriteLine("All local materials out of date");
+				LoadMappings();
+			}
 
 			try
 			{
@@ -630,7 +736,6 @@ namespace InventoryKamera
 					() => UpdateMaterials(@new));
 
 				var data = JToken.Parse(LoadJsonFromFile(MaterialsCompleteJson)).ToObject < Dictionary < string, string > >();
-				var original = data;
 				var dev = JToken.Parse(LoadJsonFromFile(DevMaterialsJson)).ToObject < Dictionary < string, string > >();
 				var mats = JToken.Parse(LoadJsonFromFile(MaterialsJson)).ToObject < Dictionary < string, string > >();
 
@@ -647,17 +752,40 @@ namespace InventoryKamera
 				{
 					data.Add(item.Key, item.Value);
 				}
-				
-				if (data.Count != original.Count || !data.Keys.SequenceEqual(original.Keys) || @new)
-				{
-					SaveJson(JsonConvert.SerializeObject(data), MaterialsCompleteJson);
-				}
+
+				SaveJson(JsonConvert.SerializeObject(data), MaterialsCompleteJson);
+				localVersions["allmaterials"] = remoteVersion.ToString();
+				SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
 			}
 			catch (Exception)
 			{
 				return false;
 			}
 			return true;
+		}
+
+		private static Version GetRemoteVersion()
+		{
+			using (WebClient client = new WebClient())
+			{
+				client.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
+				var text = client.DownloadString("https://api.github.com/repos/Dimbreath/GenshinData/commits");
+				var response = JArray.Parse(text);
+				foreach (var commit in response.Children())
+				{
+					try
+					{
+						if (commit["commit"]["message"].ToString().ToUpper().Contains("OSRELWIN"))
+						{
+							var message = commit["commit"]["message"].ToString();
+							return new Version(Regex.Match(message, @"[\d\.]*?(?=_)").ToString());
+						}
+					}
+					catch (Exception)
+					{ }
+				}
+				return new Version();
+			}
 		}
 
 		private string LoadJsonFromURLAsync(string url)
