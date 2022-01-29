@@ -1,4 +1,4 @@
-namespace InventoryKamera
+﻿namespace InventoryKamera
 {
     partial class Form1
     {
@@ -765,6 +765,7 @@ namespace InventoryKamera
 			this.ArtifactRarityControl.Size = new System.Drawing.Size(48, 20);
 			this.ArtifactRarityControl.TabIndex = 90;
 			this.ArtifactRarityControl.Value = global::InventoryKamera.Properties.Settings.Default.MinimumArtifactRarity;
+			this.ArtifactRarityControl.ValueChanged += new System.EventHandler(this.SaveSettings);
 			// 
 			// label3
 			// 
@@ -793,6 +794,7 @@ namespace InventoryKamera
 			this.WeaponRarityControl.Size = new System.Drawing.Size(48, 20);
 			this.WeaponRarityControl.TabIndex = 88;
 			this.WeaponRarityControl.Value = global::InventoryKamera.Properties.Settings.Default.MinimumWeaponRarity;
+			this.WeaponRarityControl.ValueChanged += new System.EventHandler(this.SaveSettings);
 			// 
 			// Materials_CheckBox
 			// 
@@ -806,6 +808,7 @@ namespace InventoryKamera
 			this.Materials_CheckBox.TabIndex = 86;
 			this.Materials_CheckBox.Text = "Materials";
 			this.Materials_CheckBox.UseVisualStyleBackColor = true;
+			this.Materials_CheckBox.CheckedChanged += new System.EventHandler(this.SaveSettings);
 			// 
 			// CharDevItems_CheckBox
 			// 
@@ -821,6 +824,7 @@ namespace InventoryKamera
 			this.CharDevItems_CheckBox.TabIndex = 83;
 			this.CharDevItems_CheckBox.Text = "Char Development Items";
 			this.CharDevItems_CheckBox.UseVisualStyleBackColor = true;
+			this.CharDevItems_CheckBox.CheckedChanged += new System.EventHandler(this.SaveSettings);
 			// 
 			// Characters_CheckBox
 			// 
@@ -836,6 +840,7 @@ namespace InventoryKamera
 			this.Characters_CheckBox.TabIndex = 73;
 			this.Characters_CheckBox.Text = "Characters";
 			this.Characters_CheckBox.UseVisualStyleBackColor = true;
+			this.Characters_CheckBox.CheckedChanged += new System.EventHandler(this.SaveSettings);
 			// 
 			// Artifacts_Checkbox
 			// 
@@ -851,6 +856,7 @@ namespace InventoryKamera
 			this.Artifacts_Checkbox.TabIndex = 72;
 			this.Artifacts_Checkbox.Text = "Artifacts";
 			this.Artifacts_Checkbox.UseVisualStyleBackColor = true;
+			this.Artifacts_Checkbox.CheckedChanged += new System.EventHandler(this.SaveSettings);
 			// 
 			// Weapons_CheckBox
 			// 
@@ -866,6 +872,7 @@ namespace InventoryKamera
 			this.Weapons_CheckBox.TabIndex = 70;
 			this.Weapons_CheckBox.Text = "Weapons";
 			this.Weapons_CheckBox.UseVisualStyleBackColor = true;
+			this.Weapons_CheckBox.CheckedChanged += new System.EventHandler(this.SaveSettings);
 			// 
 			// OutputPath_TextBox
 			// 
@@ -879,6 +886,7 @@ namespace InventoryKamera
 			this.OutputPath_TextBox.Size = new System.Drawing.Size(386, 18);
 			this.OutputPath_TextBox.TabIndex = 79;
 			this.OutputPath_TextBox.Text = global::InventoryKamera.Properties.Settings.Default.OutputPath;
+			this.OutputPath_TextBox.TextChanged += new System.EventHandler(this.SaveSettings);
 			// 
 			// ScannerDelay_TrackBar
 			// 
@@ -944,13 +952,13 @@ namespace InventoryKamera
 			this.Controls.Add(this.menuStrip1);
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MainMenuStrip = this.menuStrip1;
-            this.Margin = new System.Windows.Forms.Padding(2);
-            this.Name = "Form1";
-            this.Text = "Inventory Kamera V1.2";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
-            this.Load += new System.EventHandler(this.Form1_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.CharacterTalent3_PictureBox)).EndInit();
+			this.MainMenuStrip = this.menuStrip1;
+			this.Margin = new System.Windows.Forms.Padding(2);
+			this.Name = "Form1";
+			this.Text = "Inventory Kamera V#";
+			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
+			this.Load += new System.EventHandler(this.Form1_Load);
+			((System.ComponentModel.ISupportInitialize)(this.CharacterTalent3_PictureBox)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.CharacterTalent2_PictureBox)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.CharacterTalent1_PictureBox)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.CharacterLevel_PictureBox)).EndInit();
