@@ -6,8 +6,8 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Accord;
 using Accord.Imaging;
@@ -23,7 +23,6 @@ namespace InventoryKamera
 #if DEBUG
 		public static bool s_bDoDebugOnlyCode = false;
 
-		
 #endif
 		private static readonly string tesseractDatapath = $"{Directory.GetCurrentDirectory()}\\tessdata";
 		private static readonly string tesseractLanguage = "genshin_fast_09_04_21";
@@ -70,7 +69,6 @@ namespace InventoryKamera
 			"geo",
 		};
 
-
 		public static readonly HashSet<string> enhancementMaterials = new HashSet<string>
 		{
 			"enhancementore",
@@ -81,7 +79,6 @@ namespace InventoryKamera
 		};
 
 		public static ConcurrentBag<TesseractEngine> engines;
-
 
 		public static readonly Dictionary<string, string> Artifacts, Weapons, DevMaterials, Materials, AllMaterials, Elements;
 
@@ -105,7 +102,7 @@ namespace InventoryKamera
 			AllMaterials = listManager.LoadAllMaterials();
 			Elements = new Dictionary<string, string>();
 
-			foreach (var element in elements)	Elements.Add(element, char.ToUpper(element[0]) + element.Substring(1));
+			foreach (var element in elements) Elements.Add(element, char.ToUpper(element[0]) + element.Substring(1));
 			Debug.WriteLine("Scraper initialized");
 		}
 
@@ -122,7 +119,6 @@ namespace InventoryKamera
 				}
 				else throw new KeyNotFoundException("Could not find 'traveler' entry in characters.json");
 			}
-
 		}
 
 		public static void AssignTravelerName(string traveler)
@@ -202,105 +198,42 @@ namespace InventoryKamera
 
 		public static bool IsValidSetName(string setName)
 		{
-			if (Artifacts.Keys.Contains(setName) || Artifacts.Values.Contains(setName))
-			{
-				return true;
-			}
-			else
-			{
-				Debug.WriteLine($"Error: {setName} is not a valid set name");
-				UserInterface.AddError($"{setName} is not a valid set name");
-				return false;
-			};
+			return Artifacts.ContainsValue(setName) || Artifacts.ContainsKey(setName.ToLower());
 		}
 
 		internal static bool IsValidMaterial(string name)
 		{
-			if (AllMaterials.Keys.Contains(name) || AllMaterials.Values.Contains(name))
-			{
-				return true;
-			}
-			else
-			{
-				Debug.WriteLine($"Error: {name} is not a valid material");
-				UserInterface.AddError($"{name} is not a valid material");
-				return false;
-			};
+			return AllMaterials.ContainsValue(name) || AllMaterials.ContainsKey(name.ToLower());
 		}
 
 		public static bool IsValidStat(string stat)
 		{
-			if (string.IsNullOrWhiteSpace(stat) || Stats.Keys.Contains(stat) || Stats.Values.Contains(stat) )
-			{
-				return true;
-			}
-			else
-			{
-				Debug.WriteLine($"Error: {stat} is not a valid stat name");
-				UserInterface.AddError($"{stat} is not a valid stat name");
-				return false;
-			};
+			return string.IsNullOrWhiteSpace(stat) || Stats.ContainsValue(stat);
 		}
 
 		public static bool IsValidSlot(string gearSlot)
 		{
-			if (gearSlots.Contains(gearSlot))
-			{
-				return true;
-			}
-			else
-			{
-				Debug.WriteLine($"Error: {gearSlot} is not a valid gear slot");
-				UserInterface.AddError($"{gearSlot} is not a valid gear slot");
-				return false;
-			};
+			return gearSlots.Contains(gearSlot);
 		}
 
 		public static bool IsValidCharacter(string character)
 		{
-			if (character == "Traveler" || Characters.Keys.Contains(character.ToLower()))
-			{
-				return true;
-			}
-			else
-			{
-				Debug.WriteLine($"{character} is not a valid character name");
-				UserInterface.AddError($"{character} is not a valid character name");
-				return false;
-			}
+			return character == "Traveler" || Characters.ContainsKey(character.ToLower());
 		}
 
 		public static bool IsValidElement(string element)
 		{
-			if (Elements.Keys.Contains(element) || Elements.Values.Contains(element))
-			{
-				return true;
-			}
-			else
-			{
-				Debug.Print($"Error: {element} is not a valid elemental type");
-				UserInterface.AddError($"{element} is not a valid elemental type");
-				return false;
-			};
+			return Elements.ContainsValue(element) || Elements.ContainsKey(element.ToLower());
 		}
 
 		public static bool IsEnhancementMaterial(string material)
 		{
-			return AllMaterials.Keys.Contains(material.ToLower());
+			return enhancementMaterials.Contains(material.ToLower()) || AllMaterials.ContainsValue(material) || AllMaterials.ContainsKey(material.ToLower());
 		}
 
 		public static bool IsValidWeapon(string weapon)
 		{
-			if (Weapons.Keys.Contains(weapon) || Weapons.Values.Contains(weapon))
-			{
-				return true;
-			}
-			else
-			{
-				Debug.Print($"Error: {weapon} is not a valid weapon name");
-				UserInterface.AddError($"{weapon} is not a valid weapon name");
-				return false;
-			};
+			return Weapons.ContainsValue(weapon) || Weapons.ContainsKey(weapon.ToLower());
 		}
 
 		#endregion Check valid parameters
@@ -482,18 +415,9 @@ namespace InventoryKamera
 
 		#endregion Element Searching
 
-		public static bool CompareColors(Color a, Color b)
-		{
-			int[] diff = new int[3];
-			diff[0] = Math.Abs(a.R - b.R);
-			diff[1] = Math.Abs(a.G - b.G);
-			diff[2] = Math.Abs(a.B - b.B);
-
-			return diff[0] < 10 && diff[1] < 10 && diff[2] < 10;
-		}
 
 		public static void FindDelay(List<Rectangle> rectangles)
-        {
+		{
 			Navigation.SetDelay(180);
 			int delayOffset = 20;
 			bool bStoppedOnce = false; bool bStop = false;
@@ -501,111 +425,113 @@ namespace InventoryKamera
 			Rectangle item1 = rectangles[0];
 
 			RECT reference; int width = Navigation.GetWidth(); int height = Navigation.GetHeight();
+
 			#region Get first card
+
 			if (Navigation.GetAspectRatio() == new Size(16, 9))
-            {
-                reference = new RECT(new Rectangle(862, 80, 327, 560));
+			{
+				reference = new RECT(new Rectangle(862, 80, 327, 560));
 
-                int left = (int)Math.Round(reference.Left / 1280.0 * width, MidpointRounding.AwayFromZero);
-                int top = (int)Math.Round(reference.Top / 720.0 * height, MidpointRounding.AwayFromZero);
-                int right = (int)Math.Round(reference.Right / 1280.0 * width, MidpointRounding.AwayFromZero);
-                int bottom = (int)Math.Round(reference.Bottom / 720.0 * height, MidpointRounding.AwayFromZero);
+				int left = (int)Math.Round(reference.Left / 1280.0 * width, MidpointRounding.AwayFromZero);
+				int top = (int)Math.Round(reference.Top / 720.0 * height, MidpointRounding.AwayFromZero);
+				int right = (int)Math.Round(reference.Right / 1280.0 * width, MidpointRounding.AwayFromZero);
+				int bottom = (int)Math.Round(reference.Bottom / 720.0 * height, MidpointRounding.AwayFromZero);
 
-                card1 = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
-            }
-            else // if (Navigation.GetAspectRatio() == new Size(8, 5))
-            {
-                reference = new RECT(new Rectangle(862, 80, 327, 640));
+				card1 = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
+			}
+			else // if (Navigation.GetAspectRatio() == new Size(8, 5))
+			{
+				reference = new RECT(new Rectangle(862, 80, 327, 640));
 
-                int left = (int)Math.Round(reference.Left / 1280.0 * width, MidpointRounding.AwayFromZero);
-                int top = (int)Math.Round(reference.Top / 800.0 * height, MidpointRounding.AwayFromZero);
-                int right = (int)Math.Round(reference.Right / 1280.0 * width, MidpointRounding.AwayFromZero);
-                int bottom = (int)Math.Round(reference.Bottom / 800.0 * height, MidpointRounding.AwayFromZero);
+				int left = (int)Math.Round(reference.Left / 1280.0 * width, MidpointRounding.AwayFromZero);
+				int top = (int)Math.Round(reference.Top / 800.0 * height, MidpointRounding.AwayFromZero);
+				int right = (int)Math.Round(reference.Right / 1280.0 * width, MidpointRounding.AwayFromZero);
+				int bottom = (int)Math.Round(reference.Bottom / 800.0 * height, MidpointRounding.AwayFromZero);
 
-                card1 = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
-            }
-            #endregion
+				card1 = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
+			}
 
-            do
-            {
+			#endregion Get first card
+
+			do
+			{
 				if (bStoppedOnce)
 					delayOffset = 10;
 
-                // Do mouse movement to first and second UI element in Inventory
-                Navigation.SetCursorPos(Navigation.GetPosition().Left + item1.Center().X, Navigation.GetPosition().Top + item1.Center().Y);
-                Navigation.Click();
-                Navigation.Wait(Navigation.GetDelay() - delayOffset);
+				// Do mouse movement to first and second UI element in Inventory
+				Navigation.SetCursorPos(Navigation.GetPosition().Left + item1.Center().X, Navigation.GetPosition().Top + item1.Center().Y);
+				Navigation.Click();
+				Navigation.Wait(Navigation.GetDelay() - delayOffset);
 
-                Rectangle item2 = rectangles[1];
-                Navigation.SetCursorPos(Navigation.GetPosition().Left + item2.Center().X, Navigation.GetPosition().Top + item2.Center().Y);
-                Navigation.Click();
+				Rectangle item2 = rectangles[1];
+				Navigation.SetCursorPos(Navigation.GetPosition().Left + item2.Center().X, Navigation.GetPosition().Top + item2.Center().Y);
+				Navigation.Click();
 				Navigation.Wait(Navigation.GetDelay() - delayOffset);
 
 				// Take image after second click
 				if (Navigation.GetAspectRatio() == new Size(16, 9))
-                {
-                    int left = (int)Math.Round(reference.Left / 1280.0 * width, MidpointRounding.AwayFromZero);
-                    int top = (int)Math.Round(reference.Top / 720.0 * height, MidpointRounding.AwayFromZero);
-                    int right = (int)Math.Round(reference.Right / 1280.0 * width, MidpointRounding.AwayFromZero);
-                    int bottom = (int)Math.Round(reference.Bottom / 720.0 * height, MidpointRounding.AwayFromZero);
+				{
+					int left = (int)Math.Round(reference.Left / 1280.0 * width, MidpointRounding.AwayFromZero);
+					int top = (int)Math.Round(reference.Top / 720.0 * height, MidpointRounding.AwayFromZero);
+					int right = (int)Math.Round(reference.Right / 1280.0 * width, MidpointRounding.AwayFromZero);
+					int bottom = (int)Math.Round(reference.Bottom / 720.0 * height, MidpointRounding.AwayFromZero);
 
-                    card2 = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
-                }
-                else
-                {
-                    int left = (int)Math.Round(reference.Left / 1280.0 * width, MidpointRounding.AwayFromZero);
-                    int top = (int)Math.Round(reference.Top / 800.0 * height, MidpointRounding.AwayFromZero);
-                    int right = (int)Math.Round(reference.Right / 1280.0 * width, MidpointRounding.AwayFromZero);
-                    int bottom = (int)Math.Round(reference.Bottom / 800.0 * height, MidpointRounding.AwayFromZero);
+					card2 = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
+				}
+				else
+				{
+					int left = (int)Math.Round(reference.Left / 1280.0 * width, MidpointRounding.AwayFromZero);
+					int top = (int)Math.Round(reference.Top / 800.0 * height, MidpointRounding.AwayFromZero);
+					int right = (int)Math.Round(reference.Right / 1280.0 * width, MidpointRounding.AwayFromZero);
+					int bottom = (int)Math.Round(reference.Bottom / 800.0 * height, MidpointRounding.AwayFromZero);
 
-                    card2 = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
-                }
+					card2 = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
+				}
 
-                Rectangle item3 = rectangles[2];
-                Navigation.SetCursorPos(Navigation.GetPosition().Left + item3.Center().X, Navigation.GetPosition().Top + item3.Center().Y);
-                Navigation.Click();
-                Navigation.Wait(Navigation.GetDelay() - delayOffset);
+				Rectangle item3 = rectangles[2];
+				Navigation.SetCursorPos(Navigation.GetPosition().Left + item3.Center().X, Navigation.GetPosition().Top + item3.Center().Y);
+				Navigation.Click();
+				Navigation.Wait(Navigation.GetDelay() - delayOffset);
 
-                // Take image after third click
-                if (Navigation.GetAspectRatio() == new Size(16, 9))
-                {
-                    int left = (int)Math.Round(reference.Left / 1280.0 * width, MidpointRounding.AwayFromZero);
-                    int top = (int)Math.Round(reference.Top / 720.0 * height, MidpointRounding.AwayFromZero);
-                    int right = (int)Math.Round(reference.Right / 1280.0 * width, MidpointRounding.AwayFromZero);
-                    int bottom = (int)Math.Round(reference.Bottom / 720.0 * height, MidpointRounding.AwayFromZero);
+				// Take image after third click
+				if (Navigation.GetAspectRatio() == new Size(16, 9))
+				{
+					int left = (int)Math.Round(reference.Left / 1280.0 * width, MidpointRounding.AwayFromZero);
+					int top = (int)Math.Round(reference.Top / 720.0 * height, MidpointRounding.AwayFromZero);
+					int right = (int)Math.Round(reference.Right / 1280.0 * width, MidpointRounding.AwayFromZero);
+					int bottom = (int)Math.Round(reference.Bottom / 720.0 * height, MidpointRounding.AwayFromZero);
 
-                    card3 = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
-                }
-                else
-                {
-                    int left = (int)Math.Round(reference.Left / 1280.0 * width, MidpointRounding.AwayFromZero);
-                    int top = (int)Math.Round(reference.Top / 800.0 * height, MidpointRounding.AwayFromZero);
-                    int right = (int)Math.Round(reference.Right / 1280.0 * width, MidpointRounding.AwayFromZero);
-                    int bottom = (int)Math.Round(reference.Bottom / 800.0 * height, MidpointRounding.AwayFromZero);
+					card3 = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
+				}
+				else
+				{
+					int left = (int)Math.Round(reference.Left / 1280.0 * width, MidpointRounding.AwayFromZero);
+					int top = (int)Math.Round(reference.Top / 800.0 * height, MidpointRounding.AwayFromZero);
+					int right = (int)Math.Round(reference.Right / 1280.0 * width, MidpointRounding.AwayFromZero);
+					int bottom = (int)Math.Round(reference.Bottom / 800.0 * height, MidpointRounding.AwayFromZero);
 
-                    card3 = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
-                }
+					card3 = Navigation.CaptureRegion(new RECT(left, top, right, bottom));
+				}
 
-                // logic for continuing to run
-                if (!CompareBitmapsFast(card1, card2) && !CompareBitmapsFast(card2,card3))
-                {
+				// logic for continuing to run
+				if (!CompareBitmapsFast(card1, card2) && !CompareBitmapsFast(card2, card3))
+				{
 					Navigation.SetDelay(Navigation.GetDelay() - delayOffset);
 					//Navigation.SystemRandomWait();
 
-                    Navigation.SetCursorPos(Navigation.GetPosition().Left + item1.Center().X, Navigation.GetPosition().Top + item1.Center().Y);
-                    Navigation.Click();
+					Navigation.SetCursorPos(Navigation.GetPosition().Left + item1.Center().X, Navigation.GetPosition().Top + item1.Center().Y);
+					Navigation.Click();
 					//Navigation.SystemRandomWait();
 				}
-                else
-                {
+				else
+				{
 					if (bStoppedOnce)
-                    {
+					{
 						bStop = true;
-                    }
+					}
 					bStoppedOnce = true;
-                }
-
-            } while (!bStoppedOnce && (Navigation.GetDelay() - delayOffset > 0));
+				}
+			} while (!bStoppedOnce && ( Navigation.GetDelay() - delayOffset > 0 ));
 
 			// delay of compare function
 			Navigation.SetDelay(Navigation.GetDelay() + 7);
@@ -615,9 +541,9 @@ namespace InventoryKamera
 			// set back to first element
 			Navigation.SystemRandomWait(Navigation.Speed.Slowest);
 			Navigation.SetCursorPos(Navigation.GetPosition().Left + item1.Center().X, Navigation.GetPosition().Top + item1.Center().Y);
-            Navigation.Click();
-            Navigation.SystemRandomWait(Navigation.Speed.Slower);
-        }
+			Navigation.Click();
+			Navigation.SystemRandomWait(Navigation.Speed.Slower);
+		}
 
 		#region Image Operations
 
@@ -644,6 +570,15 @@ namespace InventoryKamera
 			}
 
 			return destImage;
+		}
+		public static bool CompareColors(Color a, Color b)
+		{
+			int[] diff = new int[3];
+			diff[0] = Math.Abs(a.R - b.R);
+			diff[1] = Math.Abs(a.G - b.G);
+			diff[2] = Math.Abs(a.B - b.B);
+
+			return diff[0] < 10 && diff[1] < 10 && diff[2] < 10;
 		}
 
 		public static Bitmap ConvertToGrayscale(Bitmap bitmap)
@@ -692,8 +627,7 @@ namespace InventoryKamera
 			new Invert().ApplyInPlace(bitmap);
 		}
 
-		public static void SetColor
-			(string colorFilterType, ref Bitmap bitmap)
+		public static void SetColor(string colorFilterType, ref Bitmap bitmap)
 		{
 			Bitmap temp = bitmap;
 			Bitmap bmap = (Bitmap)temp.Clone();
@@ -742,10 +676,11 @@ namespace InventoryKamera
 
 		public static void SetBrightness(int brightness, ref Bitmap bitmap)
 		{
-			Bitmap temp = bitmap;
-			Bitmap bmap = (Bitmap)temp.Clone();
 			if (brightness < -255) brightness = -255;
 			if (brightness > 255) brightness = 255;
+
+			Bitmap temp = bitmap;
+			Bitmap bmap = (Bitmap)temp.Clone();
 			Color c;
 			for (int i = 0; i < bmap.Width; i++)
 			{
@@ -765,8 +700,7 @@ namespace InventoryKamera
 					if (cB < 0) cB = 1;
 					if (cB > 255) cB = 255;
 
-					bmap.SetPixel(i, j,
-		Color.FromArgb((byte)cR, (byte)cG, (byte)cB));
+					bmap.SetPixel(i, j, Color.FromArgb((byte)cR, (byte)cG, (byte)cB));
 				}
 			}
 			bitmap = (Bitmap)bmap.Clone();
@@ -788,42 +722,42 @@ namespace InventoryKamera
 			colorFilter.ApplyInPlace(bm);
 		}
 
-        public static bool CompareBitmapsFast(Bitmap bmp1, Bitmap bmp2)
-        {
-            if (bmp1 == null || bmp2 == null)
-                return false;
-            if (object.Equals(bmp1, bmp2))
-                return true;
-            if (!bmp1.Size.Equals(bmp2.Size) || !bmp1.PixelFormat.Equals(bmp2.PixelFormat))
-                return false;
+		public static bool CompareBitmapsFast(Bitmap bmp1, Bitmap bmp2)
+		{
+			if (bmp1 == null || bmp2 == null)
+				return false;
+			if (object.Equals(bmp1, bmp2))
+				return true;
+			if (!bmp1.Size.Equals(bmp2.Size) || !bmp1.PixelFormat.Equals(bmp2.PixelFormat))
+				return false;
 
-            int bytes = bmp1.Width * bmp1.Height * (System.Drawing.Image.GetPixelFormatSize(bmp1.PixelFormat) / 8);
+			int bytes = bmp1.Width * bmp1.Height * (System.Drawing.Image.GetPixelFormatSize(bmp1.PixelFormat) / 8);
 
-            bool result = true;
-            byte[] b1bytes = new byte[bytes];
-            byte[] b2bytes = new byte[bytes];
+			bool result = true;
+			byte[] b1bytes = new byte[bytes];
+			byte[] b2bytes = new byte[bytes];
 
-            BitmapData bitmapData1 = bmp1.LockBits(new Rectangle(0, 0, bmp1.Width, bmp1.Height), ImageLockMode.ReadOnly, bmp1.PixelFormat);
-            BitmapData bitmapData2 = bmp2.LockBits(new Rectangle(0, 0, bmp2.Width, bmp2.Height), ImageLockMode.ReadOnly, bmp2.PixelFormat);
+			BitmapData bitmapData1 = bmp1.LockBits(new Rectangle(0, 0, bmp1.Width, bmp1.Height), ImageLockMode.ReadOnly, bmp1.PixelFormat);
+			BitmapData bitmapData2 = bmp2.LockBits(new Rectangle(0, 0, bmp2.Width, bmp2.Height), ImageLockMode.ReadOnly, bmp2.PixelFormat);
 
-            Marshal.Copy(bitmapData1.Scan0, b1bytes, 0, bytes);
-            Marshal.Copy(bitmapData2.Scan0, b2bytes, 0, bytes);
+			Marshal.Copy(bitmapData1.Scan0, b1bytes, 0, bytes);
+			Marshal.Copy(bitmapData2.Scan0, b2bytes, 0, bytes);
 
-            for (int n = 0; n <= bytes - 1; n++)
-            {
-                if (b1bytes[n] != b2bytes[n])
-                {
-                    result = false;
-                    break;
-                }
-            }
+			for (int n = 0; n <= bytes - 1; n++)
+			{
+				if (b1bytes[n] != b2bytes[n])
+				{
+					result = false;
+					break;
+				}
+			}
 
-            bmp1.UnlockBits(bitmapData1);
-            bmp2.UnlockBits(bitmapData2);
+			bmp1.UnlockBits(bitmapData1);
+			bmp2.UnlockBits(bitmapData2);
 
-            return result;
-        }
+			return result;
+		}
 
-        #endregion Image Operations
-    }
+		#endregion Image Operations
+	}
 }

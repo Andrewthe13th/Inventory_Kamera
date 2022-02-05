@@ -153,41 +153,41 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Artifact.cs" />
-    <Compile Include="ArtifactScraper.cs" />
-    <Compile Include="Character.cs" />
-    <Compile Include="DatabaseManager.cs" />
-    <Compile Include="DatabaseUpdateForm.cs">
+    <Compile Include="game\Artifact.cs" />
+    <Compile Include="scraping\ArtifactScraper.cs" />
+    <Compile Include="game\Character.cs" />
+    <Compile Include="data\DatabaseManager.cs" />
+    <Compile Include="ui\databaseupdater\DatabaseUpdateForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DatabaseUpdateForm.Designer.cs">
+    <Compile Include="ui\databaseupdater\DatabaseUpdateForm.Designer.cs">
       <DependentUpon>DatabaseUpdateForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MaterialScraper.cs" />
-    <Compile Include="CharacterScraper.cs" />
-    <Compile Include="GOOD.cs" />
-    <Compile Include="Form1.cs">
+    <Compile Include="scraping\MaterialScraper.cs" />
+    <Compile Include="scraping\CharacterScraper.cs" />
+    <Compile Include="data\GOOD.cs" />
+    <Compile Include="ui\main\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="ui\main\MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="InventoryKamera.cs" />
-    <Compile Include="OCRImage.cs" />
-    <Compile Include="Inventory.cs" />
-    <Compile Include="Navigation.cs" />
+    <Compile Include="data\InventoryKamera.cs" />
+    <Compile Include="data\OCRImage.cs" />
+    <Compile Include="data\Inventory.cs" />
+    <Compile Include="game\Navigation.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Rect.cs" />
-    <Compile Include="Scraper.cs" />
-    <Compile Include="UserInterface.cs" />
-    <Compile Include="Weapon.cs" />
-    <Compile Include="WeaponScraper.cs" />
-    <EmbeddedResource Include="DatabaseUpdateForm.resx">
+    <Compile Include="data\Rect.cs" />
+    <Compile Include="scraping\Scraper.cs" />
+    <Compile Include="ui\UserInterface.cs" />
+    <Compile Include="game\Weapon.cs" />
+    <Compile Include="scraping\WeaponScraper.cs" />
+    <EmbeddedResource Include="ui\databaseupdater\DatabaseUpdateForm.resx">
       <DependentUpon>DatabaseUpdateForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <EmbeddedResource Include="ui\main\MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">

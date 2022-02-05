@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
-using Accord.Imaging.Filters;
 using Accord.Imaging;
-using System.Diagnostics;
+using Accord.Imaging.Filters;
 
 namespace InventoryKamera
 {
@@ -65,7 +65,7 @@ namespace InventoryKamera
 			{
 				int rows, cols;
 				// Find all items on the screen
-				(rectangles, cols, rows) = GetPageOfItems(section, page); 
+				(rectangles, cols, rows) = GetPageOfItems(section, page);
 
 				// Remove last row. Sometimes the bottom of a page of items is caught which results
 				// in a faded quantity that can't be parsed. Removing slightly increases the number of pages that
@@ -144,7 +144,7 @@ namespace InventoryKamera
 				++page;
 			}
 
-			LastPage:
+		LastPage:
 			// scroll down as much as possible
 			for (int i = 0; i < 20; i++)
 			{
@@ -198,21 +198,19 @@ namespace InventoryKamera
 
 		private static int ScanMora()
 		{
-
 			var region = new Rectangle(
 				x: (int)(125 / 1280.0 * Navigation.GetWidth()),
 				y: (int)(665 / 720.0 * Navigation.GetHeight()),
 				width: (int)(300 / 1280.0 * Navigation.GetWidth()),
 				height: (int)(30 / 720.0 * Navigation.GetHeight()));
 
-			if (Navigation.GetAspectRatio() == new Size(8,5))
+			if (Navigation.GetAspectRatio() == new Size(8, 5))
 			{
-				region.Y = (int)( 740 / 800.0 * Navigation.GetHeight());
+				region.Y = (int)( 740 / 800.0 * Navigation.GetHeight() );
 			}
 
 			using (var bm = Navigation.CaptureRegion(region))
 			{
-
 				var input = Scraper.AnalyzeText(bm).Split(' ').ToList();
 				input.RemoveAll(e => Regex.IsMatch(e.Trim(), @"[^0-9]") || string.IsNullOrWhiteSpace(e.Trim()));
 				var mora = input.LastOrDefault();
@@ -250,7 +248,6 @@ namespace InventoryKamera
 				MaxWidth = card.Width + 15,
 			})
 			{
-
 				// Screenshot of inventory
 				Bitmap screenshot = Navigation.CaptureWindow();
 
@@ -397,7 +394,6 @@ namespace InventoryKamera
 				Debug.WriteLine($"{rowCoords.Count} rows");
 				Debug.WriteLine($"{rectangles.Count} rectangles");
 
-
 				new RectanglesMarker(rectangles, Color.Green).ApplyInPlace(output);
 				//Navigation.DisplayBitmap(output, "Rectangles");
 
@@ -431,7 +427,6 @@ namespace InventoryKamera
 				Top:    (int)( reference.Top    / refHeight * height),
 				Right:  (int)( reference.Right  / refWidth  * width),
 				Bottom: (int)( reference.Bottom / refHeight * height));
-
 
 			Bitmap bm = Navigation.CaptureRegion(region);
 			nameplate = (Bitmap)bm.Clone();
@@ -469,17 +464,17 @@ namespace InventoryKamera
 			{
 				quantity = (Bitmap)bm.Clone();
 
-				using (Bitmap rescaled = Scraper.ResizeImage(bm, (int)( bm.Width * 3), (int)( bm.Height * 3 )))
+				using (Bitmap rescaled = Scraper.ResizeImage(bm, (int)( bm.Width * 3 ), (int)( bm.Height * 3 )))
 				{
 					Bitmap copy = (Bitmap)rescaled.Clone();
 					Scraper.SetGamma(0.7, 0.7, 0.7, ref copy);
 					// Image Processing
 					Bitmap n  =  Scraper.ConvertToGrayscale(copy);
 					Scraper.SetContrast(65, ref n); // Setting a high contrast seems to be better than thresholding
-					//Scraper.SetThreshold(165, ref n);
+													//Scraper.SetThreshold(165, ref n);
 
 					string old_text = Scraper.AnalyzeText(n, Tesseract.PageSegMode.SingleWord).Trim().ToLower();
-					
+
 					// Might be worth it to train some more numbers
 					var cleaned = old_text.Replace("mm", "111").Replace("m", "11").Replace("nn", "11").Replace("n", "1"); // Tesseract struggles with 1's so close together because of font
 					cleaned = cleaned.Replace("a", "4");
@@ -500,7 +495,6 @@ namespace InventoryKamera
 					copy.Dispose();
 					n.Dispose();
 					return count;
-
 				}
 			}
 		}

@@ -16,7 +16,7 @@ using WindowsInput.Native;
 
 namespace InventoryKamera
 {
-	public partial class Form1 : Form
+	public partial class MainForm : Form
 	{
 		private static Thread scannerThread;
 		private static InventoryKamera data;
@@ -25,7 +25,7 @@ namespace InventoryKamera
 
 		private bool running = false;
 
-		public Form1()
+		public MainForm()
 		{
 			InitializeComponent();
 

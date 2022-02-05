@@ -31,7 +31,6 @@ namespace InventoryKamera
 		[JsonProperty("materials", NullValueHandling = NullValueHandling.Ignore)]
 		public Dictionary<string, int> Materials { get; private set; }
 
-
 		public GOOD()
 		{
 			Format = "EMPTY";
@@ -58,7 +57,6 @@ namespace InventoryKamera
 			// Assign materials
 			if (genshinData.Inventory.AllMaterials.Count > 0) Materials = new Dictionary<string, int>();
 			genshinData.Inventory.AllMaterials.ToList().ForEach(material => Materials.Add(material.name, material.count));
-			
 		}
 
 		internal void WriteToJSON(string outputDirectory, string oldDataFilePath = "")

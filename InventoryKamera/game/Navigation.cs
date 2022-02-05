@@ -18,6 +18,7 @@ namespace InventoryKamera
 		public static InputSimulator sim = new InputSimulator();
 		private static RECT area = new RECT();
 		private static RECT position = new RECT();
+		public static Size AspectRatio;
 
 		private static int delay = 0;
 
@@ -44,6 +45,8 @@ namespace InventoryKamera
 					handle = genshinImpact.MainWindowHandle;
 					ClientToScreen(handle, ref position);
 					GetClientRect(handle, ref area);
+
+					AspectRatio = GetAspectRatio();
 
 					Debug.WriteLine($"Found {processName}.exe");
 					return;
@@ -455,9 +458,9 @@ namespace InventoryKamera
 		}
 
 		public static int GetDelay()
-        {
+		{
 			return delay;
-        }
+		}
 
 		public enum Speed
 		{

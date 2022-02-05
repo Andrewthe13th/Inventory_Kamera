@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Windows.Forms;
-using System.Threading.Tasks;
-using System.Drawing;
-using Microsoft.WindowsAPICodePack.Dialogs;
 using System.Diagnostics;
+using System.Drawing;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace InventoryKamera
 {
@@ -73,6 +72,7 @@ namespace InventoryKamera
 					UpdateStatusLabel.ForeColor = Color.Green;
 					UpdateStatusLabel.Text = "Updated lists";
 					break;
+
 				default:
 					UpdateStatusLabel.ForeColor = Color.Red;
 					UpdateStatusLabel.Text = "Could not update lists";
@@ -87,7 +87,7 @@ namespace InventoryKamera
 			ArtifactsCheckBox.Enabled = !EverythingCheckBox.Checked;
 			DevMaterialsCheckBox.Enabled = !EverythingCheckBox.Checked;
 			MaterialsCheckBox.Enabled = !EverythingCheckBox.Checked;
-			AllMaterialsCheckBox.Enabled  = !EverythingCheckBox.Checked;
+			AllMaterialsCheckBox.Enabled = !EverythingCheckBox.Checked;
 		}
 
 		private void DatabaseUpdateForm_FormClosed(object sender, FormClosedEventArgs e)

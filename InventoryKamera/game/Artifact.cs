@@ -22,13 +22,13 @@ namespace InventoryKamera
 		[JsonProperty("level")]
 		public int Level { get; private set; }
 
-		[JsonProperty("substats")] 
+		[JsonProperty("substats")]
 		public SubStat[] SubStats { get; private set; }
 
 		[JsonProperty("location")]
 		public string EquippedCharacter { get; private set; }
 
-		[JsonProperty("lock")] 
+		[JsonProperty("lock")]
 		public bool Lock { get; private set; }
 
 		public int SubStatsCount { get; private set; }
@@ -51,7 +51,7 @@ namespace InventoryKamera
 
 		public Artifact(string _setName, int _rarity, int _level, string _gearSlot, string _mainStat, SubStat[] _subStats, int _subStatsCount, string _equippedCharacter = null, int _id = 0, bool _Lock = false)
 		{
-			GearSlot = string.IsNullOrWhiteSpace(_gearSlot) ? "" : _gearSlot ;
+			GearSlot = string.IsNullOrWhiteSpace(_gearSlot) ? "" : _gearSlot;
 			Rarity = _rarity;
 			MainStat = string.IsNullOrWhiteSpace(_mainStat) ? "" : _mainStat;
 			Level = _level;
@@ -106,15 +106,14 @@ namespace InventoryKamera
 			return valid;
 		}
 
-		public bool	HasValidEquippedCharacter()
+		public bool HasValidEquippedCharacter()
 		{
-			return  string.IsNullOrWhiteSpace(EquippedCharacter) || Scraper.IsValidCharacter(EquippedCharacter) ;
+			return string.IsNullOrWhiteSpace(EquippedCharacter) || Scraper.IsValidCharacter(EquippedCharacter);
 		}
 
 		[Serializable]
 		public struct SubStat
 		{
-			
 			[JsonProperty("key")]
 			[DefaultValue("")]
 			public string stat;
@@ -162,7 +161,7 @@ namespace InventoryKamera
 		}
 
 		public override string ToString()
-{
+		{
 			string output = $"Artifact ID: {Id}\n"
 				+ $"Set: {SetName}\n"
 				+ $"Rarity: {Rarity}\n"

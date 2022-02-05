@@ -1,6 +1,6 @@
 ﻿namespace InventoryKamera
 {
-    partial class Form1
+    partial class MainForm
     {
         /// <summary>
         /// Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
 			this.StartScan_Button = new System.Windows.Forms.Button();
 			this.WeaponArtifact_Label = new System.Windows.Forms.Label();
 			this.WeaponArtifactOutput_TextBox_Label = new System.Windows.Forms.Label();

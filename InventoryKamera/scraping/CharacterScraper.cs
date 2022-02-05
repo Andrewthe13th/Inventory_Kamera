@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Accord.Imaging;
-using System.Linq;
 
 namespace InventoryKamera
 {
@@ -14,7 +14,6 @@ namespace InventoryKamera
 
 		public static void ScanCharacters(ref List<Character> characters)
 		{
-
 			// first character name is used to stop scanning characters
 			int characterCount = 0;
 			firstCharacterName = null; // Static variable might already be set
@@ -168,7 +167,6 @@ namespace InventoryKamera
 
 			do
 			{
-
 				Navigation.SystemRandomWait(Navigation.Speed.Fast);
 				using (Bitmap bm = Navigation.CaptureRegion(region))
 				{
