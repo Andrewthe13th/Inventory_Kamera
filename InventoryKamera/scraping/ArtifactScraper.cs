@@ -141,50 +141,56 @@ namespace InventoryKamera
 
 		private static (List<Rectangle> rectangles, int cols, int rows) GetPageOfItems()
 		{
+			// Screenshot of inventory
+			using (Bitmap screenshot = Navigation.CaptureWindow())
+			{
+				
+				try
+				{
+					var (rectangles, cols, rows) = ProcessScreenshot(screenshot);
+					if (cols != 7 || rows < 5 || true)
+					{
+						// Generated rectangles
+						screenshot.Save($"./logging/artifacts/ArtifactInventoryIncomplete.png");
+						using (Graphics g = Graphics.FromImage(screenshot))
+							rectangles.ForEach(r => g.DrawRectangle(new Pen(Color.Green, 2), r));
+						screenshot.Save($"./logging/artifacts/ArtifactInventory_{cols}x{rows}.png");
+					}
+					return (rectangles, cols, rows);
+				}
+				catch (Exception e)
+				{
+					screenshot.Save($"./logging/artifacts/ArtifactInventory.png");
+					throw e;
+				}
+				
+			}
+		}
+
+		public static (List<Rectangle> rectangles, int cols, int rows) ProcessScreenshot(Bitmap screenshot)
+		{
 			// Size of an item card is the same in 16:10 and 16:9. Also accounts for character icon and resolution size.
 			var card = new RECT(
 				Left: 0,
 				Top: 0,
-				Right: (int)(85 / 1280.0 * Navigation.GetWidth()),
-				Bottom: (int)(105 / 720.0 * Navigation.GetHeight()));
+				Right: (int)(85 / 1280.0 * screenshot.Width),
+				Bottom: (int)(105 / 720.0 * screenshot.Height));
 
 			// Filter for relative size of items in inventory, give or take a few pixels
 			using (BlobCounter blobCounter = new BlobCounter
 			{
 				FilterBlobs = true,
-				MinHeight = card.Height - 10,
-				MaxHeight = card.Height + 10,
-				MinWidth = card.Width - 10,
-				MaxWidth = card.Width + 10,
+				MinHeight = card.Height - 15,
+				MaxHeight = card.Height + 15,
+				MinWidth = card.Width - 15,
+				MaxWidth = card.Width + 15,
 			})
 			{
-				// Screenshot of inventory
-				Bitmap screenshot = Navigation.CaptureWindow();
-
-				// Copy used to overlay onto in testing
-				Bitmap output = new Bitmap(screenshot);
-
 				// Image pre-processing
-				ContrastCorrection contrast = new ContrastCorrection(85);
-				Grayscale grayscale = new Grayscale(0.2125, 0.7154, 0.0721);
-				Edges edges = new Edges();
-				Threshold threshold = new Threshold(15);
-				FillHoles holes = new FillHoles
-				{
-					CoupledSizeFiltering = true,
-					MaxHoleWidth = card.Width + 10,
-					MaxHoleHeight = card.Height + 10
-				};
-				SobelEdgeDetector sobel = new SobelEdgeDetector();
+				screenshot = new KirschEdgeDetector().Apply(screenshot); // Algorithm to find edges. Really good but can take ~1s
+				screenshot = new Grayscale(0.2125, 0.7154, 0.0721).Apply(screenshot);
+				screenshot = new Threshold(100).Apply(screenshot); // Convert to black and white only based on pixel intensity			
 
-				screenshot = contrast.Apply(screenshot);
-				screenshot = edges.Apply(screenshot); // Quick way to find ~75% of edges
-				screenshot = grayscale.Apply(screenshot);
-				screenshot = threshold.Apply(screenshot); // Convert to black and white only based on pixel intensity
-
-				screenshot = sobel.Apply(screenshot); // Find some more edges
-				screenshot = holes.Apply(screenshot); // Fill shapes
-				screenshot = sobel.Apply(screenshot); // Find edges of those shapes. A second pass removes edges within item card
 
 				blobCounter.ProcessImage(screenshot);
 				// Note: Processing won't always detect all item rectangles on screen. Since the
@@ -192,10 +198,6 @@ namespace InventoryKamera
 
 				if (blobCounter.ObjectsCount < 7)
 				{
-					output.Save("./logging/artifacts/ArtifactInventory.png");
-
-					screenshot.Dispose();
-					output.Dispose();
 					throw new Exception("Insufficient items found in artifact inventory");
 				}
 
@@ -203,8 +205,8 @@ namespace InventoryKamera
 				List<Rectangle> rectangles = new List<Rectangle>();
 				List<Rectangle> blobRects = blobCounter.GetObjectsRectangles().ToList();
 
-				int sWidth = blobRects[0].Width;
-				int sHeight = blobRects[0].Height;
+				int minWidth = blobRects[0].Width;
+				int minHeight = blobRects[0].Height;
 				foreach (var rect in blobRects)
 				{
 					bool add = true;
@@ -221,8 +223,8 @@ namespace InventoryKamera
 					}
 					if (add)
 					{
-						sWidth = Math.Min(sWidth, rect.Width);
-						sHeight = Math.Min(sHeight, rect.Height);
+						minWidth = Math.Min(minWidth, rect.Width);
+						minHeight = Math.Min(minHeight, rect.Height);
 						rectangles.Add(rect);
 					}
 				}
@@ -241,7 +243,7 @@ namespace InventoryKamera
 					foreach (var x in colCoords)
 					{
 						var xC = item.Center().X;
-						if (x - 10 <= xC && xC <= x + 10)
+						if (x - 50 / 1280.0 * screenshot.Width <= xC && xC <= x + 50 / 1280.0 * screenshot.Width)
 						{
 							addX = false;
 							break;
@@ -250,7 +252,7 @@ namespace InventoryKamera
 					foreach (var y in rowCoords)
 					{
 						var yC = item.Center().Y;
-						if (y - 10 <= yC && yC <= y + 10)
+						if (y - 50 / 720.0 * screenshot.Height <= yC && yC <= y + 50 / 720.0 * screenshot.Height)
 						{
 							addY = false;
 							break;
@@ -266,21 +268,24 @@ namespace InventoryKamera
 					}
 				}
 
-				// Clear it all because we're going to use X,Y coordinate pairings to build rectangles
-				// around. This won't be perfect but it should algorithmically put rectangles over all
-				// images on the screen. The center of each of these rectangles should be a good enough
-				// spot to click.
+				// Going to use X,Y coordinate pairings to build rectangles around. Items that might have been missed
+				// This is quite accurate and algorithmically puts rectangles over all items on the screen that were missed.
+				// The center of each of these rectangles should be a good enough spot to click.
 				rectangles.Clear();
 				colCoords.Sort();
 				rowCoords.Sort();
+
+				colCoords.RemoveAll(col => col > screenshot.Width * 0.65);
+
 				foreach (var row in rowCoords)
 				{
+					
 					foreach (var col in colCoords)
 					{
-						int x = (int)( col - (sWidth * .5) );
-						int y = (int)( row - (sHeight * .5) );
+						int x = (int)( col - (minWidth * .5) );
+						int y = (int)( row - (minHeight * .5) );
 
-						rectangles.Add(new Rectangle(x, y, sWidth, sHeight));
+						rectangles.Add(new Rectangle(x, y, minWidth, minHeight));
 					}
 				}
 
@@ -303,21 +308,12 @@ namespace InventoryKamera
 				// Sort by row then by column within each row
 				rectangles = rectangles.OrderBy(r => r.Top).ThenBy(r => r.Left).ToList();
 
-				Debug.WriteLine($"{colCoords.Count} columns");
-				Debug.WriteLine($"{rowCoords.Count} rows");
+				Debug.WriteLine($"{colCoords.Count} columns: ");
+				colCoords.ForEach(c => Debug.Write(c + ", ")); Debug.WriteLine("");
+				Debug.WriteLine($"{rowCoords.Count} rows: ");
+				rowCoords.ForEach(c => Debug.Write(c + ", ")); Debug.WriteLine("");
 				Debug.WriteLine($"{rectangles.Count} rectangles");
 
-				// Generated rectangles
-				new RectanglesMarker(rectangles, Color.Green).ApplyInPlace(output);
-				//Navigation.DisplayBitmap(output, "Rectangles");
-
-				if (colCoords.Count < 7 || rowCoords.Count < 5)
-				{
-					output.Save($"./logging/artifacts/ArtifactInventory_{colCoords.Count}x{rowCoords.Count}.png");
-				}
-
-				screenshot.Dispose();
-				output.Dispose();
 				return (rectangles, colCoords.Count, rowCoords.Count);
 			}
 		}

@@ -95,6 +95,7 @@ namespace InventoryKamera
 				catch (Exception ex)
 				{
 					UserInterface.AddError(ex.Message + "\n" + ex.StackTrace);
+					Debug.WriteLine($"{ex.Message}\n{ex.StackTrace}");
 				}
 				Navigation.MainMenuScreen();
 			}
