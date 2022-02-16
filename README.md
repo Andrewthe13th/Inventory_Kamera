@@ -1,3 +1,8 @@
+# KAMERA CURRENTLY DOES NOT WORK FOR VERSION 2.5 WE ARE WORKING ON FIXES
+Version 2.5 has changed some UI's. Character's should scan fine. Scanning weapons, artifacts, or any material will probably not work. We hope to be able to get a fix out ASAP.
+
+Please direct your comments or questions about this to [the pinned issue](https://github.com/Andrewthe13th/Inventory_Kamera/issues/219#issue-1139525395). We apologize for the inconvenience.
+
 # Inventory Kamera - A Genshin Data Scanner
 An OCR Scanner that scans your Characters, Weapons, Artifacts, Materials and Character Development items in your Inventory.
 
@@ -5,7 +10,6 @@ This scanner exports in GOOD formatting. This format is supported in a variety o
 
 
 Currently Inventory Kamera English as the in-game language, 16:9 and 16:10 game window aspect ratios, as well as the English (GenshinImpact.exe) and Chinese (YuanShen.exe) clients. Please read the instructions below for more information.
-
 
 
 ## How to use the Scanner
