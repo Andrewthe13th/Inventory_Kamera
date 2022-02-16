@@ -162,7 +162,6 @@ namespace InventoryKamera
 							rectangles.ForEach(r => g.DrawRectangle(new Pen(Color.Green, 2), r));
 						
 						screenshot.Save($"./logging/weapons/WeaponInventory_{cols}x{rows}.png");
-						Navigation.DisplayBitmap(screenshot);
 					}
 					return (rectangles, cols, rows);
 				}

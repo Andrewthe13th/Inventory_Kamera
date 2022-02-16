@@ -16,7 +16,10 @@ namespace InventoryKamera
 		public string Format { get; private set; }
 
 		[JsonProperty("version")]
-		public string Version { get; private set; }
+		public int Version { get; private set; }
+
+		[JsonProperty("kamera_version")]
+		public string AppVersion { get; private set; }
 
 		[JsonProperty("source")]
 		public string Source { get; private set; }
@@ -36,7 +39,7 @@ namespace InventoryKamera
 		public GOOD()
 		{
 			Format = "EMPTY";
-			Version = "0";
+			Version = 0;
 			Source = "NOT FILLED";
 		}
 
@@ -44,7 +47,8 @@ namespace InventoryKamera
 		{
 			// Get rid of VS warning since we are converting this class to JSON
 			Format = "GOOD";
-			Version = Regex.Replace(Assembly.GetExecutingAssembly().GetName().Version.ToString(), @"[.0]*$", string.Empty);
+			Version = 1;
+			AppVersion = Regex.Replace(Assembly.GetExecutingAssembly().GetName().Version.ToString(), @"[.0]*$", string.Empty);
 			Source = "Inventory_Kamera";
 
 			// Assign Characters
