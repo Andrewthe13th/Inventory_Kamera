@@ -131,7 +131,6 @@ namespace InventoryKamera
 			Scraper.SetGamma(0.2, 0.2, 0.2, ref nameBitmap);
 			Scraper.SetInvert(ref nameBitmap);
 			Bitmap n = Scraper.ConvertToGrayscale(nameBitmap);
-			Scraper.SetContrast(40.0, ref n);
 
 			UserInterface.SetNavigation_Image(nameBitmap);
 

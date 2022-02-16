@@ -338,7 +338,7 @@ namespace InventoryKamera
 			if (Navigation.GetAspectRatio() == new Size(16, 9))
 			{
 				// Grab image of entire card on Right
-				reference = new RECT(new Rectangle(862, 80, 327, 560)); // In 1280x720
+				reference = new RECT(new Rectangle(872, 80, 327, 560)); // In 1280x720
 
 				int left   = (int)Math.Round(reference.Left   / 1280.0 * width, MidpointRounding.AwayFromZero);
 				int top    = (int)Math.Round(reference.Top    / 720.0 * height, MidpointRounding.AwayFromZero);
@@ -357,7 +357,7 @@ namespace InventoryKamera
 			else // if (Navigation.GetAspectRatio() == new Size(8, 5))
 			{
 				// Grab image of entire card on Right
-				reference = new Rectangle(862, 80, 328, 640); // In 1280x800
+				reference = new Rectangle(872, 80, 328, 640); // In 1280x800
 
 				int left   = (int)Math.Round(reference.Left   / 1280.0 * width, MidpointRounding.AwayFromZero);
 				int top    = (int)Math.Round(reference.Top    / 800.0 * height, MidpointRounding.AwayFromZero);

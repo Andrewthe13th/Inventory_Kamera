@@ -80,7 +80,7 @@ namespace InventoryKamera
 
 		#region Window Capturing
 
-		public static Bitmap CaptureWindow(PixelFormat format = PixelFormat.Format32bppRgb)
+		public static Bitmap CaptureWindow(PixelFormat format = PixelFormat.Format24bppRgb)
 		{
 			Bitmap bmp = new Bitmap(GetWidth(), GetHeight(), format);
 			using (Graphics gfxBmp = Graphics.FromImage(bmp))
@@ -97,9 +97,9 @@ namespace InventoryKamera
 			return bmp;
 		}
 
-		public static Bitmap CaptureRegion(RECT region)
+		public static Bitmap CaptureRegion(RECT region, PixelFormat format = PixelFormat.Format24bppRgb)
 		{
-			Bitmap bmp = new Bitmap(region.Width, region.Height, PixelFormat.Format24bppRgb);
+			Bitmap bmp = new Bitmap(region.Width, region.Height, format);
 			using (Graphics gfxBmp = Graphics.FromImage(bmp))
 			{
 				gfxBmp.CopyFromScreen(WindowPosition.Left + region.Left, WindowPosition.Top + region.Top, 0, 0, bmp.Size);
@@ -107,9 +107,9 @@ namespace InventoryKamera
 			return bmp;
 		}
 
-		public static Bitmap CaptureRegion(int x, int y, int width, int height)
+		public static Bitmap CaptureRegion(int x, int y, int width, int height, PixelFormat format = PixelFormat.Format24bppRgb)
 		{
-			return CaptureRegion(new Rectangle(x, y, width, height));
+			return CaptureRegion(new Rectangle(x, y, width, height), format);
 		}
 
 		#endregion Window Capturing

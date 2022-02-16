@@ -229,9 +229,6 @@ namespace InventoryKamera
 					}
 				}
 
-				// Items originally detected
-				// new RectanglesMarker(rectangles, Color.Red).ApplyInPlace(output);
-
 				// Determine X and Y coordinates for columns and rows, respectively
 				var colCoords = new List<int>();
 				var rowCoords = new List<int>();
@@ -332,7 +329,7 @@ namespace InventoryKamera
 
 			if (Navigation.GetAspectRatio() == new Size(16, 9))
 			{
-				reference = new RECT(new Rectangle(862, 80, 327, 560));
+				reference = new RECT(new Rectangle(872, 80, 327, 560));
 
 				int left   = (int)Math.Round(reference.Left   / 1280.0 * width, MidpointRounding.AwayFromZero);
 				int top    = (int)Math.Round(reference.Top    / 720.0 * height, MidpointRounding.AwayFromZero);
@@ -349,7 +346,7 @@ namespace InventoryKamera
 			}
 			else // if (Navigation.GetAspectRatio() == new Size(8, 5))
 			{
-				reference = new RECT(new Rectangle(862, 80, 327, 640));
+				reference = new RECT(new Rectangle(872, 80, 327, 640));
 
 				int left   = (int)Math.Round(reference.Left   / 1280.0 * width, MidpointRounding.AwayFromZero);
 				int top    = (int)Math.Round(reference.Top    / 800.0 * height, MidpointRounding.AwayFromZero);

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -14,7 +16,7 @@ namespace InventoryKamera
 		public string Format { get; private set; }
 
 		[JsonProperty("version")]
-		public int Version { get; private set; }
+		public string Version { get; private set; }
 
 		[JsonProperty("source")]
 		public string Source { get; private set; }
@@ -34,7 +36,7 @@ namespace InventoryKamera
 		public GOOD()
 		{
 			Format = "EMPTY";
-			Version = 0;
+			Version = "0";
 			Source = "NOT FILLED";
 		}
 
@@ -42,7 +44,7 @@ namespace InventoryKamera
 		{
 			// Get rid of VS warning since we are converting this class to JSON
 			Format = "GOOD";
-			Version = 1;
+			Version = Regex.Replace(Assembly.GetExecutingAssembly().GetName().Version.ToString(), @"[.0]*$", string.Empty);
 			Source = "Inventory_Kamera";
 
 			// Assign Characters

@@ -410,7 +410,7 @@ namespace InventoryKamera
 			var width = Navigation.GetWidth();
 			var height = Navigation.GetHeight();
 
-			var reference = new Rectangle(862, 80, 327, 37);
+			var reference = new Rectangle(872, 80, 327, 37);
 
 			// Nameplate is in the same place in 16:9 and 16:10
 			var region= new RECT(
