@@ -19,17 +19,16 @@ namespace InventoryKamera
 
 		[JsonProperty]
 		public HashSet<Material> AllMaterials
-		{ 
-			get 
+		{
+			get
 			{
 				var all = new HashSet<Material>();
 				all.UnionWith(Materials);
 				all.UnionWith(DevMaterials);
 				return all;
 			}
-			private set { } 
+			private set { }
 		}
-		//private List<Artifact> equippedArtifacts;
 
 		public int Size
 		{

@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
-using Accord.Imaging.Filters;
 using Accord.Imaging;
-using System.Diagnostics;
+using Accord.Imaging.Filters;
 
 namespace InventoryKamera
 {
@@ -65,7 +65,7 @@ namespace InventoryKamera
 			{
 				int rows, cols;
 				// Find all items on the screen
-				(rectangles, cols, rows) = GetPageOfItems(section, page); 
+				(rectangles, cols, rows) = GetPageOfItems(section, page);
 
 				// Remove last row. Sometimes the bottom of a page of items is caught which results
 				// in a faded quantity that can't be parsed. Removing slightly increases the number of pages that
@@ -144,7 +144,7 @@ namespace InventoryKamera
 				++page;
 			}
 
-			LastPage:
+		LastPage:
 			// scroll down as much as possible
 			for (int i = 0; i < 20; i++)
 			{
@@ -198,21 +198,19 @@ namespace InventoryKamera
 
 		private static int ScanMora()
 		{
-
 			var region = new Rectangle(
 				x: (int)(125 / 1280.0 * Navigation.GetWidth()),
 				y: (int)(665 / 720.0 * Navigation.GetHeight()),
 				width: (int)(300 / 1280.0 * Navigation.GetWidth()),
 				height: (int)(30 / 720.0 * Navigation.GetHeight()));
 
-			if (Navigation.GetAspectRatio() == new Size(8,5))
+			if (Navigation.GetAspectRatio() == new Size(8, 5))
 			{
-				region.Y = (int)( 740 / 800.0 * Navigation.GetHeight());
+				region.Y = (int)( 740 / 800.0 * Navigation.GetHeight() );
 			}
 
 			using (var bm = Navigation.CaptureRegion(region))
 			{
-
 				var input = Scraper.AnalyzeText(bm).Split(' ').ToList();
 				input.RemoveAll(e => Regex.IsMatch(e.Trim(), @"[^0-9]") || string.IsNullOrWhiteSpace(e.Trim()));
 				var mora = input.LastOrDefault();
@@ -234,11 +232,37 @@ namespace InventoryKamera
 
 		private static (List<Rectangle> rectangles, int cols, int rows) GetPageOfItems(InventorySection section, int page)
 		{
+			// Screenshot of inventory
+			using (Bitmap screenshot = Navigation.CaptureWindow())
+			{
+				try
+				{
+					var (rectangles, cols, rows) = ProcessScreenshot(screenshot);
+					if (cols != 8 || rows < 4)
+					{
+						// Generated rectangles
+						screenshot.Save($"./logging/materials/{section}Inventory{page}.png");
+						using (Graphics g = Graphics.FromImage(screenshot))
+							rectangles.ForEach(r => g.DrawRectangle(new Pen(Color.Green, 3), r));
+						screenshot.Save($"./logging/materials/{section}Inventory{page}_{cols}x{rows}.png");
+					}
+					return (rectangles, cols, rows);
+				}
+				catch (Exception e)
+				{
+					screenshot.Save($"./logging/materials/{section}Inventory{page}.png");
+					throw new Exception($"Insufficient items found in {section} inventory");
+				}
+			}
+		}
+
+		public static (List<Rectangle> rectangles, int cols, int rows) ProcessScreenshot(Bitmap screenshot)
+		{
 			var card = new RECT(
 				Left: 0,
 				Top: 0,
-				Right: (int)(83 / 1280.0 * Navigation.GetWidth()),
-				Bottom: (int)(100 / 720.0 * Navigation.GetHeight()));
+				Right: (int)(85 / 1280.0 * screenshot.Width),
+				Bottom: (int)(100 / 720.0 * screenshot.Height));
 
 			// Filter for relative size of items in inventory, give or take a few pixels
 			using (BlobCounter blobCounter = new BlobCounter
@@ -250,34 +274,10 @@ namespace InventoryKamera
 				MaxWidth = card.Width + 15,
 			})
 			{
-
-				// Screenshot of inventory
-				Bitmap screenshot = Navigation.CaptureWindow();
-
-				// Copy used to overlay onto in testing
-				Bitmap output = new Bitmap(screenshot);
-
 				// Image pre-processing
-				ContrastCorrection contrast = new ContrastCorrection(90);
-				Grayscale grayscale = new Grayscale(0.2125, 0.7154, 0.0721);
-				Edges edges = new Edges();
-				Threshold threshold = new Threshold(15);
-				FillHoles holes = new FillHoles
-				{
-					CoupledSizeFiltering = true,
-					MaxHoleWidth = card.Width + 10,
-					MaxHoleHeight = card.Height + 10
-				};
-				SobelEdgeDetector sobel = new SobelEdgeDetector();
-
-				screenshot = contrast.Apply(screenshot);
-				screenshot = edges.Apply(screenshot); // Quick way to find ~75% of edges
-				screenshot = grayscale.Apply(screenshot);
-				screenshot = threshold.Apply(screenshot); // Convert to black and white only based on pixel intensity
-
-				screenshot = sobel.Apply(screenshot); // Find some more edges
-				screenshot = holes.Apply(screenshot); // Fill shapes
-				screenshot = sobel.Apply(screenshot); // Find edges of those shapes. A second pass removes edges within item card
+				screenshot = new KirschEdgeDetector().Apply(screenshot); // Algorithm to find edges. Really good but can take ~1s
+				screenshot = new Grayscale(0.2125, 0.7154, 0.0721).Apply(screenshot);
+				screenshot = new Threshold(100).Apply(screenshot); // Convert to black and white only based on pixel intensity
 
 				blobCounter.ProcessImage(screenshot);
 				// Note: Processing won't always detect all item rectangles on screen. Since the
@@ -285,19 +285,15 @@ namespace InventoryKamera
 
 				if (blobCounter.ObjectsCount < 7)
 				{
-					output.Save($"./logging/materials/{section}Inventory{page}.png");
-
-					screenshot.Dispose();
-					output.Dispose();
-					throw new Exception($"Insufficient items found in {section} inventory");
+					throw new Exception();
 				}
 
 				// Don't save overlapping blobs
 				List<Rectangle> rectangles = new List<Rectangle>();
 				List<Rectangle> blobRects = blobCounter.GetObjectsRectangles().ToList();
 
-				int sWidth = blobRects[0].Width;
-				int sHeight = blobRects[0].Height;
+				int minWidth = blobRects[0].Width;
+				int minHeight = blobRects[0].Height;
 				foreach (var rect in blobRects)
 				{
 					bool add = true;
@@ -314,8 +310,8 @@ namespace InventoryKamera
 					}
 					if (add)
 					{
-						sWidth = Math.Min(sWidth, rect.Width);
-						sHeight = Math.Min(sHeight, rect.Height);
+						minWidth = Math.Min(minWidth, rect.Width);
+						minHeight = Math.Min(minHeight, rect.Height);
 						rectangles.Add(rect);
 					}
 				}
@@ -331,7 +327,7 @@ namespace InventoryKamera
 					foreach (var x in colCoords)
 					{
 						var xC = item.Center().X;
-						if (x - 10 <= xC && xC <= x + 10)
+						if (x - 50 / 1280.0 * screenshot.Width <= xC && xC <= x + 50 / 1280.0 * screenshot.Width)
 						{
 							addX = false;
 							break;
@@ -340,7 +336,7 @@ namespace InventoryKamera
 					foreach (var y in rowCoords)
 					{
 						var yC = item.Center().Y;
-						if (y - 10 <= yC && yC <= y + 10)
+						if (y - 50 / 720.0 * screenshot.Height <= yC && yC <= y + 50 / 720.0 * screenshot.Height)
 						{
 							addY = false;
 							break;
@@ -356,21 +352,23 @@ namespace InventoryKamera
 					}
 				}
 
-				// Clear it all because we're going to use X,Y coordinate pairings to build rectangles
-				// around. This won't be perfect but it should algorithmically put rectangles over all
-				// images on the screen. The center of each of these rectangles should be a good enough
-				// spot to click.
+				// Going to use X,Y coordinate pairings to build rectangles around. Items that might have been missed
+				// This is quite accurate and algorithmically puts rectangles over all items on the screen that were missed.
+				// The center of each of these rectangles should be a good enough spot to click.
 				rectangles.Clear();
 				colCoords.Sort();
 				rowCoords.Sort();
+
+				colCoords.RemoveAll(col => col > screenshot.Width * 0.65);
+
 				foreach (var row in rowCoords)
 				{
 					foreach (var col in colCoords)
 					{
-						int x = (int)( col - (sWidth * .5) );
-						int y = (int)( row - (sHeight * .5) );
+						int x = (int)( col - (minWidth * .5) );
+						int y = (int)( row - (minHeight * .5) );
 
-						rectangles.Add(new Rectangle(x, y, sWidth, sHeight));
+						rectangles.Add(new Rectangle(x, y, minWidth, minHeight));
 					}
 				}
 
@@ -393,22 +391,11 @@ namespace InventoryKamera
 				// Sort by row then by column within each row
 				rectangles = rectangles.OrderBy(r => r.Top).ThenBy(r => r.Left).ToList();
 
-				Debug.WriteLine($"{colCoords.Count} columns");
-				Debug.WriteLine($"{rowCoords.Count} rows");
+				Debug.WriteLine($"{colCoords.Count} columns: ");
+				colCoords.ForEach(c => Debug.Write(c + ", ")); Debug.WriteLine("");
+				Debug.WriteLine($"{rowCoords.Count} rows: ");
+				rowCoords.ForEach(c => Debug.Write(c + ", ")); Debug.WriteLine("");
 				Debug.WriteLine($"{rectangles.Count} rectangles");
-
-
-				new RectanglesMarker(rectangles, Color.Green).ApplyInPlace(output);
-				//Navigation.DisplayBitmap(output, "Rectangles");
-
-				if (colCoords.Count < 7 || rowCoords.Count < 4)
-				{
-					screenshot.Save($"./logging/materials/{section}Inventory{page}.png");
-					output.Save($"./logging/materials/{section}Inventory{page}_{colCoords.Count}x{rowCoords.Count}.png");
-				}
-
-				screenshot.Dispose();
-				output.Dispose();
 
 				return (rectangles, colCoords.Count, rowCoords.Count);
 			}
@@ -423,7 +410,7 @@ namespace InventoryKamera
 			var width = Navigation.GetWidth();
 			var height = Navigation.GetHeight();
 
-			var reference = new Rectangle(862, 80, 327, 37);
+			var reference = new Rectangle(872, 80, 327, 37);
 
 			// Nameplate is in the same place in 16:9 and 16:10
 			var region= new RECT(
@@ -431,7 +418,6 @@ namespace InventoryKamera
 				Top:    (int)( reference.Top    / refHeight * height),
 				Right:  (int)( reference.Right  / refWidth  * width),
 				Bottom: (int)( reference.Bottom / refHeight * height));
-
 
 			Bitmap bm = Navigation.CaptureRegion(region);
 			nameplate = (Bitmap)bm.Clone();
@@ -469,17 +455,17 @@ namespace InventoryKamera
 			{
 				quantity = (Bitmap)bm.Clone();
 
-				using (Bitmap rescaled = Scraper.ResizeImage(bm, (int)( bm.Width * 3), (int)( bm.Height * 3 )))
+				using (Bitmap rescaled = Scraper.ResizeImage(bm, (int)( bm.Width * 3 ), (int)( bm.Height * 3 )))
 				{
 					Bitmap copy = (Bitmap)rescaled.Clone();
 					Scraper.SetGamma(0.7, 0.7, 0.7, ref copy);
 					// Image Processing
 					Bitmap n  =  Scraper.ConvertToGrayscale(copy);
 					Scraper.SetContrast(65, ref n); // Setting a high contrast seems to be better than thresholding
-					//Scraper.SetThreshold(165, ref n);
+													//Scraper.SetThreshold(165, ref n);
 
 					string old_text = Scraper.AnalyzeText(n, Tesseract.PageSegMode.SingleWord).Trim().ToLower();
-					
+
 					// Might be worth it to train some more numbers
 					var cleaned = old_text.Replace("mm", "111").Replace("m", "11").Replace("nn", "11").Replace("n", "1"); // Tesseract struggles with 1's so close together because of font
 					cleaned = cleaned.Replace("a", "4");
@@ -500,7 +486,6 @@ namespace InventoryKamera
 					copy.Dispose();
 					n.Dispose();
 					return count;
-
 				}
 			}
 		}

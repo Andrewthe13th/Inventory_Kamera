@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -15,6 +17,9 @@ namespace InventoryKamera
 
 		[JsonProperty("version")]
 		public int Version { get; private set; }
+
+		[JsonProperty("kamera_version")]
+		public string AppVersion { get; private set; }
 
 		[JsonProperty("source")]
 		public string Source { get; private set; }
@@ -31,7 +36,6 @@ namespace InventoryKamera
 		[JsonProperty("materials", NullValueHandling = NullValueHandling.Ignore)]
 		public Dictionary<string, int> Materials { get; private set; }
 
-
 		public GOOD()
 		{
 			Format = "EMPTY";
@@ -44,6 +48,7 @@ namespace InventoryKamera
 			// Get rid of VS warning since we are converting this class to JSON
 			Format = "GOOD";
 			Version = 1;
+			AppVersion = Regex.Replace(Assembly.GetExecutingAssembly().GetName().Version.ToString(), @"[.0]*$", string.Empty);
 			Source = "Inventory_Kamera";
 
 			// Assign Characters
@@ -58,7 +63,6 @@ namespace InventoryKamera
 			// Assign materials
 			if (genshinData.Inventory.AllMaterials.Count > 0) Materials = new Dictionary<string, int>();
 			genshinData.Inventory.AllMaterials.ToList().ForEach(material => Materials.Add(material.name, material.count));
-			
 		}
 
 		internal void WriteToJSON(string outputDirectory, string oldDataFilePath = "")

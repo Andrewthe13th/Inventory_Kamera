@@ -16,7 +16,7 @@ using WindowsInput.Native;
 
 namespace InventoryKamera
 {
-	public partial class Form1 : Form
+	public partial class MainForm : Form
 	{
 		private static Thread scannerThread;
 		private static InventoryKamera data;
@@ -25,7 +25,7 @@ namespace InventoryKamera
 
 		private bool running = false;
 
-		public Form1()
+		public MainForm()
 		{
 			InitializeComponent();
 
@@ -201,7 +201,7 @@ namespace InventoryKamera
 
 						// Make Json File
 						good.WriteToJSON(OutputPath_TextBox.Text);
-						
+
 						UserInterface.SetProgramStatus("Finished");
 					}
 					catch (ThreadAbortException)
@@ -390,6 +390,18 @@ namespace InventoryKamera
 		private void SaveSettings(object sender, EventArgs e)
 		{
 			SaveSettings();
+		}
+
+		private void ExportFolderMenuItem_Click(object sender, EventArgs e)
+		{
+			if (Directory.Exists(OutputPath_TextBox.Text) || Directory.CreateDirectory(OutputPath_TextBox.Text).Exists)
+			{
+				Process.Start($@"{OutputPath_TextBox.Text}");
+			}
+			else
+			{
+				Process.Start("explorer.exe");
+			}
 		}
 	}
 }

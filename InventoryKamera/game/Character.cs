@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using Newtonsoft.Json;
 
 namespace InventoryKamera
@@ -18,7 +17,8 @@ namespace InventoryKamera
 		public int Constellation { get; private set; }
 
 		[JsonProperty("ascension")]
-		public int Ascension { get { return AscensionLevel(); } private set { } }
+		public int Ascension
+		{ get { return AscensionLevel(); } private set { } }
 
 		[JsonProperty("talent")]
 		public Dictionary<string, int> Talents { get; private set; }
@@ -67,7 +67,7 @@ namespace InventoryKamera
 			Constellation = _constellation;
 			try
 			{
-				Talents["auto"]  = _talents[0];
+				Talents["auto"] = _talents[0];
 				Talents["skill"] = _talents[1];
 				Talents["burst"] = _talents[2];
 			}

@@ -14,16 +14,22 @@ namespace InventoryKamera
 {
 	public static class Navigation
 	{
-		private static Process genshinImpact;
-		public static InputSimulator sim = new InputSimulator();
-		private static RECT area = new RECT();
-		private static RECT position = new RECT();
+		internal static InputSimulator sim = new InputSimulator();
+		internal static RECT WindowSize;
+		internal static RECT WindowPosition;
+		internal static Size AspectRatio;
 
 		private static int delay = 0;
 
-		public const VirtualKeyCode escapeKey = VirtualKeyCode.ESCAPE;
+		public static VirtualKeyCode escapeKey = VirtualKeyCode.ESCAPE;
 		public static VirtualKeyCode characterKey = VirtualKeyCode.VK_C;
 		public static VirtualKeyCode inventoryKey = VirtualKeyCode.VK_B;
+
+		[DllImport("user32.dll", SetLastError = true)]
+		private static extern bool GetClientRect(IntPtr hWnd, ref RECT Rect);
+
+		[DllImport("user32.dll", SetLastError = true)]
+		private static extern bool ClientToScreen(IntPtr hWnd, ref RECT Rect);
 
 		public static void Initialize()
 		{
@@ -36,14 +42,24 @@ namespace InventoryKamera
 			foreach (var processName in executables)
 			{
 				Debug.WriteLine($"Checking for {processName}.exe");
-				if (InitializeProcess(processName))
+				if (InitializeProcess(processName, out IntPtr handle))
 				{
-					IntPtr handle;
-
 					// Get area and position
-					handle = genshinImpact.MainWindowHandle;
-					ClientToScreen(handle, ref position);
-					GetClientRect(handle, ref area);
+					ClientToScreen(handle, ref WindowPosition);
+					GetClientRect(handle, ref WindowSize);
+					
+					try
+					{
+						AspectRatio = GetAspectRatio();
+					}
+					catch (DivideByZeroException)
+					{
+						throw new NotImplementedException("Genshin window could not be focused. Please make sure the game is visible.");
+					}
+					catch (Exception e)
+					{
+						throw e;
+					}
 
 					Debug.WriteLine($"Found {processName}.exe");
 					return;
@@ -54,6 +70,14 @@ namespace InventoryKamera
 			throw new NullReferenceException("Cannot find Genshin Impact process");
 		}
 
+		public static void Reset()
+		{
+			WindowSize = new RECT();
+			WindowPosition = new RECT();
+			AspectRatio = new Size();
+			sim = new InputSimulator();
+		}
+
 		#region Window Capturing
 
 		public static Bitmap CaptureWindow(PixelFormat format = PixelFormat.Format24bppRgb)
@@ -61,7 +85,7 @@ namespace InventoryKamera
 			Bitmap bmp = new Bitmap(GetWidth(), GetHeight(), format);
 			using (Graphics gfxBmp = Graphics.FromImage(bmp))
 			{
-				gfxBmp.CopyFromScreen(position.Left, position.Top, 0, 0, bmp.Size);
+				gfxBmp.CopyFromScreen(WindowPosition.Left, WindowPosition.Top, 0, 0, bmp.Size);
 
 				var uidRegion = new RECT(
 					Left: (int)( 1070 / 1280.0 * bmp.Width ),
@@ -73,19 +97,19 @@ namespace InventoryKamera
 			return bmp;
 		}
 
-		public static Bitmap CaptureRegion(RECT region)
+		public static Bitmap CaptureRegion(RECT region, PixelFormat format = PixelFormat.Format24bppRgb)
 		{
-			Bitmap bmp = new Bitmap(region.Width, region.Height, PixelFormat.Format24bppRgb);
+			Bitmap bmp = new Bitmap(region.Width, region.Height, format);
 			using (Graphics gfxBmp = Graphics.FromImage(bmp))
 			{
-				gfxBmp.CopyFromScreen(position.Left + region.Left, position.Top + region.Top, 0, 0, bmp.Size);
+				gfxBmp.CopyFromScreen(WindowPosition.Left + region.Left, WindowPosition.Top + region.Top, 0, 0, bmp.Size);
 			}
 			return bmp;
 		}
 
-		public static Bitmap CaptureRegion(int x, int y, int width, int height)
+		public static Bitmap CaptureRegion(int x, int y, int width, int height, PixelFormat format = PixelFormat.Format24bppRgb)
 		{
-			return CaptureRegion(new Rectangle(x, y, width, height));
+			return CaptureRegion(new Rectangle(x, y, width, height), format);
 		}
 
 		#endregion Window Capturing
@@ -115,67 +139,13 @@ namespace InventoryKamera
 
 		#endregion Image Displaying
 
-		public static void Reset()
-		{
-			area = new RECT();
-			position = new RECT();
-			sim = new InputSimulator();
-			genshinImpact = null;
-		}
-
-		public static RECT GetArea()
-		{
-			return area;
-		}
-
-		public static Size GetSize()
-		{
-			return new Size(area.Width, area.Height);
-		}
-
-		public static Size GetAspectRatio()
-		{
-			if (area.Width == 0) throw new DivideByZeroException("Genshin's window width cannot be 0");
-			if (area.Height == 0) throw new DivideByZeroException("Genshin's window height cannot be 0");
-			int x = area.Width/GCD(area.Width, area.Height);
-			int y = area.Height/GCD(area.Width, area.Height);
-			return new Size(x, y);
-		}
-
-		private static int GCD(int a, int b)
-		{
-			int r;
-			while (b != 0)
-			{
-				r = a % b;
-				a = b;
-				b = r;
-			}
-			return a;
-		}
-
-		public static int GetWidth()
-		{
-			return area.Width;
-		}
-
-		public static int GetHeight()
-		{
-			return area.Height;
-		}
-
-		public static RECT GetPosition()
-		{
-			return position;
-		}
-
 		#region Game Menu Navigation
 
 		public static void SelectWeaponInventory()
 		{
 			int buttonX = (int)(385 / 1280.0 * GetWidth());
 			int buttonY = (int)(35  / 720.0 * GetHeight());
-			SetCursorPos(position.Left + buttonX, position.Top + buttonY);
+			SetCursorPos(WindowPosition.Left + buttonX, WindowPosition.Top + buttonY);
 			Click();
 			SystemRandomWait(Speed.UI);
 		}
@@ -184,7 +154,7 @@ namespace InventoryKamera
 		{
 			int buttonX = (int)(448 / 1280.0 * GetWidth());
 			int buttonY = (int)(31 / 720.0 * GetHeight());
-			SetCursorPos(position.Left + buttonX, position.Top + buttonY);
+			SetCursorPos(WindowPosition.Left + buttonX, WindowPosition.Top + buttonY);
 			Click();
 			SystemRandomWait(Speed.UI);
 		}
@@ -193,7 +163,7 @@ namespace InventoryKamera
 		{
 			int buttonX = (int)(512 / 1280.0 * GetWidth());
 			int buttonY = (int)(40  / 720.0 * GetHeight());
-			SetCursorPos(position.Left + buttonX, position.Top + buttonY);
+			SetCursorPos(WindowPosition.Left + buttonX, WindowPosition.Top + buttonY);
 			Click();
 			SystemRandomWait(Speed.UI);
 		}
@@ -202,7 +172,7 @@ namespace InventoryKamera
 		{
 			int buttonX = (int)(636 / 1280.0 * GetWidth());
 			int buttonY = (int)(30  / 720.0 * GetHeight());
-			SetCursorPos(position.Left + buttonX, position.Top + buttonY);
+			SetCursorPos(WindowPosition.Left + buttonX, WindowPosition.Top + buttonY);
 			Click();
 			SystemRandomWait(Speed.UI);
 		}
@@ -293,24 +263,60 @@ namespace InventoryKamera
 
 		#endregion Game Menu Navigation
 
-		#region Window Size
+		#region Window Size Accessing
 
-		[DllImport("user32.dll", SetLastError = true)]
-		private static extern bool GetWindowRect(IntPtr hWnd, ref RECT Rect);
+		public static Size GetSize()
+		{
+			return WindowSize.Size;
+		}
 
-		[DllImport("user32.dll", SetLastError = true)]
-		private static extern bool GetClientRect(IntPtr hWnd, ref RECT Rect);
+		public static Size GetAspectRatio()
+		{
+			if (!AspectRatio.IsEmpty) return AspectRatio;
 
-		[DllImport("user32.dll", SetLastError = true)]
-		private static extern bool ClientToScreen(IntPtr hWnd, ref RECT Rect);
+			if (WindowSize.Width == 0) throw new DivideByZeroException("Genshin's window width cannot be 0");
+			if (WindowSize.Height == 0) throw new DivideByZeroException("Genshin's window height cannot be 0");
+			int x = WindowSize.Width/GCD(WindowSize.Width, WindowSize.Height);
+			int y = WindowSize.Height/GCD(WindowSize.Width, WindowSize.Height);
+			return new Size(x, y);
+		}
 
-		#endregion Window Size
+		private static int GCD(int a, int b)
+		{
+			int r;
+			while (b != 0)
+			{
+				r = a % b;
+				a = b;
+				b = r;
+			}
+			return a;
+		}
+
+		public static int GetWidth()
+		{
+			return WindowSize.Width;
+		}
+
+		public static int GetHeight()
+		{
+			return WindowSize.Height;
+		}
+
+		public static RECT GetPosition()
+		{
+			return WindowPosition;
+		}
+
+		#endregion Window Size Accessing
 
 		#region Window Focusing
 
 		[DllImport("user32.dll")]
-		[return: MarshalAs(UnmanagedType.Bool)]
-		private static extern bool ShowWindow(IntPtr hWnd, ShowWindowEnum flags);
+		private static extern bool IsIconic(IntPtr hWnd);
+
+		[DllImport("user32.dll")]
+		private static extern bool ShowWindowAsync(HandleRef hWnd, ShowWindowEnum flags);
 
 		[DllImport("user32.dll")]
 		private static extern int SetForegroundWindow(IntPtr hwnd);
@@ -324,24 +330,28 @@ namespace InventoryKamera
 			Restore = 9, ShowDefault = 10, ForceMinimized = 11
 		};
 
-		public static bool InitializeProcess(string processName)
+		public static bool InitializeProcess(string processName, out IntPtr handle)
 		{
-			// get the process
-			genshinImpact = Process.GetProcessesByName(processName).FirstOrDefault();
-
-			// check if the process is running
-			if (genshinImpact != null)
+			handle = IntPtr.Zero;
+			// Get process
+			using (Process genshin = Process.GetProcessesByName(processName).FirstOrDefault())
 			{
-				// check if the window is hidden / minimized
-				if (genshinImpact.MainWindowHandle == IntPtr.Zero)
-				{
-					// the window is hidden so try to restore it before setting focus.
-					ShowWindow(genshinImpact.Handle, ShowWindowEnum.Restore);
-				}
 
-				// set user the focus to the window
-				SetForegroundWindow(genshinImpact.MainWindowHandle);
-				return true;
+				// check if the process is running
+				if (genshin != null)
+				{
+					handle = genshin.MainWindowHandle;
+					
+					// Check if minimized
+					if (IsIconic(handle))
+					{
+						ShowWindowAsync(new HandleRef(null, genshin.Handle), ShowWindowEnum.Restore);
+					}
+
+					// Bring game to front
+					SetForegroundWindow(genshin.MainWindowHandle);
+					return true;
+				}
 			}
 			return false;
 		}
@@ -365,11 +375,11 @@ namespace InventoryKamera
 
 		#region Delays
 
-		public static void SystemRandomWait(Speed type = Speed.Normal)
+		public static void SystemRandomWait(Speed speed = Speed.Normal)
 		{
 			Random r = new Random();
 			int value;
-			switch (type)
+			switch (speed)
 			{
 				case Speed.Fastest:
 					value = 10;
@@ -455,9 +465,9 @@ namespace InventoryKamera
 		}
 
 		public static int GetDelay()
-        {
+		{
 			return delay;
-        }
+		}
 
 		public enum Speed
 		{

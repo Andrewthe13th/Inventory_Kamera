@@ -95,6 +95,7 @@ namespace InventoryKamera
 				catch (Exception ex)
 				{
 					UserInterface.AddError(ex.Message + "\n" + ex.StackTrace);
+					Debug.WriteLine($"{ex.Message}\n{ex.StackTrace}");
 				}
 				Navigation.MainMenuScreen();
 			}
@@ -148,7 +149,6 @@ namespace InventoryKamera
 				if (Properties.Settings.Default.ScanWeapons)
 					AssignWeapons();
 			}
-			
 
 			// Scan Character Development Items
 			if (Properties.Settings.Default.ScanCharDevItems)
@@ -191,7 +191,6 @@ namespace InventoryKamera
 			}
 
 			Inventory.AddMaterials(ref Materials);
-			
 		}
 
 		private void AwaitProcessors()
@@ -216,11 +215,14 @@ namespace InventoryKamera
 
 				if (workerQueue.TryDequeue(out OCRImage image))
 				{
-
 					switch (image.type)
 					{
 						case "weapon":
-							if (WeaponScraper.IsEnhancementMaterial(image.bm.First())) break;
+							if (WeaponScraper.IsEnhancementMaterial(image.bm.First()))
+							{
+								Debug.WriteLine($"Enhancement Material found for weapon #{image.id}");
+								break;
+							}
 
 							UserInterface.SetGearPictureBox(image.bm.Last());
 
@@ -261,9 +263,13 @@ namespace InventoryKamera
 							break;
 
 						case "artifact":
-							if (ArtifactScraper.IsEnhancementMaterial(image.bm.Last())) break;
+							if (ArtifactScraper.IsEnhancementMaterial(image.bm.Last()))
+							{
+								Debug.WriteLine($"Enhancement Material found for artifact #{image.id}");
+								break;
+							}
 
-							UserInterface.SetGearPictureBox(image.bm.Last());
+								UserInterface.SetGearPictureBox(image.bm.Last());
 							// Scan as artifact
 							Artifact artifact = ArtifactScraper.CatalogueFromBitmapsAsync(image.bm, image.id).Result;
 							UserInterface.SetGear(image.bm.Last(), artifact);
@@ -304,8 +310,9 @@ namespace InventoryKamera
 						case "END":
 							b_threadCancel = true;
 							break;
+
 						default:
-							Form1.UnexpectedError("Unknown Image type for Image Processor");
+							MainForm.UnexpectedError("Unknown Image type for Image Processor");
 							break;
 					}
 				}
