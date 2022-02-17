@@ -97,6 +97,7 @@
 			this.Weapons_CheckBox = new System.Windows.Forms.CheckBox();
 			this.OutputPath_TextBox = new System.Windows.Forms.TextBox();
 			this.ScannerDelay_TrackBar = new System.Windows.Forms.TrackBar();
+			this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
 			((System.ComponentModel.ISupportInitialize)(this.CharacterTalent3_PictureBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.CharacterTalent2_PictureBox)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.CharacterTalent1_PictureBox)).BeginInit();
@@ -677,7 +678,7 @@
 			// Quit_MenuItem
 			// 
 			this.Quit_MenuItem.Name = "Quit_MenuItem";
-			this.Quit_MenuItem.Size = new System.Drawing.Size(97, 22);
+			this.Quit_MenuItem.Size = new System.Drawing.Size(180, 22);
 			this.Quit_MenuItem.Text = "Quit";
 			this.Quit_MenuItem.Click += new System.EventHandler(this.Exit_MenuItem_Click);
 			// 
@@ -686,7 +687,8 @@
 			this.keysToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.inventoryToolStripMenuItem,
             this.characterScreenToolStripMenuItem,
-            this.DatabaseUpdateMenuItem});
+            this.DatabaseUpdateMenuItem,
+            this.toolStripMenuItem1});
 			this.keysToolStripMenuItem.Name = "keysToolStripMenuItem";
 			this.keysToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
 			this.keysToolStripMenuItem.Text = "Options";
@@ -900,7 +902,14 @@
 			this.ScannerDelay_TrackBar.Value = global::InventoryKamera.Properties.Settings.Default.ScannerDelay;
 			this.ScannerDelay_TrackBar.ValueChanged += new System.EventHandler(this.ScannerDelay_TrackBar_ValueChanged);
 			// 
-			// Form1
+			// toolStripMenuItem1
+			// 
+			this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+			this.toolStripMenuItem1.Size = new System.Drawing.Size(190, 22);
+			this.toolStripMenuItem1.Text = "Open Export Folder";
+			this.toolStripMenuItem1.Click += new System.EventHandler(this.ExportFolderMenuItem_Click);
+			// 
+			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
@@ -954,7 +963,7 @@
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.MainMenuStrip = this.menuStrip1;
 			this.Margin = new System.Windows.Forms.Padding(2);
-			this.Name = "Form1";
+			this.Name = "MainForm";
 			this.Text = "Inventory Kamera V#";
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
 			this.Load += new System.EventHandler(this.Form1_Load);
@@ -1047,6 +1056,7 @@
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.NumericUpDown ArtifactRarityControl;
 		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
 	}
 }
 

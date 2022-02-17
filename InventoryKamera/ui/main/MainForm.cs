@@ -201,7 +201,7 @@ namespace InventoryKamera
 
 						// Make Json File
 						good.WriteToJSON(OutputPath_TextBox.Text);
-						
+
 						UserInterface.SetProgramStatus("Finished");
 					}
 					catch (ThreadAbortException)
@@ -390,6 +390,18 @@ namespace InventoryKamera
 		private void SaveSettings(object sender, EventArgs e)
 		{
 			SaveSettings();
+		}
+
+		private void ExportFolderMenuItem_Click(object sender, EventArgs e)
+		{
+			if (Directory.Exists(OutputPath_TextBox.Text) || Directory.CreateDirectory(OutputPath_TextBox.Text).Exists)
+			{
+				Process.Start($@"{OutputPath_TextBox.Text}");
+			}
+			else
+			{
+				Process.Start("explorer.exe");
+			}
 		}
 	}
 }
