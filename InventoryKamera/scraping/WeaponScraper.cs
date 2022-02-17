@@ -154,7 +154,7 @@ namespace InventoryKamera
 				try
 				{
 					var (rectangles, cols, rows) = ProcessScreenshot(screenshot);
-					if (cols != 7 || rows < 5 || true)
+					if (cols != 8 || rows < 5)
 					{
 						// Generated rectangles
 						screenshot.Save($"./logging/weapons/WeaponInventoryIncomplete.png");

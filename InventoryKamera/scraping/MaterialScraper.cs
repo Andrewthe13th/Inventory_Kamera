@@ -238,7 +238,7 @@ namespace InventoryKamera
 				try
 				{
 					var (rectangles, cols, rows) = ProcessScreenshot(screenshot);
-					if (cols != 7 || rows < 4 || true)
+					if (cols != 8 || rows < 4)
 					{
 						// Generated rectangles
 						screenshot.Save($"./logging/materials/{section}Inventory{page}.png");
