@@ -243,7 +243,7 @@ namespace InventoryKamera
 			}
 
 			return !File.Exists(ListsDir + file)
-				? throw new FileNotFoundException($"Data file does not exist for {list.GetType()}")
+				? throw new FileNotFoundException($"Data file does not exist for {list}")
 				: JToken.Parse(LoadJsonFromFile(file));
 		}
 

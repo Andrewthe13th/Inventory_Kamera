@@ -240,16 +240,16 @@ namespace InventoryKamera
 
 		#region Element Searching
 
-		public static string FindClosestGearSlot(string gearSlot)
+		public static string FindClosestGearSlot(string input)
 		{
 			foreach (var slot in gearSlots)
 			{
-				if (gearSlot.Contains(slot))
+				if (input.Contains(slot))
 				{
 					return slot;
 				}
 			}
-			return null;
+			return input;
 		}
 
 		public static string FindClosestStat(string stat, int maxEdits = 15)
@@ -570,6 +570,11 @@ namespace InventoryKamera
 			}
 
 			return destImage;
+		}
+
+		public static Bitmap ScaleImage(System.Drawing.Image image, double factor)
+		{
+			return ResizeImage(image, (int)( image.Width * factor ), (int)( image.Height * factor ));
 		}
 		public static bool CompareColors(Color a, Color b)
 		{
