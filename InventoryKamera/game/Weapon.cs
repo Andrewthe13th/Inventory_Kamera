@@ -74,12 +74,13 @@ namespace InventoryKamera
 			}
 		}
 
-		public Weapon(string _name, int _level, bool _ascended, int _refinementLevel, string _equippedCharacter = null, int _id = 0, int _rarity = -1)
+		public Weapon(string _name, int _level, bool _ascended, int _refinementLevel, bool locked = false, string _equippedCharacter = null, int _id = 0, int _rarity = -1)
 		{
 			Name = string.IsNullOrWhiteSpace(_name) ? "" : _name;
 			Level = _level;
 			Ascended = _ascended;
 			RefinementLevel = _rarity > 2 ?_refinementLevel : 1; // 2 and 1 star weapons do not have refinement levels
+			Lock = locked;
 			EquippedCharacter = string.IsNullOrWhiteSpace(_equippedCharacter) ? "" : _equippedCharacter;
 			Id = _id;
 			Rarity = _rarity;

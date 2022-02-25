@@ -163,10 +163,10 @@ namespace InventoryKamera
 		public override string ToString()
 		{
 			string output = $"Artifact ID: {Id}\n"
+				+ $"Slot: {GearSlot}\n"
 				+ $"Set: {SetName}\n"
 				+ $"Rarity: {Rarity}\n"
 				+ $"Level: {Level}\n"
-				+ $"Slot: {GearSlot}\n"
 				+ $"Main Stat: {MainStat}\n";
 
 			for (int i = 0; i < SubStatsCount; i++)
