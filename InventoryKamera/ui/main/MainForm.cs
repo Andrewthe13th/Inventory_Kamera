@@ -218,8 +218,8 @@ namespace InventoryKamera
 					{
 						// Workers can get stuck if the thread is aborted or an exception is raised
 						if (!( data is null )) data.StopImageProcessorWorkers();
-						Debug.WriteLine($"{ex.Message}\n{ex.StackTrace}\n");
-						UserInterface.AddError($"{ex.Message}" + Environment.NewLine + $"{ex.StackTrace}");
+						Debug.WriteLine(ex.ToString());
+						UserInterface.AddError(ex.ToString());
 						UserInterface.SetProgramStatus("Scan aborted", ok: false);
 					}
 					finally

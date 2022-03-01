@@ -242,9 +242,10 @@ namespace InventoryKamera
 					break;
 			}
 
-			return !File.Exists(ListsDir + file)
-				? throw new FileNotFoundException($"Data file does not exist for {list}")
-				: JToken.Parse(LoadJsonFromFile(file));
+			if (!File.Exists(ListsDir + file)) throw new FileNotFoundException($"Data file does not exist for {list}.");
+			string json = LoadJsonFromFile(file);
+			if (json == "{}") throw new FormatException($"Data file for {list} is invalid. Please try running the auto updater and try again.");
+			return JToken.Parse(json);
 		}
 
 		public bool UpdateAllLists(bool @new = false)
