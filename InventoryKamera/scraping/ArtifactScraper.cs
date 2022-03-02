@@ -361,48 +361,11 @@ namespace InventoryKamera
 					Right: card.Width,
 					Bottom: card.Height), card.PixelFormat);
 			}
-
-			//Navigation.DisplayBitmap(equipped);
-
-			// GearSlot
-			gearSlot = card.Clone(new RECT(
-				Left: (int)( 3.0 / reference.Width * card.Width ),
-				Top: (int)( 46.0 / reference.Height * card.Height ),
-				Right: (int)( ( ( reference.Width / 2.0 ) + 20 ) / reference.Width * card.Width ),
-				Bottom: (int)( 66.0 / reference.Height * card.Height )), card.PixelFormat);
-			//Navigation.DisplayBitmap(gearSlot);
-
-			// MainStat
-			mainStat = card.Clone(new RECT(
-				Left: 0,
-				Top: (int)( 100.0 / reference.Height * card.Height ),
-				Right: (int)( ( ( reference.Width / 2.0 ) + 20 ) / reference.Width * card.Width ),
-				Bottom: (int)( 120.0 / reference.Height * card.Height )), card.PixelFormat);
-			//Navigation.DisplayBitmap(mainStat);
-
-			// Level
-			level = card.Clone(new RECT(
-				Left: (int)( 18.0 / reference.Width * card.Width ),
-				Top: (int)( 203.0 / reference.Height * card.Height ),
-				Right: (int)( 61.0 / reference.Width * card.Width ),
-				Bottom: (int)( 228.0 / reference.Height * card.Height )), card.PixelFormat);
-			//Navigation.DisplayBitmap(level);
-
-			// SubStats
-			subStats = card.Clone(new RECT(
-				Left: 0,
-				Top: (int)( 235.0 / reference.Height * card.Height ),
-				Right: card.Width,
-				Bottom: (int)( 370.0 / reference.Height * card.Height )), card.PixelFormat);
-			//Navigation.DisplayBitmap(subStats);
-
-			// Locked Status
-			locked = card.Clone(new RECT(
-				Left: (int)( 284.0 / reference.Width * card.Width ),
-				Top: (int)( 201.0 / reference.Height * card.Height ),
-				Right: (int)( 312.0 / reference.Width * card.Width ),
-				Bottom: (int)( 228.0 / reference.Height * card.Height )), card.PixelFormat);
-			//Navigation.DisplayBitmap(locked);
+			gearSlot = ExtractGearSlot(card, ref reference);
+			mainStat = ExctractMainStat(card, ref reference);
+			level    = ExtractLevel(card, ref reference);
+			subStats = ExtractSubstats(card, ref reference);
+			locked   = ExtractLockStatus(card, reference);
 
 			// Add all to artifact Images
 			artifactImages.Add(gearSlot); // 0
@@ -422,7 +385,7 @@ namespace InventoryKamera
 					StopScanning = true;
 				}
 				else // Send images to Worker Queue
-					InventoryKamera.workerQueue.Enqueue(new OCRImage(artifactImages, "artifact", id));
+					InventoryKamera.workerQueue.Enqueue(new OCRImageCollection(artifactImages, "artifact", id));
 			}
 			catch (Exception ex)
 			{
@@ -430,6 +393,63 @@ namespace InventoryKamera
 				UserInterface.AddError($"{ex.StackTrace}");
 				card.Save($"./logging/artifacts/artifact{id}.png");
 			}
+		}
+
+		public static Bitmap ExtractLockStatus(Bitmap card, RECT reference)
+		{
+
+			// Locked Status
+			return card.Clone(new RECT(
+				Left: (int)( 284.0 / reference.Width * card.Width ),
+				Top: (int)( 201.0 / reference.Height * card.Height ),
+				Right: (int)( 312.0 / reference.Width * card.Width ),
+				Bottom: (int)( 228.0 / reference.Height * card.Height )), card.PixelFormat);
+		}
+
+		public static Bitmap ExtractSubstats(Bitmap card, ref RECT reference)
+		{
+			return card.Clone(new RECT(
+				Left: 0,
+				Top: (int)( 235.0 / reference.Height * card.Height ),
+				Right: card.Width,
+				Bottom: (int)( 370.0 / reference.Height * card.Height )), card.PixelFormat);
+		}
+
+		public static Bitmap ExtractLevel(Bitmap card, ref RECT reference)
+		{
+			//Navigation.DisplayBitmap(mainStat);
+
+			// Level
+			return card.Clone(new RECT(
+				Left: (int)( 18.0 / reference.Width * card.Width ),
+				Top: (int)( 203.0 / reference.Height * card.Height ),
+				Right: (int)( 61.0 / reference.Width * card.Width ),
+				Bottom: (int)( 228.0 / reference.Height * card.Height )), card.PixelFormat);
+		}
+
+		public static Bitmap ExctractMainStat(Bitmap card, ref RECT reference)
+		{
+			//Navigation.DisplayBitmap(gearSlot);
+
+			// MainStat
+			return card.Clone(new RECT(
+				Left: 0,
+				Top: (int)( 100.0 / reference.Height * card.Height ),
+				Right: (int)( ( ( reference.Width / 2.0 ) + 20 ) / reference.Width * card.Width ),
+				Bottom: (int)( 120.0 / reference.Height * card.Height )), card.PixelFormat);
+		}
+
+		public static Bitmap ExtractGearSlot(Bitmap card, ref RECT reference)
+		{
+
+			//Navigation.DisplayBitmap(equipped);
+
+			// GearSlot
+			return card.Clone(new RECT(
+				Left: (int)( 3.0 / reference.Width * card.Width ),
+				Top: (int)( 46.0 / reference.Height * card.Height ),
+				Right: (int)( ( ( reference.Width / 2.0 ) + 20 ) / reference.Width * card.Width ),
+				Bottom: (int)( 66.0 / reference.Height * card.Height )), card.PixelFormat);
 		}
 
 		public static async Task<Artifact> CatalogueFromBitmapsAsync(List<Bitmap> bm, int id)
@@ -491,25 +511,28 @@ namespace InventoryKamera
 			return new Artifact(setName, rarity, level, gearSlot, mainStat, subStats.ToArray(), subStats.Count, equippedCharacter, id, _lock);
 		}
 
-		private static int GetRarity(Bitmap bitmap)
+		private static int GetRarity(Bitmap bitmap, double scale = 1)
 		{
-			int x = (int)(10/1280.0 * Navigation.GetWidth());
-			int y = (int)(10/720.0 * Navigation.GetHeight());
+			using (var scaled = Scraper.ScaleImage(bitmap, scale))
+			{
+				int x = (int)(10/1280.0 * Navigation.GetWidth());
+				int y = (int)(10/720.0 * Navigation.GetHeight());
 
-			Color rarityColor = bitmap.GetPixel(x,y);
+				Color rarityColor = bitmap.GetPixel(x,y);
 
-			Color fiveStar    = Color.FromArgb(255, 188, 105,  50);
-			Color fourStar    = Color.FromArgb(255, 161,  86, 224);
-			Color threeStar   = Color.FromArgb(255,  81, 127, 203);
-			Color twoStar     = Color.FromArgb(255,  42, 143, 114);
-			Color oneStar     = Color.FromArgb(255, 114, 119, 138);
+				Color fiveStar    = Color.FromArgb(255, 188, 105,  50);
+				Color fourStar    = Color.FromArgb(255, 161,  86, 224);
+				Color threeStar   = Color.FromArgb(255,  81, 127, 203);
+				Color twoStar     = Color.FromArgb(255,  42, 143, 114);
+				Color oneStar     = Color.FromArgb(255, 114, 119, 138);
 
-			if (Scraper.CompareColors(fiveStar, rarityColor)) return 5;
-			else if (Scraper.CompareColors(fourStar, rarityColor)) return 4;
-			else if (Scraper.CompareColors(threeStar, rarityColor)) return 3;
-			else if (Scraper.CompareColors(twoStar, rarityColor)) return 2;
-			else if (Scraper.CompareColors(oneStar, rarityColor)) return 1;
-			else return 0; // throw new ArgumentException("Unable to determine artifact rarity");
+				if (Scraper.CompareColors(fiveStar, rarityColor)) return 5;
+				else if (Scraper.CompareColors(fourStar, rarityColor)) return 4;
+				else if (Scraper.CompareColors(threeStar, rarityColor)) return 3;
+				else if (Scraper.CompareColors(twoStar, rarityColor)) return 2;
+				else if (Scraper.CompareColors(oneStar, rarityColor)) return 1;
+				else return scale == 2 ? 0 : GetRarity(bitmap, scale + 0.1); // throw new ArgumentException("Unable to determine artifact rarity");
+			}
 		}
 
 		public static bool IsEnhancementMaterial(Bitmap card)

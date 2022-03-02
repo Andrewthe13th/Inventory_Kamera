@@ -26,11 +26,8 @@ namespace InventoryKamera
 			int offset = 0;
 			UserInterface.SetWeapon_Max(weaponCount);
 
-			// Enhancement ores being in the same inventory as weapons
-			// can throw off scrolling through the inventory in certain circumstances
-			// This fix is fine for now since most people don't scan below 3 stars
 			// TODO: Rewrite this method to allow for scanning enhancement ore quantities
-			weaponCount += 3;
+			// weaponCount += 3;
 
 			// Determine Delay if delay has not been found before
 			// Scraper.FindDelay(rectangles);
@@ -332,7 +329,7 @@ namespace InventoryKamera
 
 			Bitmap card;
 			RECT reference;
-			Bitmap name, level, refinement, equipped;
+			Bitmap name, level, refinement, equipped, locked;
 
 			if (Navigation.GetAspectRatio() == new Size(16, 9))
 			{
@@ -396,12 +393,19 @@ namespace InventoryKamera
 				Right: (int)( 40.0 / reference.Width * card.Width ),
 				Bottom: (int)( 254.0 / reference.Height * card.Height )), card.PixelFormat);
 
+			locked = card.Clone(new RECT(
+				Left: (int)( 284.0 / reference.Width * card.Width ),
+				Top: (int)( 201.0 / reference.Height * card.Height ),
+				Right: (int)( 312.0 / reference.Width * card.Width ),
+				Bottom: (int)( 228.0 / reference.Height * card.Height )), card.PixelFormat); ;
+
 			// Assign to List
-			weaponImages.Add(name);
+			weaponImages.Add(name); //0
 			weaponImages.Add(level);
 			weaponImages.Add(refinement);
+			weaponImages.Add(locked);
 			weaponImages.Add(equipped);
-			weaponImages.Add(card);
+			weaponImages.Add(card); //5
 
 			try
 			{
@@ -413,7 +417,7 @@ namespace InventoryKamera
 					return;
 				}
 				else // Send images to worker queue
-					InventoryKamera.workerQueue.Enqueue(new OCRImage(weaponImages, "weapon", id));
+					InventoryKamera.workerQueue.Enqueue(new OCRImageCollection(weaponImages, "weapon", id));
 			}
 			catch (Exception ex)
 			{
@@ -429,13 +433,14 @@ namespace InventoryKamera
 			string name = null;
 			int level = -1;
 			bool ascended = false;
-			int refinementLevel = -11;
+			int refinementLevel = -1;
+			bool locked = false;
 			string equippedCharacter = null;
 			int rarity = 0;
 
 			if (bm.Count >= 4)
 			{
-				int w_name = 0; int w_level = 1; int w_refinement = 2; int w_equippedCharacter = 3;
+				int w_name = 0; int w_level = 1; int w_refinement = 2; int w_lock = 3; int w_equippedCharacter = 4;
 
 				// Check for Rarity
 				rarity = GetRarity(bm[w_name]);
@@ -443,8 +448,12 @@ namespace InventoryKamera
 				// Check for equipped color
 				Color equippedColor = Color.FromArgb(255, 255, 231, 187);
 				Color equippedStatus = bm[w_equippedCharacter].GetPixel(5, 5);
-
 				bool b_equipped = Scraper.CompareColors(equippedColor, equippedStatus);
+
+				// Check for lock color
+				Color lockedColor = Color.FromArgb(255, 70, 80, 100); // Dark area around red lock
+				Color lockStatus = bm[w_lock].GetPixel(5, 5);
+				locked = Scraper.CompareColors(lockedColor, lockStatus);
 
 				List<Task> tasks = new List<Task>();
 
@@ -465,28 +474,32 @@ namespace InventoryKamera
 				await Task.WhenAll(tasks.ToArray());
 			}
 
-			return new Weapon(name, level, ascended, refinementLevel, equippedCharacter, id, rarity);
+			return new Weapon(name, level, ascended, refinementLevel, locked, equippedCharacter, id, rarity);
 		}
 
-		private static int GetRarity(Bitmap bitmap)
+		private static int GetRarity(Bitmap bitmap, double scale = 1.0)
 		{
-			int x = (int)(10/1280.0 * Navigation.GetWidth());
-			int y = (int)(10/720.0 * Navigation.GetHeight());
+			
+			using (var scaled = Scraper.ScaleImage(bitmap, scale))
+			{
+				int x = (int)(10/1280.0 * Navigation.GetWidth());
+				int y = (int)(10/720.0 * Navigation.GetHeight());
 
-			Color rarityColor = bitmap.GetPixel(x,y);
+				Color rarityColor = bitmap.GetPixel(x,y);
 
-			Color fiveStar    = Color.FromArgb(255, 188, 105,  50);
-			Color fourStar    = Color.FromArgb(255, 161,  86, 224);
-			Color threeStar   = Color.FromArgb(255,  81, 127, 203);
-			Color twoStar     = Color.FromArgb(255,  42, 143, 114);
-			Color oneStar     = Color.FromArgb(255, 114, 119, 138);
+				Color fiveStar    = Color.FromArgb(255, 188, 105,  50);
+				Color fourStar    = Color.FromArgb(255, 161,  86, 224);
+				Color threeStar   = Color.FromArgb(255,  81, 127, 203);
+				Color twoStar     = Color.FromArgb(255,  42, 143, 114);
+				Color oneStar     = Color.FromArgb(255, 114, 119, 138);
 
-			if (Scraper.CompareColors(fiveStar, rarityColor)) return 5;
-			else if (Scraper.CompareColors(fourStar, rarityColor)) return 4;
-			else if (Scraper.CompareColors(threeStar, rarityColor)) return 3;
-			else if (Scraper.CompareColors(twoStar, rarityColor)) return 2;
-			else if (Scraper.CompareColors(oneStar, rarityColor)) return 1;
-			else return 0; //throw new ArgumentException("Unable to determine weapon rarity");
+				if (Scraper.CompareColors(fiveStar, rarityColor)) return 5;
+				else if (Scraper.CompareColors(fourStar, rarityColor)) return 4;
+				else if (Scraper.CompareColors(threeStar, rarityColor)) return 3;
+				else if (Scraper.CompareColors(twoStar, rarityColor)) return 2;
+				else if (Scraper.CompareColors(oneStar, rarityColor)) return 1;
+				else return scale == 2 ? 0 : GetRarity(bitmap, scale + 0.1); //throw new ArgumentException("Unable to determine weapon rarity");
+			}
 		}
 
 		public static bool IsEnhancementMaterial(Bitmap nameBitmap)
@@ -548,29 +561,29 @@ namespace InventoryKamera
 						ascended = 20 <= level && level < maxLevel;
 						return level;
 					}
-					else
-					{
-					}
 				}
 			}
 			return -1;
 		}
 
-		public static int ScanRefinement(Bitmap bm)
+		public static int ScanRefinement(Bitmap image)
 		{
-			using (Bitmap up = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2))
+			for (double factor = 1; factor <= 2; factor += 0.1)
 			{
-				Bitmap n = Scraper.ConvertToGrayscale(up);
-				Scraper.SetInvert(ref n);
-
-				string text = Scraper.AnalyzeText(n).Trim();
-				n.Dispose();
-				text = Regex.Replace(text, @"[^\d]", string.Empty);
-
-				// Parse Int
-				if (int.TryParse(text, out int refinementLevel))
+				using (Bitmap up = Scraper.ScaleImage(image, factor))
 				{
-					return refinementLevel;
+					Bitmap n = Scraper.ConvertToGrayscale(up);
+					Scraper.SetInvert(ref n);
+
+					string text = Scraper.AnalyzeText(n).Trim();
+					n.Dispose();
+					text = Regex.Replace(text, @"[^\d]", string.Empty);
+
+					// Parse Int
+					if (int.TryParse(text, out int refinementLevel) && 1 <= refinementLevel && refinementLevel <= 5)
+					{
+						return refinementLevel;
+					}
 				}
 			}
 			return -1;

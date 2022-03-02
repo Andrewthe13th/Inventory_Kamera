@@ -209,24 +209,33 @@ namespace InventoryKamera
 				region.Y = (int)( 740 / 800.0 * Navigation.GetHeight() );
 			}
 
-			using (var bm = Navigation.CaptureRegion(region))
+			using (var screenshot = Navigation.CaptureRegion(region))
 			{
-				var input = Scraper.AnalyzeText(bm).Split(' ').ToList();
-				input.RemoveAll(e => Regex.IsMatch(e.Trim(), @"[^0-9]") || string.IsNullOrWhiteSpace(e.Trim()));
-				var mora = input.LastOrDefault();
+				string mora = ParseMoraFromScreenshot(screenshot);
 
 				if (int.TryParse(mora, out int count))
 				{
 					UserInterface.ResetCharacterDisplay();
-					UserInterface.SetMora(bm, count);
+					UserInterface.SetMora(screenshot, count);
 				}
 				else
 				{
-					UserInterface.SetNavigation_Image(bm);
+					UserInterface.SetNavigation_Image(screenshot);
 					UserInterface.AddError("Unable to parse mora count");
-					bm.Save("./logging/materials/mora.png");
+					screenshot.Save("./logging/materials/mora.png");
 				}
 				return count;
+			}
+		}
+
+		public static string ParseMoraFromScreenshot(Bitmap screenshot)
+		{
+			using (var gray = Scraper.ConvertToGrayscale(screenshot))
+			{
+				var input = Scraper.AnalyzeText(gray).Split(' ').ToList();
+				input.RemoveAll(e => Regex.IsMatch(e.Trim(), @"[^0-9]") || string.IsNullOrWhiteSpace(e.Trim()));
+				var mora = input.LastOrDefault();
+				return mora;
 			}
 		}
 

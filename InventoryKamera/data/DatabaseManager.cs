@@ -242,9 +242,10 @@ namespace InventoryKamera
 					break;
 			}
 
-			return !File.Exists(ListsDir + file)
-				? throw new FileNotFoundException($"Data file does not exist for {list.GetType()}")
-				: JToken.Parse(LoadJsonFromFile(file));
+			if (!File.Exists(ListsDir + file)) throw new FileNotFoundException($"Data file does not exist for {list}.");
+			string json = LoadJsonFromFile(file);
+			if (json == "{}") throw new FormatException($"Data file for {list} is invalid. Please try running the auto updater and try again.");
+			return JToken.Parse(json);
 		}
 
 		public bool UpdateAllLists(bool @new = false)
@@ -527,7 +528,7 @@ namespace InventoryKamera
 			{
 				Dictionary<string, string> data = JToken.Parse(LoadJsonFromFile(ArtifactsJson)).ToObject < Dictionary < string, string > >();
 				List<JObject> artifacts = JArray.Parse(LoadJsonFromURLAsync(ArtifactsURL)).ToObject<List<JObject>>();
-				artifacts.RemoveAll(artifact => artifact["Icon"].ToString().Contains("DisplayItemIcon")); // These are the Strongbox variants. We don't want these
+				artifacts.RemoveAll(artifact => !artifact["Icon"].ToString().Contains("RelicIcon"));
 
 				ArtifactsTodo = artifacts.Count;
 				Debug.WriteLine($"Added {_artifactsTodo} artifacts. Total {TotalTodo}");
