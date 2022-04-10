@@ -67,6 +67,7 @@ namespace InventoryKamera
 		private int _completed;
 		private int _todo;
 		private Dictionary<string, string> localVersions;
+        private Version RemoteVersion;
 
 		public int TotalCompleted
 		{
@@ -248,6 +249,34 @@ namespace InventoryKamera
 			return JToken.Parse(json);
 		}
 
+		public bool CheckForUpdates(ListType? list = null)
+        {
+            try
+            {
+				var fs = new List<string> { "characters", "weapons", "artifacts", "devmaterials", "materials", "allmaterials" };
+				var remoteVersion = GetRemoteVersion();
+				var localVersion = new Version();
+
+				if (list.HasValue)
+                {
+					localVersion = localVersions.TryGetValue(fs[(int)list.Value], out string v) ? new Version(v) : new Version();
+                    return localVersion.CompareTo(remoteVersion) < 0;
+                }
+
+				foreach (var f in fs)
+				{
+					localVersion = localVersions.TryGetValue(f, out string v) ? new Version(v) : new Version();
+					if (localVersion.CompareTo(remoteVersion) < 0) return true;
+				}
+            }
+            catch (Exception)
+            {
+				throw;
+            } 
+
+			return false;
+        }
+
 		public bool UpdateAllLists(bool @new = false)
 		{
 			bool pass = true;
@@ -327,27 +356,17 @@ namespace InventoryKamera
 
 		private bool UpdateCharacters(bool @new = false)
 		{
-			var localVersion = !localVersions.TryGetValue("characters", out string v) ? new Version() : new Version(v);
-			var remoteVersion = GetRemoteVersion();
-
-			if (remoteVersion == new Version()) return false;
-
 			if (@new)
 			{
-				localVersion = new Version();
+				localVersions.Remove("characters");
 				File.Delete(ListsDir + CharactersJson);
 			}
 
-			if (localVersion.CompareTo(remoteVersion) >= 0)
-			{
-				Debug.WriteLine("Local characters up to date");
-				return true;
-			}
-			else
-			{
-				Debug.WriteLine("Local characters out of date");
-				LoadMappings();
-			}
+			if (!CheckForUpdates(ListType.Characters)) return true;
+
+			
+			LoadMappings();
+			
 
 			try
 			{
@@ -425,7 +444,7 @@ namespace InventoryKamera
 				}
 
 				SaveJson(JsonConvert.SerializeObject(data), CharactersJson);
-				localVersions["characters"] = remoteVersion.ToString();
+				localVersions["characters"] = RemoteVersion.ToString();
 				SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
 			}
 			catch (Exception ex)
@@ -439,27 +458,16 @@ namespace InventoryKamera
 
 		private bool UpdateWeapons(bool @new = false)
 		{
-			var localVersion = !localVersions.TryGetValue("weapons", out string v) ? new Version() : new Version(v);
-			var remoteVersion = GetRemoteVersion();
-
-			if (remoteVersion == new Version()) return false;
-
 			if (@new)
 			{
-				localVersion = new Version();
+				localVersions.Remove("weapons");
 				File.Delete(ListsDir + WeaponsJson);
 			}
 
-			if (localVersion.CompareTo(remoteVersion) >= 0)
-			{
-				Debug.WriteLine("Local weapons up to date");
-				return true;
-			}
-			else
-			{
-				Debug.WriteLine("Local weapons out of date");
-				LoadMappings();
-			}
+			if (!CheckForUpdates(ListType.Weapons)) return true;
+
+
+			LoadMappings();
 
 			try
 			{
@@ -490,7 +498,7 @@ namespace InventoryKamera
 				}
 
 				SaveJson(JsonConvert.SerializeObject(data), WeaponsJson);
-				localVersions["weapons"] = remoteVersion.ToString();
+				localVersions["weapons"] = RemoteVersion.ToString();
 				SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
 			}
 			catch (Exception)
@@ -502,27 +510,16 @@ namespace InventoryKamera
 
 		private bool UpdateArtifacts(bool @new = false)
 		{
-			var localVersion = !localVersions.TryGetValue("artifacts", out string v) ? new Version() : new Version(v);
-			var remoteVersion = GetRemoteVersion();
-
-			if (remoteVersion == new Version()) return false;
-
 			if (@new)
 			{
-				localVersion = new Version();
+				localVersions.Remove("artifacts");
 				File.Delete(ListsDir + ArtifactsJson);
 			}
 
-			if (localVersion.CompareTo(remoteVersion) >= 0)
-			{
-				Debug.WriteLine("Local artifacts up to date");
-				return true;
-			}
-			else
-			{
-				Debug.WriteLine("Local artifacts out of date");
-				LoadMappings();
-			}
+			if (!CheckForUpdates(ListType.Artifacts)) return true;
+
+
+			LoadMappings();
 
 			try
 			{
@@ -554,7 +551,7 @@ namespace InventoryKamera
 				}
 
 				SaveJson(JsonConvert.SerializeObject(data), ArtifactsJson);
-				localVersions["artifacts"] = remoteVersion.ToString();
+				localVersions["artifacts"] = RemoteVersion.ToString();
 				SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
 			}
 			catch (Exception)
@@ -566,27 +563,16 @@ namespace InventoryKamera
 
 		private bool UpdateDevItems(bool @new = false)
 		{
-			var localVersion = !localVersions.TryGetValue("devmaterials", out string v) ? new Version() : new Version(v);
-			var remoteVersion = GetRemoteVersion();
-
-			if (remoteVersion == new Version()) return false;
-
 			if (@new)
 			{
-				localVersion = new Version();
+				localVersions.Remove("devmaterials");
 				File.Delete(ListsDir + DevMaterialsJson);
 			}
 
-			if (localVersion.CompareTo(remoteVersion) >= 0)
-			{
-				Debug.WriteLine("Local dev materials up to date");
-				return true;
-			}
-			else
-			{
-				Debug.WriteLine("Local dev materials out of date");
-				LoadMappings();
-			}
+			if (!CheckForUpdates(ListType.CharacterDevelopmentItems)) return true;
+
+
+			LoadMappings();
 
 			try
 			{
@@ -623,7 +609,7 @@ namespace InventoryKamera
 				}
 
 				SaveJson(JsonConvert.SerializeObject(data), DevMaterialsJson);
-				localVersions["devmaterials"] = remoteVersion.ToString();
+				localVersions["devmaterials"] = RemoteVersion.ToString();
 				SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
 			}
 			catch (Exception)
@@ -635,27 +621,16 @@ namespace InventoryKamera
 
 		private bool UpdateMaterials(bool @new = false)
 		{
-			var localVersion = !localVersions.TryGetValue("materials", out string v) ? new Version() : new Version(v);
-			var remoteVersion = GetRemoteVersion();
-
-			if (remoteVersion == new Version()) return false;
-
 			if (@new)
 			{
-				localVersion = new Version();
+				localVersions.Remove("materials");
 				File.Delete(ListsDir + MaterialsJson);
 			}
 
-			if (localVersion.CompareTo(remoteVersion) >= 0)
-			{
-				Debug.WriteLine("Local materials up to date");
-				return true;
-			}
-			else
-			{
-				Debug.WriteLine("Local materials out of date");
-				LoadMappings();
-			}
+			if (!CheckForUpdates(ListType.Materials)) return true;
+
+
+			LoadMappings();
 
 			try
 			{
@@ -696,7 +671,7 @@ namespace InventoryKamera
 				}
 
 				SaveJson(JsonConvert.SerializeObject(data), MaterialsJson);
-				localVersions["materials"] = remoteVersion.ToString();
+				localVersions["materials"] = RemoteVersion.ToString();
 				SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
 			}
 			catch (Exception)
@@ -708,27 +683,16 @@ namespace InventoryKamera
 
 		private bool UpdateAllMaterials(bool @new = false)
 		{
-			var localVersion = !localVersions.TryGetValue("allmaterials", out string v) ? new Version() : new Version(v);
-			var remoteVersion = GetRemoteVersion();
-
-			if (remoteVersion == new Version()) return false;
-
 			if (@new)
 			{
-				localVersion = new Version();
+				localVersions.Remove("allmaterials");
 				File.Delete(ListsDir + MaterialsCompleteJson);
 			}
 
-			if (localVersion.CompareTo(remoteVersion) >= 0)
-			{
-				Debug.WriteLine("All local materials up to date");
-				return true;
-			}
-			else
-			{
-				Debug.WriteLine("All local materials out of date");
-				LoadMappings();
-			}
+			if (!CheckForUpdates(ListType.AllMaterials)) return true;
+
+
+			LoadMappings();
 
 			try
 			{
@@ -755,7 +719,7 @@ namespace InventoryKamera
 				}
 
 				SaveJson(JsonConvert.SerializeObject(data), MaterialsCompleteJson);
-				localVersions["allmaterials"] = remoteVersion.ToString();
+				localVersions["allmaterials"] = RemoteVersion.ToString();
 				SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
 			}
 			catch (Exception)
@@ -765,27 +729,34 @@ namespace InventoryKamera
 			return true;
 		}
 
-		private static Version GetRemoteVersion()
+		private Version GetRemoteVersion()
 		{
+			var maxCommits = 5;
 			using (WebClient client = new WebClient())
 			{
 				client.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
 				var text = client.DownloadString("https://api.github.com/repos/Dimbreath/GenshinData/commits");
 				var response = JArray.Parse(text);
+				var commitsChecked = 0;
 				foreach (var commit in response.Children())
 				{
+					if (commitsChecked >= maxCommits) break;
+
 					try
 					{
 						if (commit["commit"]["message"].ToString().ToUpper().Contains("OSRELWIN"))
 						{
 							var message = commit["commit"]["message"].ToString();
-							return new Version(Regex.Match(message, @"[\d\.]*?(?=_)").ToString());
+                            Version remoteVersion = new Version(Regex.Match(message, @"[\d\.]*?(?=_)").ToString());
+							RemoteVersion = RemoteVersion ?? remoteVersion;
+                            return remoteVersion;
 						}
 					}
 					catch (Exception)
 					{ }
+					commitsChecked++;
 				}
-				return new Version();
+				throw new Exception("Could not determine remote version");
 			}
 		}
 

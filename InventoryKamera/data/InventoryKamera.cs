@@ -351,7 +351,7 @@ namespace InventoryKamera
 									{
 										error += "Invalid artifact gear slot\n";
 										Directory.CreateDirectory(artifactPath + "slot");
-										imageCollection.Bitmaps[0].Save(artifactPath + "slot/slot.png");
+										imageCollection.Bitmaps[1].Save(artifactPath + "slot/slot.png");
 									}
 									catch { }
 								}
@@ -361,7 +361,7 @@ namespace InventoryKamera
 									{
 										error += "Invalid artifact set name\n";
 										Directory.CreateDirectory(artifactPath + "set");
-										imageCollection.Bitmaps[3].Save(artifactPath + "set/set.png");
+										imageCollection.Bitmaps[4].Save(artifactPath + "set/set.png");
 									}
 									catch { }
 								}
@@ -371,7 +371,7 @@ namespace InventoryKamera
 									{
 										error += "Invalid artifact rarity\n";
 										Directory.CreateDirectory(artifactPath + "rarity");
-										imageCollection.Bitmaps[6].Save(artifactPath + "rarity/rarity.png");
+										imageCollection.Bitmaps[0].Save(artifactPath + "rarity/rarity.png");
 									}
 									catch { }
 								}
@@ -381,7 +381,7 @@ namespace InventoryKamera
 									{
 										error += "Invalid artifact level\n";
 										Directory.CreateDirectory(artifactPath + "level");
-										imageCollection.Bitmaps[2].Save(artifactPath + "level/level.png");
+										imageCollection.Bitmaps[3].Save(artifactPath + "level/level.png");
 									}
 									catch { }
 								}
@@ -391,7 +391,7 @@ namespace InventoryKamera
 									{
 										error += "Invalid artifact main stat\n";
 										Directory.CreateDirectory(artifactPath + "mainstat");
-										imageCollection.Bitmaps[1].Save(artifactPath + "mainstat/mainstat.png");
+										imageCollection.Bitmaps[2].Save(artifactPath + "mainstat/mainstat.png");
 									}
 									catch { }
 								}
@@ -401,7 +401,7 @@ namespace InventoryKamera
 									{
 										error += "Invalid artifact sub stats\n";
 										Directory.CreateDirectory(artifactPath + "substats");
-										imageCollection.Bitmaps[3].Save(artifactPath + "substats/substats.png");
+										imageCollection.Bitmaps[4].Save(artifactPath + "substats/substats.png");
 									}
 									catch { }
 								}
@@ -411,7 +411,7 @@ namespace InventoryKamera
 									{
 										error += "Invalid equipped character\n";
 										Directory.CreateDirectory(artifactPath + "equipped");
-										imageCollection.Bitmaps[4].Save(artifactPath + "equipped/equipped.png");
+										imageCollection.Bitmaps[5].Save(artifactPath + "equipped/equipped.png");
 									}
 									catch { }
 								}

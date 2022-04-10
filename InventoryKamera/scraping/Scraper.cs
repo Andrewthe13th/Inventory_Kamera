@@ -85,28 +85,24 @@ namespace InventoryKamera
 		public static Dictionary<string, JObject> Characters;
 
 		static Scraper()
-		{
-			engines = new ConcurrentBag<TesseractEngine>();
-			for (int i = 0; i < numEngines; i++)
-			{
-				engines.Add(new TesseractEngine(tesseractDatapath, tesseractLanguage, EngineMode.LstmOnly));
-			}
+        {
+            InitEngines();
 
-			var listManager = new DatabaseManager();
+            var listManager = new DatabaseManager();
 
-			Characters = listManager.LoadCharacters();
-			Artifacts = listManager.LoadArtifacts();
-			Weapons = listManager.LoadWeapons();
-			DevMaterials = listManager.LoadDevMaterials();
-			Materials = listManager.LoadMaterials();
-			AllMaterials = listManager.LoadAllMaterials();
-			Elements = new Dictionary<string, string>();
+            Characters = listManager.LoadCharacters();
+            Artifacts = listManager.LoadArtifacts();
+            Weapons = listManager.LoadWeapons();
+            DevMaterials = listManager.LoadDevMaterials();
+            Materials = listManager.LoadMaterials();
+            AllMaterials = listManager.LoadAllMaterials();
+            Elements = new Dictionary<string, string>();
 
-			foreach (var element in elements) Elements.Add(element, char.ToUpper(element[0]) + element.Substring(1));
-			Debug.WriteLine("Scraper initialized");
-		}
+            foreach (var element in elements) Elements.Add(element, char.ToUpper(element[0]) + element.Substring(1));
+            Debug.WriteLine("Scraper initialized");
+        }
 
-		public static void AddTravelerToCharacterList(string traveler)
+        public static void AddTravelerToCharacterList(string traveler)
 		{
 			Characters = new DatabaseManager().LoadCharacters();
 
@@ -135,6 +131,23 @@ namespace InventoryKamera
 		}
 
 		#region OCR
+
+		private static void InitEngines()
+		{
+			engines = new ConcurrentBag<TesseractEngine>();
+			try
+			{
+				for (int i = 0; i < numEngines; i++)
+				{
+					engines.Add(new TesseractEngine(tesseractDatapath, tesseractLanguage, EngineMode.LstmOnly));
+				}
+			}
+			catch (Exception e)
+			{
+				Debug.WriteLine("Failed to initialize Tesseract engines.");
+				throw e;
+			}
+		}
 
 		public static void RestartEngines()
 		{

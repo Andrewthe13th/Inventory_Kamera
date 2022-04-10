@@ -410,7 +410,7 @@ namespace InventoryKamera
 			try
 			{
 				int rarity = GetRarity(name);
-				if (0 < rarity && rarity < Properties.Settings.Default.MinimumWeaponRarity)
+				if (rarity < Properties.Settings.Default.MinimumWeaponRarity)
 				{
 					weaponImages.ForEach(i => i.Dispose());
 					StopScanning = true;
@@ -421,9 +421,9 @@ namespace InventoryKamera
 			}
 			catch (Exception ex)
 			{
-				UserInterface.AddError($"Unexpected error {ex.Message} for weapon ID#{id}");
-				UserInterface.AddError($"{ex.StackTrace}");
-				card.Save($"./logging/weapons/weapon{id}.png");
+				UserInterface.AddError($"Unexpected error getting the rarity for weapon ID#{id}");
+				UserInterface.AddError(ex.ToString());
+				name.Save($"./logging/weapons/weapon{id}.png");
 			}
 		}
 
@@ -479,11 +479,10 @@ namespace InventoryKamera
 
 		private static int GetRarity(Bitmap bitmap, double scale = 1.0)
 		{
-			
 			using (var scaled = Scraper.ScaleImage(bitmap, scale))
 			{
-				int x = (int)(10/1280.0 * Navigation.GetWidth());
-				int y = (int)(10/720.0 * Navigation.GetHeight());
+				int x = (int)(0.025 * scaled.Width);
+				int y = (int)(0.20 * scaled.Height);
 
 				Color rarityColor = bitmap.GetPixel(x,y);
 
@@ -498,7 +497,7 @@ namespace InventoryKamera
 				else if (Scraper.CompareColors(threeStar, rarityColor)) return 3;
 				else if (Scraper.CompareColors(twoStar, rarityColor)) return 2;
 				else if (Scraper.CompareColors(oneStar, rarityColor)) return 1;
-				else return scale == 2 ? 0 : GetRarity(bitmap, scale + 0.1); //throw new ArgumentException("Unable to determine weapon rarity");
+				else return scale >= 2 ? 0 : GetRarity(bitmap, scale + 0.1);
 			}
 		}
 

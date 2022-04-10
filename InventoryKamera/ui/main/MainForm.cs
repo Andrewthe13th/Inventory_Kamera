@@ -129,9 +129,16 @@ namespace InventoryKamera
 			{
 				OutputPath_TextBox.Text = Directory.GetCurrentDirectory() + @"\GenshinData";
 			}
+
 		}
 
-		private void UpdateKeyTextBoxes()
+        private bool CheckForUpdates()
+        {
+            var databaseManager = new DatabaseManager();
+            return databaseManager.CheckForUpdates();
+        }
+
+        private void UpdateKeyTextBoxes()
 		{
 			Navigation.inventoryKey = (VirtualKeyCode)Properties.Settings.Default.InventoryKey;
 			Navigation.characterKey = (VirtualKeyCode)Properties.Settings.Default.CharacterKey;
@@ -153,6 +160,8 @@ namespace InventoryKamera
 
 		private void StartButton_Clicked(object sender, EventArgs e)
 		{
+			GC.Collect();
+
 			UserInterface.ResetAll();
 
 			UserInterface.SetProgramStatus("Scanning");
@@ -403,5 +412,26 @@ namespace InventoryKamera
 				Process.Start("explorer.exe");
 			}
 		}
-	}
+
+		private void MainForm_Shown(object sender, EventArgs e)
+		{
+			var updatesAvailable = CheckForUpdates();
+			if (updatesAvailable)
+			{ 
+				var message = "A new version for Genshin Impact has been found. Would you like to update this Kamera's lookup tables? (Recommended)";
+				var result = MessageBox.Show(message, "Game Version Update", MessageBoxButtons.YesNo);
+				if (result == DialogResult.Yes)
+				{
+					new DatabaseManager().UpdateAllLists();
+					MessageBox.Show("Update complete");
+				}
+				else if (result == DialogResult.No)
+				{
+					MessageBox.Show("Update skipped. Please know that skipping this update will likely result in incorrect scans.\n" +
+                        "\nYou may check for updates again on restarting this application or by using the update manager found" +
+                        " under 'options'", "Update declined", MessageBoxButtons.OK);
+				}
+			}
+		}
+    }
 }
