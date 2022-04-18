@@ -68,13 +68,13 @@ The character's name is as it appears in the party menu on the right side of the
 Consider using [a JSON text validator](https://jsonlint.com/) after following this manual method.
 
 ## Can Inventory Kamera get me banned?
-According to miHoYo's [response to Script, Plug-In, and Third-Party Software](https://genshin.mihoyo.com/en/news/detail/5763), we believe not.
+According to HoYoverse's [response to Script, Plug-In, and Third-Party Software](https://genshin.hoyoverse.com/en/news/detail/5763), we believe not.
 - This scanner does not exploit the game. It only takes pictures of the game window and navigates menus.
 - This scanner does not provide artificial in-game progress.
 - This scanner does nothing to provide account selling/exchanging.
 - Doesn't provide Top-up Primogems.
 
-We have neither heard of any reports nor received warnings of the application's development. However, that does not mean it will stay that way forever. We are at the mercy of miHoYo.
+We have neither heard of any reports nor received warnings of the application's development. However, that does not mean it will stay that way forever. We are at the mercy of HoYoverse.
 
 ## Report an Issue
 If you ran through any issue with our scanner, please [report your issue here](https://github.com/Andrewthe13th/Inventory_Kamera/issues). Please be descriptive and precise as much as much as possible while describing.
@@ -101,4 +101,4 @@ distributed under [different licenses](THIRD-PARTY-NOTICES.md).
 
 ---
 
-All rights reserved by © miHoYo Co., Ltd. This project is not affiliated with, nor endorsed by miHoYo. Genshin Impact™ and other properties belong to their respective owners.
+All rights reserved by ©  Cognosphere Pte. Ltd. This project is not affiliated with, nor endorsed by HoYoverse. Genshin Impact™ and other properties belong to their respective owners.
