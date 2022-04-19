@@ -12,6 +12,8 @@ namespace InventoryKamera
 {
 	public static class WeaponScraper
 	{
+		private static NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
 		public static bool StopScanning { get; set; }
 
 		public static void ScanWeapons(int count = 0)
@@ -125,18 +127,16 @@ namespace InventoryKamera
 				if (Regex.IsMatch(text, "/"))
 				{
 					count = int.Parse(text.Split('/')[0]);
-					Debug.WriteLine($"Parsed {count} for weapon count");
 				}
 				else if (Regex.Matches(text, "2000").Count == 1) // Remove the inventory limit from number
 				{
 					text = text.Replace("2000", string.Empty);
 					count = int.Parse(text);
-					Debug.WriteLine($"Parsed {count} for weapon count");
 				}
 				else // Extreme worst case
 				{
 					count = 2000;
-					Debug.WriteLine("Defaulted to 2000 for weapon count");
+					Logger.Debug("Defaulted to 2000 for weapon count");
 				}
 
 				return count;
@@ -162,10 +162,10 @@ namespace InventoryKamera
 					}
 					return (rectangles, cols, rows);
 				}
-				catch (Exception e)
+				catch (Exception)
 				{
 					screenshot.Save($"./logging/weapons/WeaponInventory.png");
-					throw e;
+					throw;
 				}
 			}
 

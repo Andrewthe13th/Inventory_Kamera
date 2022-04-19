@@ -18,6 +18,7 @@ namespace InventoryKamera
 {
 	public partial class MainForm : Form
 	{
+		private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 		private static Thread scannerThread;
 		private static InventoryKamera data;
 
@@ -32,6 +33,7 @@ namespace InventoryKamera
 			Language_ComboBox.SelectedItem = "ENG";
 
 			var version = Regex.Replace(Assembly.GetExecutingAssembly().GetName().Version.ToString(), @"[.0]*$", string.Empty);
+			Logger.Info("Inventory Kamera version {0}", version);
 
 			Text = $"Inventory Kamera V{version}";
 
@@ -52,6 +54,7 @@ namespace InventoryKamera
 				Navigation_Image);
 			MaximizeBox = false;
 			MinimizeBox = false;
+			Logger.Info("MainForm initialization complete");
 		}
 
 		private int ScannerDelayValue(int value)
@@ -74,6 +77,7 @@ namespace InventoryKamera
 
 		private void Hotkey_Pressed(object sender, HotkeyEventArgs e)
 		{
+			Logger.Info("Hotkey pressed");
 			e.Handled = true;
 			// Check if scanner is running
 			if (scannerThread.IsAlive)
@@ -93,6 +97,7 @@ namespace InventoryKamera
 
 			// Need to invoke method from the UI's handle, not the worker thread
 			BeginInvoke((MethodInvoker)delegate { RemoveHotkey(); });
+			Logger.Info("Hotkey removed");
 		}
 
 		private void RemoveHotkey()
@@ -108,13 +113,14 @@ namespace InventoryKamera
 			}
 		}
 
-		private void Form1_Load(object sender, EventArgs e)
+		private void MainForm_Load(object sender, EventArgs e)
 		{
 			if (Properties.Settings.Default.UpgradeNeeded)
 			{
 				try
 				{
 					Properties.Settings.Default.Upgrade();
+					Logger.Info("Application settings loaded from previous version");
 				}
 				catch (Exception) { }
 				Properties.Settings.Default.UpgradeNeeded = false;
@@ -165,17 +171,28 @@ namespace InventoryKamera
 			UserInterface.ResetAll();
 
 			UserInterface.SetProgramStatus("Scanning");
+			Logger.Info("Starting scan");
 
 			if (Directory.Exists(OutputPath_TextBox.Text) || Directory.CreateDirectory(OutputPath_TextBox.Text).Exists)
 			{
 				if (running)
 				{
-					Debug.WriteLine("Already running");
+					Logger.Debug("Already running");
 					return;
 				}
 				running = true;
 
 				HotkeyManager.Current.AddOrReplace("Stop", Keys.Enter, Hotkey_Pressed);
+				Logger.Info("Hotkey registered");
+				var settings = Properties.Settings.Default;
+				var options = $"\n\tWeapons:\t\t\t {settings.ScanWeapons}\n" +
+                    $"\tArtifacts:\t\t\t {settings.ScanArtifacts}\n" +
+                    $"\tCharacters:\t\t\t {settings.ScanCharacters}\n" +
+                    $"\tDev Items:\t\t\t {settings.ScanCharDevItems}\n" +
+                    $"\tMaterials:\t\t\t {settings.ScanMaterials}\n" +
+                    $"\tMin Weapon Rarity:\t {settings.MinimumWeaponRarity}\n" +
+                    $"\tMin Artifact Rarity: {settings.MinimumArtifactRarity}\n" +
+                    $"\tDelay:\t\t\t\t {settings.ScannerDelay}";
 
 				scannerThread = new Thread(() =>
 				{
@@ -202,14 +219,18 @@ namespace InventoryKamera
 						// Add navigation delay
 						Navigation.SetDelay(ScannerDelayValue(Delay));
 
+						Logger.Info("Scan settings: {0}", options);
+						
 						// The Data object of json object
 						data.GatherData();
 
 						// Covert to GOOD
 						GOOD good = new GOOD(data);
+						Logger.Info("Data converted to GOOD");
 
 						// Make Json File
 						good.WriteToJSON(OutputPath_TextBox.Text);
+						Logger.Info("Exported data");
 
 						UserInterface.SetProgramStatus("Finished");
 					}
@@ -227,7 +248,6 @@ namespace InventoryKamera
 					{
 						// Workers can get stuck if the thread is aborted or an exception is raised
 						if (!( data is null )) data.StopImageProcessorWorkers();
-						Debug.WriteLine(ex.ToString());
 						UserInterface.AddError(ex.ToString());
 						UserInterface.SetProgramStatus("Scan aborted", ok: false);
 					}
@@ -235,7 +255,7 @@ namespace InventoryKamera
 					{
 						ResetUI();
 						running = false;
-						Debug.WriteLine("No longer running");
+						Logger.Info("Scanner stopped");
 					}
 				})
 				{
@@ -286,6 +306,7 @@ namespace InventoryKamera
 		{
 			SaveSettings();
 			RemoveHotkey();
+			NLog.LogManager.Shutdown();
 		}
 
 		private void SaveSettings()
@@ -321,7 +342,7 @@ namespace InventoryKamera
 			// Validate that key is an acceptable Genshin keybind.
 			if (!vk && !np && !oem && !misc)
 			{
-				Debug.WriteLine($"Invalid {e.KeyCode} key pressed");
+				Logger.Debug("Invalid {key} key pressed", e.KeyCode);
 				return;
 			}
 			ToolStripTextBox s = (ToolStripTextBox)sender;
@@ -340,12 +361,12 @@ namespace InventoryKamera
 			{
 				case "InventoryKey":
 					Navigation.inventoryKey = (VirtualKeyCode)e.KeyCode;
-					Debug.WriteLine($"Inv key set to: {Navigation.inventoryKey}");
+					Logger.Debug("Inv key set to: {key}", Navigation.inventoryKey);
 					break;
 
 				case "CharacterKey":
 					Navigation.characterKey = (VirtualKeyCode)e.KeyCode;
-					Debug.WriteLine($"Char key set to: {Navigation.characterKey}");
+					Logger.Debug("Char key set to: {key}", Navigation.characterKey);
 					break;
 
 				default:

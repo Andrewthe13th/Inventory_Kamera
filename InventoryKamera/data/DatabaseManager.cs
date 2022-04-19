@@ -16,6 +16,7 @@ namespace InventoryKamera
 {
 	public class DatabaseManager
 	{
+		private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 		private string _listdir = @".\inventorylists\";
 		private string versionJson = "versions.json";
 
@@ -174,7 +175,7 @@ namespace InventoryKamera
 			if (Interlocked.CompareExchange(ref updaters, 0, 0) == 0)
 			{
 				Mappings = new Dictionary<string, string>();
-				Console.WriteLine("Mappings released");
+				Logger.Info("Mappings released");
 				return true;
 			}
 			return false;
@@ -350,7 +351,7 @@ namespace InventoryKamera
 			}
 
 			Interlocked.Decrement(ref updaters);
-
+			Logger.Info("Finished updating {0}", list);
 			return pass;
 		}
 
@@ -380,7 +381,7 @@ namespace InventoryKamera
 				characters.RemoveAll(character => !character.ContainsKey("UseType")
 												|| character["UseType"].ToString() != "AVATAR_FORMAL");
 				CharactersTodo = characters.Count;
-				Debug.WriteLine($"Added {_charactersTodo} characters. Total {TotalTodo}");
+				Logger.Debug("Added {_charactersTodo} characters. Total {TotalTodo}", _charactersTodo, TotalTodo);
 
 				foreach (var character in characters)
 				{
@@ -439,8 +440,7 @@ namespace InventoryKamera
 						}
 						++CharactersCompleted;
 					}
-					catch (Exception)
-					{ }
+					catch (Exception ex) { Logger.Warn(ex); }
 				}
 
 				SaveJson(JsonConvert.SerializeObject(data), CharactersJson);
@@ -449,8 +449,7 @@ namespace InventoryKamera
 			}
 			catch (Exception ex)
 			{
-				Debug.WriteLine(ex.Message);
-				Debug.WriteLine(ex.StackTrace);
+				Logger.Warn(ex);
 				return false;
 			}
 			return true;
@@ -475,34 +474,36 @@ namespace InventoryKamera
 				List<JObject> weapons = JArray.Parse(LoadJsonFromURLAsync(WeaponsURL)).ToObject<List<JObject>>();
 				weapons.RemoveAll(weapon => !weapon.ContainsKey("NameTextMapHash"));
 				WeaponsTodo = weapons.Count;
-				Debug.WriteLine($"Added {_weapons_todo} weapons. Total {TotalTodo}");
+				Logger.Debug("Added {_weapons_todo} weapons. Total {TotalTodo}", _weapons_todo, TotalTodo);
 
 				foreach (var weapon in weapons)
 				{
 					try
 					{
-						string name = Mappings[weapon["NameTextMapHash"].ToString()].ToString(); // Dull Blade
-
-						string PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name);
-						string nameGOOD = Regex.Replace(PascalCase, @"[\W]", string.Empty);  // DullBlade
-						string nameKey = nameGOOD.ToLower();                                 // dullblade
-
-						if (!data.ContainsKey(nameKey))
+						if (Mappings.TryGetValue(weapon["NameTextMapHash"].ToString(), out string name)) // Dull Blade
 						{
-							data.Add(nameKey, nameGOOD);
+							string PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name);
+							string nameGOOD = Regex.Replace(PascalCase, @"[\W]", string.Empty);  // DullBlade
+							string nameKey = nameGOOD.ToLower();                                 // dullblade
+
+							if (!data.ContainsKey(nameKey))
+							{
+								data.Add(nameKey, nameGOOD);
+							}
 						}
 						++WeaponsCompleted;
 					}
-					catch (Exception)
-					{ }
+					catch (Exception ex) { Logger.Warn(ex, weapon["NameTextMapHash"].ToString()); }
+
 				}
 
 				SaveJson(JsonConvert.SerializeObject(data), WeaponsJson);
 				localVersions["weapons"] = RemoteVersion.ToString();
 				SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
+				Logger.Warn(ex);
 				return false;
 			}
 			return true;
@@ -528,36 +529,34 @@ namespace InventoryKamera
 				artifacts.RemoveAll(artifact => !artifact["Icon"].ToString().Contains("RelicIcon"));
 
 				ArtifactsTodo = artifacts.Count;
-				Debug.WriteLine($"Added {_artifactsTodo} artifacts. Total {TotalTodo}");
+				Logger.Debug("Added {_artifactsTodo} artifacts. Total {TotalTodo}", _artifactsTodo, TotalTodo);
 
 				foreach (var artifact in artifacts)
 				{
 					try
 					{
-						string name = Mappings[artifact["NameTextMapHash"].ToString()].ToString(); // Archaic Petra
+						if (Mappings.TryGetValue(Mappings[artifact["NameTextMapHash"].ToString()], out string name))  // Archaic Petra
+						{ 
+							string PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name);
+							string nameGOOD = Regex.Replace(PascalCase, @"[\W]", string.Empty);  // ArchaicPetra
+							string nameKey = nameGOOD.ToLower();                                 // archaicpetra
 
-						string PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name);
-						string nameGOOD = Regex.Replace(PascalCase, @"[\W]", string.Empty);  // ArchaicPetra
-						string nameKey = nameGOOD.ToLower();                                 // archaicpetra
-
-						if (!data.ContainsKey(nameKey))
-						{
-							data.Add(nameKey, nameGOOD);
+							if (!data.ContainsKey(nameKey))
+							{
+								data.Add(nameKey, nameGOOD);
+							}
 						}
 						++ArtifactsCompleted;
 					}
-					catch (Exception)
-					{ }
+					catch (Exception ex) { Logger.Warn(ex); }
+
 				}
 
 				SaveJson(JsonConvert.SerializeObject(data), ArtifactsJson);
 				localVersions["artifacts"] = RemoteVersion.ToString();
 				SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
 			}
-			catch (Exception)
-			{
-				return false;
-			}
+			catch (Exception ex) { Logger.Warn(ex); return false; }
 			return true;
 		}
 
@@ -586,25 +585,25 @@ namespace InventoryKamera
 				List<JObject> materials = JArray.Parse(LoadJsonFromURLAsync(MaterialsURL)).ToObject<List<JObject>>();
 				materials.RemoveAll(material => !material.ContainsKey("MaterialType") || !categories.Contains(material["MaterialType"].ToString()));
 				DevMaterialsTodo = materials.Count;
-				Debug.WriteLine($"Added {_devTodo} dev materials. Total {TotalTodo}");
+				Logger.Debug("Added {_devTodo} dev materials. Total {TotalTodo}", _devTodo, TotalTodo);
 
 				foreach (var material in materials)
 				{
 					try
 					{
-						string name = Mappings[material["NameTextMapHash"].ToString()].ToString(); // Hero's Wit
+						if (Mappings.TryGetValue(Mappings[material["NameTextMapHash"].ToString()], out string name))  // Hero's Wit
+						{ 
+							string PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name);
+							string nameGOOD = Regex.Replace(PascalCase, @"[\W]", string.Empty);  // HerosWit
+							string nameKey = nameGOOD.ToLower();                                 // heroswit
 
-						string PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name);
-						string nameGOOD = Regex.Replace(PascalCase, @"[\W]", string.Empty);  // HerosWit
-						string nameKey = nameGOOD.ToLower();                                 // heroswit
-
-						if (!data.ContainsKey(nameKey))
-						{
-							data.Add(nameKey, nameGOOD);
+							if (!data.ContainsKey(nameKey))
+							{
+								data.Add(nameKey, nameGOOD);
+							}
 						}
 					}
-					catch (Exception)
-					{ }
+					catch (Exception ex) { Logger.Warn(ex); }
 					++DevMaterialsCompleted;
 				}
 
@@ -612,10 +611,7 @@ namespace InventoryKamera
 				localVersions["devmaterials"] = RemoteVersion.ToString();
 				SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
 			}
-			catch (Exception)
-			{
-				return false;
-			}
+			catch (Exception ex) { Logger.Warn(ex); return false; }
 			return true;
 		}
 
@@ -647,26 +643,26 @@ namespace InventoryKamera
 				List<JObject> materials = JArray.Parse(LoadJsonFromURLAsync(MaterialsURL)).ToObject<List<JObject>>();
 				materials.RemoveAll(material => !material.ContainsKey("MaterialType") || !categories.Contains(material["MaterialType"].ToString()));
 				MaterialsTodo = materials.Count;
-				Debug.WriteLine($"Added {_materialsTodo} materials. Total {_todo}");
+				Logger.Debug("Added {_materialsTodo} materials. Total {TotalTodo}", _materialsTodo, TotalTodo);
 
 				foreach (var material in materials)
 				{
 					try
 					{
-						string name = Mappings[material["NameTextMapHash"].ToString()].ToString(); // Iron Chunk
-
-						string PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name);
-						string nameGOOD = Regex.Replace(PascalCase, @"[\W]", string.Empty);  // IronChunk
-						string nameKey = nameGOOD.ToLower();                                 // ironchunk
-
-						if (!data.ContainsKey(nameKey))
+						if (Mappings.TryGetValue(Mappings[material["NameTextMapHash"].ToString()], out string name))  // Iron Chunk
 						{
-							data.Add(nameKey, nameGOOD);
+							string PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name);
+							string nameGOOD = Regex.Replace(PascalCase, @"[\W]", string.Empty);  // IronChunk
+							string nameKey = nameGOOD.ToLower();                                 // ironchunk
+
+							if (!data.ContainsKey(nameKey))
+							{
+								data.Add(nameKey, nameGOOD);
+							}
+							Interlocked.Increment(ref _completed);
 						}
-						Interlocked.Increment(ref _completed);
 					}
-					catch (Exception)
-					{ }
+					catch (Exception ex) { Logger.Warn(ex); }
 					++MaterialsCompleted;
 				}
 
@@ -674,10 +670,7 @@ namespace InventoryKamera
 				localVersions["materials"] = RemoteVersion.ToString();
 				SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
 			}
-			catch (Exception)
-			{
-				return false;
-			}
+			catch (Exception ex) { Logger.Warn(ex); return false; }
 			return true;
 		}
 
@@ -722,10 +715,7 @@ namespace InventoryKamera
 				localVersions["allmaterials"] = RemoteVersion.ToString();
 				SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
 			}
-			catch (Exception)
-			{
-				return false;
-			}
+			catch (Exception ex) { Logger.Warn(ex); return false; }
 			return true;
 		}
 
@@ -752,8 +742,7 @@ namespace InventoryKamera
                             return remoteVersion;
 						}
 					}
-					catch (Exception)
-					{ }
+					catch (Exception ex) { Logger.Warn(ex); }
 					commitsChecked++;
 				}
 				throw new Exception("Could not determine remote version");
@@ -799,10 +788,7 @@ namespace InventoryKamera
 				}
 				return true;
 			}
-			catch (Exception)
-			{
-				return false;
-			}
+			catch (Exception ex) { Logger.Warn(ex); return false; }
 		}
 	}
 

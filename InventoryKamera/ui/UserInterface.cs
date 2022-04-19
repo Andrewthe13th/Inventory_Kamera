@@ -7,6 +7,8 @@ namespace InventoryKamera
 {
 	public static class UserInterface
 	{
+		private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
 		// Artifacts and Weapons
 		private static PictureBox gear_PictureBox;
 
@@ -198,11 +200,13 @@ namespace InventoryKamera
 		public static void SetWeapon_Max(int value)
 		{
 			UpdateLabel(value.ToString(), weaponMax_Label);
+			Logger.Info("Parsed {value} weapons to scan", value);
 		}
 
 		public static void SetArtifact_Max(int value)
 		{
 			UpdateLabel(value.ToString(), artifactMax_Label);
+			Logger.Info("Parsed {value} artifacts to scan", value);
 		}
 
 		public static void IncrementArtifactCount()
@@ -236,6 +240,7 @@ namespace InventoryKamera
 		public static void AddError(string error)
 		{
 			UpdateTextBox($"{error.Replace("\n", Environment.NewLine)}" + Environment.NewLine, error_TextBox);
+			Logger.Error(error);
 		}
 
 		public static void SetNavigation_Image(Bitmap bm)

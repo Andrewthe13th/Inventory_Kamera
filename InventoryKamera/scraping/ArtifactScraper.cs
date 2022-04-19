@@ -14,6 +14,7 @@ namespace InventoryKamera
 {
 	public static class ArtifactScraper
 	{
+		private static NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 		public static bool StopScanning { get; set; }
 
 		public static void ScanArtifacts(int count = 0)
@@ -121,18 +122,16 @@ namespace InventoryKamera
 				if (Regex.IsMatch(text, "/"))
 				{
 					count = int.Parse(text.Split('/')[0]);
-					Debug.WriteLine($"Parsed {count} for artifact count");
 				}
 				else if (Regex.Matches(text, "1500").Count == 1) // Remove the inventory limit from number
 				{
 					text = text.Replace("1500", string.Empty);
 					count = int.Parse(text);
-					Debug.WriteLine($"Parsed {count} for artifact count");
 				}
 				else // Extreme worst case
 				{
 					count = 1500;
-					Debug.WriteLine("Defaulted to 1500 for artifact count");
+					Logger.Debug("Defaulted to 1500 for artifact count");
 				}
 
 				return count;
@@ -158,10 +157,10 @@ namespace InventoryKamera
 					}
 					return (rectangles, cols, rows);
 				}
-				catch (Exception e)
-				{
+				catch (Exception)
+				{ 
 					screenshot.Save($"./logging/artifacts/ArtifactInventory.png");
-					throw e;
+					throw;
 				}
 				
 			}

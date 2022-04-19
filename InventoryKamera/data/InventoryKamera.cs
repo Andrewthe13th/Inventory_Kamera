@@ -12,6 +12,9 @@ namespace InventoryKamera
 {
 	public class InventoryKamera
 	{
+
+		private static NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
 		[JsonProperty]
 		public List<Character> Characters { get; private set; }
 
@@ -52,6 +55,8 @@ namespace InventoryKamera
 			Directory.CreateDirectory("./logging/artifacts");
 			Directory.CreateDirectory("./logging/characters");
 			Directory.CreateDirectory("./logging/materials");
+
+			Logger.Info("Logging directory created");
 		}
 
 		public void StopImageProcessorWorkers()
@@ -59,11 +64,6 @@ namespace InventoryKamera
 			b_threadCancel = true;
 			AwaitProcessors();
 			workerQueue = new Queue<OCRImageCollection>();
-		}
-
-		public List<Character> GetCharacters()
-		{
-			return Characters;
 		}
 
 		public void GatherData()
@@ -75,7 +75,7 @@ namespace InventoryKamera
 				processor.Start();
 				ImageProcessors.Add(processor);
 			}
-			Debug.WriteLine($"Added {ImageProcessors.Count} workers");
+			Logger.Debug("Added {ImageProcessors.Count} workers", ImageProcessors.Count);
 
 			Scraper.RestartEngines();
 
@@ -85,6 +85,7 @@ namespace InventoryKamera
 
 			if (Properties.Settings.Default.ScanWeapons)
 			{
+				Logger.Info("Scanning weapons...");
 				// Get Weapons
 				Navigation.InventoryScreen();
 				Navigation.SelectWeaponInventory();
@@ -97,13 +98,15 @@ namespace InventoryKamera
 				catch (Exception ex)
 				{
 					UserInterface.AddError(ex.Message + "\n" + ex.StackTrace);
-					Debug.WriteLine($"{ex.Message}\n{ex.StackTrace}");
 				}
 				Navigation.MainMenuScreen();
+				Logger.Info("Done scanning weapons");
 			}
 
 			if (Properties.Settings.Default.ScanArtifacts)
 			{
+				Logger.Info("Scanning artifacts...");
+
 				// Get Artifacts
 				Navigation.InventoryScreen();
 				Navigation.SelectArtifactInventory();
@@ -118,12 +121,14 @@ namespace InventoryKamera
 					UserInterface.AddError(ex.Message + "\n" + ex.StackTrace);
 				}
 				Navigation.MainMenuScreen();
+				Logger.Info("Done scanning artifacts");
 			}
 
 			workerQueue.Enqueue(new OCRImageCollection(null, "END", 0));
 
 			if (Properties.Settings.Default.ScanCharacters)
 			{
+				Logger.Info("Scanning characters...");
 				// Get characters
 				Navigation.CharacterScreen();
 				var c = new List<Character>();
@@ -138,6 +143,7 @@ namespace InventoryKamera
 				}
 				Characters = c;
 				Navigation.MainMenuScreen();
+				Logger.Info("Done scanning characters");
 			}
 
 			// Wait for Image Processors to finish
@@ -155,6 +161,7 @@ namespace InventoryKamera
 			// Scan Character Development Items
 			if (Properties.Settings.Default.ScanCharDevItems)
 			{
+				Logger.Info("Scanning character development materials...");
 				// Get Materials
 				Navigation.InventoryScreen();
 				Navigation.SelectCharacterDevelopmentInventory();
@@ -170,11 +177,13 @@ namespace InventoryKamera
 					UserInterface.AddError(ex.Message + "\n" + ex.StackTrace);
 				}
 				Navigation.MainMenuScreen();
+				Logger.Info("Done scanning character development materials");
 			}
 
 			// Scan Materials
 			if (Properties.Settings.Default.ScanMaterials)
 			{
+				Logger.Info("Scanning materials...");
 				// Get Materials
 				Navigation.InventoryScreen();
 				Navigation.SelectMaterialInventory();
@@ -190,6 +199,7 @@ namespace InventoryKamera
 					UserInterface.AddError(ex.Message + "\n" + ex.StackTrace);
 				}
 				Navigation.MainMenuScreen();
+				Logger.Info("Done scanning materials");
 			}
 
 			Inventory.AddMaterials(ref Materials);
@@ -206,7 +216,7 @@ namespace InventoryKamera
 
 		public void ImageProcessorWorker()
 		{
-			Debug.WriteLine($"Thread #{Thread.CurrentThread.ManagedThreadId} priority: {Thread.CurrentThread.Priority}");
+			Logger.Debug("Thread #{0} priority: {1}", Thread.CurrentThread.ManagedThreadId, Thread.CurrentThread.Priority);
 			while (true)
 			{
 				if (b_threadCancel)
@@ -222,7 +232,7 @@ namespace InventoryKamera
 						case "weapon":
 							if (WeaponScraper.IsEnhancementMaterial(imageCollection.Bitmaps.First()))
 							{
-								Debug.WriteLine($"Enhancement Material found for weapon #{imageCollection.Id}");
+								Logger.Debug("Enhancement Material found for weapon #{weaponID}", imageCollection.Id);
 								WeaponScraper.StopScanning = true;
 								break;
 							}
@@ -318,12 +328,12 @@ namespace InventoryKamera
 						case "artifact":
 							if (ArtifactScraper.IsEnhancementMaterial(imageCollection.Bitmaps.Last()))
 							{
-								Debug.WriteLine($"Enhancement Material found for artifact #{imageCollection.Id}");
+								Logger.Debug("Enhancement Material found for artifact #{artifactID}", imageCollection.Id);
 								ArtifactScraper.StopScanning = true;
 								break;
 							}
 
-								UserInterface.SetGearPictureBox(imageCollection.Bitmaps.Last());
+							UserInterface.SetGearPictureBox(imageCollection.Bitmaps.Last());
 							// Scan as artifact
 							Artifact artifact = ArtifactScraper.CatalogueFromBitmapsAsync(imageCollection.Bitmaps, imageCollection.Id).Result;
 							UserInterface.SetGear(imageCollection.Bitmaps.Last(), artifact);
@@ -448,7 +458,7 @@ namespace InventoryKamera
 					Thread.Sleep(250);
 				}
 			}
-			Debug.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId} exit");
+			Logger.Debug("Thread {threadId} exit", Thread.CurrentThread.ManagedThreadId);
 		}
 
 		public void AssignArtifacts()
@@ -459,8 +469,8 @@ namespace InventoryKamera
 				{
 					if (artifact.EquippedCharacter == character.Name)
 					{
-						Debug.WriteLine($"Assigned {artifact.GearSlot} to {character.Name}");
 						character.AssignArtifact(artifact); // Do we even need to do this?
+						Logger.Debug("Assigned {fearSlot} to {character}", artifact.GearSlot, character.Name);
 						break;
 					}
 				}
@@ -475,14 +485,15 @@ namespace InventoryKamera
 				{
 					if (weapon.EquippedCharacter == character.Name)
 					{
-						Debug.WriteLine($"Assigned {weapon.Name} to {character.Name}");
 						character.AssignWeapon(weapon);
+						Logger.Debug("Assigned {weapon} to {character}", weapon.Name, character.Name);
 						break;
 					}
 				}
 				if (character.Weapon is null)
 				{
 					Inventory.Add(new Weapon(character.WeaponType, character.Name));
+					Logger.Info("Default weapon assigned to {character}", character.Name);
 				}
 			}
 		}

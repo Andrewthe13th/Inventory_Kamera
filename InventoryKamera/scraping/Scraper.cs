@@ -19,11 +19,10 @@ namespace InventoryKamera
 {
 	public static class Scraper
 	{
-		private const int numEngines = 8;
-#if DEBUG
-		public static bool s_bDoDebugOnlyCode = false;
+		private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
-#endif
+		private const int numEngines = 8;
+
 		private static readonly string tesseractDatapath = $"{Directory.GetCurrentDirectory()}\\tessdata";
 		private static readonly string tesseractLanguage = "genshin_fast_09_04_21";
 
@@ -99,7 +98,7 @@ namespace InventoryKamera
             Elements = new Dictionary<string, string>();
 
             foreach (var element in elements) Elements.Add(element, char.ToUpper(element[0]) + element.Substring(1));
-            Debug.WriteLine("Scraper initialized");
+            Logger.Info("Scraper initialized");
         }
 
         public static void AddTravelerToCharacterList(string traveler)
@@ -122,7 +121,7 @@ namespace InventoryKamera
 			if (!string.IsNullOrEmpty(traveler))
 			{
 				AddTravelerToCharacterList(traveler);
-				Debug.WriteLine($"Parsed traveler name {traveler}");
+				Logger.Debug("Parsed traveler name {traveler}", traveler);
 			}
 			else
 			{
@@ -142,15 +141,16 @@ namespace InventoryKamera
 					engines.Add(new TesseractEngine(tesseractDatapath, tesseractLanguage, EngineMode.LstmOnly));
 				}
 			}
-			catch (Exception e)
+			catch (Exception ex)
 			{
-				Debug.WriteLine("Failed to initialize Tesseract engines.");
-				throw e;
+				Logger.Error(ex, "Failed to initialize Tesseract engines.");
+				throw;
 			}
 		}
 
 		public static void RestartEngines()
 		{
+			
 			if (engines is null) engines = new ConcurrentBag<TesseractEngine>();
 			lock (engines)
 			{
@@ -165,7 +165,7 @@ namespace InventoryKamera
 					engines.Add(new TesseractEngine(tesseractDatapath, tesseractLanguage, EngineMode.LstmOnly));
 				}
 			}
-			Debug.WriteLine("Engines restarted");
+			Logger.Debug("{numEngines} Engines restarted", numEngines);
 		}
 
 		/// <summary> Use Tesseract OCR to find words on picture to string </summary>

@@ -14,6 +14,8 @@ namespace InventoryKamera
 {
 	public static class Navigation
 	{
+		private static NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
 		internal static InputSimulator sim = new InputSimulator();
 		internal static RECT WindowSize;
 		internal static RECT WindowPosition;
@@ -41,7 +43,7 @@ namespace InventoryKamera
 
 			foreach (var processName in executables)
 			{
-				Debug.WriteLine($"Checking for {processName}.exe");
+				Logger.Debug("Checking for {genshin}.exe", processName);
 				if (InitializeProcess(processName, out IntPtr handle))
 				{
 					// Get area and position
@@ -56,15 +58,15 @@ namespace InventoryKamera
 					{
 						throw new NotImplementedException("Genshin window could not be focused. Please make sure the game is visible.");
 					}
-					catch (Exception e)
+					catch (Exception)
 					{
-						throw e;
+						throw;
 					}
 
-					Debug.WriteLine($"Found {processName}.exe");
+					Logger.Debug("Found {genshin}.exe", processName);
 					return;
 				}
-				Debug.WriteLine($"Could not find {processName}.exe");
+				Logger.Debug("Could not find {genshin}.exe", processName);
 			}
 
 			throw new NullReferenceException("Cannot find Genshin Impact process");
