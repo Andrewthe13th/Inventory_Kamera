@@ -124,6 +124,7 @@ namespace InventoryKamera
 				}
 				catch (Exception) { }
 				Properties.Settings.Default.UpgradeNeeded = false;
+				Properties.Settings.Default.Save();
 			}
 
 			UpdateKeyTextBoxes();
@@ -141,7 +142,7 @@ namespace InventoryKamera
         private bool CheckForUpdates()
         {
             var databaseManager = new DatabaseManager();
-            return databaseManager.CheckForUpdates();
+            return databaseManager.UpdateAvailable();
         }
 
         private void UpdateKeyTextBoxes()
@@ -436,23 +437,33 @@ namespace InventoryKamera
 
 		private void MainForm_Shown(object sender, EventArgs e)
 		{
-			var updatesAvailable = CheckForUpdates();
-			if (updatesAvailable)
-			{ 
-				var message = "A new version for Genshin Impact has been found. Would you like to update this Kamera's lookup tables? (Recommended)";
-				var result = MessageBox.Show(message, "Game Version Update", MessageBoxButtons.YesNo);
-				if (result == DialogResult.Yes)
-				{
-					new DatabaseManager().UpdateAllLists();
-					MessageBox.Show("Update complete");
+            try
+            {
+				var updatesAvailable = CheckForUpdates();
+				if (updatesAvailable)
+				{ 
+					var message = "A new version for Genshin Impact has been found. Would you like to update this Kamera's lookup tables? (Recommended)";
+					var result = MessageBox.Show(message, "Game Version Update", MessageBoxButtons.YesNo);
+					if (result == DialogResult.Yes)
+					{
+						new DatabaseManager().UpdateAllLists();
+						MessageBox.Show("Update complete");
+					}
+					else if (result == DialogResult.No)
+					{
+						MessageBox.Show("Update skipped. Please know that skipping this update will likely result in incorrect scans.\n" +
+							"\nYou may check for updates again on restarting this application or by using the update manager found" +
+							" under 'options'", "Update declined", MessageBoxButtons.OK);
+					}
 				}
-				else if (result == DialogResult.No)
-				{
-					MessageBox.Show("Update skipped. Please know that skipping this update will likely result in incorrect scans.\n" +
-                        "\nYou may check for updates again on restarting this application or by using the update manager found" +
-                        " under 'options'", "Update declined", MessageBoxButtons.OK);
-				}
-			}
+            }
+            catch (Exception ex)
+            {
+				Logger.Warn(ex, "Could not check for list updates");
+				MessageBox.Show("Could not check for updates. Consider trying again in an hour or so.", "Game Version Update", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+			Properties.Settings.Default.LastUpdateCheck = DateTime.Now.TimeOfDay;
+			Properties.Settings.Default.Save();
 		}
-    }
+	}
 }

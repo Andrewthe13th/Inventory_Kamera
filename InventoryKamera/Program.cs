@@ -35,11 +35,11 @@ namespace InventoryKamera
 
 			var logFile = new NLog.Targets.FileTarget("logfile")
 			{
-				Layout = "${date:format=yyyy-MM-dd HH\\:mm\\:ss.fff}|${level:uppercase=true}|${logger}|${message:withexception=true}",
+				Layout = "${date:format=yyyy-MM-dd HH\\:mm\\:ss.fff}|${level:uppercase=true}|${logger:shortName=True}|${message:withexception=true}",
 				FileName = "./logging/InventoryKamera.log",
-				ArchiveFileName = "logging/archives/InventoryKamera.{#}.log",
-				ArchiveEvery = NLog.Targets.FileArchivePeriod.Day,
-				ArchiveNumbering = NLog.Targets.ArchiveNumberingMode.DateAndSequence,
+				ArchiveFileName = "logging/archives/InventoryKamera.{####}.log",
+				ArchiveNumbering = NLog.Targets.ArchiveNumberingMode.Date,
+				ArchiveDateFormat = "yyyyMMddHHmmss",
 				MaxArchiveFiles = 4,
 				ConcurrentWrites = true,
 				KeepFileOpen = true,

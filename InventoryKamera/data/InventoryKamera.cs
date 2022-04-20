@@ -47,7 +47,10 @@ namespace InventoryKamera
 		{
 			try
 			{
-				Directory.Delete("./logging", true);
+				Directory.Delete("./logging/weapons", true);
+				Directory.Delete("./logging/artifacts", true);
+				Directory.Delete("./logging/characters", true);
+				Directory.Delete("./logging/materials", true);
 			}
 			catch { }
 

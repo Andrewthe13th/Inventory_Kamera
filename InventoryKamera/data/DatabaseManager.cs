@@ -18,7 +18,7 @@ namespace InventoryKamera
 	{
 		private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 		private string _listdir = @".\inventorylists\";
-		private string versionJson = "versions.json";
+		private readonly string versionJson = "versions.json";
 
 		public string ListsDir
 		{
@@ -39,12 +39,12 @@ namespace InventoryKamera
 
 		// This is the best place I think we can find easily accessible and up-to-date lists of information
 		private const string CharactersURL = "https://raw.githubusercontent.com/Dimbreath/GenshinData/master/ExcelBinOutput/AvatarExcelConfigData.json";
-
 		private const string ConstellationsURL = "https://raw.githubusercontent.com/Dimbreath/GenshinData/master/ExcelBinOutput/AvatarTalentExcelConfigData.json";
 		private const string SkillsURL = "https://raw.githubusercontent.com/Dimbreath/GenshinData/master/ExcelBinOutput/AvatarSkillExcelConfigData.json";
 		private const string ArtifactsURL = "https://raw.githubusercontent.com/Dimbreath/GenshinData/master/ExcelBinOutput/DisplayItemExcelConfigData.json";
 		private const string WeaponsURL = "https://raw.githubusercontent.com/Dimbreath/GenshinData/master/ExcelBinOutput/WeaponExcelConfigData.json";
 		private const string MaterialsURL = "https://raw.githubusercontent.com/Dimbreath/GenshinData/master/ExcelBinOutput/MaterialExcelConfigData.json";
+		
 		private const string MappingsURL = "https://raw.githubusercontent.com/Dimbreath/GenshinData/master/TextMap/TextMapEN.json";
 
 		private Dictionary<string, string> Mappings = new Dictionary<string, string>();
@@ -70,7 +70,7 @@ namespace InventoryKamera
 		private Dictionary<string, string> localVersions;
         private Version RemoteVersion;
 
-		public int TotalCompleted
+        public int TotalCompleted
 		{
 			get { return _completed; }
 			private set { _completed = value; }
@@ -151,8 +151,8 @@ namespace InventoryKamera
 			if (!File.Exists(ListsDir + versionJson))
 			{
 				File.Create(ListsDir + versionJson);
-			}
-
+			}			
+			RemoteVersion = new Version(Properties.Settings.Default.RemoteVersion);
 			localVersions = JToken.Parse(LoadJsonFromFile(versionJson)).ToObject<Dictionary<string, string>>();
 		}
 
@@ -250,37 +250,15 @@ namespace InventoryKamera
 			return JToken.Parse(json);
 		}
 
-		public bool CheckForUpdates(ListType? list = null)
-        {
-            try
-            {
-				var fs = new List<string> { "characters", "weapons", "artifacts", "devmaterials", "materials", "allmaterials" };
-				var remoteVersion = GetRemoteVersion();
-				var localVersion = new Version();
-
-				if (list.HasValue)
-                {
-					localVersion = localVersions.TryGetValue(fs[(int)list.Value], out string v) ? new Version(v) : new Version();
-                    return localVersion.CompareTo(remoteVersion) < 0;
-                }
-
-				foreach (var f in fs)
-				{
-					localVersion = localVersions.TryGetValue(f, out string v) ? new Version(v) : new Version();
-					if (localVersion.CompareTo(remoteVersion) < 0) return true;
-				}
-            }
-            catch (Exception)
-            {
-				throw;
-            } 
-
-			return false;
-        }
-
 		public bool UpdateAllLists(bool @new = false)
 		{
 			bool pass = true;
+
+			if (@new)
+			{
+				Properties.Settings.Default.LastUpdateCheck = TimeSpan.Zero;
+				Properties.Settings.Default.Save();
+			}
 
 			var lists = Enum.GetValues(typeof(ListType)).Cast<ListType>().ToList();
 
@@ -301,6 +279,12 @@ namespace InventoryKamera
 		{
 			bool pass = true;
 
+			if (@new)
+			{
+				Properties.Settings.Default.LastUpdateCheck = TimeSpan.Zero;
+				Properties.Settings.Default.Save();
+			}
+
 			if (lists.Contains(ListType.AllMaterials)) lists = lists.Where(list => list != ListType.Materials && list != ListType.CharacterDevelopmentItems);
 
 			lists.AsParallel().ForAll(list =>
@@ -317,9 +301,11 @@ namespace InventoryKamera
 		private bool UpdateList(ListType list, bool @new = false)
 		{
 			Interlocked.Increment(ref updaters);
-
+			LoadMappings();
 			bool pass = true;
+            
 
+			Logger.Info("Updating {0}", list);
 			switch (list)
 			{
 				case ListType.Weapons:
@@ -359,12 +345,23 @@ namespace InventoryKamera
 		{
 			if (@new)
 			{
-				localVersions.Remove("characters");
-				File.Delete(ListsDir + CharactersJson);
+                lock (localVersions)
+                {
+					localVersions.Remove("characters");
+					SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
+					File.Delete(ListsDir + CharactersJson);
+                }
 			}
 
-			if (!CheckForUpdates(ListType.Characters)) return true;
-
+			try
+			{
+				if (!UpdateAvailable(ListType.Characters)) return true;
+			}
+			catch (Exception e)
+			{
+				Logger.Error(e, "Could not get check for updates when updating characters. Trying again in an hour should be fine.");
+				return false;
+			}
 			
 			LoadMappings();
 			
@@ -459,12 +456,23 @@ namespace InventoryKamera
 		{
 			if (@new)
 			{
-				localVersions.Remove("weapons");
-				File.Delete(ListsDir + WeaponsJson);
+                lock (localVersions)
+                {
+					localVersions.Remove("weapons");
+					SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
+					File.Delete(ListsDir + WeaponsJson);
+                }
 			}
 
-			if (!CheckForUpdates(ListType.Weapons)) return true;
-
+			try
+			{
+				if (!UpdateAvailable(ListType.Weapons)) return true;
+			}
+			catch (Exception e)
+			{
+				Logger.Error(e, "Could not get check for updates when updating weapons. Trying again in an hour should be fine.");
+				return false;
+			}
 
 			LoadMappings();
 
@@ -480,17 +488,19 @@ namespace InventoryKamera
 				{
 					try
 					{
-						if (Mappings.TryGetValue(weapon["NameTextMapHash"].ToString(), out string name)) // Dull Blade
+						if (Mappings.ContainsKey(weapon["NameTextMapHash"].ToString()))
 						{
-							string PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name);
-							string nameGOOD = Regex.Replace(PascalCase, @"[\W]", string.Empty);  // DullBlade
-							string nameKey = nameGOOD.ToLower();                                 // dullblade
+							var name = Mappings[weapon["NameTextMapHash"].ToString()];
+							string PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name); // Dull Blade
+							string nameGOOD = Regex.Replace(PascalCase, @"[\W]", string.Empty);              // DullBlade
+							string nameKey = nameGOOD.ToLower();                                             // dullblade
 
 							if (!data.ContainsKey(nameKey))
 							{
 								data.Add(nameKey, nameGOOD);
 							}
 						}
+						else Logger.Warn("Weapon hash {0} not found in Mappings. It's likely unreleased.", weapon["NameTextMapHash"].ToString());
 						++WeaponsCompleted;
 					}
 					catch (Exception ex) { Logger.Warn(ex, weapon["NameTextMapHash"].ToString()); }
@@ -513,12 +523,23 @@ namespace InventoryKamera
 		{
 			if (@new)
 			{
-				localVersions.Remove("artifacts");
-				File.Delete(ListsDir + ArtifactsJson);
+                lock (localVersions)
+                {
+					localVersions.Remove("artifacts");
+					SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
+					File.Delete(ListsDir + ArtifactsJson);
+                }
 			}
 
-			if (!CheckForUpdates(ListType.Artifacts)) return true;
-
+			try
+			{
+				if (!UpdateAvailable(ListType.Artifacts)) return true;
+			}
+			catch (Exception e)
+			{
+				Logger.Error(e, "Could not get check for updates when updating artifacts. Trying again in an hour should be fine.");
+				return false;
+			}
 
 			LoadMappings();
 
@@ -535,11 +556,12 @@ namespace InventoryKamera
 				{
 					try
 					{
-						if (Mappings.TryGetValue(Mappings[artifact["NameTextMapHash"].ToString()], out string name))  // Archaic Petra
-						{ 
-							string PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name);
-							string nameGOOD = Regex.Replace(PascalCase, @"[\W]", string.Empty);  // ArchaicPetra
-							string nameKey = nameGOOD.ToLower();                                 // archaicpetra
+                        if (Mappings.ContainsKey(artifact["NameTextMapHash"].ToString()))
+                        {
+							var name = Mappings[artifact["NameTextMapHash"].ToString()];
+							string PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name);   // Archaic Petra
+							string nameGOOD = Regex.Replace(PascalCase, @"[\W]", string.Empty);				// ArchaicPetra
+							string nameKey = nameGOOD.ToLower();											// archaicpetra
 
 							if (!data.ContainsKey(nameKey))
 							{
@@ -564,12 +586,23 @@ namespace InventoryKamera
 		{
 			if (@new)
 			{
-				localVersions.Remove("devmaterials");
-				File.Delete(ListsDir + DevMaterialsJson);
+                lock (localVersions)
+                {
+					localVersions.Remove("devmaterials");
+					SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
+					File.Delete(ListsDir + DevMaterialsJson);
+                }
 			}
 
-			if (!CheckForUpdates(ListType.CharacterDevelopmentItems)) return true;
-
+			try
+			{
+				if (!UpdateAvailable(ListType.CharacterDevelopmentItems)) return true;
+			}
+			catch (Exception e)
+			{
+				Logger.Error(e, "Could not get check for updates when updating character development items. Trying again in an hour should be fine.");
+				return false;
+			}
 
 			LoadMappings();
 
@@ -591,17 +624,19 @@ namespace InventoryKamera
 				{
 					try
 					{
-						if (Mappings.TryGetValue(Mappings[material["NameTextMapHash"].ToString()], out string name))  // Hero's Wit
-						{ 
-							string PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name);
-							string nameGOOD = Regex.Replace(PascalCase, @"[\W]", string.Empty);  // HerosWit
-							string nameKey = nameGOOD.ToLower();                                 // heroswit
+						if (Mappings.ContainsKey(material["NameTextMapHash"].ToString()))  
+						{
+							var name = Mappings[material["NameTextMapHash"].ToString()];
+							string PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name);  // Hero's Wit
+							string nameGOOD = Regex.Replace(PascalCase, @"[\W]", string.Empty);				  // HerosWit
+							string nameKey = nameGOOD.ToLower();											  // heroswit
 
 							if (!data.ContainsKey(nameKey))
 							{
 								data.Add(nameKey, nameGOOD);
 							}
 						}
+						else Logger.Warn("Material hash {0} not found in Mappings. It's likely unreleased.", material["NameTextMapHash"].ToString());
 					}
 					catch (Exception ex) { Logger.Warn(ex); }
 					++DevMaterialsCompleted;
@@ -619,11 +654,23 @@ namespace InventoryKamera
 		{
 			if (@new)
 			{
-				localVersions.Remove("materials");
-				File.Delete(ListsDir + MaterialsJson);
+                lock (localVersions)
+                {
+					localVersions.Remove("materials");
+					SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
+					File.Delete(ListsDir + MaterialsJson);
+				}
 			}
 
-			if (!CheckForUpdates(ListType.Materials)) return true;
+            try
+            {
+				if (!UpdateAvailable(ListType.Materials)) return true;
+            }
+            catch (Exception e)
+            {
+				Logger.Error(e, "Could not get check for updates when updating materials. Trying again in an hour should be fine.");
+				return false;
+            }
 
 
 			LoadMappings();
@@ -649,11 +696,12 @@ namespace InventoryKamera
 				{
 					try
 					{
-						if (Mappings.TryGetValue(Mappings[material["NameTextMapHash"].ToString()], out string name))  // Iron Chunk
+						if (Mappings.ContainsKey(material["NameTextMapHash"].ToString())) //Mappings.ContainsKey(weapon["NameTextMapHash"].ToString())
 						{
-							string PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name);
-							string nameGOOD = Regex.Replace(PascalCase, @"[\W]", string.Empty);  // IronChunk
-							string nameKey = nameGOOD.ToLower();                                 // ironchunk
+							var name = Mappings[material["NameTextMapHash"].ToString()];
+							string PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name);  // Iron Chunk
+							string nameGOOD = Regex.Replace(PascalCase, @"[\W]", string.Empty);				  // IronChunk
+							string nameKey = nameGOOD.ToLower();											  // ironchunk
 
 							if (!data.ContainsKey(nameKey))
 							{
@@ -661,6 +709,7 @@ namespace InventoryKamera
 							}
 							Interlocked.Increment(ref _completed);
 						}
+						else Logger.Warn("Material hash {0} not found in Mappings. It's likely unreleased.", material["NameTextMapHash"].ToString());
 					}
 					catch (Exception ex) { Logger.Warn(ex); }
 					++MaterialsCompleted;
@@ -678,12 +727,13 @@ namespace InventoryKamera
 		{
 			if (@new)
 			{
-				localVersions.Remove("allmaterials");
-				File.Delete(ListsDir + MaterialsCompleteJson);
+                lock (localVersions)
+                {
+					localVersions.Remove("allmaterials");
+					SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
+					File.Delete(ListsDir + MaterialsCompleteJson);
+                }
 			}
-
-			if (!CheckForUpdates(ListType.AllMaterials)) return true;
-
 
 			LoadMappings();
 
@@ -718,6 +768,39 @@ namespace InventoryKamera
 			catch (Exception ex) { Logger.Warn(ex); return false; }
 			return true;
 		}
+		
+		public bool UpdateAvailable(ListType? list = null, bool forced = false)
+        {
+			var lastChecked = Properties.Settings.Default.LastUpdateCheck;
+			var now = DateTime.Now.TimeOfDay;
+            if (!forced && (now - lastChecked < TimeSpan.FromHours(1))) return false;
+            try
+            {
+
+				var fs = new List<string> { "characters", "weapons", "artifacts", "devmaterials", "materials", "allmaterials" };
+				var remoteVersion = GetRemoteVersion();
+				var localVersion = new Version();
+
+				if (list.HasValue)
+                {
+					localVersion = localVersions.TryGetValue(fs[(int)list.Value], out string v) ? new Version(v) : new Version();
+                    return localVersion.CompareTo(remoteVersion) < 0;
+                }
+
+				foreach (var f in fs)
+				{
+					localVersion = localVersions.TryGetValue(f, out string v) ? new Version(v) : new Version();
+					if (localVersion.CompareTo(remoteVersion) < 0) return true;
+				}
+            }
+            catch (Exception e)
+            {
+				Logger.Error(e, "Could not check for list updates");
+				throw;
+            } 
+
+			return false;
+        }
 
 		private Version GetRemoteVersion()
 		{
@@ -737,15 +820,20 @@ namespace InventoryKamera
 						if (commit["commit"]["message"].ToString().ToUpper().Contains("OSRELWIN"))
 						{
 							var message = commit["commit"]["message"].ToString();
-                            Version remoteVersion = new Version(Regex.Match(message, @"[\d\.]*?(?=_)").ToString());
-							RemoteVersion = RemoteVersion ?? remoteVersion;
-                            return remoteVersion;
+                            RemoteVersion = new Version(Regex.Match(message, @"[\d\.]*?(?=_)").ToString());
+                            if (RemoteVersion != new Version(Properties.Settings.Default.RemoteVersion))
+                            {
+								Properties.Settings.Default.RemoteVersion = RemoteVersion.ToString();
+								Properties.Settings.Default.Save();
+								Logger.Info("Saved remote version as {0}", Properties.Settings.Default.RemoteVersion);
+                            }
+                            return RemoteVersion;
 						}
 					}
 					catch (Exception ex) { Logger.Warn(ex); }
 					commitsChecked++;
 				}
-				throw new Exception("Could not determine remote version");
+				throw new Exception("Could not determine remote version from commits");
 			}
 		}
 
@@ -761,34 +849,40 @@ namespace InventoryKamera
 
 		private string LoadJsonFromFile(string fileName)
 		{
-			try
-			{
-				using (StreamReader file = File.OpenText(ListsDir + fileName))
-				using (JsonTextReader reader = new JsonTextReader(file))
+            lock (this)
+            {
+				try
 				{
-					return JToken.ReadFrom(reader).ToString();
+					using (StreamReader file = File.OpenText(ListsDir + fileName))
+					using (JsonTextReader reader = new JsonTextReader(file))
+					{
+						return JToken.ReadFrom(reader).ToString();
+					}
 				}
-			}
-			catch (Exception)
-			{
-				File.Create(ListsDir + fileName).Close();
-				return "{}";
-			}
+				catch (Exception)
+				{
+					File.Create(ListsDir + fileName).Close();
+					return "{}";
+				}
+            }
 		}
 
 		private bool SaveJson(string json, string fileName)
 		{
-			try
-			{
-				using (StreamWriter file = new StreamWriter(ListsDir + fileName))
-				using (JsonTextWriter writer = new JsonTextWriter(file))
+            lock (this)
+            {
+				try
 				{
-					writer.Formatting = Formatting.Indented;
-					JToken.Parse(json).WriteTo(writer);
+					using (StreamWriter file = new StreamWriter(ListsDir + fileName))
+					using (JsonTextWriter writer = new JsonTextWriter(file))
+					{
+						writer.Formatting = Formatting.Indented;
+						JToken.Parse(json).WriteTo(writer);
+					}
+					return true;
 				}
-				return true;
-			}
-			catch (Exception ex) { Logger.Warn(ex); return false; }
+				catch (Exception ex) { Logger.Warn(ex); return false; }
+            }
 		}
 	}
 
