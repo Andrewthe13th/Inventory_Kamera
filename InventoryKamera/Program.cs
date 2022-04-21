@@ -26,6 +26,10 @@ namespace InventoryKamera
             catch (Exception ex)
             {
 				Logger.Fatal(ex, "Main application crashed");
+				MessageBox.Show("Inventory Kamera has encountered an error it was not meant to handle." +
+					" Please check the application's log and/or upload it to GitHub when reporting your issue. Thanks!",
+					"Application Crashed",
+					MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 		}
 
