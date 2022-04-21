@@ -10,6 +10,7 @@ namespace InventoryKamera
 {
 	public static class CharacterScraper
 	{
+		private static NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 		private static string firstCharacterName = null;
 
 		public static void ScanCharacters(ref List<Character> characters)
@@ -24,6 +25,7 @@ namespace InventoryKamera
 				{
 					characters.Add(character);
 					UserInterface.IncrementCharacterCount();
+					Logger.Info("Scanned {0} successfully", character.Name);
 					characterCount++;
 				}
 				Navigation.SelectNextCharacter();
@@ -107,6 +109,7 @@ namespace InventoryKamera
 				character = new Character(name, element, level, ascended, experience, constellation, talents, (WeaponType)weaponType);
 				return true;
 			}
+			Logger.Info("Repeat character {0} detected. Finishing character scan...", name);
 			return false;
 		}
 

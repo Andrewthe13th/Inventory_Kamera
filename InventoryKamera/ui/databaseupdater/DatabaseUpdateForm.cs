@@ -43,6 +43,7 @@ namespace InventoryKamera
 			Task<bool> updateTask;
 			UpdateStatusLabel.Text = "";
 
+
 			if (EverythingCheckBox.Checked)
 			{
 				updateTask = Task.Run(() => { return databaseManager.UpdateAllLists(CreateNewCheckBox.Checked); });
@@ -71,6 +72,8 @@ namespace InventoryKamera
 				case true:
 					UpdateStatusLabel.ForeColor = Color.Green;
 					UpdateStatusLabel.Text = "Updated lists";
+					Properties.Settings.Default.LastUpdateCheck = DateTime.Now.TimeOfDay;
+					Properties.Settings.Default.Save();
 					break;
 
 				default:

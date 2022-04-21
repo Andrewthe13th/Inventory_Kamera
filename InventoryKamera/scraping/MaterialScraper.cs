@@ -257,7 +257,7 @@ namespace InventoryKamera
 					}
 					return (rectangles, cols, rows);
 				}
-				catch (Exception e)
+				catch (Exception)
 				{
 					screenshot.Save($"./logging/materials/{section}Inventory{page}.png");
 					throw new Exception($"Insufficient items found in {section} inventory");

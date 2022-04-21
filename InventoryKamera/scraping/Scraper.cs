@@ -19,11 +19,10 @@ namespace InventoryKamera
 {
 	public static class Scraper
 	{
-		private const int numEngines = 8;
-#if DEBUG
-		public static bool s_bDoDebugOnlyCode = false;
+		private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
-#endif
+		private const int numEngines = 8;
+
 		private static readonly string tesseractDatapath = $"{Directory.GetCurrentDirectory()}\\tessdata";
 		private static readonly string tesseractLanguage = "genshin_fast_09_04_21";
 
@@ -85,28 +84,24 @@ namespace InventoryKamera
 		public static Dictionary<string, JObject> Characters;
 
 		static Scraper()
-		{
-			engines = new ConcurrentBag<TesseractEngine>();
-			for (int i = 0; i < numEngines; i++)
-			{
-				engines.Add(new TesseractEngine(tesseractDatapath, tesseractLanguage, EngineMode.LstmOnly));
-			}
+        {
+            InitEngines();
 
-			var listManager = new DatabaseManager();
+            var listManager = new DatabaseManager();
 
-			Characters = listManager.LoadCharacters();
-			Artifacts = listManager.LoadArtifacts();
-			Weapons = listManager.LoadWeapons();
-			DevMaterials = listManager.LoadDevMaterials();
-			Materials = listManager.LoadMaterials();
-			AllMaterials = listManager.LoadAllMaterials();
-			Elements = new Dictionary<string, string>();
+            Characters = listManager.LoadCharacters();
+            Artifacts = listManager.LoadArtifacts();
+            Weapons = listManager.LoadWeapons();
+            DevMaterials = listManager.LoadDevMaterials();
+            Materials = listManager.LoadMaterials();
+            AllMaterials = listManager.LoadAllMaterials();
+            Elements = new Dictionary<string, string>();
 
-			foreach (var element in elements) Elements.Add(element, char.ToUpper(element[0]) + element.Substring(1));
-			Debug.WriteLine("Scraper initialized");
-		}
+            foreach (var element in elements) Elements.Add(element, char.ToUpper(element[0]) + element.Substring(1));
+            Logger.Info("Scraper initialized");
+        }
 
-		public static void AddTravelerToCharacterList(string traveler)
+        public static void AddTravelerToCharacterList(string traveler)
 		{
 			Characters = new DatabaseManager().LoadCharacters();
 
@@ -126,7 +121,7 @@ namespace InventoryKamera
 			if (!string.IsNullOrEmpty(traveler))
 			{
 				AddTravelerToCharacterList(traveler);
-				Debug.WriteLine($"Parsed traveler name {traveler}");
+				Logger.Debug("Parsed traveler name {traveler}", traveler);
 			}
 			else
 			{
@@ -136,8 +131,26 @@ namespace InventoryKamera
 
 		#region OCR
 
+		private static void InitEngines()
+		{
+			engines = new ConcurrentBag<TesseractEngine>();
+			try
+			{
+				for (int i = 0; i < numEngines; i++)
+				{
+					engines.Add(new TesseractEngine(tesseractDatapath, tesseractLanguage, EngineMode.LstmOnly));
+				}
+			}
+			catch (Exception ex)
+			{
+				Logger.Error(ex, "Failed to initialize Tesseract engines.");
+				throw;
+			}
+		}
+
 		public static void RestartEngines()
 		{
+			
 			if (engines is null) engines = new ConcurrentBag<TesseractEngine>();
 			lock (engines)
 			{
@@ -152,7 +165,7 @@ namespace InventoryKamera
 					engines.Add(new TesseractEngine(tesseractDatapath, tesseractLanguage, EngineMode.LstmOnly));
 				}
 			}
-			Debug.WriteLine("Engines restarted");
+			Logger.Debug("{numEngines} Engines restarted", numEngines);
 		}
 
 		/// <summary> Use Tesseract OCR to find words on picture to string </summary>

@@ -74,70 +74,10 @@ namespace InventoryKamera
 			string fileName = "\\genshinData_GOOD_" + DateTime.Now.ToString("yyyy_MM_dd_HH_mm") + ".json";
 			fileName = fileName.Replace('/', '_');
 			string outputFile = outputDirectory + fileName;
-			if (File.Exists(oldDataFilePath) && false) // && false hack. TODO: add support for data merging
-			{
-				try
-				{
-					// Try to load external GOOD data to update.
-					// For preserving information at when uploading data to
-					// https://frzyc.github.io/genshin-optimizer
-					// This may not even be necessary
-					JObject database;
-					// Load source data
-					using (StreamReader file = File.OpenText(oldDataFilePath))
-					using (JsonTextReader reader = new JsonTextReader(file))
-					{
-						database = (JObject)JToken.ReadFrom(reader);
-					}
-
-					// Characters
-					//foreach (ICharacter character in characters)
-					//{
-					//	foreach (JObject dbCharacter in database["characters"])
-					//	{
-					//		{
-					//			if ((string)dbCharacter["key"] == character.key)
-					//			{
-					//				dbCharacter["level"] = character.level;
-					//				dbCharacter["constellation"] = character.constellation;
-					//				dbCharacter["ascension"] = character.ascension;
-					//				dbCharacter["talent"] = JObject.FromObject(character.talent);
-					//				break;
-					//			}
-					//		}
-					//	}
-					//}
-					// Weapons
-					//foreach (IWeapon weapon in weapons)
-					//{
-					//	foreach (JToken dbWeapon in database["weapons"])
-					//	{
-					//		if ((string)dbWeapon["key"] == weapon.key)
-					//		{
-					//			break;
-					//		}
-					//	}
-					//}
-					// Artifacts
-
-					using (StreamWriter file = File.CreateText(outputFile))
-					using (JsonWriter writer = new JsonTextWriter(file))
-					{
-						database.WriteTo(writer);
-					}
-					Debug.WriteLine("Successfully merged databases");
-				}
-				catch (Exception)
-				{
-					UserInterface.AddError("Unable to create merged database.");
-					WriteToJson(outputFile);
-				}
-			}
-			else
-			{
-				// Write file
-				WriteToJson(outputFile);
-			}
+			
+			// Write file
+			WriteToJson(outputFile);
+			
 
 			if (!File.Exists(outputFile)) // did not make file
 			{
