@@ -505,15 +505,7 @@ namespace InventoryKamera
 			{
 				Dictionary<string, string> data = JToken.Parse(LoadJsonFromFile(ArtifactsJson)).ToObject < Dictionary < string, string > >();
 				List<JObject> artifacts = JArray.Parse(LoadJsonFromURLAsync(ArtifactsURL)).ToObject<List<JObject>>();
-				//artifacts.RemoveAll(artifact => artifact.TryGetValue("Icon", out var icon) && !icon.ToString().Contains("RelicIcon"));
-
-				foreach (JObject artifact in artifacts)
-                {
-                    if (artifact.TryGetValue("icon", out var icon) && !icon.ToString().Contains("RelicIcon"))
-                    {
-                        Console.WriteLine();
-                    }
-                }
+				artifacts.RemoveAll(artifact => artifact.TryGetValue("icon", out var icon) && !icon.ToString().Contains("RelicIcon"));
 
 				ArtifactsTodo = artifacts.Count;
 				Logger.Debug("Added {_artifactsTodo} artifacts. Total {TotalTodo}", _artifactsTodo, TotalTodo);
