@@ -25,14 +25,14 @@ namespace InventoryKamera
 		[JsonProperty("lock")]
 		public bool Lock { get; private set; }
 
+		[JsonProperty("id")]
+		public int Id { get; private set; }
 		[JsonIgnore]
+		
 		public int Rarity { get; private set; }
 
 		[JsonIgnore]
 		public bool Ascended { get; private set; }
-
-		[JsonIgnore]
-		public int Id { get; private set; }
 
 		[JsonIgnore]
 		public WeaponType WeaponType { get; private set; }

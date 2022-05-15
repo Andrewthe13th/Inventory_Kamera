@@ -33,8 +33,6 @@
             this.WeaponArtifact_Label = new System.Windows.Forms.Label();
             this.WeaponArtifactOutput_TextBox_Label = new System.Windows.Forms.Label();
             this.ScannerCancelInstructions_Label = new System.Windows.Forms.Label();
-            this.Instructions_Label = new System.Windows.Forms.Label();
-            this.Instructions1_Label = new System.Windows.Forms.Label();
             this.Language_ComboBox = new System.Windows.Forms.ComboBox();
             this.ArtifactOutput_TextBox = new System.Windows.Forms.TextBox();
             this.CharacterOutput_TextBox = new System.Windows.Forms.TextBox();
@@ -59,9 +57,6 @@
             this.Github_Label = new System.Windows.Forms.LinkLabel();
             this.ErrorLog_TextBox = new System.Windows.Forms.TextBox();
             this.ErrorLog_Label = new System.Windows.Forms.Label();
-            this.Instructions2_Label = new System.Windows.Forms.Label();
-            this.Instructions2b_Label = new System.Windows.Forms.Label();
-            this.Instruction3_Label = new System.Windows.Forms.Label();
             this.ErrorReport_Label = new System.Windows.Forms.Label();
             this.IssuesPage_Label = new System.Windows.Forms.LinkLabel();
             this.Releases_Label = new System.Windows.Forms.LinkLabel();
@@ -90,6 +85,14 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
+            this.MinimumWeaponLevelLabel = new System.Windows.Forms.Label();
+            this.MinimumArtifactLevelLabel = new System.Windows.Forms.Label();
+            this.ManualExportButton = new System.Windows.Forms.Button();
+            this.EquipArtifactsCheckBox = new System.Windows.Forms.CheckBox();
+            this.EquipWeaponsCheckBox = new System.Windows.Forms.CheckBox();
+            this.LogScreenshotsCheckBox = new System.Windows.Forms.CheckBox();
+            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+            this.MinimumWeaponLevelControl = new System.Windows.Forms.NumericUpDown();
             this.ArtifactRarityControl = new System.Windows.Forms.NumericUpDown();
             this.WeaponRarityControl = new System.Windows.Forms.NumericUpDown();
             this.Materials_CheckBox = new System.Windows.Forms.CheckBox();
@@ -108,6 +111,8 @@
             this.ScannerOutput_Panel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.GearPictureBox)).BeginInit();
             this.menuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.MinimumWeaponLevelControl)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.ArtifactRarityControl)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.WeaponRarityControl)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.ScannerDelay_TrackBar)).BeginInit();
@@ -115,7 +120,7 @@
             // 
             // StartScan_Button
             // 
-            this.StartScan_Button.Location = new System.Drawing.Point(12, 362);
+            this.StartScan_Button.Location = new System.Drawing.Point(12, 313);
             this.StartScan_Button.Margin = new System.Windows.Forms.Padding(2);
             this.StartScan_Button.Name = "StartScan_Button";
             this.StartScan_Button.Size = new System.Drawing.Size(124, 34);
@@ -151,35 +156,12 @@
             // 
             this.ScannerCancelInstructions_Label.AutoSize = true;
             this.ScannerCancelInstructions_Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.7F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ScannerCancelInstructions_Label.Location = new System.Drawing.Point(12, 401);
+            this.ScannerCancelInstructions_Label.Location = new System.Drawing.Point(12, 352);
             this.ScannerCancelInstructions_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.ScannerCancelInstructions_Label.Name = "ScannerCancelInstructions_Label";
             this.ScannerCancelInstructions_Label.Size = new System.Drawing.Size(124, 13);
             this.ScannerCancelInstructions_Label.TabIndex = 11;
             this.ScannerCancelInstructions_Label.Text = "Press \'ENTER\' to cancel";
-            // 
-            // Instructions_Label
-            // 
-            this.Instructions_Label.AutoSize = true;
-            this.Instructions_Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.3F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Instructions_Label.ForeColor = System.Drawing.Color.DarkGreen;
-            this.Instructions_Label.Location = new System.Drawing.Point(140, 26);
-            this.Instructions_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.Instructions_Label.Name = "Instructions_Label";
-            this.Instructions_Label.Size = new System.Drawing.Size(83, 13);
-            this.Instructions_Label.TabIndex = 12;
-            this.Instructions_Label.Text = "INSTRUCTIONS:";
-            // 
-            // Instructions1_Label
-            // 
-            this.Instructions1_Label.AutoSize = true;
-            this.Instructions1_Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.3F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Instructions1_Label.Location = new System.Drawing.Point(159, 40);
-            this.Instructions1_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.Instructions1_Label.Name = "Instructions1_Label";
-            this.Instructions1_Label.Size = new System.Drawing.Size(230, 13);
-            this.Instructions1_Label.TabIndex = 13;
-            this.Instructions1_Label.Text = "1. Run Genshin Impact and Log In / Start Game";
             // 
             // Language_ComboBox
             // 
@@ -296,7 +278,7 @@
             // WeaponsScanned_Label
             // 
             this.WeaponsScanned_Label.AutoSize = true;
-            this.WeaponsScanned_Label.Location = new System.Drawing.Point(7, 424);
+            this.WeaponsScanned_Label.Location = new System.Drawing.Point(7, 375);
             this.WeaponsScanned_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.WeaponsScanned_Label.Name = "WeaponsScanned_Label";
             this.WeaponsScanned_Label.Size = new System.Drawing.Size(59, 13);
@@ -306,7 +288,7 @@
             // Artifacts_Label
             // 
             this.Artifacts_Label.AutoSize = true;
-            this.Artifacts_Label.Location = new System.Drawing.Point(7, 437);
+            this.Artifacts_Label.Location = new System.Drawing.Point(7, 388);
             this.Artifacts_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.Artifacts_Label.Name = "Artifacts_Label";
             this.Artifacts_Label.Size = new System.Drawing.Size(51, 13);
@@ -316,7 +298,7 @@
             // Characters_Label
             // 
             this.Characters_Label.AutoSize = true;
-            this.Characters_Label.Location = new System.Drawing.Point(7, 451);
+            this.Characters_Label.Location = new System.Drawing.Point(7, 402);
             this.Characters_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.Characters_Label.Name = "Characters_Label";
             this.Characters_Label.Size = new System.Drawing.Size(64, 13);
@@ -326,7 +308,7 @@
             // CharactersScanned_Label
             // 
             this.CharactersScanned_Label.AutoSize = true;
-            this.CharactersScanned_Label.Location = new System.Drawing.Point(80, 451);
+            this.CharactersScanned_Label.Location = new System.Drawing.Point(80, 402);
             this.CharactersScanned_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.CharactersScanned_Label.Name = "CharactersScanned_Label";
             this.CharactersScanned_Label.Size = new System.Drawing.Size(13, 13);
@@ -336,7 +318,7 @@
             // ArtifactsScanned_Label
             // 
             this.ArtifactsScanned_Label.AutoSize = true;
-            this.ArtifactsScanned_Label.Location = new System.Drawing.Point(80, 437);
+            this.ArtifactsScanned_Label.Location = new System.Drawing.Point(80, 388);
             this.ArtifactsScanned_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.ArtifactsScanned_Label.Name = "ArtifactsScanned_Label";
             this.ArtifactsScanned_Label.Size = new System.Drawing.Size(13, 13);
@@ -346,7 +328,7 @@
             // WeaponsScannedCount_Label
             // 
             this.WeaponsScannedCount_Label.AutoSize = true;
-            this.WeaponsScannedCount_Label.Location = new System.Drawing.Point(80, 424);
+            this.WeaponsScannedCount_Label.Location = new System.Drawing.Point(80, 375);
             this.WeaponsScannedCount_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.WeaponsScannedCount_Label.Name = "WeaponsScannedCount_Label";
             this.WeaponsScannedCount_Label.Size = new System.Drawing.Size(13, 13);
@@ -356,7 +338,7 @@
             // WeaponsScannedSlash_Label
             // 
             this.WeaponsScannedSlash_Label.AutoSize = true;
-            this.WeaponsScannedSlash_Label.Location = new System.Drawing.Point(111, 424);
+            this.WeaponsScannedSlash_Label.Location = new System.Drawing.Point(111, 375);
             this.WeaponsScannedSlash_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.WeaponsScannedSlash_Label.Name = "WeaponsScannedSlash_Label";
             this.WeaponsScannedSlash_Label.Size = new System.Drawing.Size(12, 13);
@@ -366,7 +348,7 @@
             // ArtifactsScannedSlash_Label
             // 
             this.ArtifactsScannedSlash_Label.AutoSize = true;
-            this.ArtifactsScannedSlash_Label.Location = new System.Drawing.Point(111, 437);
+            this.ArtifactsScannedSlash_Label.Location = new System.Drawing.Point(111, 388);
             this.ArtifactsScannedSlash_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.ArtifactsScannedSlash_Label.Name = "ArtifactsScannedSlash_Label";
             this.ArtifactsScannedSlash_Label.Size = new System.Drawing.Size(12, 13);
@@ -376,7 +358,7 @@
             // WeaponsMax_Labell
             // 
             this.WeaponsMax_Labell.AutoSize = true;
-            this.WeaponsMax_Labell.Location = new System.Drawing.Point(126, 424);
+            this.WeaponsMax_Labell.Location = new System.Drawing.Point(126, 375);
             this.WeaponsMax_Labell.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.WeaponsMax_Labell.Name = "WeaponsMax_Labell";
             this.WeaponsMax_Labell.Size = new System.Drawing.Size(13, 13);
@@ -386,7 +368,7 @@
             // ArtifactsMax_Label
             // 
             this.ArtifactsMax_Label.AutoSize = true;
-            this.ArtifactsMax_Label.Location = new System.Drawing.Point(126, 437);
+            this.ArtifactsMax_Label.Location = new System.Drawing.Point(126, 388);
             this.ArtifactsMax_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.ArtifactsMax_Label.Name = "ArtifactsMax_Label";
             this.ArtifactsMax_Label.Size = new System.Drawing.Size(13, 13);
@@ -398,7 +380,7 @@
             this.ProgramStatus_Label.AutoSize = true;
             this.ProgramStatus_Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.ProgramStatus_Label.ForeColor = System.Drawing.Color.Green;
-            this.ProgramStatus_Label.Location = new System.Drawing.Point(5, 326);
+            this.ProgramStatus_Label.Location = new System.Drawing.Point(5, 277);
             this.ProgramStatus_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.ProgramStatus_Label.Name = "ProgramStatus_Label";
             this.ProgramStatus_Label.Size = new System.Drawing.Size(156, 25);
@@ -442,39 +424,6 @@
             this.ErrorLog_Label.Size = new System.Drawing.Size(56, 13);
             this.ErrorLog_Label.TabIndex = 54;
             this.ErrorLog_Label.Text = "Error Log: ";
-            // 
-            // Instructions2_Label
-            // 
-            this.Instructions2_Label.AutoSize = true;
-            this.Instructions2_Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.3F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Instructions2_Label.Location = new System.Drawing.Point(159, 53);
-            this.Instructions2_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.Instructions2_Label.Name = "Instructions2_Label";
-            this.Instructions2_Label.Size = new System.Drawing.Size(86, 13);
-            this.Instructions2_Label.TabIndex = 55;
-            this.Instructions2_Label.Text = "2. Go to Settings";
-            // 
-            // Instructions2b_Label
-            // 
-            this.Instructions2b_Label.AutoSize = true;
-            this.Instructions2b_Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.3F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Instructions2b_Label.Location = new System.Drawing.Point(174, 67);
-            this.Instructions2b_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.Instructions2b_Label.Name = "Instructions2b_Label";
-            this.Instructions2b_Label.Size = new System.Drawing.Size(235, 13);
-            this.Instructions2b_Label.TabIndex = 57;
-            this.Instructions2b_Label.Text = "2a. Under Controls, set Control Type to Keyboard";
-            // 
-            // Instruction3_Label
-            // 
-            this.Instruction3_Label.AutoSize = true;
-            this.Instruction3_Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.3F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Instruction3_Label.Location = new System.Drawing.Point(159, 83);
-            this.Instruction3_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.Instruction3_Label.Name = "Instruction3_Label";
-            this.Instruction3_Label.Size = new System.Drawing.Size(293, 13);
-            this.Instruction3_Label.TabIndex = 58;
-            this.Instruction3_Label.Text = "3. Exit settings and leave game in Paimon Menu / ESC Menu";
             // 
             // ErrorReport_Label
             // 
@@ -571,7 +520,7 @@
             // ScannerDelay_Label
             // 
             this.ScannerDelay_Label.AutoSize = true;
-            this.ScannerDelay_Label.Location = new System.Drawing.Point(10, 265);
+            this.ScannerDelay_Label.Location = new System.Drawing.Point(10, 216);
             this.ScannerDelay_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.ScannerDelay_Label.Name = "ScannerDelay_Label";
             this.ScannerDelay_Label.Size = new System.Drawing.Size(77, 13);
@@ -593,7 +542,7 @@
             // 
             this.FastScannerDelay_Label.AutoSize = true;
             this.FastScannerDelay_Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.FastScannerDelay_Label.Location = new System.Drawing.Point(18, 310);
+            this.FastScannerDelay_Label.Location = new System.Drawing.Point(18, 261);
             this.FastScannerDelay_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.FastScannerDelay_Label.Name = "FastScannerDelay_Label";
             this.FastScannerDelay_Label.Size = new System.Drawing.Size(20, 9);
@@ -604,7 +553,7 @@
             // 
             this.MidScannerDelay_Label.AutoSize = true;
             this.MidScannerDelay_Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.MidScannerDelay_Label.Location = new System.Drawing.Point(44, 310);
+            this.MidScannerDelay_Label.Location = new System.Drawing.Point(63, 261);
             this.MidScannerDelay_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.MidScannerDelay_Label.Name = "MidScannerDelay_Label";
             this.MidScannerDelay_Label.Size = new System.Drawing.Size(24, 9);
@@ -615,7 +564,7 @@
             // 
             this.SlowScannerDelay_Label.AutoSize = true;
             this.SlowScannerDelay_Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.SlowScannerDelay_Label.Location = new System.Drawing.Point(69, 310);
+            this.SlowScannerDelay_Label.Location = new System.Drawing.Point(108, 261);
             this.SlowScannerDelay_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.SlowScannerDelay_Label.Name = "SlowScannerDelay_Label";
             this.SlowScannerDelay_Label.Size = new System.Drawing.Size(28, 9);
@@ -705,7 +654,6 @@
             // inventoryToolStripTextBox
             // 
             this.inventoryToolStripTextBox.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
-            this.inventoryToolStripTextBox.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.inventoryToolStripTextBox.MaxLength = 2;
             this.inventoryToolStripTextBox.Name = "inventoryToolStripTextBox";
             this.inventoryToolStripTextBox.Size = new System.Drawing.Size(90, 23);
@@ -725,7 +673,6 @@
             // characterToolStripTextBox
             // 
             this.characterToolStripTextBox.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
-            this.characterToolStripTextBox.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.characterToolStripTextBox.MaxLength = 2;
             this.characterToolStripTextBox.Name = "characterToolStripTextBox";
             this.characterToolStripTextBox.Size = new System.Drawing.Size(90, 23);
@@ -751,7 +698,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(9, 173);
+            this.label2.Location = new System.Drawing.Point(96, 34);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(122, 13);
             this.label2.TabIndex = 89;
@@ -760,16 +707,116 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(10, 215);
+            this.label3.Location = new System.Drawing.Point(285, 33);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(114, 13);
             this.label3.TabIndex = 91;
             this.label3.Text = "Minimum Artifact Rarity";
             // 
+            // MinimumWeaponLevelLabel
+            // 
+            this.MinimumWeaponLevelLabel.AutoSize = true;
+            this.MinimumWeaponLevelLabel.Location = new System.Drawing.Point(97, 64);
+            this.MinimumWeaponLevelLabel.Name = "MinimumWeaponLevelLabel";
+            this.MinimumWeaponLevelLabel.Size = new System.Drawing.Size(121, 13);
+            this.MinimumWeaponLevelLabel.TabIndex = 92;
+            this.MinimumWeaponLevelLabel.Text = "Minimum Weapon Level";
+            // 
+            // MinimumArtifactLevelLabel
+            // 
+            this.MinimumArtifactLevelLabel.AutoSize = true;
+            this.MinimumArtifactLevelLabel.Location = new System.Drawing.Point(286, 67);
+            this.MinimumArtifactLevelLabel.Name = "MinimumArtifactLevelLabel";
+            this.MinimumArtifactLevelLabel.Size = new System.Drawing.Size(113, 13);
+            this.MinimumArtifactLevelLabel.TabIndex = 93;
+            this.MinimumArtifactLevelLabel.Text = "Minimum Artifact Level";
+            // 
+            // ManualExportButton
+            // 
+            this.ManualExportButton.Enabled = false;
+            this.ManualExportButton.Location = new System.Drawing.Point(7, 437);
+            this.ManualExportButton.Name = "ManualExportButton";
+            this.ManualExportButton.Size = new System.Drawing.Size(144, 23);
+            this.ManualExportButton.TabIndex = 97;
+            this.ManualExportButton.Text = "Export Scanned Data";
+            this.ManualExportButton.UseVisualStyleBackColor = true;
+            this.ManualExportButton.Click += new System.EventHandler(this.Export_Button_Click);
+            // 
+            // EquipArtifactsCheckBox
+            // 
+            this.EquipArtifactsCheckBox.AutoSize = true;
+            this.EquipArtifactsCheckBox.Checked = global::InventoryKamera.Properties.Settings.Default.EquipArtifacts;
+            this.EquipArtifactsCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.EquipArtifactsCheckBox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::InventoryKamera.Properties.Settings.Default, "EquipArtifacts", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.EquipArtifactsCheckBox.Location = new System.Drawing.Point(328, 88);
+            this.EquipArtifactsCheckBox.Name = "EquipArtifactsCheckBox";
+            this.EquipArtifactsCheckBox.Size = new System.Drawing.Size(94, 17);
+            this.EquipArtifactsCheckBox.TabIndex = 98;
+            this.EquipArtifactsCheckBox.Text = "Equip Artifacts";
+            this.EquipArtifactsCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // EquipWeaponsCheckBox
+            // 
+            this.EquipWeaponsCheckBox.AutoSize = true;
+            this.EquipWeaponsCheckBox.Checked = global::InventoryKamera.Properties.Settings.Default.EquipWeapons;
+            this.EquipWeaponsCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.EquipWeaponsCheckBox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::InventoryKamera.Properties.Settings.Default, "EquipWeapons", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.EquipWeaponsCheckBox.Location = new System.Drawing.Point(129, 88);
+            this.EquipWeaponsCheckBox.Name = "EquipWeaponsCheckBox";
+            this.EquipWeaponsCheckBox.Size = new System.Drawing.Size(102, 17);
+            this.EquipWeaponsCheckBox.TabIndex = 99;
+            this.EquipWeaponsCheckBox.Text = "Equip Weapons";
+            this.EquipWeaponsCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // LogScreenshotsCheckBox
+            // 
+            this.LogScreenshotsCheckBox.AutoSize = true;
+            this.LogScreenshotsCheckBox.Checked = global::InventoryKamera.Properties.Settings.Default.LogScreenshots;
+            this.LogScreenshotsCheckBox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::InventoryKamera.Properties.Settings.Default, "LogScreenshots", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.LogScreenshotsCheckBox.Location = new System.Drawing.Point(10, 196);
+            this.LogScreenshotsCheckBox.Name = "LogScreenshotsCheckBox";
+            this.LogScreenshotsCheckBox.Size = new System.Drawing.Size(120, 17);
+            this.LogScreenshotsCheckBox.TabIndex = 96;
+            this.LogScreenshotsCheckBox.Text = "Log All Screenshots";
+            this.LogScreenshotsCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // numericUpDown1
+            // 
+            this.numericUpDown1.DataBindings.Add(new System.Windows.Forms.Binding("Value", global::InventoryKamera.Properties.Settings.Default, "MinimumArtifactLevel", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.numericUpDown1.Location = new System.Drawing.Point(413, 62);
+            this.numericUpDown1.Maximum = new decimal(new int[] {
+            20,
+            0,
+            0,
+            0});
+            this.numericUpDown1.Name = "numericUpDown1";
+            this.numericUpDown1.Size = new System.Drawing.Size(48, 20);
+            this.numericUpDown1.TabIndex = 95;
+            this.numericUpDown1.Value = global::InventoryKamera.Properties.Settings.Default.MinimumArtifactLevel;
+            // 
+            // MinimumWeaponLevelControl
+            // 
+            this.MinimumWeaponLevelControl.DataBindings.Add(new System.Windows.Forms.Binding("Value", global::InventoryKamera.Properties.Settings.Default, "MinimumWeaponLevel", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.MinimumWeaponLevelControl.Location = new System.Drawing.Point(224, 62);
+            this.MinimumWeaponLevelControl.Maximum = new decimal(new int[] {
+            90,
+            0,
+            0,
+            0});
+            this.MinimumWeaponLevelControl.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.MinimumWeaponLevelControl.Name = "MinimumWeaponLevelControl";
+            this.MinimumWeaponLevelControl.Size = new System.Drawing.Size(48, 20);
+            this.MinimumWeaponLevelControl.TabIndex = 94;
+            this.MinimumWeaponLevelControl.Value = global::InventoryKamera.Properties.Settings.Default.MinimumWeaponLevel;
+            // 
             // ArtifactRarityControl
             // 
             this.ArtifactRarityControl.DataBindings.Add(new System.Windows.Forms.Binding("Value", global::InventoryKamera.Properties.Settings.Default, "MinimumArtifactRarity", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.ArtifactRarityControl.Location = new System.Drawing.Point(11, 233);
+            this.ArtifactRarityControl.Location = new System.Drawing.Point(413, 26);
             this.ArtifactRarityControl.Maximum = new decimal(new int[] {
             5,
             0,
@@ -784,12 +831,11 @@
             this.ArtifactRarityControl.Size = new System.Drawing.Size(48, 20);
             this.ArtifactRarityControl.TabIndex = 90;
             this.ArtifactRarityControl.Value = global::InventoryKamera.Properties.Settings.Default.MinimumArtifactRarity;
-            this.ArtifactRarityControl.ValueChanged += new System.EventHandler(this.SaveSettings);
             // 
             // WeaponRarityControl
             // 
             this.WeaponRarityControl.DataBindings.Add(new System.Windows.Forms.Binding("Value", global::InventoryKamera.Properties.Settings.Default, "MinimumWeaponRarity", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.WeaponRarityControl.Location = new System.Drawing.Point(12, 189);
+            this.WeaponRarityControl.Location = new System.Drawing.Point(224, 27);
             this.WeaponRarityControl.Maximum = new decimal(new int[] {
             5,
             0,
@@ -804,7 +850,6 @@
             this.WeaponRarityControl.Size = new System.Drawing.Size(48, 20);
             this.WeaponRarityControl.TabIndex = 88;
             this.WeaponRarityControl.Value = global::InventoryKamera.Properties.Settings.Default.MinimumWeaponRarity;
-            this.WeaponRarityControl.ValueChanged += new System.EventHandler(this.SaveSettings);
             // 
             // Materials_CheckBox
             // 
@@ -818,7 +863,6 @@
             this.Materials_CheckBox.TabIndex = 86;
             this.Materials_CheckBox.Text = "Materials";
             this.Materials_CheckBox.UseVisualStyleBackColor = true;
-            this.Materials_CheckBox.CheckedChanged += new System.EventHandler(this.SaveSettings);
             // 
             // CharDevItems_CheckBox
             // 
@@ -834,7 +878,6 @@
             this.CharDevItems_CheckBox.TabIndex = 83;
             this.CharDevItems_CheckBox.Text = "Char Development Items";
             this.CharDevItems_CheckBox.UseVisualStyleBackColor = true;
-            this.CharDevItems_CheckBox.CheckedChanged += new System.EventHandler(this.SaveSettings);
             // 
             // Characters_CheckBox
             // 
@@ -850,7 +893,6 @@
             this.Characters_CheckBox.TabIndex = 73;
             this.Characters_CheckBox.Text = "Characters";
             this.Characters_CheckBox.UseVisualStyleBackColor = true;
-            this.Characters_CheckBox.CheckedChanged += new System.EventHandler(this.SaveSettings);
             // 
             // Artifacts_Checkbox
             // 
@@ -866,7 +908,6 @@
             this.Artifacts_Checkbox.TabIndex = 72;
             this.Artifacts_Checkbox.Text = "Artifacts";
             this.Artifacts_Checkbox.UseVisualStyleBackColor = true;
-            this.Artifacts_Checkbox.CheckedChanged += new System.EventHandler(this.SaveSettings);
             // 
             // Weapons_CheckBox
             // 
@@ -882,7 +923,6 @@
             this.Weapons_CheckBox.TabIndex = 70;
             this.Weapons_CheckBox.Text = "Weapons";
             this.Weapons_CheckBox.UseVisualStyleBackColor = true;
-            this.Weapons_CheckBox.CheckedChanged += new System.EventHandler(this.SaveSettings);
             // 
             // OutputPath_TextBox
             // 
@@ -896,16 +936,15 @@
             this.OutputPath_TextBox.Size = new System.Drawing.Size(386, 18);
             this.OutputPath_TextBox.TabIndex = 79;
             this.OutputPath_TextBox.Text = global::InventoryKamera.Properties.Settings.Default.OutputPath;
-            this.OutputPath_TextBox.TextChanged += new System.EventHandler(this.SaveSettings);
             // 
             // ScannerDelay_TrackBar
             // 
             this.ScannerDelay_TrackBar.DataBindings.Add(new System.Windows.Forms.Binding("Value", global::InventoryKamera.Properties.Settings.Default, "ScannerDelay", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged, null, "N0"));
-            this.ScannerDelay_TrackBar.Location = new System.Drawing.Point(13, 281);
+            this.ScannerDelay_TrackBar.Location = new System.Drawing.Point(10, 232);
             this.ScannerDelay_TrackBar.Margin = new System.Windows.Forms.Padding(2);
             this.ScannerDelay_TrackBar.Maximum = 2;
             this.ScannerDelay_TrackBar.Name = "ScannerDelay_TrackBar";
-            this.ScannerDelay_TrackBar.Size = new System.Drawing.Size(83, 45);
+            this.ScannerDelay_TrackBar.Size = new System.Drawing.Size(129, 45);
             this.ScannerDelay_TrackBar.TabIndex = 68;
             this.ScannerDelay_TrackBar.Value = global::InventoryKamera.Properties.Settings.Default.ScannerDelay;
             this.ScannerDelay_TrackBar.ValueChanged += new System.EventHandler(this.ScannerDelay_TrackBar_ValueChanged);
@@ -916,6 +955,14 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(234)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
             this.ClientSize = new System.Drawing.Size(595, 472);
+            this.Controls.Add(this.EquipWeaponsCheckBox);
+            this.Controls.Add(this.EquipArtifactsCheckBox);
+            this.Controls.Add(this.ManualExportButton);
+            this.Controls.Add(this.LogScreenshotsCheckBox);
+            this.Controls.Add(this.numericUpDown1);
+            this.Controls.Add(this.MinimumWeaponLevelControl);
+            this.Controls.Add(this.MinimumArtifactLevelLabel);
+            this.Controls.Add(this.MinimumWeaponLevelLabel);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.ArtifactRarityControl);
             this.Controls.Add(this.label2);
@@ -939,9 +986,6 @@
             this.Controls.Add(this.Navigation_Label);
             this.Controls.Add(this.Navigation_Image);
             this.Controls.Add(this.Releases_Label);
-            this.Controls.Add(this.Instruction3_Label);
-            this.Controls.Add(this.Instructions2b_Label);
-            this.Controls.Add(this.Instructions2_Label);
             this.Controls.Add(this.Github_Label);
             this.Controls.Add(this.ProgramStatus_Label);
             this.Controls.Add(this.ArtifactsMax_Label);
@@ -955,8 +999,6 @@
             this.Controls.Add(this.Artifacts_Label);
             this.Controls.Add(this.WeaponsScanned_Label);
             this.Controls.Add(this.Language_ComboBox);
-            this.Controls.Add(this.Instructions1_Label);
-            this.Controls.Add(this.Instructions_Label);
             this.Controls.Add(this.ScannerCancelInstructions_Label);
             this.Controls.Add(this.StartScan_Button);
             this.Controls.Add(this.menuStrip1);
@@ -981,6 +1023,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.GearPictureBox)).EndInit();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.MinimumWeaponLevelControl)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.ArtifactRarityControl)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.WeaponRarityControl)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.ScannerDelay_TrackBar)).EndInit();
@@ -995,8 +1039,6 @@
         private System.Windows.Forms.Label WeaponArtifact_Label;
         private System.Windows.Forms.Label WeaponArtifactOutput_TextBox_Label;
         private System.Windows.Forms.Label ScannerCancelInstructions_Label;
-        private System.Windows.Forms.Label Instructions_Label;
-        private System.Windows.Forms.Label Instructions1_Label;
         private System.Windows.Forms.ComboBox Language_ComboBox;
         private System.Windows.Forms.TextBox ArtifactOutput_TextBox;
         private System.Windows.Forms.TextBox CharacterOutput_TextBox;
@@ -1021,9 +1063,6 @@
         private System.Windows.Forms.LinkLabel Github_Label;
         private System.Windows.Forms.TextBox ErrorLog_TextBox;
         private System.Windows.Forms.Label ErrorLog_Label;
-        private System.Windows.Forms.Label Instructions2_Label;
-        private System.Windows.Forms.Label Instructions2b_Label;
-        private System.Windows.Forms.Label Instruction3_Label;
         private System.Windows.Forms.Label ErrorReport_Label;
         private System.Windows.Forms.LinkLabel IssuesPage_Label;
         private System.Windows.Forms.LinkLabel Releases_Label;
@@ -1061,6 +1100,14 @@
 		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
+        private System.Windows.Forms.Label MinimumWeaponLevelLabel;
+        private System.Windows.Forms.Label MinimumArtifactLevelLabel;
+        private System.Windows.Forms.NumericUpDown MinimumWeaponLevelControl;
+        private System.Windows.Forms.NumericUpDown numericUpDown1;
+        private System.Windows.Forms.CheckBox LogScreenshotsCheckBox;
+        private System.Windows.Forms.Button ManualExportButton;
+        private System.Windows.Forms.CheckBox EquipArtifactsCheckBox;
+        private System.Windows.Forms.CheckBox EquipWeaponsCheckBox;
     }
 }
 

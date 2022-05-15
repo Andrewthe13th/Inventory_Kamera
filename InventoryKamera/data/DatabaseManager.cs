@@ -150,7 +150,7 @@ namespace InventoryKamera
 
 			if (!File.Exists(ListsDir + versionJson))
 			{
-				File.Create(ListsDir + versionJson);
+				File.Create(ListsDir + versionJson).Close();
 			}			
 			RemoteVersion = new Version(Properties.Settings.Default.RemoteVersion);
 			localVersions = JToken.Parse(LoadJsonFromFile(versionJson)).ToObject<Dictionary<string, string>>();
@@ -250,86 +250,61 @@ namespace InventoryKamera
 			return JToken.Parse(json);
 		}
 
-		public bool UpdateAllLists(bool @new = false)
+		public UpdateStatus UpdateAllLists(bool @new = false, bool force = false)
 		{
-			bool pass = true;
+			UpdateStatus overallStatus = UpdateStatus.Success;
 
 			if (@new)
 			{
 				Properties.Settings.Default.LastUpdateCheck = TimeSpan.Zero;
-				Properties.Settings.Default.Save();
 			}
 
 			var lists = Enum.GetValues(typeof(ListType)).Cast<ListType>().ToList();
 
-			lists.RemoveAll(e => e == ListType.CharacterDevelopmentItems || e == ListType.Materials);
+            lists.RemoveAll(e => e == ListType.CharacterDevelopmentItems || e == ListType.Materials);
 
-			lists.AsParallel().ForAll(e =>
-			{
-				if (!UpdateList(e, @new))
-				{
-					pass = false;
-				}
-			});
+            lists.AsParallel().ForAll(e =>
+            {
+                var status = UpdateList(e, @new, force);
+                overallStatus = overallStatus == UpdateStatus.Fail || status == UpdateStatus.Fail ? UpdateStatus.Fail : status;
+                overallStatus = overallStatus == UpdateStatus.Success || status == UpdateStatus.Success ? UpdateStatus.Success : status;
+            });
 
-			return pass;
+            return overallStatus;
 		}
 
-		public bool UpdateLists(IEnumerable<ListType> lists, bool @new = false)
-		{
-			bool pass = true;
-
-			if (@new)
-			{
-				Properties.Settings.Default.LastUpdateCheck = TimeSpan.Zero;
-				Properties.Settings.Default.Save();
-			}
-
-			if (lists.Contains(ListType.AllMaterials)) lists = lists.Where(list => list != ListType.Materials && list != ListType.CharacterDevelopmentItems);
-
-			lists.AsParallel().ForAll(list =>
-			{
-				if (!UpdateList(list, @new))
-				{
-					pass = false;
-				}
-			});
-
-			return pass;
-		}
-
-		private bool UpdateList(ListType list, bool @new = false)
+		private UpdateStatus UpdateList(ListType list, bool @new = false, bool force = false)
 		{
 			Interlocked.Increment(ref updaters);
 			LoadMappings();
-			bool pass = true;
+			UpdateStatus status = UpdateStatus.Success;
             
 
 			Logger.Info("Updating {0}", list);
 			switch (list)
 			{
 				case ListType.Weapons:
-					pass = UpdateWeapons(@new);
+					status = UpdateWeapons(@new, force);
 					break;
 
 				case ListType.Artifacts:
-					pass = UpdateArtifacts(@new);
+					status = UpdateArtifacts(@new, force);
 					break;
 
 				case ListType.Characters:
-					pass = UpdateCharacters(@new);
+					status = UpdateCharacters(@new, force);
 					break;
 
 				case ListType.CharacterDevelopmentItems:
-					pass = UpdateDevItems(@new);
+					status = UpdateDevItems(@new, force);
 					break;
 
 				case ListType.Materials:
-					pass = UpdateMaterials(@new);
+					status = UpdateMaterials(@new, force);
 					break;
 
 				case ListType.AllMaterials:
-					pass = UpdateAllMaterials(@new);
+					status = UpdateAllMaterials(@new, force);
 					break;
 
 				default:
@@ -338,10 +313,10 @@ namespace InventoryKamera
 
 			Interlocked.Decrement(ref updaters);
 			Logger.Info("Finished updating {0}", list);
-			return pass;
+			return status;
 		}
 
-		private bool UpdateCharacters(bool @new = false)
+		private UpdateStatus UpdateCharacters(bool @new = false, bool force = false)
 		{
 			if (@new)
 			{
@@ -353,14 +328,11 @@ namespace InventoryKamera
                 }
 			}
 
-			try
-			{
-				if (!UpdateAvailable(ListType.Characters)) return true;
-			}
+			try { if (!UpdateAvailable(ListType.Characters, force)) return UpdateStatus.Skipped; }
 			catch (Exception e)
 			{
 				Logger.Error(e, "Could not get check for updates when updating characters. Trying again in an hour should be fine.");
-				return false;
+				return UpdateStatus.Fail;
 			}
 			
 			LoadMappings();
@@ -375,8 +347,8 @@ namespace InventoryKamera
 				List<JObject> skills =JArray.Parse(LoadJsonFromURLAsync(SkillsURL)).ToObject<List<JObject>>();
 
 				// Only playable characters have this key. NPCs don't.
-				characters.RemoveAll(character => !character.ContainsKey("UseType")
-												|| character["UseType"].ToString() != "AVATAR_FORMAL");
+				characters.RemoveAll(character => !character.ContainsKey("useType")
+												|| character["useType"].ToString() != "AVATAR_FORMAL");
 				CharactersTodo = characters.Count;
 				Logger.Debug("Added {_charactersTodo} characters. Total {TotalTodo}", _charactersTodo, TotalTodo);
 
@@ -384,7 +356,7 @@ namespace InventoryKamera
 				{
 					try
 					{
-						string name = Mappings[character["NameTextMapHash"].ToString()].ToString();
+						string name = Mappings[character["nameTextMapHash"].ToString()].ToString();
 						string PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name);
 						string nameGOOD = Regex.Replace(PascalCase, @"[\W]", string.Empty);
 						string nameKey = nameGOOD.ToLower();
@@ -393,15 +365,15 @@ namespace InventoryKamera
 						{
 							// Some characters have different internal names.
 							// Ex: Jean -> Qin, Yanfei -> Feiyan, etc.
-							name = character["IconName"].ToString().Split('_').Last(); // UI_AvatarIcon_[Qin] -> Qin
+							name = character["iconName"].ToString().Split('_').Last(); // UI_AvatarIcon_[Qin] -> Qin
 
-							name = name == "PlayerBoy" || name == "PlayerGirl" ? "A" : name; // The name suddenly switches to "A" for travelers
+							name = name.ToLower() == "PlayerBoy".ToLower() || name.ToLower() == "PlayerGirl".ToLower() ? "A" : name; // The name suddenly switches to "A" for travelers
 
-							var skill = skills.Where(entry => entry["SkillIcon"].ToString().Contains($"Skill_S_{name}")).First()["NameTextMapHash"].ToString();
+							var skill = skills.Where(entry => entry["skillIcon"].ToString().Contains($"Skill_S_{name}")).First()["nameTextMapHash"].ToString();
 							skill = Mappings[skill].ToString();
 
 							// The skill/burst name is always mentioned in the constellation's description so we'll check for it
-							var constellation = constellations.Where(entry => entry["Icon"].ToString().Contains(name)).ElementAt(2)["DescTextMapHash"].ToString();
+							var constellation = constellations.Where(entry => entry["icon"].ToString().Contains(name)).ElementAt(2)["descTextMapHash"].ToString();
 
 							var constOrder = new JArray();
 
@@ -417,9 +389,9 @@ namespace InventoryKamera
 								constOrder.Add("skill");
 							}
 
-							var archetype = character["WeaponType"].ToString();
+							var archetype = character["weaponType"].ToString();
 							WeaponType weaponType;
-							if (archetype.Contains("SWORD")) weaponType = WeaponType.Sword;
+							if (archetype.Contains("SWORD_ONE_HAND")) weaponType = WeaponType.Sword;
 							else if (archetype.Contains("CLAYMORE")) weaponType = WeaponType.Claymore;
 							else if (archetype.Contains("POLE")) weaponType = WeaponType.Polearm;
 							else if (archetype.Contains("BOW")) weaponType = WeaponType.Bow;
@@ -444,15 +416,11 @@ namespace InventoryKamera
 				localVersions["characters"] = RemoteVersion.ToString();
 				SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
 			}
-			catch (Exception ex)
-			{
-				Logger.Warn(ex);
-				return false;
-			}
-			return true;
+			catch (Exception ex) { Logger.Warn(ex); return UpdateStatus.Fail; }
+			return UpdateStatus.Success;
 		}
 
-		private bool UpdateWeapons(bool @new = false)
+		private UpdateStatus UpdateWeapons(bool @new = false, bool force = false)
 		{
 			if (@new)
 			{
@@ -464,14 +432,11 @@ namespace InventoryKamera
                 }
 			}
 
-			try
-			{
-				if (!UpdateAvailable(ListType.Weapons)) return true;
-			}
+			try { if (!UpdateAvailable(ListType.Weapons, force)) return UpdateStatus.Skipped; }
 			catch (Exception e)
 			{
 				Logger.Error(e, "Could not get check for updates when updating weapons. Trying again in an hour should be fine.");
-				return false;
+				return UpdateStatus.Fail;
 			}
 
 			LoadMappings();
@@ -480,7 +445,7 @@ namespace InventoryKamera
 			{
 				Dictionary<string,string> data = JToken.Parse(LoadJsonFromFile(WeaponsJson)).ToObject<Dictionary<string,string>>();
 				List<JObject> weapons = JArray.Parse(LoadJsonFromURLAsync(WeaponsURL)).ToObject<List<JObject>>();
-				weapons.RemoveAll(weapon => !weapon.ContainsKey("NameTextMapHash"));
+				weapons.RemoveAll(weapon => !weapon.ContainsKey("nameTextMapHash"));
 				WeaponsTodo = weapons.Count;
 				Logger.Debug("Added {_weapons_todo} weapons. Total {TotalTodo}", _weapons_todo, TotalTodo);
 
@@ -488,9 +453,9 @@ namespace InventoryKamera
 				{
 					try
 					{
-						if (Mappings.ContainsKey(weapon["NameTextMapHash"].ToString()))
+						if (Mappings.ContainsKey(weapon["nameTextMapHash"].ToString()))
 						{
-							var name = Mappings[weapon["NameTextMapHash"].ToString()];
+							var name = Mappings[weapon["nameTextMapHash"].ToString()];
 							string PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name); // Dull Blade
 							string nameGOOD = Regex.Replace(PascalCase, @"[\W]", string.Empty);              // DullBlade
 							string nameKey = nameGOOD.ToLower();                                             // dullblade
@@ -500,10 +465,10 @@ namespace InventoryKamera
 								data.Add(nameKey, nameGOOD);
 							}
 						}
-						else Logger.Warn("Weapon hash {0} not found in Mappings. It's likely unreleased.", weapon["NameTextMapHash"].ToString());
+						else Logger.Warn("Weapon hash {0} not found in Mappings. It's likely unreleased.", weapon["nameTextMapHash"].ToString());
 						++WeaponsCompleted;
 					}
-					catch (Exception ex) { Logger.Warn(ex, weapon["NameTextMapHash"].ToString()); }
+					catch (Exception ex) { Logger.Warn(ex, weapon["nameTextMapHash"].ToString()); }
 
 				}
 
@@ -511,15 +476,11 @@ namespace InventoryKamera
 				localVersions["weapons"] = RemoteVersion.ToString();
 				SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
 			}
-			catch (Exception ex)
-			{
-				Logger.Warn(ex);
-				return false;
-			}
-			return true;
+			catch (Exception ex) { Logger.Warn(ex); return UpdateStatus.Fail; }
+			return UpdateStatus.Success;
 		}
 
-		private bool UpdateArtifacts(bool @new = false)
+		private UpdateStatus UpdateArtifacts(bool @new = false, bool force = false)
 		{
 			if (@new)
 			{
@@ -528,17 +489,14 @@ namespace InventoryKamera
 					localVersions.Remove("artifacts");
 					SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
 					File.Delete(ListsDir + ArtifactsJson);
-                }
-			}
+}
+}
 
-			try
-			{
-				if (!UpdateAvailable(ListType.Artifacts)) return true;
-			}
+			try { if (!UpdateAvailable(ListType.Artifacts, force)) return UpdateStatus.Skipped; }
 			catch (Exception e)
 			{
 				Logger.Error(e, "Could not get check for updates when updating artifacts. Trying again in an hour should be fine.");
-				return false;
+				return UpdateStatus.Fail;
 			}
 
 			LoadMappings();
@@ -547,7 +505,15 @@ namespace InventoryKamera
 			{
 				Dictionary<string, string> data = JToken.Parse(LoadJsonFromFile(ArtifactsJson)).ToObject < Dictionary < string, string > >();
 				List<JObject> artifacts = JArray.Parse(LoadJsonFromURLAsync(ArtifactsURL)).ToObject<List<JObject>>();
-				artifacts.RemoveAll(artifact => !artifact["Icon"].ToString().Contains("RelicIcon"));
+				//artifacts.RemoveAll(artifact => artifact.TryGetValue("Icon", out var icon) && !icon.ToString().Contains("RelicIcon"));
+
+				foreach (JObject artifact in artifacts)
+                {
+                    if (artifact.TryGetValue("icon", out var icon) && !icon.ToString().Contains("RelicIcon"))
+                    {
+                        Console.WriteLine();
+                    }
+                }
 
 				ArtifactsTodo = artifacts.Count;
 				Logger.Debug("Added {_artifactsTodo} artifacts. Total {TotalTodo}", _artifactsTodo, TotalTodo);
@@ -556,9 +522,9 @@ namespace InventoryKamera
 				{
 					try
 					{
-                        if (Mappings.ContainsKey(artifact["NameTextMapHash"].ToString()))
+                        if (Mappings.ContainsKey(artifact["nameTextMapHash"].ToString()))
                         {
-							var name = Mappings[artifact["NameTextMapHash"].ToString()];
+							var name = Mappings[artifact["nameTextMapHash"].ToString()];
 							string PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name);   // Archaic Petra
 							string nameGOOD = Regex.Replace(PascalCase, @"[\W]", string.Empty);				// ArchaicPetra
 							string nameKey = nameGOOD.ToLower();											// archaicpetra
@@ -578,11 +544,11 @@ namespace InventoryKamera
 				localVersions["artifacts"] = RemoteVersion.ToString();
 				SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
 			}
-			catch (Exception ex) { Logger.Warn(ex); return false; }
-			return true;
+			catch (Exception ex) { Logger.Warn(ex); return UpdateStatus.Fail; }
+			return UpdateStatus.Success;
 		}
 
-		private bool UpdateDevItems(bool @new = false)
+		private UpdateStatus UpdateDevItems(bool @new = false, bool force = false)
 		{
 			if (@new)
 			{
@@ -594,14 +560,11 @@ namespace InventoryKamera
                 }
 			}
 
-			try
-			{
-				if (!UpdateAvailable(ListType.CharacterDevelopmentItems)) return true;
-			}
+			try { if (!UpdateAvailable(ListType.CharacterDevelopmentItems, force)) return UpdateStatus.Skipped; }
 			catch (Exception e)
 			{
 				Logger.Error(e, "Could not get check for updates when updating character development items. Trying again in an hour should be fine.");
-				return false;
+				return UpdateStatus.Fail;
 			}
 
 			LoadMappings();
@@ -616,7 +579,7 @@ namespace InventoryKamera
 
 				Dictionary<string, string> data = JToken.Parse(LoadJsonFromFile(DevMaterialsJson)).ToObject < Dictionary < string, string > >();
 				List<JObject> materials = JArray.Parse(LoadJsonFromURLAsync(MaterialsURL)).ToObject<List<JObject>>();
-				materials.RemoveAll(material => !material.ContainsKey("MaterialType") || !categories.Contains(material["MaterialType"].ToString()));
+				materials.RemoveAll(material => !material.ContainsKey("materialType") || !categories.Contains(material["materialType"].ToString()));
 				DevMaterialsTodo = materials.Count;
 				Logger.Debug("Added {_devTodo} dev materials. Total {TotalTodo}", _devTodo, TotalTodo);
 
@@ -624,9 +587,9 @@ namespace InventoryKamera
 				{
 					try
 					{
-						if (Mappings.ContainsKey(material["NameTextMapHash"].ToString()))  
+						if (Mappings.ContainsKey(material["nameTextMapHash"].ToString()))  
 						{
-							var name = Mappings[material["NameTextMapHash"].ToString()];
+							var name = Mappings[material["nameTextMapHash"].ToString()];
 							string PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name);  // Hero's Wit
 							string nameGOOD = Regex.Replace(PascalCase, @"[\W]", string.Empty);				  // HerosWit
 							string nameKey = nameGOOD.ToLower();											  // heroswit
@@ -636,7 +599,7 @@ namespace InventoryKamera
 								data.Add(nameKey, nameGOOD);
 							}
 						}
-						else Logger.Warn("Material hash {0} not found in Mappings. It's likely unreleased.", material["NameTextMapHash"].ToString());
+						else Logger.Warn("Material hash {0} not found in Mappings. It's likely unreleased.", material["nameTextMapHash"].ToString());
 					}
 					catch (Exception ex) { Logger.Warn(ex); }
 					++DevMaterialsCompleted;
@@ -646,11 +609,11 @@ namespace InventoryKamera
 				localVersions["devmaterials"] = RemoteVersion.ToString();
 				SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
 			}
-			catch (Exception ex) { Logger.Warn(ex); return false; }
-			return true;
+			catch (Exception ex) { Logger.Warn(ex); return UpdateStatus.Fail; }
+			return UpdateStatus.Success;
 		}
 
-		private bool UpdateMaterials(bool @new = false)
+		private UpdateStatus UpdateMaterials(bool @new = false, bool force = false)
 		{
 			if (@new)
 			{
@@ -662,14 +625,11 @@ namespace InventoryKamera
 				}
 			}
 
-            try
-            {
-				if (!UpdateAvailable(ListType.Materials)) return true;
-            }
+            try { if (!UpdateAvailable(ListType.Materials, force)) return UpdateStatus.Skipped; }
             catch (Exception e)
             {
 				Logger.Error(e, "Could not get check for updates when updating materials. Trying again in an hour should be fine.");
-				return false;
+				return UpdateStatus.Fail;
             }
 
 
@@ -688,7 +648,7 @@ namespace InventoryKamera
 
 				Dictionary<string, string> data = JToken.Parse(LoadJsonFromFile(MaterialsJson)).ToObject < Dictionary < string, string > >();
 				List<JObject> materials = JArray.Parse(LoadJsonFromURLAsync(MaterialsURL)).ToObject<List<JObject>>();
-				materials.RemoveAll(material => !material.ContainsKey("MaterialType") || !categories.Contains(material["MaterialType"].ToString()));
+				materials.RemoveAll(material => !material.ContainsKey("materialType") || !categories.Contains(material["materialType"].ToString()));
 				MaterialsTodo = materials.Count;
 				Logger.Debug("Added {_materialsTodo} materials. Total {TotalTodo}", _materialsTodo, TotalTodo);
 
@@ -696,9 +656,9 @@ namespace InventoryKamera
 				{
 					try
 					{
-						if (Mappings.ContainsKey(material["NameTextMapHash"].ToString())) //Mappings.ContainsKey(weapon["NameTextMapHash"].ToString())
+						if (Mappings.ContainsKey(material["nameTextMapHash"].ToString())) //Mappings.ContainsKey(weapon["NameTextMapHash"].ToString())
 						{
-							var name = Mappings[material["NameTextMapHash"].ToString()];
+							var name = Mappings[material["nameTextMapHash"].ToString()];
 							string PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name);  // Iron Chunk
 							string nameGOOD = Regex.Replace(PascalCase, @"[\W]", string.Empty);				  // IronChunk
 							string nameKey = nameGOOD.ToLower();											  // ironchunk
@@ -709,7 +669,7 @@ namespace InventoryKamera
 							}
 							Interlocked.Increment(ref _completed);
 						}
-						else Logger.Warn("Material hash {0} not found in Mappings. It's likely unreleased.", material["NameTextMapHash"].ToString());
+						else Logger.Warn("Material hash {0} not found in Mappings. It's likely unreleased.", material["nameTextMapHash"].ToString());
 					}
 					catch (Exception ex) { Logger.Warn(ex); }
 					++MaterialsCompleted;
@@ -719,11 +679,11 @@ namespace InventoryKamera
 				localVersions["materials"] = RemoteVersion.ToString();
 				SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
 			}
-			catch (Exception ex) { Logger.Warn(ex); return false; }
-			return true;
+			catch (Exception ex) { Logger.Warn(ex); return UpdateStatus.Fail; }
+			return UpdateStatus.Success;
 		}
 
-		private bool UpdateAllMaterials(bool @new = false)
+		private UpdateStatus UpdateAllMaterials(bool @new = false, bool force = false)
 		{
 			if (@new)
 			{
@@ -735,13 +695,20 @@ namespace InventoryKamera
                 }
 			}
 
+			try { if (!UpdateAvailable(ListType.AllMaterials, force)) return UpdateStatus.Skipped; }
+			catch (Exception e)
+			{
+				Logger.Error(e, "Could not get check for updates when updating all materials. Trying again in an hour should be fine.");
+				return UpdateStatus.Fail;
+			}
+
 			LoadMappings();
 
 			try
 			{
 				Parallel.Invoke(
-					() => UpdateDevItems(@new),
-					() => UpdateMaterials(@new));
+					() => UpdateDevItems(@new, force),
+					() => UpdateMaterials(@new, force));
 
 				var data = JToken.Parse(LoadJsonFromFile(MaterialsCompleteJson)).ToObject < Dictionary < string, string > >();
 				var dev = JToken.Parse(LoadJsonFromFile(DevMaterialsJson)).ToObject < Dictionary < string, string > >();
@@ -765,41 +732,45 @@ namespace InventoryKamera
 				localVersions["allmaterials"] = RemoteVersion.ToString();
 				SaveJson(JsonConvert.SerializeObject(localVersions), versionJson);
 			}
-			catch (Exception ex) { Logger.Warn(ex); return false; }
-			return true;
+			catch (Exception ex) { Logger.Warn(ex); return UpdateStatus.Fail; }
+			return UpdateStatus.Success;
 		}
 		
 		public bool UpdateAvailable(ListType? list = null, bool forced = false)
         {
-			var lastChecked = Properties.Settings.Default.LastUpdateCheck;
-			var now = DateTime.Now.TimeOfDay;
-            if (!forced && (now - lastChecked < TimeSpan.FromHours(1))) return false;
+			if (forced) return true;
             try
             {
+				var lastChecked = Properties.Settings.Default.LastUpdateCheck;
+				var now = DateTime.Now.TimeOfDay;
 
-				var fs = new List<string> { "characters", "weapons", "artifacts", "devmaterials", "materials", "allmaterials" };
+				if (now - lastChecked < TimeSpan.FromHours(1)) return false;
+
 				var remoteVersion = GetRemoteVersion();
-				var localVersion = new Version();
+
+				var lists = new List<string> { "characters", "weapons", "artifacts", "devmaterials", "materials", "allmaterials" };
+				string v;
 
 				if (list.HasValue)
                 {
-					localVersion = localVersions.TryGetValue(fs[(int)list.Value], out string v) ? new Version(v) : new Version();
-                    return localVersion.CompareTo(remoteVersion) < 0;
-                }
-
-				foreach (var f in fs)
-				{
-					localVersion = localVersions.TryGetValue(f, out string v) ? new Version(v) : new Version();
-					if (localVersion.CompareTo(remoteVersion) < 0) return true;
+					var localVersion = localVersions.TryGetValue(lists[(int)list], out v) ? new Version(v) : new Version();
+					return localVersion.CompareTo(remoteVersion) < 0;
+				}
+				else
+                {
+					foreach (var ls in lists)
+					{ 
+						var localVersion = localVersions.TryGetValue(ls, out v) ? new Version(v) : new Version();
+						if (localVersion.CompareTo(remoteVersion) < 0) return true;
+					}
+					return false;
 				}
             }
             catch (Exception e)
             {
 				Logger.Error(e, "Could not check for list updates");
 				throw;
-            } 
-
-			return false;
+            }
         }
 
 		private Version GetRemoteVersion()
@@ -824,7 +795,6 @@ namespace InventoryKamera
                             if (RemoteVersion != new Version(Properties.Settings.Default.RemoteVersion))
                             {
 								Properties.Settings.Default.RemoteVersion = RemoteVersion.ToString();
-								Properties.Settings.Default.Save();
 								Logger.Info("Saved remote version as {0}", Properties.Settings.Default.RemoteVersion);
                             }
                             return RemoteVersion;
@@ -895,4 +865,11 @@ namespace InventoryKamera
 		Materials,
 		AllMaterials
 	}
+
+	public enum UpdateStatus
+    {
+		Fail,
+		Success,
+		Skipped
+    }
 }

@@ -24,16 +24,16 @@ namespace InventoryKamera
 		[JsonProperty("source")]
 		public string Source { get; private set; }
 
-		[JsonProperty("weapons", NullValueHandling = NullValueHandling.Ignore)]
+		[JsonProperty("weapons", DefaultValueHandling = DefaultValueHandling.Ignore)]
 		public List<Weapon> Weapons { get; private set; }
 
-		[JsonProperty("artifacts", NullValueHandling = NullValueHandling.Ignore)]
+		[JsonProperty("artifacts", DefaultValueHandling = DefaultValueHandling.Ignore)]
 		public List<Artifact> Artifacts { get; private set; }
 
-		[JsonProperty("characters", NullValueHandling = NullValueHandling.Ignore)]
+		[JsonProperty("characters", DefaultValueHandling = DefaultValueHandling.Ignore)]
 		public List<Character> Characters { get; private set; }
 
-		[JsonProperty("materials", NullValueHandling = NullValueHandling.Ignore)]
+		[JsonProperty("materials", DefaultValueHandling = DefaultValueHandling.Ignore)]
 		public Dictionary<string, int> Materials { get; private set; }
 
 		public GOOD()

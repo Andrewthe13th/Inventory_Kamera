@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -20,7 +21,7 @@ namespace InventoryKamera
 	{
 		private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 		private static Thread scannerThread;
-		private static InventoryKamera data;
+		private static InventoryKamera data = new InventoryKamera();
 
 		private int Delay;
 
@@ -124,7 +125,6 @@ namespace InventoryKamera
 				}
 				catch (Exception) { }
 				Properties.Settings.Default.UpgradeNeeded = false;
-				Properties.Settings.Default.Save();
 			}
 
 			UpdateKeyTextBoxes();
@@ -138,12 +138,6 @@ namespace InventoryKamera
 			}
 
 		}
-
-        private bool CheckForUpdates()
-        {
-            var databaseManager = new DatabaseManager();
-            return databaseManager.UpdateAvailable();
-        }
 
         private void UpdateKeyTextBoxes()
 		{
@@ -186,14 +180,18 @@ namespace InventoryKamera
 				HotkeyManager.Current.AddOrReplace("Stop", Keys.Enter, Hotkey_Pressed);
 				Logger.Info("Hotkey registered");
 				var settings = Properties.Settings.Default;
-				var options = $"\n\tWeapons:\t\t\t {settings.ScanWeapons}\n" +
-                    $"\tArtifacts:\t\t\t {settings.ScanArtifacts}\n" +
-                    $"\tCharacters:\t\t\t {settings.ScanCharacters}\n" +
-                    $"\tDev Items:\t\t\t {settings.ScanCharDevItems}\n" +
-                    $"\tMaterials:\t\t\t {settings.ScanMaterials}\n" +
-                    $"\tMin Weapon Rarity:\t {settings.MinimumWeaponRarity}\n" +
-                    $"\tMin Artifact Rarity: {settings.MinimumArtifactRarity}\n" +
-                    $"\tDelay:\t\t\t\t {settings.ScannerDelay}";
+				var options = $"\n\tWeapons:\t\t\t\t {settings.ScanWeapons}\n" +
+                    $"\tArtifacts:\t\t\t\t {settings.ScanArtifacts}\n" +
+                    $"\tCharacters:\t\t\t\t {settings.ScanCharacters}\n" +
+                    $"\tDev Items:\t\t\t\t {settings.ScanCharDevItems}\n" +
+                    $"\tMaterials:\t\t\t\t {settings.ScanMaterials}\n" +
+                    $"\tMin Weapon Rarity:\t\t {settings.MinimumWeaponRarity}\n" +
+                    $"\tMin Weapon Level:\t\t {settings.MinimumWeaponLevel}\n" +
+					$"\tEquip Weapons:\t\t {settings.EquipWeapons}\n" +
+					$"\tMin Artifact Rarity:\t {settings.MinimumArtifactRarity}\n" +
+                    $"\tMin Artifact Level:\t\t {settings.MinimumArtifactLevel}\n" +
+                    $"\tEquip Artifacts:\t\t {settings.EquipArtifacts}\n" +
+                    $"\tDelay:\t\t\t\t\t {settings.ScannerDelay}";
 
 				scannerThread = new Thread(() =>
 				{
@@ -216,6 +214,9 @@ namespace InventoryKamera
 						if (Navigation.GetSize() != Navigation.CaptureWindow().Size) throw new FormatException("Window size and screenshot size mismatch. Please make sure the game is not in a fullscreen mode.");
 
 						data = new InventoryKamera();
+						data.ResetLogging();
+
+						Logger.Info("Resolution: {0}x{1}", Navigation.GetSize().Width, Navigation.GetSize().Height);
 
 						// Add navigation delay
 						Navigation.SetDelay(ScannerDelayValue(Delay));
@@ -249,6 +250,7 @@ namespace InventoryKamera
 					{
 						// Workers can get stuck if the thread is aborted or an exception is raised
 						if (!( data is null )) data.StopImageProcessorWorkers();
+						while (ex.InnerException != null) ex = ex.InnerException;
 						UserInterface.AddError(ex.ToString());
 						UserInterface.SetProgramStatus("Scan aborted", ok: false);
 					}
@@ -257,6 +259,10 @@ namespace InventoryKamera
 						ResetUI();
 						running = false;
 						Logger.Info("Scanner stopped");
+                        ManualExportButton.Invoke((MethodInvoker)delegate 
+						{
+							ManualExportButton.Enabled = data.Inventory.Size > 0;
+						});
 					}
 				})
 				{
@@ -318,7 +324,6 @@ namespace InventoryKamera
 		private void ScannerDelay_TrackBar_ValueChanged(object sender, EventArgs e)
 		{
 			Delay = ( (TrackBar)sender ).Value;
-			SaveSettings();
 		}
 
 		private void Exit_MenuItem_Click(object sender, EventArgs e)
@@ -377,9 +382,43 @@ namespace InventoryKamera
 
 		private void DatabaseUpdateMenuItem_Click(object sender, EventArgs e)
 		{
-			var updateForm = new DatabaseUpdateForm();
-			updateForm.ShowDialog();
-		}
+			var database = new DatabaseManager();
+			var status = database.UpdateAllLists();
+			Logger.Info("Update status {0}", status);
+            switch (status)
+            {
+                case UpdateStatus.Fail:
+					MessageBox.Show("Unable to update lookup data. Please check the log for more details", "Update failed", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Stop);
+                    break;
+                case UpdateStatus.Success:
+					MessageBox.Show("Update successful.", "Update status", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Information);
+					break;
+                case UpdateStatus.Skipped:
+					var choice = MessageBox.Show($"No update necessary! You are already using the latest game data ({Properties.Settings.Default.RemoteVersion})." +
+                        $" Would you like to force an update?",
+						"Already Up to Date",
+						buttons: MessageBoxButtons.YesNo,
+						icon: MessageBoxIcon.Information);
+					if (choice == DialogResult.Yes)
+					{
+						status = database.UpdateAllLists(force: true);
+                        switch (status)
+                        {
+                            case UpdateStatus.Fail:
+								MessageBox.Show("Unable to update lookup data. Please check the log for more details", "Update failed", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Stop);
+								break;
+                            case UpdateStatus.Success:
+								MessageBox.Show("Update successful.", "Update status", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Information);
+								break;
+                            default:
+                                break;
+                        }
+                    }
+					break;
+                default:
+                    break;
+            }
+        }
 
 		#region Unicode Helper Functions
 
@@ -418,11 +457,6 @@ namespace InventoryKamera
 
 		#endregion Unicode Helper Functions
 
-		private void SaveSettings(object sender, EventArgs e)
-		{
-			SaveSettings();
-		}
-
 		private void ExportFolderMenuItem_Click(object sender, EventArgs e)
 		{
 			if (Directory.Exists(OutputPath_TextBox.Text) || Directory.CreateDirectory(OutputPath_TextBox.Text).Exists)
@@ -435,19 +469,38 @@ namespace InventoryKamera
 			}
 		}
 
+		private bool CheckForUpdates()
+		{
+			var databaseManager = new DatabaseManager();
+			return databaseManager.UpdateAvailable(forced: true);
+		}
+
 		private void MainForm_Shown(object sender, EventArgs e)
 		{
             try
             {
 				var updatesAvailable = CheckForUpdates();
-				if (updatesAvailable)
+				if (updatesAvailable && false)
 				{ 
 					var message = "A new version for Genshin Impact has been found. Would you like to update this Kamera's lookup tables? (Recommended)";
 					var result = MessageBox.Show(message, "Game Version Update", MessageBoxButtons.YesNo);
 					if (result == DialogResult.Yes)
 					{
-						new DatabaseManager().UpdateAllLists();
-						MessageBox.Show("Update complete");
+						var status = new DatabaseManager().UpdateAllLists(force: true);
+						switch (status)
+						{
+							case UpdateStatus.Fail:
+								MessageBox.Show("Unable to update lookup data. Please check the log for more details", "Update failed", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Stop);
+								break;
+							case UpdateStatus.Success:
+								MessageBox.Show("Update successful.", "Update status", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Information);
+								break;
+							case UpdateStatus.Skipped:
+								MessageBox.Show($"No update necessary! You are already using the latest game data ({Properties.Settings.Default.RemoteVersion})", "Update skipped", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Information);
+								break;
+							default:
+								break;
+						}
 					}
 					else if (result == DialogResult.No)
 					{
@@ -463,7 +516,19 @@ namespace InventoryKamera
 				MessageBox.Show("Could not check for updates. Consider trying again in an hour or so.", "Game Version Update", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 			Properties.Settings.Default.LastUpdateCheck = DateTime.Now.TimeOfDay;
-			Properties.Settings.Default.Save();
+		}
+
+        private void Export_Button_Click(object sender, EventArgs e)
+        {
+
+			var good = new GOOD(data);
+
+			if (data.Inventory.Size > 0)
+			{
+				good.WriteToJSON(OutputPath_TextBox.Text);
+				Logger.Info("Manually exported data");
+				Process.Start($@"{OutputPath_TextBox.Text}");
+			}
 		}
 	}
 }

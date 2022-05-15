@@ -114,11 +114,11 @@ namespace InventoryKamera
 				// Remove any non-numeric and '/' characters
 				text = Regex.Replace(text, @"[^0-9/]", string.Empty);
 
-				if (string.IsNullOrWhiteSpace(text))
+				if (string.IsNullOrWhiteSpace(text) || Properties.Settings.Default.LogScreenshots)
 				{
 					countBitmap.Save($"./logging/weapons/WeaponCount.png");
 					Navigation.CaptureWindow().Save($"./logging/weapons/WeaponWindow_{Navigation.GetWidth()}x{Navigation.GetHeight()}.png");
-					throw new FormatException("Unable to locate weapon count.");
+					if (string.IsNullOrWhiteSpace(text)) throw new FormatException("Unable to locate weapon count.");
 				}
 
 				int count;
@@ -151,10 +151,10 @@ namespace InventoryKamera
 				try
 				{
 					var (rectangles, cols, rows) = ProcessScreenshot(screenshot);
-					if (cols != 8 || rows < 5)
+					if (cols != 8 || rows < 5 || Properties.Settings.Default.LogScreenshots)
 					{
 						// Generated rectangles
-						screenshot.Save($"./logging/weapons/WeaponInventoryIncomplete.png");
+						screenshot.Save($"./logging/weapons/WeaponInventory.png");
 						using (Graphics g = Graphics.FromImage(screenshot))
 							rectangles.ForEach(r => g.DrawRectangle(new Pen(Color.Green, 2), r));
 						
@@ -407,24 +407,16 @@ namespace InventoryKamera
 			weaponImages.Add(equipped);
 			weaponImages.Add(card); //5
 
-			try
+
+            if (GetRarity(name) < Properties.Settings.Default.MinimumWeaponRarity)
 			{
-				int rarity = GetRarity(name);
-				if (rarity < Properties.Settings.Default.MinimumWeaponRarity)
-				{
-					weaponImages.ForEach(i => i.Dispose());
-					StopScanning = true;
-					return;
-				}
-				else // Send images to worker queue
-					InventoryKamera.workerQueue.Enqueue(new OCRImageCollection(weaponImages, "weapon", id));
+				weaponImages.ForEach(i => i.Dispose());
+				StopScanning = true;
+				return;
 			}
-			catch (Exception ex)
-			{
-				UserInterface.AddError($"Unexpected error getting the rarity for weapon ID#{id}");
-				UserInterface.AddError(ex.ToString());
-				name.Save($"./logging/weapons/weapon{id}.png");
-			}
+			else // Send images to worker queue
+				InventoryKamera.workerQueue.Enqueue(new OCRImageCollection(weaponImages, "weapon", id));
+			
 		}
 
 		public static async Task<Weapon> CatalogueFromBitmapsAsync(List<Bitmap> bm, int id)
@@ -473,18 +465,25 @@ namespace InventoryKamera
 
 				await Task.WhenAll(tasks.ToArray());
 			}
-
+			if (!Properties.Settings.Default.EquipWeapons) equippedCharacter = "";
 			return new Weapon(name, level, ascended, refinementLevel, locked, equippedCharacter, id, rarity);
 		}
 
-		private static int GetRarity(Bitmap bitmap, double scale = 1.0)
+		private static int GetRarity(Bitmap bm, double scale = 1.0)
 		{
-			using (var scaled = Scraper.ScaleImage(bitmap, scale))
+			using (var scaled = Scraper.ScaleImage(bm, scale))
 			{
 				int x = (int)(0.025 * scaled.Width);
 				int y = (int)(0.20 * scaled.Height);
 
-				Color rarityColor = bitmap.GetPixel(x,y);
+				if (scale != 1.0)
+                {
+					var random = new Random();
+					x = random.Next(scaled.Width);
+					y = random.Next(scaled.Height);
+                }
+
+				Color rarityColor = bm.GetPixel(x,y);
 
 				Color fiveStar    = Color.FromArgb(255, 188, 105,  50);
 				Color fourStar    = Color.FromArgb(255, 161,  86, 224);
@@ -497,7 +496,8 @@ namespace InventoryKamera
 				else if (Scraper.CompareColors(threeStar, rarityColor)) return 3;
 				else if (Scraper.CompareColors(twoStar, rarityColor)) return 2;
 				else if (Scraper.CompareColors(oneStar, rarityColor)) return 1;
-				else return scale >= 2 ? 0 : GetRarity(bitmap, scale + 0.1);
+				else if (Scraper.CompareColors(Color.White, rarityColor)) return GetRarity(bm, scale);
+				else return scale >= 2 ? 10 : GetRarity(bm, scale + 0.1);
 			}
 		}
 
