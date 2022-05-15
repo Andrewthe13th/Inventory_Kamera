@@ -63,10 +63,10 @@ namespace InventoryKamera
 						throw;
 					}
 
-					Logger.Debug("Found {genshin}.exe", processName);
+					Logger.Debug("Found {0}.exe", processName);
 					return;
 				}
-				Logger.Debug("Could not find {genshin}.exe", processName);
+				Logger.Debug("Could not find {0}.exe", processName);
 			}
 
 			throw new NullReferenceException("Cannot find Genshin Impact process");

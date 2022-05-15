@@ -164,12 +164,7 @@
     <Compile Include="scraping\ArtifactScraper.cs" />
     <Compile Include="game\Character.cs" />
     <Compile Include="data\DatabaseManager.cs" />
-    <Compile Include="ui\databaseupdater\DatabaseUpdateForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="ui\databaseupdater\DatabaseUpdateForm.Designer.cs">
-      <DependentUpon>DatabaseUpdateForm.cs</DependentUpon>
-    </Compile>
+    <Compile Include="Settings.cs" />
     <Compile Include="scraping\MaterialScraper.cs" />
     <Compile Include="scraping\CharacterScraper.cs" />
     <Compile Include="data\GOOD.cs" />
@@ -190,9 +185,6 @@
     <Compile Include="ui\UserInterface.cs" />
     <Compile Include="game\Weapon.cs" />
     <Compile Include="scraping\WeaponScraper.cs" />
-    <EmbeddedResource Include="ui\databaseupdater\DatabaseUpdateForm.resx">
-      <DependentUpon>DatabaseUpdateForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="ui\main\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
       <SubType>Designer</SubType>

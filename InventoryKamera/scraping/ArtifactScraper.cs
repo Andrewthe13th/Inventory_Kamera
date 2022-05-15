@@ -109,11 +109,11 @@ namespace InventoryKamera
 				// Remove any non-numeric and '/' characters
 				text = Regex.Replace(text, @"[^0-9/]", string.Empty);
 
-				if (string.IsNullOrWhiteSpace(text))
+				if (string.IsNullOrWhiteSpace(text) || Properties.Settings.Default.LogScreenshots)
 				{
 					countBitmap.Save($"./logging/artifacts/ArtifactCount.png");
 					Navigation.CaptureWindow().Save($"./logging/artifacts/ArtifactWindow_{Navigation.GetWidth()}x{Navigation.GetHeight()}.png");
-					throw new FormatException("Unable to locate artifact count.");
+					if (string.IsNullOrWhiteSpace(text)) throw new FormatException("Unable to locate artifact count.");
 				}
 
 				int count;
@@ -147,10 +147,10 @@ namespace InventoryKamera
 				try
 				{
 					var (rectangles, cols, rows) = ProcessScreenshot(screenshot);
-					if (cols != 8 || rows < 5)
+					if (cols != 8 || rows < 5 || Properties.Settings.Default.LogScreenshots)
 					{
 						// Generated rectangles
-						screenshot.Save($"./logging/artifacts/ArtifactInventoryIncomplete.png");
+						screenshot.Save($"./logging/artifacts/ArtifactInventory.png");
 						using (Graphics g = Graphics.FromImage(screenshot))
 							rectangles.ForEach(r => g.DrawRectangle(new Pen(Color.Green, 2), r));
 						screenshot.Save($"./logging/artifacts/ArtifactInventory_{cols}x{rows}.png");
@@ -408,24 +408,15 @@ namespace InventoryKamera
 			artifactImages.Add(locked);
 			artifactImages.Add(card);
 
-			try
+
+            if (GetRarity(name) < Properties.Settings.Default.MinimumArtifactRarity)
 			{
-				
-				int rarity = GetRarity(name);
-				if (rarity < Properties.Settings.Default.MinimumArtifactRarity)
-				{
-					artifactImages.ForEach(i => i.Dispose());
-					StopScanning = true;
-				}
-				else // Send images to Worker Queue
-					InventoryKamera.workerQueue.Enqueue(new OCRImageCollection(artifactImages, "artifact", id));
+				artifactImages.ForEach(i => i.Dispose());
+				StopScanning = true;
 			}
-			catch (Exception ex)
-			{
-				UserInterface.AddError($"Unexpected error getting the rarity for artifact ID#{id}");
-				UserInterface.AddError(ex.ToString());
-				name.Save($"./logging/artifacts/artifact{id}.png");
-			}
+			else // Send images to Worker Queue
+				InventoryKamera.workerQueue.Enqueue(new OCRImageCollection(artifactImages, "artifact", id));
+			
 		}
 
 		public static async Task<Artifact> CatalogueFromBitmapsAsync(List<Bitmap> bm, int id)
@@ -482,18 +473,25 @@ namespace InventoryKamera
 
 				await Task.WhenAll(tasks.ToArray());
 			}
-
+			if (!Properties.Settings.Default.EquipArtifacts) equippedCharacter = "";
 			return new Artifact(setName, rarity, level, gearSlot, mainStat, subStats.ToArray(), subStats.Count, equippedCharacter, id, _lock);
 		}
 
-		private static int GetRarity(Bitmap card, double scale = 1)
+		private static int GetRarity(Bitmap bm, double scale = 1)
 		{
-			using (var scaled = Scraper.ScaleImage(card, scale))
+			using (var scaled = Scraper.ScaleImage(bm, scale))
 			{
 				int x = (int)(0.025 * scaled.Width);
 				int y = (int)(0.20 * scaled.Height);
 
-				Color rarityColor = card.GetPixel(x,y);
+				if (scale != 1.0)
+				{
+					var random = new Random();
+					x = random.Next(scaled.Width);
+					y = random.Next(scaled.Height);
+				}
+
+				Color rarityColor = bm.GetPixel(x,y);
 
 				Color fiveStar    = Color.FromArgb(255, 188, 105,  50);
 				Color fourStar    = Color.FromArgb(255, 161,  86, 224);
@@ -506,7 +504,8 @@ namespace InventoryKamera
 				else if (Scraper.CompareColors(threeStar, rarityColor)) return 3;
 				else if (Scraper.CompareColors(twoStar, rarityColor)) return 2;
 				else if (Scraper.CompareColors(oneStar, rarityColor)) return 1;
-				else return scale >= 2 ? 0 : GetRarity(card, scale + 0.2); 
+				else if (Scraper.CompareColors(Color.White, rarityColor)) return GetRarity(bm, scale);
+				else return scale >= 2 ? 10 : GetRarity(bm, scale + 0.2); 
 			}
 		}
 

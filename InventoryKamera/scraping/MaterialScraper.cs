@@ -98,6 +98,10 @@ namespace InventoryKamera
 								UserInterface.AddError($"Failed to parse quantity for {material.name}");
 								quantity.Save($"./logging/materials/{material.name}_Quantity.png");
 							}
+							else if (Properties.Settings.Default.LogScreenshots)
+                            {
+								quantity.Save($"./logging/materials/{material.name}_Quantity.png");
+                            }
 							materials.Add(material);
 							UserInterface.ResetCharacterDisplay();
 							UserInterface.SetMaterial(nameplate, quantity, material.name, material.count);
@@ -180,6 +184,10 @@ namespace InventoryKamera
 							UserInterface.AddError($"Failed to parse quantity for {material.name}");
 							quantity.Save($"./logging/materials/{material.name}_Quantity.png");
 						}
+						else if (Properties.Settings.Default.LogScreenshots)
+						{
+							quantity.Save($"./logging/materials/{material.name}_Quantity.png");
+						}
 						materials.Add(material);
 						UserInterface.ResetCharacterDisplay();
 						UserInterface.SetMaterial(nameplate, quantity, material.name, material.count);
@@ -217,6 +225,10 @@ namespace InventoryKamera
 				{
 					UserInterface.ResetCharacterDisplay();
 					UserInterface.SetMora(screenshot, count);
+                    if (Properties.Settings.Default.LogScreenshots)
+                    {
+						screenshot.Save("./logging/materials/mora.png");
+                    }
 				}
 				else
 				{
@@ -247,7 +259,7 @@ namespace InventoryKamera
 				try
 				{
 					var (rectangles, cols, rows) = ProcessScreenshot(screenshot);
-					if (cols != 8 || rows < 4)
+					if (cols != 8 || rows < 4 || Properties.Settings.Default.LogScreenshots)
 					{
 						// Generated rectangles
 						screenshot.Save($"./logging/materials/{section}Inventory{page}.png");

@@ -12,8 +12,9 @@ namespace InventoryKamera
 	{
 		private static NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 		private static string firstCharacterName = null;
+		private static List<Character> Characters = new List<Character>();
 
-		public static void ScanCharacters(ref List<Character> characters)
+		public static List<Character> ScanCharacters()
 		{
 			// first character name is used to stop scanning characters
 			int characterCount = 0;
@@ -23,7 +24,7 @@ namespace InventoryKamera
 			{
 				if (character.IsValid())
 				{
-					characters.Add(character);
+					Characters.Add(character);
 					UserInterface.IncrementCharacterCount();
 					Logger.Info("Scanned {0} successfully", character.Name);
 					characterCount++;
@@ -31,6 +32,7 @@ namespace InventoryKamera
 				Navigation.SelectNextCharacter();
 				UserInterface.ResetCharacterDisplay();
 			}
+			return Characters;
 		}
 
 		private static bool ScanCharacter(out Character character)
