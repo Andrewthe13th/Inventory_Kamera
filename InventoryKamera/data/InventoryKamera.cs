@@ -19,11 +19,10 @@ namespace InventoryKamera
 		public List<Character> Characters { get; private set; }
 
 		[JsonProperty]
-		public Inventory Inventory { get; private set; }
+		public Inventory Inventory = new Inventory();
 
 		private static List<Artifact> equippedArtifacts;
 		private static List<Weapon> equippedWeapons;
-		private static HashSet<Material> Materials;
 		public static Queue<OCRImageCollection> workerQueue;
 		private static List<Thread> ImageProcessors;
 		private static volatile bool b_threadCancel = false;
@@ -35,7 +34,6 @@ namespace InventoryKamera
 			Inventory = new Inventory();
 			equippedArtifacts = new List<Artifact>();
 			equippedWeapons = new List<Weapon>();
-			Materials = new HashSet<Material>();
 			ImageProcessors = new List<Thread>();
 			workerQueue = new Queue<OCRImageCollection>();
 
@@ -168,7 +166,7 @@ namespace InventoryKamera
 				HashSet<Material> devItems = new HashSet<Material>();
 				try
 				{
-					MaterialScraper.Scan_Materials(InventorySection.CharacterDevelopmentItems, ref Materials);
+					MaterialScraper.Scan_Materials(InventorySection.CharacterDevelopmentItems, ref Inventory);
 				}
 				catch (FormatException ex) { UserInterface.AddError(ex.Message); }
 				catch (ThreadAbortException) { }
@@ -190,7 +188,7 @@ namespace InventoryKamera
 				HashSet<Material> materials = new HashSet<Material>();
 				try
 				{
-					MaterialScraper.Scan_Materials(InventorySection.Materials, ref Materials);
+					MaterialScraper.Scan_Materials(InventorySection.Materials, ref Inventory);
 				}
 				catch (FormatException ex) { UserInterface.AddError(ex.Message); }
 				catch (ThreadAbortException) { }
@@ -201,8 +199,6 @@ namespace InventoryKamera
 				Navigation.MainMenuScreen();
 				Logger.Info("Done scanning materials");
 			}
-
-			Inventory.AddMaterials(ref Materials);
 		}
 
 		private void AwaitProcessors()

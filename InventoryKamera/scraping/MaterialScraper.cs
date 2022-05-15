@@ -45,11 +45,11 @@ namespace InventoryKamera
 
 	public static class MaterialScraper
 	{
-		public static void Scan_Materials(InventorySection section, ref HashSet<Material> materials)
+		public static void Scan_Materials(InventorySection section, ref Inventory inventory)
 		{
-			if (!materials.Contains(new Material("Mora", 0)))
+			if (!inventory.Materials.Contains(new Material("Mora", 0)))
 			{
-				materials.Add(new Material("Mora", ScanMora()));
+				inventory.Materials.Add(new Material("Mora", ScanMora()));
 			}
 
 			int scrollCount = 0;
@@ -83,7 +83,7 @@ namespace InventoryKamera
 					material.count = 0;
 
 					// Check if new material has been found
-					if (materials.Contains(material))
+					if (inventory.Materials.Contains(material))
 					{
 						goto LastPage;
 					}
@@ -91,18 +91,18 @@ namespace InventoryKamera
 					{
 						if (!string.IsNullOrEmpty(material.name))
 						{
-							// Scan Material Number
+							// Scan Material Quantity
 							material.count = ScanMaterialCount(rectangle, out Bitmap quantity);
 							if (material.count == 0)
 							{
 								UserInterface.AddError($"Failed to parse quantity for {material.name}");
 								quantity.Save($"./logging/materials/{material.name}_Quantity.png");
 							}
-							else if (Properties.Settings.Default.LogScreenshots)
+							if (Properties.Settings.Default.LogScreenshots || material.count == 0)
                             {
 								quantity.Save($"./logging/materials/{material.name}_Quantity.png");
                             }
-							materials.Add(material);
+							inventory.Materials.Add(material);
 							UserInterface.ResetCharacterDisplay();
 							UserInterface.SetMaterial(nameplate, quantity, material.name, material.count);
 
@@ -171,9 +171,9 @@ namespace InventoryKamera
 				material.name = ScanMaterialName(section, out Bitmap nameplate);
 				material.count = 0;
 
-				if (materials.Contains(material) && passby) continue;
+				if (inventory.Materials.Contains(material) && passby) continue;
 
-				if (!materials.Contains(material))
+				if (!inventory.Materials.Contains(material))
 				{
 					if (!string.IsNullOrEmpty(material.name))
 					{
@@ -188,7 +188,7 @@ namespace InventoryKamera
 						{
 							quantity.Save($"./logging/materials/{material.name}_Quantity.png");
 						}
-						materials.Add(material);
+						inventory.Materials.Add(material);
 						UserInterface.ResetCharacterDisplay();
 						UserInterface.SetMaterial(nameplate, quantity, material.name, material.count);
 						passby = false; // New material found so break on next old material
@@ -331,8 +331,8 @@ namespace InventoryKamera
 					}
 					if (add)
 					{
-						minWidth = Math.Min(minWidth, rect.Width);
-						minHeight = Math.Min(minHeight, rect.Height);
+						minWidth = Math.Max(minWidth, rect.Width);
+						minHeight = Math.Max(minHeight, rect.Height);
 						rectangles.Add(rect);
 					}
 				}
@@ -483,16 +483,25 @@ namespace InventoryKamera
 					// Image Processing
 					Bitmap n  =  Scraper.ConvertToGrayscale(copy);
 					Scraper.SetContrast(65, ref n); // Setting a high contrast seems to be better than thresholding
-													//Scraper.SetThreshold(165, ref n);
 
 					string old_text = Scraper.AnalyzeText(n, Tesseract.PageSegMode.SingleWord).Trim().ToLower();
 
 					// Might be worth it to train some more numbers
-					var cleaned = old_text.Replace("mm", "111").Replace("m", "11").Replace("nn", "11").Replace("n", "1"); // Tesseract struggles with 1's so close together because of font
-					cleaned = cleaned.Replace("a", "4");
-					cleaned = cleaned.Replace("e", "1");
-					//old_text = old_text.Replace("b", "8");
-					//old_text = old_text.Replace("+", "4");
+					var cleaned = old_text;
+
+					// Adhoc replacements. TODO: Maybe fix?
+					foreach (var c in new List<String> { "e", "=", "l"})
+                    {
+						cleaned = cleaned.Replace(c, "1");
+                    }
+                    foreach (var c in new List<String> { "a" })
+                    {
+						cleaned = cleaned.Replace(c, "4");
+                    }
+                    foreach (var c in new List<String> { "dt" })
+                    {
+						cleaned = cleaned.Replace(c, "14");
+                    }
 
 					cleaned = Regex.Replace(cleaned, @"[^0-9]", string.Empty);
 
