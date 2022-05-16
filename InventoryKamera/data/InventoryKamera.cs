@@ -249,6 +249,7 @@ namespace InventoryKamera
 									WeaponScraper.StopScanning = true;
 									continue;
                                 }
+								if (weapon.Level < (int)Properties.Settings.Default.MinimumWeaponLevel) continue;
 
 								UserInterface.IncrementWeaponCount();
 								Inventory.Add(weapon);
@@ -338,6 +339,7 @@ namespace InventoryKamera
 									ArtifactScraper.StopScanning = true;
 									continue;
 								}
+								if (artifact.Level < (int)Properties.Settings.Default.MinimumArtifactLevel) continue;
 
 								UserInterface.IncrementArtifactCount();
 								Inventory.Add(artifact);
