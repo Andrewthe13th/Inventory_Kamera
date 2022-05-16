@@ -472,7 +472,7 @@ namespace InventoryKamera
 		private bool CheckForUpdates()
 		{
 			var databaseManager = new DatabaseManager();
-			return databaseManager.UpdateAvailable(forced: true);
+			return databaseManager.UpdateAvailable();
 		}
 
 		private void MainForm_Shown(object sender, EventArgs e)
@@ -480,9 +480,9 @@ namespace InventoryKamera
             try
             {
 				var updatesAvailable = CheckForUpdates();
-				if (updatesAvailable && false)
+				if (updatesAvailable)
 				{ 
-					var message = "A new version for Genshin Impact has been found. Would you like to update this Kamera's lookup tables? (Recommended)";
+					var message = "A new version for Genshin Impact has been found. Would you like to update Kamera's lookup tables? (Recommended)";
 					var result = MessageBox.Show(message, "Game Version Update", MessageBoxButtons.YesNo);
 					if (result == DialogResult.Yes)
 					{
@@ -509,16 +509,16 @@ namespace InventoryKamera
 							" under 'options'", "Update declined", MessageBoxButtons.OK);
 					}
 				}
-            }
+			}
             catch (Exception ex)
             {
 				Logger.Warn(ex, "Could not check for list updates");
 				MessageBox.Show("Could not check for updates. Consider trying again in an hour or so.", "Game Version Update", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-			Properties.Settings.Default.LastUpdateCheck = DateTime.Now.TimeOfDay;
+			}
+			Properties.Settings.Default.LastUpdateCheck = DateTime.Now;
 		}
 
-        private void Export_Button_Click(object sender, EventArgs e)
+		private void Export_Button_Click(object sender, EventArgs e)
         {
 
 			var good = new GOOD(data);
