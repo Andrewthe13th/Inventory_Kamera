@@ -169,10 +169,10 @@ namespace InventoryKamera.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("00:00:00")]
-        public global::System.TimeSpan LastUpdateCheck {
+        [global::System.Configuration.DefaultSettingValueAttribute("1000-01-01")]
+        public global::System.DateTime LastUpdateCheck {
             get {
-                return ((global::System.TimeSpan)(this["LastUpdateCheck"]));
+                return ((global::System.DateTime)(this["LastUpdateCheck"]));
             }
             set {
                 this["LastUpdateCheck"] = value;

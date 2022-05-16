@@ -35,7 +35,7 @@ namespace InventoryKamera
 		private const string CharactersJson = "characters.json";
 		private const string DevMaterialsJson = "devmaterials.json";
 		private const string MaterialsJson = "materials.json";
-		private const string MaterialsCompleteJson = "materialscomplete.json";
+		private const string MaterialsCompleteJson = "allmaterials.json";
 
 		// This is the best place I think we can find easily accessible and up-to-date lists of information
 		private const string CharactersURL = "https://raw.githubusercontent.com/Dimbreath/GenshinData/master/ExcelBinOutput/AvatarExcelConfigData.json";
@@ -154,9 +154,10 @@ namespace InventoryKamera
 			}			
 			RemoteVersion = new Version(Properties.Settings.Default.RemoteVersion);
 			localVersions = JToken.Parse(LoadJsonFromFile(versionJson)).ToObject<Dictionary<string, string>>();
-		}
+			if (localVersions.Keys.Count < 6) Properties.Settings.Default.LastUpdateCheck = DateTime.MinValue;
+        }
 
-		private void LoadMappings()
+        private void LoadMappings()
 		{
 			lock (Mappings)
 			{
@@ -256,7 +257,7 @@ namespace InventoryKamera
 
 			if (@new)
 			{
-				Properties.Settings.Default.LastUpdateCheck = TimeSpan.Zero;
+				Properties.Settings.Default.LastUpdateCheck = DateTime.MinValue;
 			}
 
 			var lists = Enum.GetValues(typeof(ListType)).Cast<ListType>().ToList();
@@ -732,15 +733,25 @@ namespace InventoryKamera
         {
 			if (forced) return true;
             try
-            {
+			{ 
+				var lists = new List<string> { "characters", "weapons", "artifacts", "devmaterials", "materials", "allmaterials" };
+                foreach (var item in lists)
+                {
+					if (!File.Exists(ListsDir + item + ".json"))
+                    {
+						Properties.Settings.Default.LastUpdateCheck = DateTime.MinValue;
+						localVersions.Remove(item);
+						break;
+                    }
+                }
+
 				var lastChecked = Properties.Settings.Default.LastUpdateCheck;
-				var now = DateTime.Now.TimeOfDay;
+				var now = DateTime.Now;
 
 				if (now - lastChecked < TimeSpan.FromHours(1)) return false;
 
 				var remoteVersion = GetRemoteVersion();
 
-				var lists = new List<string> { "characters", "weapons", "artifacts", "devmaterials", "materials", "allmaterials" };
 				string v;
 
 				if (list.HasValue)
