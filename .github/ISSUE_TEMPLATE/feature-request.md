@@ -1,20 +1,16 @@
 ---
 name: Feature Request
-about: Got ideas to share? Starts here.
+about: Got features in mind? Starts here.
 title: "[FEATURE] "
 labels: enhancement
 assignees: ''
 
 ---
 
-## **Describe the new feature**
-Describe what you would like to be added:
+## What feature are you requesting?
+Please describe what you want from this feature. Feel free to add media to support your ideas.
 
 
 
-## **Describe the motivation for the new feature**
-Describe why you would like the feature to be added:
-
-
-## **Additional context**
-Add any other context or screenshots about the feature request here.
+## What can we get from this feature?
+Please persuade us on what, why, and how this feature will benefits you and everyone else.
