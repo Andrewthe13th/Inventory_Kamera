@@ -1,7 +1,7 @@
 ---
-name: Feature Request
-about: Got features in mind? Starts here.
-title: "[FEATURE] "
+name: Feature enhancement ideas/request
+about: Want some improvement in existing feature? Starts here.
+title: "[ENHANCEMENT] "
 labels: enhancement
 assignees: ''
 
