@@ -368,11 +368,13 @@ namespace InventoryKamera
 				case "InventoryKey":
 					Navigation.inventoryKey = (VirtualKeyCode)e.KeyCode;
 					Logger.Debug("Inv key set to: {key}", Navigation.inventoryKey);
+					Properties.Settings.Default.InventoryKey = e.KeyValue;
 					break;
 
 				case "CharacterKey":
 					Navigation.characterKey = (VirtualKeyCode)e.KeyCode;
 					Logger.Debug("Char key set to: {key}", Navigation.characterKey);
+					Properties.Settings.Default.CharacterKey = e.KeyValue;
 					break;
 
 				default:

@@ -32,6 +32,17 @@ namespace InventoryKamera
 				Navigation.SelectNextCharacter();
 				UserInterface.ResetCharacterDisplay();
 			}
+            for (int i = 0; i < 4; i++)
+            {
+                if (Characters.ElementAt(i).Name.ToLower() == "tartaglia")
+                {
+                    for (i = 0; i < Characters.Count; i++)
+                    {
+						Characters[i].Talents["auto"] -= 1;
+                    }
+					break;
+                }
+            }
 			return Characters;
 		}
 
