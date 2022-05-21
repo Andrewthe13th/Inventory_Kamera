@@ -69,7 +69,7 @@ namespace InventoryKamera
 					return 1;
 
 				case 2:
-					return 2;
+					return 1.5;
 
 				default:
 					return 1;

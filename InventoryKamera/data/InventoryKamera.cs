@@ -26,7 +26,7 @@ namespace InventoryKamera
 		public static Queue<OCRImageCollection> workerQueue;
 		private List<Thread> ImageProcessors;
 		private volatile bool b_threadCancel;
-		private int maxProcessors = 2; // TODO: Add support for more processors
+		private readonly int NumWorkers;
 
 		public bool HasData
         {
@@ -44,7 +44,17 @@ namespace InventoryKamera
 
 			b_threadCancel = false;
 
-			ResetLogging();
+            switch (Properties.Settings.Default.ScannerDelay)
+            {
+				case 0:
+					NumWorkers = 3;
+					break;
+				default:
+					NumWorkers = 2;
+					break;
+            }
+
+            ResetLogging();
 		}
 
 		public void ResetLogging()
@@ -76,7 +86,7 @@ namespace InventoryKamera
 		public void GatherData()
 		{
 			// Initize Image Processors
-			for (int i = 0; i < maxProcessors; i++)
+			for (int i = 0; i < NumWorkers; i++)
 			{
 				Thread processor = new Thread(ImageProcessorWorker){ IsBackground = true };
 				processor.Start();

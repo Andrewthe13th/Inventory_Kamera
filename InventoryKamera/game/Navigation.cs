@@ -384,7 +384,6 @@ namespace InventoryKamera
 
 		public static void SystemWait(Speed speed = Speed.Normal)
 		{
-			Random r = new Random();
 			double value;
 			switch (speed)
 			{
@@ -421,11 +420,11 @@ namespace InventoryKamera
 					break;
 
 				case Speed.ArtifactIgnore:
-					value = r.Next(50, 60);
+					value = 80;
 					break;
 
 				case Speed.UI:
-					value = r.Next(1800, 2200);
+					value = 2000;
 					break;
 
 				case Speed.SelectNextCharacter:
@@ -437,7 +436,7 @@ namespace InventoryKamera
 					break;
 
 				case Speed.SelectNextInventoryItem:
-					value = 175;
+					value = 200;
 					break;
 
 				default:
