@@ -7,8 +7,25 @@ namespace InventoryKamera
 	[Serializable]
 	public class Character
 	{
+		private string name;
+
 		[JsonProperty("key")]
-		public string Name { get; internal set; }
+		public string Name { 
+			
+			get { return name; }
+
+			internal set 
+			{
+				try
+				{
+					name = (string)Scraper.Characters[value.ToLower()]["GOOD"];
+				}
+				catch (Exception)
+				{
+					name = value;
+				}
+			} 
+		}
 
 		[JsonProperty("level")]
 		public int Level { get; internal set; }
@@ -54,12 +71,7 @@ namespace InventoryKamera
 
 		public Character(string _name, string _element, int _level, bool _ascension, int _experience, int _constellation, int[] _talents, WeaponType _weaponType) : this()
 		{
-			try
-			{
-				Name = (string)Scraper.Characters[_name.ToLower()]["GOOD"];
-			}
-			catch (Exception)
-			{ }
+			
 			Element = _element;
 			Level = _level;
 			Ascended = _ascension;
