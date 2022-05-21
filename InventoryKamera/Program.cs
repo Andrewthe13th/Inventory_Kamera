@@ -51,7 +51,10 @@ namespace InventoryKamera
 				ArchiveFileKind = NLog.Targets.FilePathKind.Relative
 			};
 
-			var logConsole = new NLog.Targets.ConsoleTarget("logconsole");
+			var logConsole = new NLog.Targets.ConsoleTarget("logconsole")
+			{
+				Layout = "${date:format=yyyy-MM-dd HH\\:mm\\:ss.fff}|${level:uppercase=true}|${logger:shortName=True}|${message:withexception=true}",
+			};
 
 			config.AddRule(LogLevel.Debug, LogLevel.Fatal, logConsole);
 			config.AddRule(LogLevel.Debug, LogLevel.Fatal, logFile);
