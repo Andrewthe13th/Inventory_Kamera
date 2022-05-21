@@ -474,12 +474,12 @@ namespace InventoryKamera
 				// Do mouse movement to first and second UI element in Inventory
 				Navigation.SetCursor(item1.Center().X, item1.Center().Y);
 				Navigation.Click();
-				Navigation.Wait(Navigation.GetDelay() - delayOffset);
+				Navigation.Wait(((int)Navigation.GetDelay()) - delayOffset);
 
 				Rectangle item2 = rectangles[1];
 				Navigation.SetCursor(item2.Center().X, item2.Center().Y);
 				Navigation.Click();
-				Navigation.Wait(Navigation.GetDelay() - delayOffset);
+				Navigation.Wait(((int)Navigation.GetDelay()) - delayOffset);
 
 				// Take image after second click
 				if (Navigation.GetAspectRatio() == new Size(16, 9))
@@ -504,7 +504,7 @@ namespace InventoryKamera
 				Rectangle item3 = rectangles[2];
 				Navigation.SetCursor(item3.Center().X, item3.Center().Y);
 				Navigation.Click();
-				Navigation.Wait(Navigation.GetDelay() - delayOffset);
+				Navigation.Wait(((int)Navigation.GetDelay()) - delayOffset);
 
 				// Take image after third click
 				if (Navigation.GetAspectRatio() == new Size(16, 9))
@@ -552,10 +552,10 @@ namespace InventoryKamera
 			card1.Dispose(); card2.Dispose();
 
 			// set back to first element
-			Navigation.SystemRandomWait(Navigation.Speed.Slowest);
+			Navigation.SystemWait(Navigation.Speed.Slowest);
 			Navigation.SetCursor(item1.Center().X, item1.Center().Y);
 			Navigation.Click();
-			Navigation.SystemRandomWait(Navigation.Speed.Slower);
+			Navigation.SystemWait(Navigation.Speed.Slower);
 		}
 
         #region Image Operations

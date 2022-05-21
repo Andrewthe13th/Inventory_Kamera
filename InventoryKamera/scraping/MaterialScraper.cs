@@ -79,7 +79,7 @@ namespace InventoryKamera
 					// Select Material
 					Navigation.SetCursor(rectangle.Center().X, rectangle.Center().Y);
 					Navigation.Click();
-					Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
+					Navigation.SystemWait(Navigation.Speed.SelectNextInventoryItem);
 
 					material.name = ScanMaterialName(section, out Bitmap nameplate);
 					material.count = 0;
@@ -143,10 +143,10 @@ namespace InventoryKamera
 								}
 							}
 						}
-						Navigation.SystemRandomWait(Navigation.Speed.InventoryScroll);
+						Navigation.SystemWait(Navigation.Speed.InventoryScroll);
 					}
 				}
-				Navigation.SystemRandomWait(Navigation.Speed.Normal);
+				Navigation.SystemWait(Navigation.Speed.Normal);
 				++page;
 			}
 
@@ -155,7 +155,7 @@ namespace InventoryKamera
 			for (int i = 0; i < 20; i++)
 			{
 				Navigation.sim.Mouse.VerticalScroll(-1);
-				Navigation.SystemRandomWait(Navigation.Speed.InventoryScroll);
+				Navigation.SystemWait(Navigation.Speed.InventoryScroll);
 			}
 
 			Navigation.Wait(500);
@@ -168,7 +168,7 @@ namespace InventoryKamera
 				Rectangle rectangle = rectangles[i];
 				Navigation.SetCursor(rectangle.Center().X, rectangle.Center().Y);
 				Navigation.Click();
-				Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
+				Navigation.SystemWait(Navigation.Speed.SelectNextInventoryItem);
 
 				material.name = ScanMaterialName(section, out Bitmap nameplate);
 				material.count = 0;

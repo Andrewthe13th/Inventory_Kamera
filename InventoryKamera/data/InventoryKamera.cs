@@ -16,17 +16,22 @@ namespace InventoryKamera
 		private static NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
 		[JsonProperty]
-		public List<Character> Characters { get; private set; }
+		public List<Character> Characters;
 
 		[JsonProperty]
-		public Inventory Inventory = new Inventory();
+		public Inventory Inventory;
 
-		private static List<Artifact> equippedArtifacts;
-		private static List<Weapon> equippedWeapons;
+		private List<Artifact> equippedArtifacts;
+		private List<Weapon> equippedWeapons;
 		public static Queue<OCRImageCollection> workerQueue;
-		private static List<Thread> ImageProcessors;
-		private static volatile bool b_threadCancel = false;
-		private static int maxProcessors = 2; // TODO: Add support for more processors
+		private List<Thread> ImageProcessors;
+		private volatile bool b_threadCancel;
+		private int maxProcessors = 2; // TODO: Add support for more processors
+
+		public bool HasData
+        {
+			get { return Characters.Count > 0 || Inventory.Size > 0; }
+        }
 
 		public InventoryKamera()
 		{
@@ -36,6 +41,8 @@ namespace InventoryKamera
 			equippedWeapons = new List<Weapon>();
 			ImageProcessors = new List<Thread>();
 			workerQueue = new Queue<OCRImageCollection>();
+
+			b_threadCancel = false;
 
 			ResetLogging();
 		}
@@ -56,7 +63,7 @@ namespace InventoryKamera
 			Directory.CreateDirectory("./logging/characters");
 			Directory.CreateDirectory("./logging/materials");
 
-			Logger.Info("Logging directory created");
+			Logger.Info("Logging directory reset");
 		}
 
 		public void StopImageProcessorWorkers()
@@ -133,7 +140,7 @@ namespace InventoryKamera
 				Navigation.CharacterScreen();
 				try
 				{
-					Characters = CharacterScraper.ScanCharacters();
+					CharacterScraper.ScanCharacters(ref Characters);
 				}
 				catch (ThreadAbortException) { }
 				catch (Exception ex)

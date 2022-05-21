@@ -83,7 +83,7 @@ namespace InventoryKamera
 					Rectangle item = rectangles[i];
 					Navigation.SetCursor(item.Center().X, item.Center().Y + offset);
 					Navigation.Click();
-					Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
+					Navigation.SystemWait(Navigation.Speed.SelectNextInventoryItem);
 
 					// Queue card for scanning
 					QueueScan(cardsQueued);
@@ -109,7 +109,7 @@ namespace InventoryKamera
 					{
 						Navigation.sim.Mouse.VerticalScroll(-1);
 					}
-					Navigation.SystemRandomWait(Navigation.Speed.Fast);
+					Navigation.SystemWait(Navigation.Speed.Fast);
 				}
 				else
 				{
@@ -122,7 +122,7 @@ namespace InventoryKamera
 					{
 						Navigation.sim.Mouse.VerticalScroll(-1);
 					}
-					Navigation.SystemRandomWait(Navigation.Speed.Fast);
+					Navigation.SystemWait(Navigation.Speed.Fast);
 				}
 				++page;
 				(rectangles, cols, rows) = GetPageOfItems(page);
