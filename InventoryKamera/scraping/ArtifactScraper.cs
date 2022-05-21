@@ -22,7 +22,8 @@ namespace InventoryKamera
 		{
 			// Get Max artifacts from screen
 			int artifactCount = count == 0 ? ScanArtifactCount() : count;
-			var (rectangles, cols, rows) = GetPageOfItems();
+			int page = 0;
+			var (rectangles, cols, rows) = GetPageOfItems(page);
 			int fullPage = cols * rows;
 			int totalRows = (int)Math.Ceiling(artifactCount / (decimal)cols);
 			int cardsQueued = 0;
@@ -123,6 +124,8 @@ namespace InventoryKamera
 					}
 					Navigation.SystemRandomWait(Navigation.Speed.Fast);
 				}
+				++page;
+				(rectangles, cols, rows) = GetPageOfItems(page);
 			}
 		}
 
@@ -194,7 +197,7 @@ namespace InventoryKamera
 			}
 		}
 
-		private static (List<Rectangle> rectangles, int cols, int rows) GetPageOfItems()
+		private static (List<Rectangle> rectangles, int cols, int rows) GetPageOfItems(int page)
 		{
 			// Screenshot of inventory
 			using (Bitmap screenshot = Navigation.CaptureWindow())
@@ -209,7 +212,7 @@ namespace InventoryKamera
 						screenshot.Save($"./logging/artifacts/ArtifactInventory.png");
 						using (Graphics g = Graphics.FromImage(screenshot))
 							rectangles.ForEach(r => g.DrawRectangle(new Pen(Color.Green, 2), r));
-						screenshot.Save($"./logging/artifacts/ArtifactInventory_{cols}x{rows}.png");
+						screenshot.Save($"./logging/artifacts/ArtifactInventory{page}_{cols}x{rows}.png");
 					}
 					return (rectangles, cols, rows);
 				}
@@ -359,12 +362,6 @@ namespace InventoryKamera
 
 				// Sort by row then by column within each row
 				rectangles = rectangles.OrderBy(r => r.Top).ThenBy(r => r.Left).ToList();
-
-				Debug.WriteLine($"{colCoords.Count} columns: ");
-				colCoords.ForEach(c => Debug.Write(c + ", ")); Debug.WriteLine("");
-				Debug.WriteLine($"{rowCoords.Count} rows: ");
-				rowCoords.ForEach(c => Debug.Write(c + ", ")); Debug.WriteLine("");
-				Debug.WriteLine($"{rectangles.Count} rectangles");
 
 				return (rectangles, colCoords.Count, rowCoords.Count);
 			}

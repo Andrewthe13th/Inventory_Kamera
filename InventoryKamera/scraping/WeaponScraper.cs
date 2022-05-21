@@ -20,7 +20,8 @@ namespace InventoryKamera
 		{
 			// Determine maximum number of weapons to scan
 			int weaponCount = count == 0 ? ScanWeaponCount(): count;
-			var (rectangles, cols, rows) = GetPageOfItems();
+			int page = 0;
+			var (rectangles, cols, rows) = GetPageOfItems(page);
 			int fullPage = cols * rows;
 			int totalRows = (int)Math.Ceiling(weaponCount / (decimal)cols);
 			int cardsQueued = 0;
@@ -85,6 +86,8 @@ namespace InventoryKamera
 					}
 					Navigation.SystemRandomWait(Navigation.Speed.Fast);
 				}
+				++page;
+				(rectangles, cols, rows) = GetPageOfItems(page);
 			}
 		}
 
@@ -140,7 +143,7 @@ namespace InventoryKamera
 			}
 		}
 
-		private static (List<Rectangle> rectangles, int cols, int rows) GetPageOfItems()
+		private static (List<Rectangle> rectangles, int cols, int rows) GetPageOfItems(int page)
 		{
 			// Screenshot of inventory
 			using (Bitmap screenshot = Navigation.CaptureWindow())
@@ -155,7 +158,7 @@ namespace InventoryKamera
 						using (Graphics g = Graphics.FromImage(screenshot))
 							rectangles.ForEach(r => g.DrawRectangle(new Pen(Color.Green, 2), r));
 						
-						screenshot.Save($"./logging/weapons/WeaponInventory_{cols}x{rows}.png");
+						screenshot.Save($"./logging/weapons/WeaponInventory{page}_{cols}x{rows}.png");
 					}
 					return (rectangles, cols, rows);
 				}
@@ -305,12 +308,6 @@ namespace InventoryKamera
 
 				// Sort by row then by column within each row
 				rectangles = rectangles.OrderBy(r => r.Top).ThenBy(r => r.Left).ToList();
-
-				Debug.WriteLine($"{colCoords.Count} columns: ");
-				colCoords.ForEach(c => Debug.Write(c + ", ")); Debug.WriteLine("");
-				Debug.WriteLine($"{rowCoords.Count} rows: ");
-				rowCoords.ForEach(c => Debug.Write(c + ", ")); Debug.WriteLine("");
-				Debug.WriteLine($"{rectangles.Count} rectangles");
 				
 				return (rectangles, colCoords.Count, rowCoords.Count);
 			}
