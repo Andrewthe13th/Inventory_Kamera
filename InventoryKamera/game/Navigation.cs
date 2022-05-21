@@ -147,7 +147,7 @@ namespace InventoryKamera
 		{
 			int buttonX = (int)(385 / 1280.0 * GetWidth());
 			int buttonY = (int)(35  / 720.0 * GetHeight());
-			SetCursorPos(WindowPosition.Left + buttonX, WindowPosition.Top + buttonY);
+			SetCursor(buttonX, buttonY);
 			Click();
 			SystemRandomWait(Speed.UI);
 		}
@@ -156,7 +156,7 @@ namespace InventoryKamera
 		{
 			int buttonX = (int)(448 / 1280.0 * GetWidth());
 			int buttonY = (int)(31 / 720.0 * GetHeight());
-			SetCursorPos(WindowPosition.Left + buttonX, WindowPosition.Top + buttonY);
+			SetCursor(buttonX, buttonY);
 			Click();
 			SystemRandomWait(Speed.UI);
 		}
@@ -165,7 +165,7 @@ namespace InventoryKamera
 		{
 			int buttonX = (int)(512 / 1280.0 * GetWidth());
 			int buttonY = (int)(40  / 720.0 * GetHeight());
-			SetCursorPos(WindowPosition.Left + buttonX, WindowPosition.Top + buttonY);
+			SetCursor(buttonX, buttonY);
 			Click();
 			SystemRandomWait(Speed.UI);
 		}
@@ -174,7 +174,7 @@ namespace InventoryKamera
 		{
 			int buttonX = (int)(636 / 1280.0 * GetWidth());
 			int buttonY = (int)(30  / 720.0 * GetHeight());
-			SetCursorPos(WindowPosition.Left + buttonX, WindowPosition.Top + buttonY);
+			SetCursor(buttonX, buttonY);
 			Click();
 			SystemRandomWait(Speed.UI);
 		}
@@ -189,7 +189,7 @@ namespace InventoryKamera
 				yOffset = (int)( 105 / 800.0 * GetHeight() );
 			}
 
-			SetCursorPos(GetPosition().Left + xOffset, GetPosition().Top + yOffset);
+			SetCursor(xOffset, yOffset);
 			Click();
 			SystemRandomWait(Speed.CharacterUI);
 		}
@@ -204,7 +204,7 @@ namespace InventoryKamera
 				yOffset = (int)( 245 / 800.0 * GetHeight() );
 			}
 
-			SetCursorPos(GetPosition().Left + xOffset, GetPosition().Top + yOffset);
+			SetCursor(xOffset, yOffset);
 			Click();
 			SystemRandomWait(Speed.CharacterUI);
 		}
@@ -219,7 +219,7 @@ namespace InventoryKamera
 				yOffset = (int)( 290 / 800.0 * GetHeight() );
 			}
 
-			SetCursorPos(GetPosition().Left + xOffset, GetPosition().Top + yOffset);
+			SetCursor(xOffset, yOffset);
 			Click();
 			SystemRandomWait(Speed.CharacterUI);
 		}
@@ -234,7 +234,7 @@ namespace InventoryKamera
 				yOffset = (int)( 400 / 800.0 * GetHeight() );
 			}
 
-			SetCursorPos(GetPosition().Left + xOffset, GetPosition().Top + yOffset);
+			SetCursor(xOffset, yOffset);
 			Click();
 			SystemRandomWait(Speed.SelectNextCharacter);
 		}
@@ -364,6 +364,11 @@ namespace InventoryKamera
 
 		[DllImport("user32.dll")]
 		public static extern bool SetCursorPos(int X, int Y);
+
+		public static bool SetCursor(int X, int Y)
+        {
+			return SetCursorPos(GetPosition().Left + X, GetPosition().Top + Y);
+		}
 
 		public static void Click()
 		{

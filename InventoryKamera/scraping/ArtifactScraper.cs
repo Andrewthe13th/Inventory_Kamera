@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Accord;
 using Accord.Imaging;
 using Accord.Imaging.Filters;
 using static InventoryKamera.Artifact;
@@ -31,6 +32,45 @@ namespace InventoryKamera
 
 			StopScanning = false;
 
+			var minLevel = Properties.Settings.Default.MinimumArtifactLevel;
+
+			if (minLevel >= 1)
+			{
+                // Check if sorted by level
+                // If not, sort by level
+                if (CurrentSortingMethod() != "level")
+                {
+					Navigation.SetCursor(
+						X: (int)(230 / 1280.0 * Navigation.GetWidth()),
+						Y: (int)(680 / 720.0 * Navigation.GetHeight()));
+					Navigation.Click();
+					Navigation.Wait();
+					Navigation.SetCursor(
+						X: (int)(250 / 1280.0 * Navigation.GetWidth()),
+						Y: (int)(615 / 720.0 * Navigation.GetHeight()));
+					Navigation.Click();
+					Navigation.Wait();
+				}
+			}
+			else
+            {
+                // Check if sorted by quality
+                if (CurrentSortingMethod() != "quality")
+				{
+					// If not, sort by quality
+					Navigation.SetCursor(
+						X: (int)(230 / 1280.0 * Navigation.GetWidth()),
+						Y: (int)(680 / 720.0 * Navigation.GetHeight()));
+					Navigation.Click();
+					Navigation.Wait();
+					Navigation.SetCursor(
+						X: (int)(250 / 1280.0 * Navigation.GetWidth()),
+						Y: (int)(645 / 720.0 * Navigation.GetHeight()));
+					Navigation.Click();
+					Navigation.Wait();
+				}
+			}
+
 			// Go through artifact list
 			while (cardsQueued < artifactCount)
 			{
@@ -40,7 +80,7 @@ namespace InventoryKamera
 				for (int i = cardsRemaining < fullPage ? ( rows - ( totalRows - rowsQueued ) ) * cols : 0; i < rectangles.Count; i++)
 				{
 					Rectangle item = rectangles[i];
-					Navigation.SetCursorPos(Navigation.GetPosition().Left + item.Center().X, Navigation.GetPosition().Top + item.Center().Y + offset);
+					Navigation.SetCursor(item.Center().X, item.Center().Y + offset);
 					Navigation.Click();
 					Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
 
@@ -86,7 +126,23 @@ namespace InventoryKamera
 			}
 		}
 
-		private static int ScanArtifactCount()
+        private static string CurrentSortingMethod()
+        {
+			var region = new Rectangle(
+				x: (int)(140.0 / 1280.0 * Navigation.GetWidth()),
+				y: (int)(660.0 / 720.0 * Navigation.GetHeight()),
+				width: (int)(175.0 / 1280.0 * Navigation.GetWidth()),
+				height: (int)(40.0 / 720.0 * Navigation.GetHeight()));
+
+            using (var bm = Navigation.CaptureRegion(region))
+            {
+				var g = Scraper.ConvertToGrayscale(bm);
+				var mode = Scraper.AnalyzeText(g).Trim().ToLower();
+				return mode.Contains("level") ? "level" : mode.Contains("quality") ? "quality" : null; 
+            }
+        }
+
+        private static int ScanArtifactCount()
 		{
 			//Find artifact count
 			var region = new Rectangle(
@@ -479,34 +535,19 @@ namespace InventoryKamera
 
 		private static int GetRarity(Bitmap bm, double scale = 1)
 		{
-			using (var scaled = Scraper.ScaleImage(bm, scale))
-			{
-				int x = (int)(0.025 * scaled.Width);
-				int y = (int)(0.20 * scaled.Height);
+			var averageColor = new ImageStatistics(bm);
 
-				if (scale != 1.0)
-				{
-					var random = new Random();
-					x = random.Next(scaled.Width);
-					y = random.Next(scaled.Height);
-				}
+			Color fiveStar = Color.FromArgb(255, 188, 105, 50);
+			Color fourStar = Color.FromArgb(255, 161, 86, 224);
+			Color threeStar = Color.FromArgb(255, 81, 127, 203);
+			Color twoStar = Color.FromArgb(255, 42, 143, 114);
+			Color oneStar = Color.FromArgb(255, 114, 119, 138);
 
-				Color rarityColor = bm.GetPixel(x,y);
+			var colors = new List<Color> { Color.Black, oneStar, twoStar, threeStar, fourStar, fiveStar };
 
-				Color fiveStar    = Color.FromArgb(255, 188, 105,  50);
-				Color fourStar    = Color.FromArgb(255, 161,  86, 224);
-				Color threeStar   = Color.FromArgb(255,  81, 127, 203);
-				Color twoStar     = Color.FromArgb(255,  42, 143, 114);
-				Color oneStar     = Color.FromArgb(255, 114, 119, 138);
+			var c = Scraper.ClosestColor(colors, averageColor);
 
-				if (Scraper.CompareColors(fiveStar, rarityColor)) return 5;
-				else if (Scraper.CompareColors(fourStar, rarityColor)) return 4;
-				else if (Scraper.CompareColors(threeStar, rarityColor)) return 3;
-				else if (Scraper.CompareColors(twoStar, rarityColor)) return 2;
-				else if (Scraper.CompareColors(oneStar, rarityColor)) return 1;
-				else if (Scraper.CompareColors(Color.White, rarityColor)) return GetRarity(bm, scale);
-				else return scale >= 2 ? 10 : GetRarity(bm, scale + 0.2); 
-			}
+			return colors.IndexOf(c);
 		}
 
 		public static bool IsEnhancementMaterial(Bitmap card)

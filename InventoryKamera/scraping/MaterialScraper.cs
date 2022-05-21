@@ -75,7 +75,7 @@ namespace InventoryKamera
 				foreach (var rectangle in r)
 				{
 					// Select Material
-					Navigation.SetCursorPos(Navigation.GetPosition().Left + rectangle.Center().X, Navigation.GetPosition().Top + rectangle.Center().Y);
+					Navigation.SetCursor(rectangle.Center().X, rectangle.Center().Y);
 					Navigation.Click();
 					Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
 
@@ -113,7 +113,7 @@ namespace InventoryKamera
 					Navigation.Wait(150);
 				}
 
-				Navigation.SetCursorPos(Navigation.GetPosition().Left + r.Last().Center().X, Navigation.GetPosition().Top + r.Last().Center().Y);
+				Navigation.SetCursor(r.Last().Center().X, r.Last().Center().Y);
 				Navigation.Click();
 				Navigation.Wait(150);
 				// Scroll to next page
@@ -164,7 +164,7 @@ namespace InventoryKamera
 			{
 				// Select Material
 				Rectangle rectangle = rectangles[i];
-				Navigation.SetCursorPos(Navigation.GetPosition().Left + rectangle.Center().X, Navigation.GetPosition().Top + rectangle.Center().Y);
+				Navigation.SetCursor(rectangle.Center().X, rectangle.Center().Y);
 				Navigation.Click();
 				Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
 

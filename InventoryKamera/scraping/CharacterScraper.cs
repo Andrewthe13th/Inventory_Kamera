@@ -347,8 +347,7 @@ namespace InventoryKamera
 					yOffset = (int)( ( 225 + ( constellation * 75 ) ) / yReference * Navigation.GetHeight() );
 				}
 
-				Navigation.SetCursorPos(Navigation.GetPosition().Left + (int)( 1130 / 1280.0 * Navigation.GetWidth() ),
-										Navigation.GetPosition().Top + yOffset);
+				Navigation.SetCursor((int)( 1130 / 1280.0 * Navigation.GetWidth() ), yOffset);
 				Navigation.Click();
 
 				Navigation.Speed speed = constellation == 0 ? Navigation.Speed.Normal : Navigation.Speed.Fast;
@@ -401,7 +400,7 @@ namespace InventoryKamera
 				// Change y-offset for talent clicking
 				int yOffset = (int)( 110 / yRef * Navigation.GetHeight() ) + ( i + ( ( i == 2 ) ? specialOffset : 0 ) ) * (int)(60 / yRef * Navigation.GetHeight() );
 
-				Navigation.SetCursorPos(Navigation.GetPosition().Left + (int)( 1130 / xRef * Navigation.GetWidth() ), Navigation.GetPosition().Top + yOffset);
+				Navigation.SetCursor((int)(1130 / xRef * Navigation.GetWidth()), yOffset);
 				Navigation.Click();
 				Navigation.Speed speed = i == 0 ? Navigation.Speed.Normal : Navigation.Speed.Fast;
 				Navigation.SystemRandomWait(speed);

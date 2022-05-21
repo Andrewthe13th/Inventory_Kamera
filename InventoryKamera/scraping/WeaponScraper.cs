@@ -28,9 +28,6 @@ namespace InventoryKamera
 			int offset = 0;
 			UserInterface.SetWeapon_Max(weaponCount);
 
-			// TODO: Rewrite this method to allow for scanning enhancement ore quantities
-			// weaponCount += 3;
-
 			// Determine Delay if delay has not been found before
 			// Scraper.FindDelay(rectangles);
 
@@ -45,7 +42,7 @@ namespace InventoryKamera
 				for (int i = cardsRemaining < fullPage ? ( rows - ( totalRows - rowsQueued ) ) * cols : 0; i < rectangles.Count; i++)
 				{
 					Rectangle item = rectangles[i];
-					Navigation.SetCursorPos(Navigation.GetPosition().Left + item.Center().X, Navigation.GetPosition().Top + item.Center().Y + offset);
+					Navigation.SetCursor(item.Center().X, item.Center().Y + offset);
 					Navigation.Click();
 					Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
 
@@ -469,36 +466,21 @@ namespace InventoryKamera
 			return new Weapon(name, level, ascended, refinementLevel, locked, equippedCharacter, id, rarity);
 		}
 
-		private static int GetRarity(Bitmap bm, double scale = 1.0)
+		private static int GetRarity(Bitmap bm)
 		{
-			using (var scaled = Scraper.ScaleImage(bm, scale))
-			{
-				int x = (int)(0.025 * scaled.Width);
-				int y = (int)(0.20 * scaled.Height);
+			var averageColor = new ImageStatistics(bm);
 
-				if (scale != 1.0)
-                {
-					var random = new Random();
-					x = random.Next(scaled.Width);
-					y = random.Next(scaled.Height);
-                }
+			Color fiveStar    = Color.FromArgb(255, 188, 105,  50);
+			Color fourStar    = Color.FromArgb(255, 161,  86, 224);
+			Color threeStar   = Color.FromArgb(255,  81, 127, 203);
+			Color twoStar     = Color.FromArgb(255,  42, 143, 114);
+			Color oneStar     = Color.FromArgb(255, 114, 119, 138);
 
-				Color rarityColor = bm.GetPixel(x,y);
+			var colors = new List<Color> { Color.Black, oneStar, twoStar, threeStar, fourStar, fiveStar };
 
-				Color fiveStar    = Color.FromArgb(255, 188, 105,  50);
-				Color fourStar    = Color.FromArgb(255, 161,  86, 224);
-				Color threeStar   = Color.FromArgb(255,  81, 127, 203);
-				Color twoStar     = Color.FromArgb(255,  42, 143, 114);
-				Color oneStar     = Color.FromArgb(255, 114, 119, 138);
+			var c = Scraper.ClosestColor(colors, averageColor);
 
-				if (Scraper.CompareColors(fiveStar, rarityColor)) return 5;
-				else if (Scraper.CompareColors(fourStar, rarityColor)) return 4;
-				else if (Scraper.CompareColors(threeStar, rarityColor)) return 3;
-				else if (Scraper.CompareColors(twoStar, rarityColor)) return 2;
-				else if (Scraper.CompareColors(oneStar, rarityColor)) return 1;
-				else if (Scraper.CompareColors(Color.White, rarityColor)) return GetRarity(bm, scale);
-				else return scale >= 2 ? 10 : GetRarity(bm, scale + 0.1);
-			}
+			return colors.IndexOf(c);
 		}
 
 		public static bool IsEnhancementMaterial(Bitmap nameBitmap)
