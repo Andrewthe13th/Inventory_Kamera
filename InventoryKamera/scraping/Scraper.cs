@@ -472,14 +472,14 @@ namespace InventoryKamera
 					delayOffset = 10;
 
 				// Do mouse movement to first and second UI element in Inventory
-				Navigation.SetCursorPos(Navigation.GetPosition().Left + item1.Center().X, Navigation.GetPosition().Top + item1.Center().Y);
+				Navigation.SetCursor(item1.Center().X, item1.Center().Y);
 				Navigation.Click();
-				Navigation.Wait(Navigation.GetDelay() - delayOffset);
+				Navigation.Wait(((int)Navigation.GetDelay()) - delayOffset);
 
 				Rectangle item2 = rectangles[1];
-				Navigation.SetCursorPos(Navigation.GetPosition().Left + item2.Center().X, Navigation.GetPosition().Top + item2.Center().Y);
+				Navigation.SetCursor(item2.Center().X, item2.Center().Y);
 				Navigation.Click();
-				Navigation.Wait(Navigation.GetDelay() - delayOffset);
+				Navigation.Wait(((int)Navigation.GetDelay()) - delayOffset);
 
 				// Take image after second click
 				if (Navigation.GetAspectRatio() == new Size(16, 9))
@@ -502,9 +502,9 @@ namespace InventoryKamera
 				}
 
 				Rectangle item3 = rectangles[2];
-				Navigation.SetCursorPos(Navigation.GetPosition().Left + item3.Center().X, Navigation.GetPosition().Top + item3.Center().Y);
+				Navigation.SetCursor(item3.Center().X, item3.Center().Y);
 				Navigation.Click();
-				Navigation.Wait(Navigation.GetDelay() - delayOffset);
+				Navigation.Wait(((int)Navigation.GetDelay()) - delayOffset);
 
 				// Take image after third click
 				if (Navigation.GetAspectRatio() == new Size(16, 9))
@@ -532,7 +532,7 @@ namespace InventoryKamera
 					Navigation.SetDelay(Navigation.GetDelay() - delayOffset);
 					//Navigation.SystemRandomWait();
 
-					Navigation.SetCursorPos(Navigation.GetPosition().Left + item1.Center().X, Navigation.GetPosition().Top + item1.Center().Y);
+					Navigation.SetCursor(item1.Center().X, item1.Center().Y);
 					Navigation.Click();
 					//Navigation.SystemRandomWait();
 				}
@@ -552,15 +552,15 @@ namespace InventoryKamera
 			card1.Dispose(); card2.Dispose();
 
 			// set back to first element
-			Navigation.SystemRandomWait(Navigation.Speed.Slowest);
-			Navigation.SetCursorPos(Navigation.GetPosition().Left + item1.Center().X, Navigation.GetPosition().Top + item1.Center().Y);
+			Navigation.SystemWait(Navigation.Speed.Slowest);
+			Navigation.SetCursor(item1.Center().X, item1.Center().Y);
 			Navigation.Click();
-			Navigation.SystemRandomWait(Navigation.Speed.Slower);
+			Navigation.SystemWait(Navigation.Speed.Slower);
 		}
 
-		#region Image Operations
+        #region Image Operations
 
-		public static Bitmap ResizeImage(System.Drawing.Image image, int width, int height)
+        public static Bitmap ResizeImage(System.Drawing.Image image, int width, int height)
 		{
 			var destRect = new Rectangle(0, 0, width, height);
 			var destImage = new Bitmap(width, height);
@@ -598,8 +598,28 @@ namespace InventoryKamera
 
 			return diff[0] < 10 && diff[1] < 10 && diff[2] < 10;
 		}
+		internal static Color ClosestColor(List<Color> colors, ImageStatistics color)
+		{
+			var c2 = Color.FromArgb((int)color.Red.Mean, (int)color.Green.Mean, (int)color.Blue.Mean);
+			var diff = colors.Select(x => new { Value = x, Diff = GetColorDifference(x, c2) }).ToList();
 
-		public static Bitmap ConvertToGrayscale(Bitmap bitmap)
+			Logger.Debug("Average Color: {0}", c2);
+
+			foreach (var c in colors)
+            {
+                if (CompareColors(c, c2)) return c;
+            }
+
+            return diff.Find(x=> x.Diff == diff.Min(y=>y.Diff)).Value;
+		}
+
+        private static int GetColorDifference(Color c, Color c2)
+        {
+			int r = c.R - c2.R, g = c.G - c2.G, b = c.B - c2.B;
+			return r*r + g*g + b*b;
+		}
+
+        public static Bitmap ConvertToGrayscale(Bitmap bitmap)
 		{
 			return new Grayscale(0.2125, 0.7154, 0.0721).Apply(bitmap);
 		}

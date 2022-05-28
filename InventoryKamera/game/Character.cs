@@ -7,39 +7,56 @@ namespace InventoryKamera
 	[Serializable]
 	public class Character
 	{
+		private string name;
+
 		[JsonProperty("key")]
-		public string Name { get; private set; }
+		public string Name { 
+			
+			get { return name; }
+
+			internal set 
+			{
+				try
+				{
+					name = (string)Scraper.Characters[value.ToLower()]["GOOD"];
+				}
+				catch (Exception)
+				{
+					name = value;
+				}
+			} 
+		}
 
 		[JsonProperty("level")]
-		public int Level { get; private set; }
+		public int Level { get; internal set; }
 
 		[JsonProperty("constellation")]
-		public int Constellation { get; private set; }
+		public int Constellation { get; internal set; }
 
 		[JsonProperty("ascension")]
 		public int Ascension
-		{ get { return AscensionLevel(); } private set { } }
+		{ get { return AscensionLevel(); } internal set { } }
 
 		[JsonProperty("talent")]
-		public Dictionary<string, int> Talents { get; private set; }
+		public Dictionary<string, int> Talents { get; internal set; }
 
 		[JsonIgnore]
-		public string Element { get; private set; }
+		public string Element { get; internal set; }
 
 		[JsonIgnore]
-		public bool Ascended { get; private set; }
+		public bool Ascended { get; internal set; }
 
 		[JsonIgnore]
-		public int Experience { get; private set; }
+		public int Experience { get; internal set; }
 
 		[JsonIgnore]
-		public Weapon Weapon { get; private set; }
+		public Weapon Weapon { get; internal set; }
 
 		[JsonIgnore]
-		public Dictionary<string, Artifact> Artifacts { get; private set; }
+		public Dictionary<string, Artifact> Artifacts { get; internal set; }
 
 		[JsonIgnore]
-		public WeaponType WeaponType { get; private set; }
+		public WeaponType WeaponType { get; internal set; }
 
 		public Character()
 		{
@@ -54,12 +71,7 @@ namespace InventoryKamera
 
 		public Character(string _name, string _element, int _level, bool _ascension, int _experience, int _constellation, int[] _talents, WeaponType _weaponType) : this()
 		{
-			try
-			{
-				Name = (string)Scraper.Characters[_name.ToLower()]["GOOD"];
-			}
-			catch (Exception)
-			{ }
+			
 			Element = _element;
 			Level = _level;
 			Ascended = _ascension;

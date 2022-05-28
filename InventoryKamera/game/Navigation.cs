@@ -21,7 +21,7 @@ namespace InventoryKamera
 		internal static RECT WindowPosition;
 		internal static Size AspectRatio;
 
-		private static int delay = 0;
+		private static double delay = 1;
 
 		public static VirtualKeyCode escapeKey = VirtualKeyCode.ESCAPE;
 		public static VirtualKeyCode characterKey = VirtualKeyCode.VK_C;
@@ -147,36 +147,36 @@ namespace InventoryKamera
 		{
 			int buttonX = (int)(385 / 1280.0 * GetWidth());
 			int buttonY = (int)(35  / 720.0 * GetHeight());
-			SetCursorPos(WindowPosition.Left + buttonX, WindowPosition.Top + buttonY);
+			SetCursor(buttonX, buttonY);
 			Click();
-			SystemRandomWait(Speed.UI);
+			SystemWait(Speed.UI);
 		}
 
 		public static void SelectArtifactInventory()
 		{
 			int buttonX = (int)(448 / 1280.0 * GetWidth());
 			int buttonY = (int)(31 / 720.0 * GetHeight());
-			SetCursorPos(WindowPosition.Left + buttonX, WindowPosition.Top + buttonY);
+			SetCursor(buttonX, buttonY);
 			Click();
-			SystemRandomWait(Speed.UI);
+			SystemWait(Speed.UI);
 		}
 
 		public static void SelectCharacterDevelopmentInventory()
 		{
 			int buttonX = (int)(512 / 1280.0 * GetWidth());
 			int buttonY = (int)(40  / 720.0 * GetHeight());
-			SetCursorPos(WindowPosition.Left + buttonX, WindowPosition.Top + buttonY);
+			SetCursor(buttonX, buttonY);
 			Click();
-			SystemRandomWait(Speed.UI);
+			SystemWait(Speed.UI);
 		}
 
 		public static void SelectMaterialInventory()
 		{
 			int buttonX = (int)(636 / 1280.0 * GetWidth());
 			int buttonY = (int)(30  / 720.0 * GetHeight());
-			SetCursorPos(WindowPosition.Left + buttonX, WindowPosition.Top + buttonY);
+			SetCursor(buttonX, buttonY);
 			Click();
-			SystemRandomWait(Speed.UI);
+			SystemWait(Speed.UI);
 		}
 
 		public static void SelectCharacterAttributes()
@@ -189,9 +189,9 @@ namespace InventoryKamera
 				yOffset = (int)( 105 / 800.0 * GetHeight() );
 			}
 
-			SetCursorPos(GetPosition().Left + xOffset, GetPosition().Top + yOffset);
+			SetCursor(xOffset, yOffset);
 			Click();
-			SystemRandomWait(Speed.CharacterUI);
+			SystemWait(Speed.CharacterUI);
 		}
 
 		public static void SelectCharacterConstellation()
@@ -204,9 +204,9 @@ namespace InventoryKamera
 				yOffset = (int)( 245 / 800.0 * GetHeight() );
 			}
 
-			SetCursorPos(GetPosition().Left + xOffset, GetPosition().Top + yOffset);
+			SetCursor(xOffset, yOffset);
 			Click();
-			SystemRandomWait(Speed.CharacterUI);
+			SystemWait(Speed.CharacterUI);
 		}
 
 		public static void SelectCharacterTalents()
@@ -219,9 +219,9 @@ namespace InventoryKamera
 				yOffset = (int)( 290 / 800.0 * GetHeight() );
 			}
 
-			SetCursorPos(GetPosition().Left + xOffset, GetPosition().Top + yOffset);
+			SetCursor(xOffset, yOffset);
 			Click();
-			SystemRandomWait(Speed.CharacterUI);
+			SystemWait(Speed.CharacterUI);
 		}
 
 		public static void SelectNextCharacter()
@@ -234,33 +234,33 @@ namespace InventoryKamera
 				yOffset = (int)( 400 / 800.0 * GetHeight() );
 			}
 
-			SetCursorPos(GetPosition().Left + xOffset, GetPosition().Top + yOffset);
+			SetCursor(xOffset, yOffset);
 			Click();
-			SystemRandomWait(Speed.SelectNextCharacter);
+			SystemWait(Speed.SelectNextCharacter);
 		}
 
 		public static void CharacterScreen()
 		{
 			sim.Keyboard.KeyPress(escapeKey);
-			SystemRandomWait(Speed.UI);
+			SystemWait(Speed.UI);
 			sim.Keyboard.KeyPress(characterKey);
-			SystemRandomWait(Speed.UI);
+			SystemWait(Speed.UI);
 		}
 
 		public static void InventoryScreen()
 		{
 			sim.Keyboard.KeyPress(escapeKey);
-			SystemRandomWait(Speed.UI);
+			SystemWait(Speed.UI);
 			sim.Keyboard.KeyPress(inventoryKey);
-			SystemRandomWait(Speed.UI);
+			SystemWait(Speed.UI);
 		}
 
 		public static void MainMenuScreen()
 		{
 			sim.Keyboard.KeyPress(escapeKey);
-			SystemRandomWait(Speed.UI);
+			SystemWait(Speed.UI);
 			sim.Keyboard.KeyPress(escapeKey);
-			SystemRandomWait(Speed.UI);
+			SystemWait(Speed.UI);
 		}
 
 		#endregion Game Menu Navigation
@@ -365,6 +365,11 @@ namespace InventoryKamera
 		[DllImport("user32.dll")]
 		public static extern bool SetCursorPos(int X, int Y);
 
+		public static bool SetCursor(int X, int Y)
+        {
+			return SetCursorPos(GetPosition().Left + X, GetPosition().Top + Y);
+		}
+
 		public static void Click()
 		{
 			if (SystemInformation.MouseButtonsSwapped)
@@ -377,96 +382,88 @@ namespace InventoryKamera
 
 		#region Delays
 
-		public static void SystemRandomWait(Speed speed = Speed.Normal)
+		public static void SystemWait(Speed speed = Speed.Normal)
 		{
-			Random r = new Random();
-			int value;
+			double value;
 			switch (speed)
 			{
 				case Speed.Fastest:
 					value = 10;
-					value += delay / 10;
 					break;
 
 				case Speed.Faster:
-					value = 100;
-					value += delay / 5;
+					value = 75;
 					break;
 
 				case Speed.Fast:
-					value = 250;
-					value += delay / 2;
+					value = 100;
 					break;
 
 				case Speed.Normal:
 					value = 500;
-					value += delay;
 					break;
 
 				case Speed.Slow:
-					value = 1000;
-					value += 3 * delay;
+					value = 750;
 					break;
 
 				case Speed.Slower:
-					value = 2000;
-					value += 3 * delay;
+					value = 1000;
 					break;
 
 				case Speed.Slowest:
-					value = 3000;
-					value += 3 * delay;
+					value = 2000;
 					break;
 
 				case Speed.CharacterUI:
-					value = 400;
-					value += delay;
+					value = 2000;
 					break;
 
 				case Speed.ArtifactIgnore:
-					value = r.Next(50, 70);
-					value += delay / 5;
+					value = 80;
 					break;
 
 				case Speed.UI:
-					value = r.Next(1800, 2200);
-					value += 3 * delay;
+					value = 2000;
 					break;
 
 				case Speed.SelectNextCharacter:
-					value = 600;
-					value += 2 * delay;
+					value = 700;
 					break;
 
 				case Speed.InventoryScroll:
 					value = 10;
-					value += delay / 10;
 					break;
 
 				case Speed.SelectNextInventoryItem:
-					value = 175;
-					value += delay / 3;
+					value = 200;
 					break;
 
 				default:
 					value = 1000;
 					break;
 			}
+			value *= delay;
 
-			Wait(value);
+			Wait(((int)value));
 		}
+
+		public static void SystemWait(float ms)
+        {
+			Wait((int)(ms * delay));
+        }
 
 		public static void Wait(int ms = 1000)
 		{
 			Thread.Sleep(ms);
 		}
 
-		public static void SetDelay(int _delay)
+		public static void SetDelay(double _delay)
 		{
 			delay = _delay;
 		}
 
-		public static int GetDelay()
+		public static double GetDelay()
 		{
 			return delay;
 		}

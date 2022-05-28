@@ -45,6 +45,8 @@ namespace InventoryKamera
 
 	public static class MaterialScraper
 	{
+		private static NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
 		public static void Scan_Materials(InventorySection section, ref Inventory inventory)
 		{
 			if (!inventory.Materials.Contains(new Material("Mora", 0)))
@@ -75,9 +77,9 @@ namespace InventoryKamera
 				foreach (var rectangle in r)
 				{
 					// Select Material
-					Navigation.SetCursorPos(Navigation.GetPosition().Left + rectangle.Center().X, Navigation.GetPosition().Top + rectangle.Center().Y);
+					Navigation.SetCursor(rectangle.Center().X, rectangle.Center().Y);
 					Navigation.Click();
-					Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
+					Navigation.SystemWait(Navigation.Speed.SelectNextInventoryItem);
 
 					material.name = ScanMaterialName(section, out Bitmap nameplate);
 					material.count = 0;
@@ -113,7 +115,7 @@ namespace InventoryKamera
 					Navigation.Wait(150);
 				}
 
-				Navigation.SetCursorPos(Navigation.GetPosition().Left + r.Last().Center().X, Navigation.GetPosition().Top + r.Last().Center().Y);
+				Navigation.SetCursor(r.Last().Center().X, r.Last().Center().Y);
 				Navigation.Click();
 				Navigation.Wait(150);
 				// Scroll to next page
@@ -141,10 +143,10 @@ namespace InventoryKamera
 								}
 							}
 						}
-						Navigation.SystemRandomWait(Navigation.Speed.InventoryScroll);
+						Navigation.SystemWait(Navigation.Speed.InventoryScroll);
 					}
 				}
-				Navigation.SystemRandomWait(Navigation.Speed.Normal);
+				Navigation.SystemWait(Navigation.Speed.Normal);
 				++page;
 			}
 
@@ -153,7 +155,7 @@ namespace InventoryKamera
 			for (int i = 0; i < 20; i++)
 			{
 				Navigation.sim.Mouse.VerticalScroll(-1);
-				Navigation.SystemRandomWait(Navigation.Speed.InventoryScroll);
+				Navigation.SystemWait(Navigation.Speed.InventoryScroll);
 			}
 
 			Navigation.Wait(500);
@@ -164,9 +166,9 @@ namespace InventoryKamera
 			{
 				// Select Material
 				Rectangle rectangle = rectangles[i];
-				Navigation.SetCursorPos(Navigation.GetPosition().Left + rectangle.Center().X, Navigation.GetPosition().Top + rectangle.Center().Y);
+				Navigation.SetCursor(rectangle.Center().X, rectangle.Center().Y);
 				Navigation.Click();
-				Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
+				Navigation.SystemWait(Navigation.Speed.SelectNextInventoryItem);
 
 				material.name = ScanMaterialName(section, out Bitmap nameplate);
 				material.count = 0;
@@ -244,9 +246,13 @@ namespace InventoryKamera
 		{
 			using (var gray = Scraper.ConvertToGrayscale(screenshot))
 			{
-				var input = Scraper.AnalyzeText(gray).Split(' ').ToList();
+				var invert = (Bitmap)gray.Clone();
+				Scraper.SetInvert(ref invert);
+				var input = Scraper.AnalyzeText(invert).Split(' ').ToList();
+				Logger.Debug("Scanned mora input: {0}", input.ToString());
 				input.RemoveAll(e => Regex.IsMatch(e.Trim(), @"[^0-9]") || string.IsNullOrWhiteSpace(e.Trim()));
 				var mora = input.LastOrDefault();
+				Logger.Debug("Parsed mora input: {0}", mora);
 				return mora;
 			}
 		}
@@ -412,12 +418,6 @@ namespace InventoryKamera
 				// Sort by row then by column within each row
 				rectangles = rectangles.OrderBy(r => r.Top).ThenBy(r => r.Left).ToList();
 
-				Debug.WriteLine($"{colCoords.Count} columns: ");
-				colCoords.ForEach(c => Debug.Write(c + ", ")); Debug.WriteLine("");
-				Debug.WriteLine($"{rowCoords.Count} rows: ");
-				rowCoords.ForEach(c => Debug.Write(c + ", ")); Debug.WriteLine("");
-				Debug.WriteLine($"{rectangles.Count} rectangles");
-
 				return (rectangles, colCoords.Count, rowCoords.Count);
 			}
 		}
@@ -507,12 +507,8 @@ namespace InventoryKamera
 
 					_ = int.TryParse(cleaned, out int count);
 
-					Debug.WriteLine($"{old_text} -> {cleaned} -> {count}");
+					Logger.Debug($"{old_text} -> {cleaned} -> {count}");
 
-					//if (count > 3000 || count == 0)
-					//{
-					//	//Navigation.DisplayBitmap(n);
-					//}
 					copy.Dispose();
 					n.Dispose();
 					return count;

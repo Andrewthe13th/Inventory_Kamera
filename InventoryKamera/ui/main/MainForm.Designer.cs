@@ -547,18 +547,18 @@
             this.FastScannerDelay_Label.Name = "FastScannerDelay_Label";
             this.FastScannerDelay_Label.Size = new System.Drawing.Size(20, 9);
             this.FastScannerDelay_Label.TabIndex = 74;
-            this.FastScannerDelay_Label.Text = "0ms";
+            this.FastScannerDelay_Label.Text = "Fast";
             // 
             // MidScannerDelay_Label
             // 
             this.MidScannerDelay_Label.AutoSize = true;
             this.MidScannerDelay_Label.Font = new System.Drawing.Font("Microsoft Sans Serif", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.MidScannerDelay_Label.Location = new System.Drawing.Point(63, 261);
+            this.MidScannerDelay_Label.Location = new System.Drawing.Point(60, 261);
             this.MidScannerDelay_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.MidScannerDelay_Label.Name = "MidScannerDelay_Label";
-            this.MidScannerDelay_Label.Size = new System.Drawing.Size(24, 9);
+            this.MidScannerDelay_Label.Size = new System.Drawing.Size(29, 9);
             this.MidScannerDelay_Label.TabIndex = 75;
-            this.MidScannerDelay_Label.Text = "50ms";
+            this.MidScannerDelay_Label.Text = "Slower";
             // 
             // SlowScannerDelay_Label
             // 
@@ -567,9 +567,9 @@
             this.SlowScannerDelay_Label.Location = new System.Drawing.Point(108, 261);
             this.SlowScannerDelay_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.SlowScannerDelay_Label.Name = "SlowScannerDelay_Label";
-            this.SlowScannerDelay_Label.Size = new System.Drawing.Size(28, 9);
+            this.SlowScannerDelay_Label.Size = new System.Drawing.Size(22, 9);
             this.SlowScannerDelay_Label.TabIndex = 76;
-            this.SlowScannerDelay_Label.Text = "100ms";
+            this.SlowScannerDelay_Label.Text = "Slow";
             // 
             // FileSelectButton
             // 

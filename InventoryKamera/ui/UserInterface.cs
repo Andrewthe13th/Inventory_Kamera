@@ -93,7 +93,7 @@ namespace InventoryKamera
 			}
 			catch (Exception e)
 			{
-				Debug.WriteLine($"Problem updating picturebox {pictureBox.Name}\n{e.StackTrace}");
+				Logger.Debug($"Problem updating picturebox {0}\n{1}", pictureBox.Name, e);
 			}
 		}
 
@@ -111,7 +111,7 @@ namespace InventoryKamera
 			}
 			catch (Exception e)
 			{
-				Debug.WriteLine($"Problem updating textbox {textBox.Name}\n{e.StackTrace}");
+				Logger.Debug($"Problem updating picturebox {0}\n{1}", textBox.Name, e);
 			}
 		}
 
@@ -128,7 +128,8 @@ namespace InventoryKamera
 			}
 			catch (Exception e)
 			{
-				Debug.WriteLine($"Problem updating label {label.Name}\n{e.StackTrace}");
+				Logger.Debug($"Problem updating picturebox {0}\n{1}", label.Name, e);
+
 			}
 		}
 

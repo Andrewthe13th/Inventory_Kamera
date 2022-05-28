@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Accord;
 using Accord.Imaging;
 using Accord.Imaging.Filters;
 using static InventoryKamera.Artifact;
@@ -21,7 +22,8 @@ namespace InventoryKamera
 		{
 			// Get Max artifacts from screen
 			int artifactCount = count == 0 ? ScanArtifactCount() : count;
-			var (rectangles, cols, rows) = GetPageOfItems();
+			int page = 0;
+			var (rectangles, cols, rows) = GetPageOfItems(page);
 			int fullPage = cols * rows;
 			int totalRows = (int)Math.Ceiling(artifactCount / (decimal)cols);
 			int cardsQueued = 0;
@@ -30,6 +32,45 @@ namespace InventoryKamera
 			UserInterface.SetArtifact_Max(artifactCount);
 
 			StopScanning = false;
+
+			var minLevel = Properties.Settings.Default.MinimumArtifactLevel;
+
+			if (minLevel >= 1)
+			{
+                // Check if sorted by level
+                // If not, sort by level
+                if (CurrentSortingMethod() != "level")
+                {
+					Navigation.SetCursor(
+						X: (int)(230 / 1280.0 * Navigation.GetWidth()),
+						Y: (int)(680 / 720.0 * Navigation.GetHeight()));
+					Navigation.Click();
+					Navigation.Wait();
+					Navigation.SetCursor(
+						X: (int)(250 / 1280.0 * Navigation.GetWidth()),
+						Y: (int)(615 / 720.0 * Navigation.GetHeight()));
+					Navigation.Click();
+					Navigation.Wait();
+				}
+			}
+			else
+            {
+                // Check if sorted by quality
+                if (CurrentSortingMethod() != "quality")
+				{
+					// If not, sort by quality
+					Navigation.SetCursor(
+						X: (int)(230 / 1280.0 * Navigation.GetWidth()),
+						Y: (int)(680 / 720.0 * Navigation.GetHeight()));
+					Navigation.Click();
+					Navigation.Wait();
+					Navigation.SetCursor(
+						X: (int)(250 / 1280.0 * Navigation.GetWidth()),
+						Y: (int)(645 / 720.0 * Navigation.GetHeight()));
+					Navigation.Click();
+					Navigation.Wait();
+				}
+			}
 
 			// Go through artifact list
 			while (cardsQueued < artifactCount)
@@ -40,9 +81,9 @@ namespace InventoryKamera
 				for (int i = cardsRemaining < fullPage ? ( rows - ( totalRows - rowsQueued ) ) * cols : 0; i < rectangles.Count; i++)
 				{
 					Rectangle item = rectangles[i];
-					Navigation.SetCursorPos(Navigation.GetPosition().Left + item.Center().X, Navigation.GetPosition().Top + item.Center().Y + offset);
+					Navigation.SetCursor(item.Center().X, item.Center().Y + offset);
 					Navigation.Click();
-					Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
+					Navigation.SystemWait(Navigation.Speed.SelectNextInventoryItem);
 
 					// Queue card for scanning
 					QueueScan(cardsQueued);
@@ -68,7 +109,7 @@ namespace InventoryKamera
 					{
 						Navigation.sim.Mouse.VerticalScroll(-1);
 					}
-					Navigation.SystemRandomWait(Navigation.Speed.Fast);
+					Navigation.SystemWait(Navigation.Speed.Fast);
 				}
 				else
 				{
@@ -81,12 +122,30 @@ namespace InventoryKamera
 					{
 						Navigation.sim.Mouse.VerticalScroll(-1);
 					}
-					Navigation.SystemRandomWait(Navigation.Speed.Fast);
+					Navigation.SystemWait(Navigation.Speed.Fast);
 				}
+				++page;
+				(rectangles, cols, rows) = GetPageOfItems(page);
 			}
 		}
 
-		private static int ScanArtifactCount()
+        private static string CurrentSortingMethod()
+        {
+			var region = new Rectangle(
+				x: (int)(140.0 / 1280.0 * Navigation.GetWidth()),
+				y: (int)(660.0 / 720.0 * Navigation.GetHeight()),
+				width: (int)(175.0 / 1280.0 * Navigation.GetWidth()),
+				height: (int)(40.0 / 720.0 * Navigation.GetHeight()));
+
+            using (var bm = Navigation.CaptureRegion(region))
+            {
+				var g = Scraper.ConvertToGrayscale(bm);
+				var mode = Scraper.AnalyzeText(g).Trim().ToLower();
+				return mode.Contains("level") ? "level" : mode.Contains("quality") ? "quality" : null; 
+            }
+        }
+
+        private static int ScanArtifactCount()
 		{
 			//Find artifact count
 			var region = new Rectangle(
@@ -138,7 +197,7 @@ namespace InventoryKamera
 			}
 		}
 
-		private static (List<Rectangle> rectangles, int cols, int rows) GetPageOfItems()
+		private static (List<Rectangle> rectangles, int cols, int rows) GetPageOfItems(int page)
 		{
 			// Screenshot of inventory
 			using (Bitmap screenshot = Navigation.CaptureWindow())
@@ -153,7 +212,7 @@ namespace InventoryKamera
 						screenshot.Save($"./logging/artifacts/ArtifactInventory.png");
 						using (Graphics g = Graphics.FromImage(screenshot))
 							rectangles.ForEach(r => g.DrawRectangle(new Pen(Color.Green, 2), r));
-						screenshot.Save($"./logging/artifacts/ArtifactInventory_{cols}x{rows}.png");
+						screenshot.Save($"./logging/artifacts/ArtifactInventory{page}_{cols}x{rows}.png");
 					}
 					return (rectangles, cols, rows);
 				}
@@ -304,12 +363,6 @@ namespace InventoryKamera
 				// Sort by row then by column within each row
 				rectangles = rectangles.OrderBy(r => r.Top).ThenBy(r => r.Left).ToList();
 
-				Debug.WriteLine($"{colCoords.Count} columns: ");
-				colCoords.ForEach(c => Debug.Write(c + ", ")); Debug.WriteLine("");
-				Debug.WriteLine($"{rowCoords.Count} rows: ");
-				rowCoords.ForEach(c => Debug.Write(c + ", ")); Debug.WriteLine("");
-				Debug.WriteLine($"{rectangles.Count} rectangles");
-
 				return (rectangles, colCoords.Count, rowCoords.Count);
 			}
 		}
@@ -409,6 +462,7 @@ namespace InventoryKamera
 			artifactImages.Add(card);
 
 
+
             if (GetRarity(name) < Properties.Settings.Default.MinimumArtifactRarity)
 			{
 				artifactImages.ForEach(i => i.Dispose());
@@ -479,34 +533,19 @@ namespace InventoryKamera
 
 		private static int GetRarity(Bitmap bm, double scale = 1)
 		{
-			using (var scaled = Scraper.ScaleImage(bm, scale))
-			{
-				int x = (int)(0.025 * scaled.Width);
-				int y = (int)(0.20 * scaled.Height);
+			var averageColor = new ImageStatistics(bm);
 
-				if (scale != 1.0)
-				{
-					var random = new Random();
-					x = random.Next(scaled.Width);
-					y = random.Next(scaled.Height);
-				}
+			Color fiveStar = Color.FromArgb(255, 188, 105, 50);
+			Color fourStar = Color.FromArgb(255, 161, 86, 224);
+			Color threeStar = Color.FromArgb(255, 81, 127, 203);
+			Color twoStar = Color.FromArgb(255, 42, 143, 114);
+			Color oneStar = Color.FromArgb(255, 114, 119, 138);
 
-				Color rarityColor = bm.GetPixel(x,y);
+			var colors = new List<Color> { Color.Black, oneStar, twoStar, threeStar, fourStar, fiveStar };
 
-				Color fiveStar    = Color.FromArgb(255, 188, 105,  50);
-				Color fourStar    = Color.FromArgb(255, 161,  86, 224);
-				Color threeStar   = Color.FromArgb(255,  81, 127, 203);
-				Color twoStar     = Color.FromArgb(255,  42, 143, 114);
-				Color oneStar     = Color.FromArgb(255, 114, 119, 138);
+			var c = Scraper.ClosestColor(colors, averageColor);
 
-				if (Scraper.CompareColors(fiveStar, rarityColor)) return 5;
-				else if (Scraper.CompareColors(fourStar, rarityColor)) return 4;
-				else if (Scraper.CompareColors(threeStar, rarityColor)) return 3;
-				else if (Scraper.CompareColors(twoStar, rarityColor)) return 2;
-				else if (Scraper.CompareColors(oneStar, rarityColor)) return 1;
-				else if (Scraper.CompareColors(Color.White, rarityColor)) return GetRarity(bm, scale);
-				else return scale >= 2 ? 10 : GetRarity(bm, scale + 0.2); 
-			}
+			return colors.IndexOf(c);
 		}
 
 		public static bool IsEnhancementMaterial(Bitmap card)
@@ -574,19 +613,20 @@ namespace InventoryKamera
 
 					// Get Main Stat
 					string mainStat = Scraper.AnalyzeText(n).ToLower().Trim();
-					n.Dispose();
+					
 
 					// Remove anything not a-z as well as removes spaces/underscores
 					mainStat = Regex.Replace(mainStat, @"[\W_0-9]", string.Empty);
 					// Replace double characters (ex. aanemodmgbonus). Seemed to be a somewhat common problem.
 					mainStat = Regex.Replace(mainStat, "(.)\\1+", "$1");
+					mainStat = Scraper.FindClosestStat(mainStat);
 
 					if (mainStat == "def" || mainStat == "atk" || mainStat == "hp")
 					{
-						mainStat += "%";
+						mainStat += "_";
 					}
-
-					return Scraper.FindClosestStat(mainStat);
+					n.Dispose();
+					return mainStat;
 			}
 		}
 

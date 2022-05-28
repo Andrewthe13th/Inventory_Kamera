@@ -37,6 +37,20 @@ namespace InventoryKamera
         {
             var config = new NLog.Config.LoggingConfiguration();
 
+			var debugFile = new NLog.Targets.FileTarget("logfile")
+			{
+				Layout = "${date:format=yyyy-MM-dd HH\\:mm\\:ss.fff}|${level:uppercase=true}|${logger:shortName=True}|${message:withexception=true}",
+				FileName = "./logging/InventoryKamera.debug.log",
+				ArchiveFileName = "logging/archives/InventoryKamera.{####}.debug.log",
+				ArchiveNumbering = NLog.Targets.ArchiveNumberingMode.Date,
+				ArchiveDateFormat = "yyyyMMddHHmmss",
+				MaxArchiveFiles = 4,
+				ConcurrentWrites = true,
+				KeepFileOpen = true,
+				ArchiveOldFileOnStartup = true,
+				ArchiveFileKind = NLog.Targets.FilePathKind.Relative
+			};
+
 			var logFile = new NLog.Targets.FileTarget("logfile")
 			{
 				Layout = "${date:format=yyyy-MM-dd HH\\:mm\\:ss.fff}|${level:uppercase=true}|${logger:shortName=True}|${message:withexception=true}",
@@ -51,10 +65,14 @@ namespace InventoryKamera
 				ArchiveFileKind = NLog.Targets.FilePathKind.Relative
 			};
 
-			var logConsole = new NLog.Targets.ConsoleTarget("logconsole");
+			var logConsole = new NLog.Targets.ConsoleTarget("logconsole")
+			{
+				Layout = "${date:format=yyyy-MM-dd HH\\:mm\\:ss.fff}|${level:uppercase=true}|${logger:shortName=True}|${message:withexception=true}",
+			};
 
 			config.AddRule(LogLevel.Debug, LogLevel.Fatal, logConsole);
-			config.AddRule(LogLevel.Debug, LogLevel.Fatal, logFile);
+			config.AddRule(LogLevel.Debug, LogLevel.Fatal, debugFile);
+			config.AddRule(LogLevel.Info, LogLevel.Fatal, logFile);
 
             LogManager.Configuration = config;
         }

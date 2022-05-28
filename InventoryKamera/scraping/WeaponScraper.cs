@@ -20,16 +20,14 @@ namespace InventoryKamera
 		{
 			// Determine maximum number of weapons to scan
 			int weaponCount = count == 0 ? ScanWeaponCount(): count;
-			var (rectangles, cols, rows) = GetPageOfItems();
+			int page = 0;
+			var (rectangles, cols, rows) = GetPageOfItems(page);
 			int fullPage = cols * rows;
 			int totalRows = (int)Math.Ceiling(weaponCount / (decimal)cols);
 			int cardsQueued = 0;
 			int rowsQueued = 0;
 			int offset = 0;
 			UserInterface.SetWeapon_Max(weaponCount);
-
-			// TODO: Rewrite this method to allow for scanning enhancement ore quantities
-			// weaponCount += 3;
 
 			// Determine Delay if delay has not been found before
 			// Scraper.FindDelay(rectangles);
@@ -45,9 +43,9 @@ namespace InventoryKamera
 				for (int i = cardsRemaining < fullPage ? ( rows - ( totalRows - rowsQueued ) ) * cols : 0; i < rectangles.Count; i++)
 				{
 					Rectangle item = rectangles[i];
-					Navigation.SetCursorPos(Navigation.GetPosition().Left + item.Center().X, Navigation.GetPosition().Top + item.Center().Y + offset);
+					Navigation.SetCursor(item.Center().X, item.Center().Y + offset);
 					Navigation.Click();
-					Navigation.SystemRandomWait(Navigation.Speed.SelectNextInventoryItem);
+					Navigation.SystemWait(Navigation.Speed.SelectNextInventoryItem);
 
 					// Queue card for scanning
 					QueueScan(cardsQueued);
@@ -73,7 +71,7 @@ namespace InventoryKamera
 					{
 						Navigation.sim.Mouse.VerticalScroll(-1);
 					}
-					Navigation.SystemRandomWait(Navigation.Speed.Fast);
+					Navigation.SystemWait(Navigation.Speed.Fast);
 				}
 				else
 				{
@@ -86,8 +84,10 @@ namespace InventoryKamera
 					{
 						Navigation.sim.Mouse.VerticalScroll(-1);
 					}
-					Navigation.SystemRandomWait(Navigation.Speed.Fast);
+					Navigation.SystemWait(Navigation.Speed.Fast);
 				}
+				++page;
+				(rectangles, cols, rows) = GetPageOfItems(page);
 			}
 		}
 
@@ -143,7 +143,7 @@ namespace InventoryKamera
 			}
 		}
 
-		private static (List<Rectangle> rectangles, int cols, int rows) GetPageOfItems()
+		private static (List<Rectangle> rectangles, int cols, int rows) GetPageOfItems(int page)
 		{
 			// Screenshot of inventory
 			using (Bitmap screenshot = Navigation.CaptureWindow())
@@ -158,7 +158,7 @@ namespace InventoryKamera
 						using (Graphics g = Graphics.FromImage(screenshot))
 							rectangles.ForEach(r => g.DrawRectangle(new Pen(Color.Green, 2), r));
 						
-						screenshot.Save($"./logging/weapons/WeaponInventory_{cols}x{rows}.png");
+						screenshot.Save($"./logging/weapons/WeaponInventory{page}_{cols}x{rows}.png");
 					}
 					return (rectangles, cols, rows);
 				}
@@ -308,12 +308,6 @@ namespace InventoryKamera
 
 				// Sort by row then by column within each row
 				rectangles = rectangles.OrderBy(r => r.Top).ThenBy(r => r.Left).ToList();
-
-				Debug.WriteLine($"{colCoords.Count} columns: ");
-				colCoords.ForEach(c => Debug.Write(c + ", ")); Debug.WriteLine("");
-				Debug.WriteLine($"{rowCoords.Count} rows: ");
-				rowCoords.ForEach(c => Debug.Write(c + ", ")); Debug.WriteLine("");
-				Debug.WriteLine($"{rectangles.Count} rectangles");
 				
 				return (rectangles, colCoords.Count, rowCoords.Count);
 			}
@@ -469,36 +463,21 @@ namespace InventoryKamera
 			return new Weapon(name, level, ascended, refinementLevel, locked, equippedCharacter, id, rarity);
 		}
 
-		private static int GetRarity(Bitmap bm, double scale = 1.0)
+		private static int GetRarity(Bitmap bm)
 		{
-			using (var scaled = Scraper.ScaleImage(bm, scale))
-			{
-				int x = (int)(0.025 * scaled.Width);
-				int y = (int)(0.20 * scaled.Height);
+			var averageColor = new ImageStatistics(bm);
 
-				if (scale != 1.0)
-                {
-					var random = new Random();
-					x = random.Next(scaled.Width);
-					y = random.Next(scaled.Height);
-                }
+			Color fiveStar    = Color.FromArgb(255, 188, 105,  50);
+			Color fourStar    = Color.FromArgb(255, 161,  86, 224);
+			Color threeStar   = Color.FromArgb(255,  81, 127, 203);
+			Color twoStar     = Color.FromArgb(255,  42, 143, 114);
+			Color oneStar     = Color.FromArgb(255, 114, 119, 138);
 
-				Color rarityColor = bm.GetPixel(x,y);
+			var colors = new List<Color> { Color.Black, oneStar, twoStar, threeStar, fourStar, fiveStar };
 
-				Color fiveStar    = Color.FromArgb(255, 188, 105,  50);
-				Color fourStar    = Color.FromArgb(255, 161,  86, 224);
-				Color threeStar   = Color.FromArgb(255,  81, 127, 203);
-				Color twoStar     = Color.FromArgb(255,  42, 143, 114);
-				Color oneStar     = Color.FromArgb(255, 114, 119, 138);
+			var c = Scraper.ClosestColor(colors, averageColor);
 
-				if (Scraper.CompareColors(fiveStar, rarityColor)) return 5;
-				else if (Scraper.CompareColors(fourStar, rarityColor)) return 4;
-				else if (Scraper.CompareColors(threeStar, rarityColor)) return 3;
-				else if (Scraper.CompareColors(twoStar, rarityColor)) return 2;
-				else if (Scraper.CompareColors(oneStar, rarityColor)) return 1;
-				else if (Scraper.CompareColors(Color.White, rarityColor)) return GetRarity(bm, scale);
-				else return scale >= 2 ? 10 : GetRarity(bm, scale + 0.1);
-			}
+			return colors.IndexOf(c);
 		}
 
 		public static bool IsEnhancementMaterial(Bitmap nameBitmap)

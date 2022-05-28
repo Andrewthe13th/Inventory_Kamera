@@ -23,7 +23,7 @@ namespace InventoryKamera
 		private static Thread scannerThread;
 		private static InventoryKamera data = new InventoryKamera();
 
-		private int Delay;
+        private int Delay;
 
 		private bool running = false;
 
@@ -58,21 +58,21 @@ namespace InventoryKamera
 			Logger.Info("MainForm initialization complete");
 		}
 
-		private int ScannerDelayValue(int value)
+		private double ScannerDelayValue(int value)
 		{
 			switch (value)
 			{
 				case 0:
-					return 0;
+					return 0.5;
 
 				case 1:
-					return 50;
+					return 1;
 
 				case 2:
-					return 100;
+					return 1.5;
 
 				default:
-					return 100;
+					return 1;
 			}
 		}
 
@@ -258,10 +258,9 @@ namespace InventoryKamera
 					{
 						ResetUI();
 						running = false;
-						Logger.Info("Scanner stopped");
                         ManualExportButton.Invoke((MethodInvoker)delegate 
 						{
-							ManualExportButton.Enabled = data.Inventory.Size > 0;
+							ManualExportButton.Enabled = data.HasData;
 						});
 					}
 				})
@@ -368,11 +367,13 @@ namespace InventoryKamera
 				case "InventoryKey":
 					Navigation.inventoryKey = (VirtualKeyCode)e.KeyCode;
 					Logger.Debug("Inv key set to: {key}", Navigation.inventoryKey);
+					Properties.Settings.Default.InventoryKey = e.KeyValue;
 					break;
 
 				case "CharacterKey":
 					Navigation.characterKey = (VirtualKeyCode)e.KeyCode;
 					Logger.Debug("Char key set to: {key}", Navigation.characterKey);
+					Properties.Settings.Default.CharacterKey = e.KeyValue;
 					break;
 
 				default:

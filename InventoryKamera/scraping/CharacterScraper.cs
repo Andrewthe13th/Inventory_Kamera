@@ -11,33 +11,68 @@ namespace InventoryKamera
 	public static class CharacterScraper
 	{
 		private static NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
-		private static string firstCharacterName = null;
-		private static List<Character> Characters = new List<Character>();
 
-		public static List<Character> ScanCharacters()
+		public static void ScanCharacters(ref List<Character> Characters)
 		{
-			// first character name is used to stop scanning characters
-			int characterCount = 0;
-			firstCharacterName = null; // Static variable might already be set
+			int viewed = 0;
+			string first = null;
+			HashSet<string> scanned = new HashSet<string>();
+
 			UserInterface.ResetCharacterDisplay();
-			while (ScanCharacter(out Character character) || characterCount <= 4)
+
+			while (true)
 			{
+				var character = ScanCharacter(first);
+				if (Characters.Count > 0 && character.Name == Characters.ElementAt(0).Name) break;
 				if (character.IsValid())
 				{
-					Characters.Add(character);
-					UserInterface.IncrementCharacterCount();
-					Logger.Info("Scanned {0} successfully", character.Name);
-					characterCount++;
+					if (!scanned.Contains(character.Name))
+					{
+						Characters.Add(character);
+						UserInterface.IncrementCharacterCount();
+						Logger.Info("Scanned {0} successfully", character.Name);
+						if (Characters.Count == 1) first = character.Name;
+					}
+					else
+                    {
+						Logger.Info("Prevented {0} duplicate scan", character.Name);
+                    }
 				}
+                else 
+				{
+					string error = "";
+					if (!character.HasValidName()) error += "Invalid character name\n";
+					if (!character.HasValidLevel()) error += "Invalid level\n";
+					if (!character.HasValidElement()) error += "Invalid element\n";
+					if (!character.HasValidConstellation()) error += "Invalid constellation\n";
+					if (!character.HasValidTalents()) error += "Invalid talents\n";
+					Logger.Error("Failed to scan character\n" + error + character);
+				}
+
 				Navigation.SelectNextCharacter();
 				UserInterface.ResetCharacterDisplay();
+
+				if (++viewed > 3 && Characters.Count < 1) break;
 			}
-			return Characters;
+
+            // Childe passive buff fix
+            foreach (var character in Characters.Take(4))
+            {
+				if (character.Name.ToLower() == "tartaglia")
+                {
+					for (int i = 0; i < Characters.Count; i++)
+					{
+						Characters[i].Talents["auto"] -= 1;
+					}
+					Logger.Info("Tartaglia in on-field party, applied auto attack fix.");
+					break;
+				}
+            }
 		}
 
-		private static bool ScanCharacter(out Character character)
+		private static Character ScanCharacter(string firstCharacter)
 		{
-			character = new Character();
+			var character = new Character();
 			Navigation.SelectCharacterAttributes();
 			string name = null;
 			string element = null;
@@ -49,70 +84,75 @@ namespace InventoryKamera
 			{
 				if (string.IsNullOrWhiteSpace(name)) UserInterface.AddError("Could not determine character's name");
 				if (string.IsNullOrWhiteSpace(element)) UserInterface.AddError("Could not determine character's element");
-				return false;
+				return character;
 			}
 
-			// Check if character was first scanned
-			if (name != firstCharacterName)
-			{
-				if (string.IsNullOrWhiteSpace(firstCharacterName))
-					firstCharacterName = name;
+			character.Name = name;
+			character.Element = element;
 
+			// Check if character was first scanned
+			if (name != firstCharacter)
+			{
 				bool ascended = false;
 				// Scan Level and ascension
 				int level = ScanLevel(ref ascended);
 				if (level == -1)
 				{
 					UserInterface.AddError($"Could not determine {name}'s level");
-					return false;
+					return character;
 				}
+				character.Level = level;
+				character.Ascended = ascended;
+
+				Logger.Info("{name:l} Level: {level:l}", character.Name, character.Level);
+				Logger.Info("{name:l} Ascended: {ascended:l}", character.Name, character.Ascended);
 
 				// Scan Experience
 				//experience = ScanExperience();
-				Navigation.SystemRandomWait(Navigation.Speed.Normal);
+				//Navigation.SystemRandomWait(Navigation.Speed.Normal);
 
 				// Scan Constellation
 				Navigation.SelectCharacterConstellation();
-				int constellation = ScanConstellations();
-				Navigation.SystemRandomWait(Navigation.Speed.Normal);
+				character.Constellation = ScanConstellations();
+				Logger.Info("{name:l} Constellation: {constellation:l}", character.Name, character.Constellation);
+				Navigation.SystemWait(Navigation.Speed.Normal);
 
 				// Scan Talents
 				Navigation.SelectCharacterTalents();
-				int[] talents = ScanTalents(name);
-				Navigation.SystemRandomWait(Navigation.Speed.Normal);
+				character.Talents = ScanTalents(name);
+				Logger.Info("{name:l} Talents: {talents:l}", character.Name, character.Talents);
+				Navigation.SystemWait(Navigation.Speed.Normal);
 
 				// Scale down talents due to constellations
-				if (constellation >= 3)
+				if (character.Constellation >= 3)
 				{
 					if (Scraper.Characters.ContainsKey(name.ToLower()))
 					{
 						// get talent if character
-						if (constellation >= 5)
+						if (character.Constellation >= 5)
 						{
-							talents[1] -= 3;
-							talents[2] -= 3;
+							character.Talents["skill"] -= 3;
+							character.Talents["burst"] -= 3;
 						}
 						else if ((string)Scraper.Characters[name.ToLower()]["ConstellationOrder"][0] == "skill")
 						{
-							talents[1] -= 3;
+							character.Talents["skill"] -= 3;
 						}
 						else
 						{
-							talents[2] -= 3;
+							character.Talents["burst"] -= 3;
 						}
 					}
 					else
-						return false;
+						return character;
 				}
 
-				var weaponType = Scraper.Characters[name.ToLower()]["WeaponType"].ToObject<int>();
+				character.WeaponType = Scraper.Characters[name.ToLower()]["WeaponType"].ToObject<WeaponType>();
 
-				int experience = 0;
-				character = new Character(name, element, level, ascended, experience, constellation, talents, (WeaponType)weaponType);
-				return true;
+				return character;
 			}
 			Logger.Info("Repeat character {0} detected. Finishing character scan...", name);
-			return false;
+			return character;
 		}
 
 		public static string ScanMainCharacterName()
@@ -171,7 +211,7 @@ namespace InventoryKamera
 
 			do
 			{
-				Navigation.SystemRandomWait(Navigation.Speed.Fast);
+				Navigation.SystemWait(Navigation.Speed.Fast);
 				using (Bitmap bm = Navigation.CaptureRegion(region))
 				{
 					Bitmap n = Scraper.ConvertToGrayscale(bm);
@@ -218,7 +258,7 @@ namespace InventoryKamera
 					}
 				}
 				attempts++;
-				Navigation.SystemRandomWait(Navigation.Speed.Normal);
+				Navigation.SystemWait(Navigation.Speed.Normal);
 			} while (( string.IsNullOrWhiteSpace(name) || string.IsNullOrEmpty(element) ) && ( attempts < maxAttempts ));
 			name = null;
 			element = null;
@@ -268,7 +308,7 @@ namespace InventoryKamera
 					n.Dispose();
 					bm.Dispose();
 				}
-				Navigation.SystemRandomWait(Navigation.Speed.Normal);
+				Navigation.SystemWait(Navigation.Speed.Normal);
 			} while (level == -1);
 
 			return -1;
@@ -336,12 +376,11 @@ namespace InventoryKamera
 					yOffset = (int)( ( 225 + ( constellation * 75 ) ) / yReference * Navigation.GetHeight() );
 				}
 
-				Navigation.SetCursorPos(Navigation.GetPosition().Left + (int)( 1130 / 1280.0 * Navigation.GetWidth() ),
-										Navigation.GetPosition().Top + yOffset);
+				Navigation.SetCursor((int)( 1130 / 1280.0 * Navigation.GetWidth() ), yOffset);
 				Navigation.Click();
 
-				Navigation.Speed speed = constellation == 0 ? Navigation.Speed.Normal : Navigation.Speed.Fast;
-				Navigation.SystemRandomWait(speed);
+				var pause = constellation == 0 ? 700 : 550;
+				Navigation.SystemWait(pause);
 
 				// Grab Color
 				using (Bitmap region = Navigation.CaptureRegion(constActivate))
@@ -361,9 +400,14 @@ namespace InventoryKamera
 			return constellation;
 		}
 
-		private static int[] ScanTalents(string name)
+		private static Dictionary<string, int> ScanTalents(string name)
 		{
-			int[] talents = {-1,-1,-1};
+			var talents = new Dictionary<string, int>
+			{
+				{ "auto" , -1 },
+				{ "skill", -1 },
+				{ "burst", -1 }
+			};
 
 			int specialOffset = 0;
 
@@ -374,10 +418,7 @@ namespace InventoryKamera
 			var xRef = 1280.0;
 			var yRef = 720.0;
 
-			if (Navigation.GetAspectRatio() == new Size(8, 5))
-			{
-				yRef = 800.0;
-			}
+			if (Navigation.GetAspectRatio() == new Size(8, 5)) yRef = 800.0;
 
 			Rectangle region =  new RECT(
 				Left:   (int)( 160 / xRef * Navigation.GetWidth() ),
@@ -387,15 +428,28 @@ namespace InventoryKamera
 
 			for (int i = 0; i < 3; i++)
 			{
+				string talent;
 				// Change y-offset for talent clicking
 				int yOffset = (int)( 110 / yRef * Navigation.GetHeight() ) + ( i + ( ( i == 2 ) ? specialOffset : 0 ) ) * (int)(60 / yRef * Navigation.GetHeight() );
 
-				Navigation.SetCursorPos(Navigation.GetPosition().Left + (int)( 1130 / xRef * Navigation.GetWidth() ), Navigation.GetPosition().Top + yOffset);
+				Navigation.SetCursor((int)(1130 / xRef * Navigation.GetWidth()), yOffset);
 				Navigation.Click();
-				Navigation.Speed speed = i == 0 ? Navigation.Speed.Normal : Navigation.Speed.Fast;
-				Navigation.SystemRandomWait(speed);
+				int pause = i == 0 ? 700 : 550;
+				Navigation.SystemWait(pause);
+                switch (i)
+                {
+					default:
+						talent = "auto";
+						break;
+					case 1:
+						talent = "skill";
+						break;
+					case 2:
+						talent = "burst";
+						break;
+                }
 
-				while (talents[i] < 1 || talents[i] > 15)
+                while (talents[talent] < 1 || talents[talent] > 15)
 				{
 					Bitmap talentLevel = Navigation.CaptureRegion(region);
 
@@ -412,7 +466,7 @@ namespace InventoryKamera
 					{
 						if (level >= 1 && level <= 15)
 						{
-							talents[i] = level;
+							talents[talent] = level;
 							UserInterface.SetCharacter_Talent(talentLevel, text, i);
 						}
 					}

@@ -16,17 +16,22 @@ namespace InventoryKamera
 		private static NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
 		[JsonProperty]
-		public List<Character> Characters { get; private set; }
+		public List<Character> Characters;
 
 		[JsonProperty]
-		public Inventory Inventory = new Inventory();
+		public Inventory Inventory;
 
-		private static List<Artifact> equippedArtifacts;
-		private static List<Weapon> equippedWeapons;
+		private List<Artifact> equippedArtifacts;
+		private List<Weapon> equippedWeapons;
 		public static Queue<OCRImageCollection> workerQueue;
-		private static List<Thread> ImageProcessors;
-		private static volatile bool b_threadCancel = false;
-		private static int maxProcessors = 2; // TODO: Add support for more processors
+		private List<Thread> ImageProcessors;
+		private volatile bool b_threadCancel;
+		private readonly int NumWorkers;
+
+		public bool HasData
+        {
+			get { return Characters.Count > 0 || Inventory.Size > 0; }
+        }
 
 		public InventoryKamera()
 		{
@@ -37,7 +42,19 @@ namespace InventoryKamera
 			ImageProcessors = new List<Thread>();
 			workerQueue = new Queue<OCRImageCollection>();
 
-			ResetLogging();
+			b_threadCancel = false;
+
+            switch (Properties.Settings.Default.ScannerDelay)
+            {
+				case 0:
+					NumWorkers = 3;
+					break;
+				default:
+					NumWorkers = 2;
+					break;
+            }
+
+            ResetLogging();
 		}
 
 		public void ResetLogging()
@@ -56,7 +73,7 @@ namespace InventoryKamera
 			Directory.CreateDirectory("./logging/characters");
 			Directory.CreateDirectory("./logging/materials");
 
-			Logger.Info("Logging directory created");
+			Logger.Info("Logging directory reset");
 		}
 
 		public void StopImageProcessorWorkers()
@@ -69,7 +86,7 @@ namespace InventoryKamera
 		public void GatherData()
 		{
 			// Initize Image Processors
-			for (int i = 0; i < maxProcessors; i++)
+			for (int i = 0; i < NumWorkers; i++)
 			{
 				Thread processor = new Thread(ImageProcessorWorker){ IsBackground = true };
 				processor.Start();
@@ -133,7 +150,7 @@ namespace InventoryKamera
 				Navigation.CharacterScreen();
 				try
 				{
-					Characters = CharacterScraper.ScanCharacters();
+					CharacterScraper.ScanCharacters(ref Characters);
 				}
 				catch (ThreadAbortException) { }
 				catch (Exception ex)
@@ -241,6 +258,8 @@ namespace InventoryKamera
 
 							string weaponPath = $"./logging/weapons/weapon{weapon.Id}/";
 
+							if (Properties.Settings.Default.LogScreenshots) Directory.CreateDirectory(weaponPath);
+
 							if (weapon.IsValid())
 							{
 								if (weapon.Rarity <= (int)Properties.Settings.Default.MinimumWeaponRarity &&
@@ -260,28 +279,13 @@ namespace InventoryKamera
 							{
 								UserInterface.AddError($"Unable to validate information for weapon ID#{weapon.Id}");
 								string error = "";
-								if (!weapon.HasValidWeaponName())
-								{
-									error += "Invalid weapon name\n";
-								}
-								if (!weapon.HasValidRarity())
-								{
-									error += "Invalid weapon rarity\n";
-									
-								}
-								if (!weapon.HasValidLevel())
-								{
-									error += "Invalid weapon level\n";
-								}
-								if (!weapon.HasValidRefinementLevel())
-								{
-									error += "Invalid refinement level\n";
-								}
-								if (!weapon.HasValidEquippedCharacter())
-								{
-									error += "Inavlid equipped character\n";
-								}
+								if (!weapon.HasValidWeaponName()) error += "Invalid weapon name\n"; 
+								if (!weapon.HasValidRarity()) error += "Invalid weapon rarity\n";
+								if (!weapon.HasValidLevel()) error += "Invalid weapon level\n";
+								if (!weapon.HasValidRefinementLevel()) error += "Invalid refinement level\n";
+								if (!weapon.HasValidEquippedCharacter()) error += "Inavlid equipped character\n";
 								UserInterface.AddError(error + weapon.ToString());
+								Directory.CreateDirectory(weaponPath);
 								using (var writer = File.CreateText(weaponPath + "log.txt"))
 								{
 									writer.WriteLine($"Version: {Regex.Replace(Assembly.GetExecutingAssembly().GetName().Version.ToString(), @"[.0]*$", string.Empty)}");
@@ -297,8 +301,6 @@ namespace InventoryKamera
 
                             if (!weapon.IsValid() || Properties.Settings.Default.LogScreenshots)
                             {
-								Directory.CreateDirectory(weaponPath);
-
 								Directory.CreateDirectory(weaponPath + "name");
 								imageCollection.Bitmaps[0].Save(weaponPath + "name/name.png");
 								Directory.CreateDirectory(weaponPath + "rarity");
@@ -309,6 +311,7 @@ namespace InventoryKamera
 								imageCollection.Bitmaps[2].Save(weaponPath + "refinement/refinement.png");
 								Directory.CreateDirectory(weaponPath + "equipped");
 								imageCollection.Bitmaps[4].Save(weaponPath + "equipped/equipped.png");
+
 								imageCollection.Bitmaps.Last().Save(weaponPath + "card.png");
 							}
 
@@ -331,6 +334,8 @@ namespace InventoryKamera
 
 							string artifactPath = $"./logging/artifacts/artifact{artifact.Id}/";
 
+                            if (Properties.Settings.Default.LogScreenshots) Directory.CreateDirectory(artifactPath);
+
 							if (artifact.IsValid())
 							{
 								if (artifact.Rarity <= (int)Properties.Settings.Default.MinimumArtifactRarity &&
@@ -350,36 +355,15 @@ namespace InventoryKamera
 							{
 								UserInterface.AddError($"Unable to validate information for artifact ID#{artifact.Id}");
 								string error = "";
-								if (!artifact.HasValidSlot())
-								{
-									error += "Invalid artifact gear slot\n";
-								}
-								if (!artifact.HasValidSetName())
-								{
-									error += "Invalid artifact set name\n";
-								}
-								if (!artifact.HasValidRarity())
-								{
-									error += "Invalid artifact rarity\n";
-								}
-								if (!artifact.HasValidLevel())
-								{
-									error += "Invalid artifact level\n";
-								}
-								if (!artifact.HasValidMainStat())
-								{
-									error += "Invalid artifact main stat\n";
-								}
-								if (!artifact.HasValidSubStats())
-								{
-									error += "Invalid artifact sub stats\n";
-								}
-								if (!artifact.HasValidEquippedCharacter())
-								{
-									error += "Invalid equipped character\n";
-								}
+								if (!artifact.HasValidSlot()) error += "Invalid artifact gear slot\n";
+								if (!artifact.HasValidSetName()) error += "Invalid artifact set name\n";
+								if (!artifact.HasValidRarity()) error += "Invalid artifact rarity\n";
+								if (!artifact.HasValidLevel()) error += "Invalid artifact level\n";
+								if (!artifact.HasValidMainStat()) error += "Invalid artifact main stat\n";
+								if (!artifact.HasValidSubStats()) error += "Invalid artifact sub stats\n";
+								if (!artifact.HasValidEquippedCharacter()) error += "Invalid equipped character\n";
 								UserInterface.AddError(error + artifact.ToString());
-
+								Directory.CreateDirectory(artifactPath);
 								using (var writer = File.CreateText(artifactPath + "log.txt"))
 								{
 									writer.WriteLine($"Version: {Regex.Replace(Assembly.GetExecutingAssembly().GetName().Version.ToString(), @"[.0]*$", string.Empty)}");
@@ -395,8 +379,6 @@ namespace InventoryKamera
 
                             if (!artifact.IsValid() || Properties.Settings.Default.LogScreenshots)
                             {
-								Directory.CreateDirectory(artifactPath);
-
 								Directory.CreateDirectory(artifactPath + "slot");
 								imageCollection.Bitmaps[1].Save(artifactPath + "slot/slot.png");
 								Directory.CreateDirectory(artifactPath + "set");
