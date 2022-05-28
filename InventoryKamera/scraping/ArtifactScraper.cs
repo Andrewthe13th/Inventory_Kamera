@@ -462,6 +462,7 @@ namespace InventoryKamera
 			artifactImages.Add(card);
 
 
+
             if (GetRarity(name) < Properties.Settings.Default.MinimumArtifactRarity)
 			{
 				artifactImages.ForEach(i => i.Dispose());
@@ -612,19 +613,20 @@ namespace InventoryKamera
 
 					// Get Main Stat
 					string mainStat = Scraper.AnalyzeText(n).ToLower().Trim();
-					n.Dispose();
+					
 
 					// Remove anything not a-z as well as removes spaces/underscores
 					mainStat = Regex.Replace(mainStat, @"[\W_0-9]", string.Empty);
 					// Replace double characters (ex. aanemodmgbonus). Seemed to be a somewhat common problem.
 					mainStat = Regex.Replace(mainStat, "(.)\\1+", "$1");
+					mainStat = Scraper.FindClosestStat(mainStat);
 
 					if (mainStat == "def" || mainStat == "atk" || mainStat == "hp")
 					{
-						mainStat += "%";
+						mainStat += "_";
 					}
-
-					return Scraper.FindClosestStat(mainStat);
+					n.Dispose();
+					return mainStat;
 			}
 		}
 
