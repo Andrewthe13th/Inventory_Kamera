@@ -16,6 +16,7 @@ namespace InventoryKamera
 		{
 			int viewed = 0;
 			string first = null;
+			HashSet<string> scanned = new HashSet<string>();
 
 			UserInterface.ResetCharacterDisplay();
 
@@ -25,10 +26,17 @@ namespace InventoryKamera
 				if (Characters.Count > 0 && character.Name == Characters.ElementAt(0).Name) break;
 				if (character.IsValid())
 				{
-					Characters.Add(character);
-					UserInterface.IncrementCharacterCount();
-					Logger.Info("Scanned {0} successfully", character.Name);
-					if (Characters.Count == 1) first = character.Name;
+					if (!scanned.Contains(character.Name))
+					{
+						Characters.Add(character);
+						UserInterface.IncrementCharacterCount();
+						Logger.Info("Scanned {0} successfully", character.Name);
+						if (Characters.Count == 1) first = character.Name;
+					}
+					else
+                    {
+						Logger.Info("Prevented {0} duplicate scan", character.Name);
+                    }
 				}
                 else 
 				{
@@ -39,7 +47,6 @@ namespace InventoryKamera
 					if (!character.HasValidConstellation()) error += "Invalid constellation\n";
 					if (!character.HasValidTalents()) error += "Invalid talents\n";
 					Logger.Error("Failed to scan character\n" + error + character);
-
 				}
 
 				Navigation.SelectNextCharacter();
@@ -57,6 +64,7 @@ namespace InventoryKamera
 					{
 						Characters[i].Talents["auto"] -= 1;
 					}
+					Logger.Info("Tartaglia in on-field party, applied auto attack fix.");
 					break;
 				}
             }
@@ -96,6 +104,9 @@ namespace InventoryKamera
 				character.Level = level;
 				character.Ascended = ascended;
 
+				Logger.Info("{name:l} Level: {level:l}", character.Name, character.Level);
+				Logger.Info("{name:l} Ascended: {ascended:l}", character.Name, character.Ascended);
+
 				// Scan Experience
 				//experience = ScanExperience();
 				//Navigation.SystemRandomWait(Navigation.Speed.Normal);
@@ -103,11 +114,13 @@ namespace InventoryKamera
 				// Scan Constellation
 				Navigation.SelectCharacterConstellation();
 				character.Constellation = ScanConstellations();
+				Logger.Info("{name:l} Constellation: {constellation:l}", character.Name, character.Constellation);
 				Navigation.SystemWait(Navigation.Speed.Normal);
 
 				// Scan Talents
 				Navigation.SelectCharacterTalents();
 				character.Talents = ScanTalents(name);
+				Logger.Info("{name:l} Talents: {talents:l}", character.Name, character.Talents);
 				Navigation.SystemWait(Navigation.Speed.Normal);
 
 				// Scale down talents due to constellations
