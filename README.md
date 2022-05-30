@@ -21,7 +21,7 @@ To use Inventory Kamera, please set up and configures Inventory Kamera as follow
    - Under `Graphics`, set *Display Mode* to any windowed resolution that is 16:9 or 16:10 ratio. Make sure that the entire game window is visible on the screen.
      - Example of 16:9 includes 1920x1080 (Full HD), 3840x2160 (4K), 2560x1440 (2K).
      - Example of 16:10 includes 1920x1200.
-     - Is this 16:9 or 16:10? [Click Here](https://andrew.hedges.name/experiments/aspect_ratio/).
+     - Is this 16:9 or 16:10? [Find out here](https://andrew.hedges.name/experiments/aspect_ratio/).
    - Under `Controls`, set *Control Type* to Keyboard.
       - If you have rebound the inventory key (default: B) or character screen key (default: C), either revert your binding back to default or set up new key binding in Inventory Kamera.
 
@@ -78,20 +78,19 @@ According to HoYoverse's [response to Script, Plug-In, and Third-Party Software]
 We have neither heard of any reports nor received warnings of the application's development. However, that does not mean it will stay that way forever. We are at the mercy of HoYoverse.
 
 ## Report an Issue / Requesting new Feature
-If you ran through any issue with our scanner or want a new feature, please [create your issue here](https://github.com/Andrewthe13th/Inventory_Kamera/issues/new/choose).
+If you ran through any issue with our scanner or want a new feature, please [create your issue here](https://github.com/Andrewthe13th/Inventory_Kamera/issues/new/choose). Choose a issue template that best suits your need and try fill it out as much as possible.
 
-**Please fill in [Bug Report](https://github.com/Andrewthe13th/Inventory_Kamera/issues/new?template=bug-report.md) or [Feature Request](https://github.com/Andrewthe13th/Inventory_Kamera/issues/new?template=feature-request.md) form** as much as possible. This makes sure we get the information we needed.
+Before sending an issue, **please check that there are no other similar [issues already open](https://github.com/Andrewthe13th/Inventory_Kamera/issues).** If a similar issue is open, consider clicking 'Subscribe' or leave a reaction emoji to that issue. We are likely to ignore or/and close duplicate issues.
 
 ### Important Remarks
 - Reporting a Bug or Asking for a new feature requires GitHub Account.
-- Before sending an issue, **please check that there are no other similar issues already open.** If a similar issue is open, consider clicking 'Subscribe' or leave a reaction emoji to that issue. We are likely to ignore or/and close duplicate issues.
 - Screenshots are usually only generated when Inventory Kamera cannot determine how many artifacts/weapons/materials can be found on the screen or when a weapon/artifact was scanned and found to be not valid. **Please check the `logging` folder for screenshots to upload. These can be very helpful in debugging your issue. You do not need to upload all screenshots from each folder.**
 
 ## License
-- This project is under the [MIT](LICENSE.md) license.
+- This project is under the [MIT license](LICENSE).
 - This project uses third-party libraries or other resources that may be
-distributed under [different licenses](THIRD-PARTY-NOTICES.md).
+distributed under different licenses.
 
 ---
 
-All rights reserved by ©  Cognosphere Pte. Ltd. This project is not affiliated with, nor endorsed by HoYoverse. Genshin Impact™ and other properties belong to their respective owners.
+All rights reserved by © Cognosphere Pte. Ltd. This project is not affiliated with, nor endorsed by HoYoverse. Genshin Impact™ and other properties belong to their respective owners.
