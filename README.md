@@ -36,7 +36,7 @@ Before starting the scanner, you can (optionally) choose to edit these following
 ### How to Run Inventory Kamera
 Starts the Inventory Kamera scans by **leaving the game screen with the Paimon Menu stays open** and click 'Scan' to start scanning.
 
-**While scanning, do not use your mouse or keyboard**. We uses your keyboard and mouse to automate artifact scanning.
+**While scanning, do not use your mouse or keyboard**. We use your keyboard and mouse to automate artifact scanning.
 
 You can terminate the scanning process at any time by pressing `ENTER` button. However, the application will not output any scanned results.
 
