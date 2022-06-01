@@ -5,6 +5,21 @@ This scanner exports in `.GOOD`, a JSON-based exporting format, which allows you
 
 Inventory Kamera supports both International (GenshinImpact.exe) and Mainland China (YuanShen.exe) launchers. Please read the following instruction on how you need to set up the scanner.
 
+## Table of Contents
+- Using Inventory Kamera
+   - [Setting up Inventory Kamera](#set-up-the-inventory-kamera)
+   - [Setting up Genshin Impact](#set-up-with-your-genshin-impact)
+   - [Configuring Inventory Kamera settings](#how-to-configure-inventory-kamera)
+- Updating Inventory Kamera database
+   - [How to update database](#updating-for-new-game-versions)
+- Repository
+   - [Report an Issue / Bug](#report-an-issue--requesting-new-feature)
+- Frequently Asked Questions (FAQ)
+   - [Can Inventory Kamera get me banned?](#can-inventory-kamera-get-me-banned)
+- Legal
+   - [Licenses](#license)
+
+
 ## How to use Inventory Kamera
 To use Inventory Kamera, please set up and configures Inventory Kamera as follows:
 
@@ -14,7 +29,7 @@ To use Inventory Kamera, please set up and configures Inventory Kamera as follow
 3. Make sure that you already have [Microsoft Visual C++ 2015-2022 Redistributable x86 and x64 packages](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2015-2017-2019-and-2022) installed on your PC.
 
 ### Set up with your Genshin Impact
-1. Open Genshin Impact by logging in and click start.
+1. Log in to Genshin Impact and click start.
 2. Open [Paimon menu](https://genshin-impact.fandom.com/wiki/Paimon_Menu). (Default shortcut: `ESC`)
 3. Go to `Settings` (Cog Icon ⚙) and set it to these settings:
    - Under `Languages`, set *Game Language* to English.
@@ -23,7 +38,7 @@ To use Inventory Kamera, please set up and configures Inventory Kamera as follow
      - Example of 16:10 includes 1920x1200.
      - Is this 16:9 or 16:10? [Find out here](https://andrew.hedges.name/experiments/aspect_ratio/).
    - Under `Controls`, set *Control Type* to Keyboard.
-      - If you have rebound the inventory key (default: B) or character screen key (default: C), either revert your binding back to default or set up new key binding in Inventory Kamera.
+      - If you have rebound the inventory key (default: B) or character screen key (default: C), either revert your binding to default or set up new key binding in Inventory Kamera.
 
 ### How to Configure Inventory Kamera
 Before starting the scanner, you can (optionally) choose to edit these following configurations:
@@ -36,12 +51,12 @@ Before starting the scanner, you can (optionally) choose to edit these following
 ### How to Run Inventory Kamera
 Starts the Inventory Kamera scans by **leaving the game screen with the Paimon Menu stays open** and click 'Scan' to start scanning.
 
-**While scanning, do not use your mouse or keyboard**. We uses your keyboard and mouse to automate artifact scanning.
-
-You can terminate the scanning process at any time by pressing `ENTER` button. However, the application will not output any scanned results.
+> **Warning**<br>
+> While scanning, **do not use your mouse or keyboard**. We use your keyboard and mouse to automate artifact scanning.
+> 
+> If you like to terminate the scan, press the `ENTER` button at any time. However, the application will not output any scanned results.
 
 ## Updating for new game versions
-
 Inventory Kamera uses lists of valid items and characters to assist with text recognition. These lists are kept local in the `inventorylists` folder. These lists must be updated with every new version of the game and can be updated both automatically or manually.
 
 ### Updating Automatically
@@ -67,24 +82,35 @@ The character's name is as it appears in the party menu on the right side of the
 
 Consider using [a JSON text validator](https://jsonlint.com/) after following this manual method.
 
-## Frequently asked question
-### Can Inventory Kamera get me banned?
-According to HoYoverse's [response to Script, Plug-In, and Third-Party Software](https://genshin.hoyoverse.com/en/news/detail/5763), we believe not.
-- This scanner does not exploit the game. It only takes pictures of the game window and navigates menus.
-- This scanner does not provide artificial in-game progress.
-- This scanner does nothing to provide account selling/exchanging.
-- Doesn't provide Top-up Primogems.
-
-We have neither heard of any reports nor received warnings of the application's development. However, that does not mean it will stay that way forever. We are at the mercy of HoYoverse.
 
 ## Report an Issue / Requesting new Feature
-If you ran through any issue with our scanner or want a new feature, please [create your issue here](https://github.com/Andrewthe13th/Inventory_Kamera/issues/new/choose). Choose a issue template that best suits your need and try fill it out as much as possible.
+If you ran into a problem with our scanner (eg. bug, app crash, invalid export format) or want to request new feature, please [create your issue here](https://github.com/Andrewthe13th/Inventory_Kamera/issues/new/choose). Choose from one of the four templates that best suits your request **and try to fill it out as much as possible.** Itself, along with the evidence, will greatly speed up the bug fix process(es).
 
-Before sending an issue, **please check that there are no other similar [issues already open](https://github.com/Andrewthe13th/Inventory_Kamera/issues).** If a similar issue is open, consider clicking 'Subscribe' or leave a reaction emoji to that issue. We are likely to ignore or/and close duplicate issues.
+- If you have questions related to InventoryKamera, feel free to ask! There are no stupid questions here.
+- Requesting a Feature Enhancement template is also available. We are also open to Pull Requests and discussions.
+- If you are still unsure that [this is a bug or a feature](https://www.quora.com/What-is-the-difference-between-a-bug-and-a-feature), there is a high chance that this is a bug. Report it.
 
-### Important Remarks
-- Reporting a Bug or Asking for a new feature requires GitHub Account.
-- Screenshots are usually only generated when Inventory Kamera cannot determine how many artifacts/weapons/materials can be found on the screen or when a weapon/artifact was scanned and found to be not valid. **Please check the `logging` folder for screenshots to upload. These can be very helpful in debugging your issue. You do not need to upload all screenshots from each folder.**
+> **Note**<br>
+> Before sending an issue, **please [check that there is no other similar issue(s)](https://github.com/Andrewthe13th/Inventory_Kamera/issues?q=is%3Aissue), especially ones that are still opened.**<br>
+> Start by leaving a reaction emoji to that issue, and start discussing. For introverts, you can choose to *subscribe* to that issue by clicking 'Subscribe' in the Notifications section.
+
+> **Note**<br>
+> Requires GitHub Account to create an issue
+
+### About writing a new Issue
+We would **love to have Screenshots (especially video recordings) and Error Log as evidence**. These can be very helpful in debugging your issue. Add it to the issue by drag-and-drop or attatch the file to the issue template. 
+
+When Inventory Kamera cannot determine how many artifacts/weapons/materials on the screen or scanned content are found to be invalid, screenshots are automatically generated. These images are located in `logging` folder, and we need that too (if you have any).
+
+
+## Frequently Asked Questions (FAQ)
+#### Can Inventory Kamera get me banned?
+According to HoYoverse's [response to Script, Plug-In, and Third-Party Software](https://genshin.hoyoverse.com/en/news/detail/5763), we believe not. 
+
+Since the scanner does not provide any exploits or game progress. It takes a portion of the game, locally process the image, and lets you control your data. And the account is still yours to keep. We also not provide any account exchanges or topping up Primogem.
+
+In addition, we have not received warnings about the application's development. 
+However, that does not mean it will stay that way forever; We are at the mercy of HoYoverse.
 
 ## License
 - This project is under the [MIT license](LICENSE).
