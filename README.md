@@ -9,7 +9,7 @@ Inventory Kamera supports both International (GenshinImpact.exe) and Mainland Ch
 To use Inventory Kamera, please set up and configures Inventory Kamera as follows:
 
 ### Set up the Inventory Kamera
-1. [Download the latest version](https://github.com/Andrewthe13th/Inventory_Kamera/releases) of the program (i.e. Inventory_KameraV1.2.6.zip) and unzip the downloaded file.
+1. [Download the latest version](https://github.com/Andrewthe13th/Inventory_Kamera/releases) of the program (Not the source code zip!) and unzip the downloaded file.
 2. Open the folder, and double click `InventoryKamera.exe` to start up the scanner. This will likely prompt you for Security or/and User Access. Allow access to continue.
 3. Make sure that you already have [Microsoft Visual C++ 2015-2022 Redistributable x86 and x64 packages](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2015-2017-2019-and-2022) installed on your PC.
 
