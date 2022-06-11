@@ -815,6 +815,7 @@ namespace InventoryKamera
 			string json = "";
 			using (WebClient client = new WebClient())
 			{
+				client.Encoding = Encoding.UTF8;
 				json = client.DownloadString(url);
 			}
 			return json;
