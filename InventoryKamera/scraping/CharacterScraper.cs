@@ -56,15 +56,15 @@ namespace InventoryKamera
 			}
 
             // Childe passive buff fix
-            foreach (var character in Characters.Take(4))
+            foreach (var character in Characters)
             {
-				if (character.Name.ToLower() == "tartaglia")
+				if (character.Name.ToLower() == "tartaglia" && character.Ascension >= 4)
                 {
 					for (int i = 0; i < Characters.Count; i++)
 					{
 						Characters[i].Talents["auto"] -= 1;
 					}
-					Logger.Info("Tartaglia in on-field party, applied auto attack fix.");
+					Logger.Info("Ascension 4+ Tartaglia found, applied auto attack fix.");
 					break;
 				}
             }
@@ -104,8 +104,8 @@ namespace InventoryKamera
 				character.Level = level;
 				character.Ascended = ascended;
 
-				Logger.Info("{name:l} Level: {level:l}", character.Name, character.Level);
-				Logger.Info("{name:l} Ascended: {ascended:l}", character.Name, character.Ascended);
+				Logger.Info("{0} Level: {1}", character.Name, character.Level);
+				Logger.Info("{0} Ascended: {1}", character.Name, character.Ascended);
 
 				// Scan Experience
 				//experience = ScanExperience();
@@ -114,13 +114,13 @@ namespace InventoryKamera
 				// Scan Constellation
 				Navigation.SelectCharacterConstellation();
 				character.Constellation = ScanConstellations();
-				Logger.Info("{name:l} Constellation: {constellation:l}", character.Name, character.Constellation);
+				Logger.Info("{0} Constellation: {0}", character.Name, character.Constellation);
 				Navigation.SystemWait(Navigation.Speed.Normal);
 
 				// Scan Talents
 				Navigation.SelectCharacterTalents();
 				character.Talents = ScanTalents(name);
-				Logger.Info("{name:l} Talents: {talents:l}", character.Name, character.Talents);
+				Logger.Info("{0} Talents: {1}", character.Name, character.Talents);
 				Navigation.SystemWait(Navigation.Speed.Normal);
 
 				// Scale down talents due to constellations

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -295,10 +294,10 @@ namespace InventoryKamera
 			using (BlobCounter blobCounter = new BlobCounter
 			{
 				FilterBlobs = true,
-				MinHeight = card.Height - 15,
-				MaxHeight = card.Height + 15,
-				MinWidth = card.Width - 15,
-				MaxWidth = card.Width + 15,
+				MinHeight = card.Height - ((int)(card.Height * 0.2)),
+				MaxHeight = card.Height + ((int)(card.Height * 0.2)),
+				MinWidth = card.Width - ((int)(card.Width * 0.2)),
+				MaxWidth = card.Width + ((int)(card.Width * 0.2)),
 			})
 			{
 				// Image pre-processing

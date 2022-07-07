@@ -238,10 +238,10 @@ namespace InventoryKamera
 			using (BlobCounter blobCounter = new BlobCounter
 			{
 				FilterBlobs = true,
-				MinHeight = card.Height - 15,
-				MaxHeight = card.Height + 15,
-				MinWidth = card.Width - 15,
-				MaxWidth = card.Width + 15,
+				MinHeight = card.Height - ((int)(card.Height * 0.2)),
+				MaxHeight = card.Height + ((int)(card.Height * 0.2)),
+				MinWidth = card.Width - ((int)(card.Width * 0.2)),
+				MaxWidth = card.Width + ((int)(card.Width * 0.2)),
 			})
 			{
 				// Image pre-processing
@@ -465,8 +465,11 @@ namespace InventoryKamera
 
             if (GetRarity(name) < Properties.Settings.Default.MinimumArtifactRarity)
 			{
-				artifactImages.ForEach(i => i.Dispose());
-				StopScanning = true;
+				if (ScanArtifactLevel(level) < Properties.Settings.Default.MinimumArtifactLevel)
+				{ 
+					artifactImages.ForEach(i => i.Dispose());
+					StopScanning = true;
+				}
 			}
 			else // Send images to Worker Queue
 				InventoryKamera.workerQueue.Enqueue(new OCRImageCollection(artifactImages, "artifact", id));

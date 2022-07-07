@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -184,10 +183,10 @@ namespace InventoryKamera
 			using (BlobCounter blobCounter = new BlobCounter
 			{
 				FilterBlobs = true,
-				MinHeight = card.Height - 15,
-				MaxHeight = card.Height + 15,
-				MinWidth = card.Width - 15,
-				MaxWidth = card.Width + 15,
+				MinHeight = card.Height - ((int)(card.Height * 0.2)),
+				MaxHeight = card.Height + ((int)(card.Height * 0.2)),
+				MinWidth = card.Width - ((int)(card.Width * 0.2)),
+				MaxWidth = card.Width + ((int)(card.Width * 0.2)),
 			})
 			{
 				// Image pre-processing
@@ -198,7 +197,6 @@ namespace InventoryKamera
 				blobCounter.ProcessImage(screenshot);
 				// Note: Processing won't always detect all item rectangles on screen. Since the
 				// background isn't a solid color it's a bit trickier to filter out.
-
 
 				if (blobCounter.ObjectsCount < 7)
 				{
@@ -404,9 +402,13 @@ namespace InventoryKamera
 
             if (GetRarity(name) < Properties.Settings.Default.MinimumWeaponRarity)
 			{
-				weaponImages.ForEach(i => i.Dispose());
-				StopScanning = true;
-				return;
+				bool a = false;
+				if (ScanLevel(level, ref a) < Properties.Settings.Default.MinimumWeaponLevel)
+				{
+					weaponImages.ForEach(i => i.Dispose());
+					StopScanning = true;
+					return;
+				}
 			}
 			else // Send images to worker queue
 				InventoryKamera.workerQueue.Enqueue(new OCRImageCollection(weaponImages, "weapon", id));
