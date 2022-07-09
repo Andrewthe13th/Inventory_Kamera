@@ -648,7 +648,7 @@
             this.inventoryToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.inventoryToolStripTextBox});
             this.inventoryToolStripMenuItem.Name = "inventoryToolStripMenuItem";
-            this.inventoryToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.inventoryToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
             this.inventoryToolStripMenuItem.Text = "Inventory Key";
             // 
             // inventoryToolStripTextBox
@@ -667,7 +667,7 @@
             this.characterScreenToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.characterToolStripTextBox});
             this.characterScreenToolStripMenuItem.Name = "characterScreenToolStripMenuItem";
-            this.characterScreenToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.characterScreenToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
             this.characterScreenToolStripMenuItem.Text = "Character Screen Key";
             // 
             // characterToolStripTextBox
@@ -684,14 +684,14 @@
             // DatabaseUpdateMenuItem
             // 
             this.DatabaseUpdateMenuItem.Name = "DatabaseUpdateMenuItem";
-            this.DatabaseUpdateMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.DatabaseUpdateMenuItem.Size = new System.Drawing.Size(191, 22);
             this.DatabaseUpdateMenuItem.Text = "Update Lookup Tables";
             this.DatabaseUpdateMenuItem.Click += new System.EventHandler(this.DatabaseUpdateMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(190, 22);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(191, 22);
             this.toolStripMenuItem1.Text = "Open Export Folder";
             this.toolStripMenuItem1.Click += new System.EventHandler(this.ExportFolderMenuItem_Click);
             // 

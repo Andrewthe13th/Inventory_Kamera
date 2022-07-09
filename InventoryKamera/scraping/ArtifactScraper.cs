@@ -6,7 +6,6 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Accord;
 using Accord.Imaging;
 using Accord.Imaging.Filters;
 using static InventoryKamera.Artifact;
@@ -108,6 +107,7 @@ namespace InventoryKamera
 					for (int i = 0; i < 10 * ( totalRows - rowsQueued ) - 1; i++)
 					{
 						Navigation.sim.Mouse.VerticalScroll(-1);
+						Navigation.Wait(1);
 					}
 					Navigation.SystemWait(Navigation.Speed.Fast);
 				}
@@ -121,6 +121,7 @@ namespace InventoryKamera
 					for (int i = 0; i < 10 * rows - 1; i++)
 					{
 						Navigation.sim.Mouse.VerticalScroll(-1);
+						Navigation.Wait(1);
 					}
 					Navigation.SystemWait(Navigation.Speed.Fast);
 				}
@@ -227,12 +228,19 @@ namespace InventoryKamera
 
 		public static (List<Rectangle> rectangles, int cols, int rows) ProcessScreenshot(Bitmap screenshot)
 		{
-			// Size of an item card is the same in 16:10 and 16:9. Also accounts for character icon and resolution size.
-			var card = new RECT(
+            // Size of an item card is the same in 16:10 and 16:9. Also accounts for character icon and resolution size.
+            double base_aspect_width = 1280.0;
+            double base_aspect_height = 720.0;
+            var card = new RECT(
 				Left: 0,
 				Top: 0,
-				Right: (int)(85 / 1280.0 * screenshot.Width),
-				Bottom: (int)(105 / 720.0 * screenshot.Height));
+				Right: (int)(85 / base_aspect_width * screenshot.Width),
+				Bottom: (int)(105 / base_aspect_height * screenshot.Height));
+
+			if (Navigation.GetAspectRatio() == new Size(8, 5))
+			{
+				base_aspect_height = 800.0;
+			}
 
 			// Filter for relative size of items in inventory, give or take a few pixels
 			using (BlobCounter blobCounter = new BlobCounter
@@ -298,7 +306,7 @@ namespace InventoryKamera
 					foreach (var x in colCoords)
 					{
 						var xC = item.Center().X;
-						if (x - 50 / 1280.0 * screenshot.Width <= xC && xC <= x + 50 / 1280.0 * screenshot.Width)
+						if (x - 75 / base_aspect_width * screenshot.Width <= xC && xC <= x + 75 / base_aspect_width * screenshot.Width)
 						{
 							addX = false;
 							break;
@@ -307,7 +315,7 @@ namespace InventoryKamera
 					foreach (var y in rowCoords)
 					{
 						var yC = item.Center().Y;
-						if (y - 50 / 720.0 * screenshot.Height <= yC && yC <= y + 50 / 720.0 * screenshot.Height)
+						if (y - 100 / base_aspect_height * screenshot.Height <= yC && yC <= y + 100 / base_aspect_height * screenshot.Height)
 						{
 							addY = false;
 							break;
@@ -334,7 +342,6 @@ namespace InventoryKamera
 
 				foreach (var row in rowCoords)
 				{
-					
 					foreach (var col in colCoords)
 					{
 						int x = (int)( col - (minWidth * .5) );
@@ -462,18 +469,16 @@ namespace InventoryKamera
 			artifactImages.Add(card);
 
 
+			StopScanning = StopScanning || GetRarity(name) < Properties.Settings.Default.MinimumArtifactRarity;
+			StopScanning = StopScanning || ScanArtifactLevel(level) < Properties.Settings.Default.MinimumArtifactLevel;
 
-            if (GetRarity(name) < Properties.Settings.Default.MinimumArtifactRarity)
-			{
-				if (ScanArtifactLevel(level) < Properties.Settings.Default.MinimumArtifactLevel)
-				{ 
-					artifactImages.ForEach(i => i.Dispose());
-					StopScanning = true;
-				}
-			}
-			else // Send images to Worker Queue
-				InventoryKamera.workerQueue.Enqueue(new OCRImageCollection(artifactImages, "artifact", id));
-			
+			if (StopScanning)
+            {
+				artifactImages.ForEach(i => i.Dispose());
+				return;
+            }
+			// Send images to Worker Queue
+			InventoryKamera.workerQueue.Enqueue(new OCRImageCollection(artifactImages, "artifact", id));
 		}
 
 		public static async Task<Artifact> CatalogueFromBitmapsAsync(List<Bitmap> bm, int id)
