@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -14,7 +13,7 @@ using Newtonsoft.Json.Linq;
 
 namespace InventoryKamera
 {
-	public class DatabaseManager
+    public class DatabaseManager
 	{
 		private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 		private string _listdir = @".\inventorylists\";

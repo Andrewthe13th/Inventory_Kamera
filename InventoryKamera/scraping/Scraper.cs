@@ -603,8 +603,6 @@ namespace InventoryKamera
 			var c2 = Color.FromArgb((int)color.Red.Mean, (int)color.Green.Mean, (int)color.Blue.Mean);
 			var diff = colors.Select(x => new { Value = x, Diff = GetColorDifference(x, c2) }).ToList();
 
-			Logger.Debug("Average Color: {0}", c2);
-
 			foreach (var c in colors)
             {
                 if (CompareColors(c, c2)) return c;

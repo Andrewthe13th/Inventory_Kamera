@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -285,26 +284,34 @@ namespace InventoryKamera
 
 		public static (List<Rectangle> rectangles, int cols, int rows) ProcessScreenshot(Bitmap screenshot)
 		{
+			// Size of an item card is the same in 16:10 and 16:9. Also accounts for character icon and resolution size.
+			double base_aspect_width = 1280.0;
+			double base_aspect_height = 720.0;
 			var card = new RECT(
 				Left: 0,
 				Top: 0,
-				Right: (int)(85 / 1280.0 * screenshot.Width),
-				Bottom: (int)(100 / 720.0 * screenshot.Height));
+				Right: (int)(85 / base_aspect_width * screenshot.Width),
+				Bottom: (int)(105 / base_aspect_height * screenshot.Height));
+
+			if (Navigation.GetAspectRatio() == new Size(8, 5))
+			{
+				base_aspect_height = 800.0;
+			}
 
 			// Filter for relative size of items in inventory, give or take a few pixels
 			using (BlobCounter blobCounter = new BlobCounter
 			{
 				FilterBlobs = true,
-				MinHeight = card.Height - 15,
-				MaxHeight = card.Height + 15,
-				MinWidth = card.Width - 15,
-				MaxWidth = card.Width + 15,
+				MinHeight = card.Height - ((int)(card.Height * 0.2)),
+				MaxHeight = card.Height + ((int)(card.Height * 0.2)),
+				MinWidth = card.Width - ((int)(card.Width * 0.2)),
+				MaxWidth = card.Width + ((int)(card.Width * 0.2)),
 			})
 			{
 				// Image pre-processing
 				screenshot = new KirschEdgeDetector().Apply(screenshot); // Algorithm to find edges. Really good but can take ~1s
 				screenshot = new Grayscale(0.2125, 0.7154, 0.0721).Apply(screenshot);
-				screenshot = new Threshold(100).Apply(screenshot); // Convert to black and white only based on pixel intensity
+				screenshot = new Threshold(100).Apply(screenshot); // Convert to black and white only based on pixel intensity			
 
 				blobCounter.ProcessImage(screenshot);
 				// Note: Processing won't always detect all item rectangles on screen. Since the
@@ -312,7 +319,7 @@ namespace InventoryKamera
 
 				if (blobCounter.ObjectsCount < 7)
 				{
-					throw new Exception();
+					throw new Exception("Insufficient items found in artifact inventory");
 				}
 
 				// Don't save overlapping blobs
@@ -337,8 +344,8 @@ namespace InventoryKamera
 					}
 					if (add)
 					{
-						minWidth = Math.Max(minWidth, rect.Width);
-						minHeight = Math.Max(minHeight, rect.Height);
+						minWidth = Math.Min(minWidth, rect.Width);
+						minHeight = Math.Min(minHeight, rect.Height);
 						rectangles.Add(rect);
 					}
 				}
@@ -354,7 +361,7 @@ namespace InventoryKamera
 					foreach (var x in colCoords)
 					{
 						var xC = item.Center().X;
-						if (x - 50 / 1280.0 * screenshot.Width <= xC && xC <= x + 50 / 1280.0 * screenshot.Width)
+						if (x - 75 / base_aspect_width * screenshot.Width <= xC && xC <= x + 75 / base_aspect_width * screenshot.Width)
 						{
 							addX = false;
 							break;
@@ -363,7 +370,7 @@ namespace InventoryKamera
 					foreach (var y in rowCoords)
 					{
 						var yC = item.Center().Y;
-						if (y - 50 / 720.0 * screenshot.Height <= yC && yC <= y + 50 / 720.0 * screenshot.Height)
+						if (y - 100 / base_aspect_height * screenshot.Height <= yC && yC <= y + 100 / base_aspect_height * screenshot.Height)
 						{
 							addY = false;
 							break;
@@ -390,10 +397,11 @@ namespace InventoryKamera
 
 				foreach (var row in rowCoords)
 				{
+
 					foreach (var col in colCoords)
 					{
-						int x = (int)( col - (minWidth * .5) );
-						int y = (int)( row - (minHeight * .5) );
+						int x = (int)(col - (minWidth * .5));
+						int y = (int)(row - (minHeight * .5));
 
 						rectangles.Add(new Rectangle(x, y, minWidth, minHeight));
 					}

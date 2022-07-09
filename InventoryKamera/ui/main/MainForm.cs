@@ -125,6 +125,7 @@ namespace InventoryKamera
 				}
 				catch (Exception) { }
 				Properties.Settings.Default.UpgradeNeeded = false;
+				Properties.Settings.Default.Save();
 			}
 
 			UpdateKeyTextBoxes();

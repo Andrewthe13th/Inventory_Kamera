@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Shapes;
 using Newtonsoft.Json;
 
 namespace InventoryKamera
@@ -262,14 +263,6 @@ namespace InventoryKamera
 
 							if (weapon.IsValid())
 							{
-								if (weapon.Rarity <= (int)Properties.Settings.Default.MinimumWeaponRarity &&
-									weapon.Level < (int)Properties.Settings.Default.MinimumWeaponLevel)
-                                {
-									WeaponScraper.StopScanning = true;
-									continue;
-                                }
-								if (weapon.Level < (int)Properties.Settings.Default.MinimumWeaponLevel) continue;
-
 								UserInterface.IncrementWeaponCount();
 								Inventory.Add(weapon);
 								if (!string.IsNullOrWhiteSpace(weapon.EquippedCharacter))
@@ -290,33 +283,29 @@ namespace InventoryKamera
 								{
 									writer.WriteLine($"Version: {Regex.Replace(Assembly.GetExecutingAssembly().GetName().Version.ToString(), @"[.0]*$", string.Empty)}");
 									writer.WriteLine($"Resolution: {Navigation.GetWidth()}x{Navigation.GetHeight()}");
-									writer.WriteLine("Settings:");
-									writer.WriteLine($"\tDelay: {Properties.Settings.Default.ScannerDelay}");
-									writer.WriteLine($"\tMinimum Rarity: {Properties.Settings.Default.MinimumWeaponRarity}");
-									writer.WriteLine($"\tMinimum Level: {Properties.Settings.Default.MinimumWeaponLevel}");
-									writer.WriteLine($"\tEquip: {Properties.Settings.Default.EquipWeapons}");
 									writer.WriteLine($"Error log:\n\t{error.Replace("\n", "\n\t")}");
 								}
 							}
 
                             if (!weapon.IsValid() || Properties.Settings.Default.LogScreenshots)
                             {
-								Directory.CreateDirectory(weaponPath + "name");
-								imageCollection.Bitmaps[0].Save(weaponPath + "name/name.png");
-								Directory.CreateDirectory(weaponPath + "rarity");
-								imageCollection.Bitmaps[0].Save(weaponPath + "rarity/rarity.png");
-								Directory.CreateDirectory(weaponPath + "level");
-								imageCollection.Bitmaps[1].Save(weaponPath + "level/level.png");
-								Directory.CreateDirectory(weaponPath + "refinement");
-								imageCollection.Bitmaps[2].Save(weaponPath + "refinement/refinement.png");
-								Directory.CreateDirectory(weaponPath + "equipped");
-								imageCollection.Bitmaps[4].Save(weaponPath + "equipped/equipped.png");
+                                Directory.CreateDirectory(weaponPath + "name");
+                                imageCollection.Bitmaps[0].Save(weaponPath + "name/name.png");
+                                Directory.CreateDirectory(weaponPath + "rarity");
+                                imageCollection.Bitmaps[0].Save(weaponPath + "rarity/rarity.png");
+                                Directory.CreateDirectory(weaponPath + "level");
+                                imageCollection.Bitmaps[1].Save(weaponPath + "level/level.png");
+                                Directory.CreateDirectory(weaponPath + "refinement");
+                                imageCollection.Bitmaps[2].Save(weaponPath + "refinement/refinement.png");
+                                Directory.CreateDirectory(weaponPath + "equipped");
+                                imageCollection.Bitmaps[4].Save(weaponPath + "equipped/equipped.png");
 
-								imageCollection.Bitmaps.Last().Save(weaponPath + "card.png");
-							}
+                                imageCollection.Bitmaps.Last().Save(weaponPath + "card.png");
+								Task.Run(() => LogObject(weapon, weaponPath + "weapon.json"));
+                            }
 
-							// Dispose of everything
-							imageCollection.Bitmaps.ForEach(b => b.Dispose());
+                            // Dispose of everything
+                            imageCollection.Bitmaps.ForEach(b => b.Dispose());
 							break;
 
 						case "artifact":
@@ -338,14 +327,6 @@ namespace InventoryKamera
 
 							if (artifact.IsValid())
 							{
-								if (artifact.Rarity <= (int)Properties.Settings.Default.MinimumArtifactRarity &&
-									artifact.Level < (int)Properties.Settings.Default.MinimumArtifactLevel)
-								{
-									ArtifactScraper.StopScanning = true;
-									continue;
-								}
-								if (artifact.Level < (int)Properties.Settings.Default.MinimumArtifactLevel) continue;
-
 								UserInterface.IncrementArtifactCount();
 								Inventory.Add(artifact);
 								if (!string.IsNullOrWhiteSpace(artifact.EquippedCharacter))
@@ -368,11 +349,6 @@ namespace InventoryKamera
 								{
 									writer.WriteLine($"Version: {Regex.Replace(Assembly.GetExecutingAssembly().GetName().Version.ToString(), @"[.0]*$", string.Empty)}");
 									writer.WriteLine($"Resolution: {Navigation.GetWidth()}x{Navigation.GetHeight()}");
-									writer.WriteLine("Settings:");
-									writer.WriteLine($"\tDelay: {Properties.Settings.Default.ScannerDelay}");
-									writer.WriteLine($"\tMinimum Rarity: {Properties.Settings.Default.MinimumArtifactRarity}");
-									writer.WriteLine($"\tMinimum Level: {Properties.Settings.Default.MinimumArtifactLevel}");
-									writer.WriteLine($"\tEquip: {Properties.Settings.Default.EquipArtifacts}");
 									writer.WriteLine($"Error Log:\n\t{error.Replace("\n", "\n\t")}");
 								}
 							}
@@ -395,6 +371,8 @@ namespace InventoryKamera
 								imageCollection.Bitmaps[5].Save(artifactPath + "equipped/equipped.png");
 
 								imageCollection.Bitmaps.Last().Save(artifactPath + "card.png");
+
+								Task.Run(()=>LogObject(artifact, artifactPath + "artifact.json"));
 							}
 
 							// Dispose of everything
@@ -419,7 +397,19 @@ namespace InventoryKamera
 			Logger.Debug("Thread {threadId} exit", Thread.CurrentThread.ManagedThreadId);
 		}
 
-		public void AssignArtifacts()
+        private static void LogObject(object obj, string path)
+        {
+            using (var file = new StreamWriter(path))
+            {
+                var serializer = new JsonSerializer
+                {
+                    Formatting = Formatting.Indented
+                };
+                serializer.Serialize(file, obj);
+            }
+        }
+
+        public void AssignArtifacts()
 		{
 			foreach (Artifact artifact in equippedArtifacts)
 			{

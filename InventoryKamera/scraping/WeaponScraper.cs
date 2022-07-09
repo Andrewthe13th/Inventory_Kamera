@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -70,6 +69,7 @@ namespace InventoryKamera
 					for (int i = 0; i < 10 * ( totalRows - rowsQueued ) - 1; i++)
 					{
 						Navigation.sim.Mouse.VerticalScroll(-1);
+						Navigation.Wait(1);
 					}
 					Navigation.SystemWait(Navigation.Speed.Fast);
 				}
@@ -83,6 +83,7 @@ namespace InventoryKamera
 					for (int i = 0; i < 10 * rows - 1; i++)
 					{
 						Navigation.sim.Mouse.VerticalScroll(-1);
+						Navigation.Wait(1);
 					}
 					Navigation.SystemWait(Navigation.Speed.Fast);
 				}
@@ -174,37 +175,42 @@ namespace InventoryKamera
 		public static (List<Rectangle> rectangles, int cols, int rows) ProcessScreenshot(Bitmap screenshot)
 		{
 			// Size of an item card is the same in 16:10 and 16:9. Also accounts for character icon and resolution size.
+			double base_aspect_width = 1280.0;
+			double base_aspect_height = 720.0;
 			var card = new RECT(
 				Left: 0,
 				Top: 0,
-				Right: (int)(85 / 1280.0 * screenshot.Width),
-				Bottom: (int)(105 / 720.0 * screenshot.Height));
+				Right: (int)(85 / base_aspect_width * screenshot.Width),
+				Bottom: (int)(105 / base_aspect_height * screenshot.Height));
+
+			if (Navigation.GetAspectRatio() == new Size(8, 5))
+			{
+				base_aspect_height = 800.0;
+			}
 
 			// Filter for relative size of items in inventory, give or take a few pixels
 			using (BlobCounter blobCounter = new BlobCounter
 			{
 				FilterBlobs = true,
-				MinHeight = card.Height - 15,
-				MaxHeight = card.Height + 15,
-				MinWidth = card.Width - 15,
-				MaxWidth = card.Width + 15,
+				MinHeight = card.Height - ((int)(card.Height * 0.2)),
+				MaxHeight = card.Height + ((int)(card.Height * 0.2)),
+				MinWidth = card.Width - ((int)(card.Width * 0.2)),
+				MaxWidth = card.Width + ((int)(card.Width * 0.2)),
 			})
 			{
 				// Image pre-processing
 				screenshot = new KirschEdgeDetector().Apply(screenshot); // Algorithm to find edges. Really good but can take ~1s
-				screenshot = new Grayscale(0.2125, 0.7154, 0.0721).Apply(screenshot); 
-				screenshot = new Threshold(100).Apply(screenshot); // Convert to black and white only based on pixel intensity				
+				screenshot = new Grayscale(0.2125, 0.7154, 0.0721).Apply(screenshot);
+				screenshot = new Threshold(100).Apply(screenshot); // Convert to black and white only based on pixel intensity			
 
 				blobCounter.ProcessImage(screenshot);
 				// Note: Processing won't always detect all item rectangles on screen. Since the
 				// background isn't a solid color it's a bit trickier to filter out.
 
-
 				if (blobCounter.ObjectsCount < 7)
 				{
-					throw new Exception("Insufficient items found in weapon inventory");
+					throw new Exception("Insufficient items found in artifact inventory");
 				}
-
 
 				// Don't save overlapping blobs
 				List<Rectangle> rectangles = new List<Rectangle>();
@@ -233,7 +239,7 @@ namespace InventoryKamera
 						rectangles.Add(rect);
 					}
 				}
-				
+
 				// Determine X and Y coordinates for columns and rows, respectively
 				var colCoords = new List<int>();
 				var rowCoords = new List<int>();
@@ -245,7 +251,7 @@ namespace InventoryKamera
 					foreach (var x in colCoords)
 					{
 						var xC = item.Center().X;
-						if (x - 50 / 1280.0 * screenshot.Width <= xC && xC <= x + 50 / 1280.0 * screenshot.Width)
+						if (x - 75 / base_aspect_width * screenshot.Width <= xC && xC <= x + 75 / base_aspect_width * screenshot.Width)
 						{
 							addX = false;
 							break;
@@ -254,7 +260,7 @@ namespace InventoryKamera
 					foreach (var y in rowCoords)
 					{
 						var yC = item.Center().Y;
-						if (y - 50 / 720.0 * screenshot.Height <= yC && yC <= y + 50 / 720.0 * screenshot.Height)
+						if (y - 100 / base_aspect_height * screenshot.Height <= yC && yC <= y + 100 / base_aspect_height * screenshot.Height)
 						{
 							addY = false;
 							break;
@@ -283,8 +289,8 @@ namespace InventoryKamera
 				{
 					foreach (var col in colCoords)
 					{
-						int x = (int)( col - (minWidth * .5) );
-						int y = (int)( row - (minHeight * .5) );
+						int x = (int)(col - (minWidth * .5));
+						int y = (int)(row - (minHeight * .5));
 
 						rectangles.Add(new Rectangle(x, y, minWidth, minHeight));
 					}
@@ -308,7 +314,7 @@ namespace InventoryKamera
 
 				// Sort by row then by column within each row
 				rectangles = rectangles.OrderBy(r => r.Top).ThenBy(r => r.Left).ToList();
-				
+
 				return (rectangles, colCoords.Count, rowCoords.Count);
 			}
 		}
@@ -401,15 +407,18 @@ namespace InventoryKamera
 			weaponImages.Add(equipped);
 			weaponImages.Add(card); //5
 
+			bool a = false;
 
-            if (GetRarity(name) < Properties.Settings.Default.MinimumWeaponRarity)
-			{
+			StopScanning = StopScanning || GetRarity(name) < Properties.Settings.Default.MinimumWeaponRarity;
+			StopScanning = StopScanning || ScanLevel(level, ref a) < Properties.Settings.Default.MinimumWeaponLevel;
+
+			if (StopScanning)
+            {
 				weaponImages.ForEach(i => i.Dispose());
-				StopScanning = true;
 				return;
-			}
-			else // Send images to worker queue
-				InventoryKamera.workerQueue.Enqueue(new OCRImageCollection(weaponImages, "weapon", id));
+            }
+			// Send images to worker queue
+			InventoryKamera.workerQueue.Enqueue(new OCRImageCollection(weaponImages, "weapon", id));
 			
 		}
 
