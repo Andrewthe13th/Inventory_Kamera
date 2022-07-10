@@ -9,7 +9,7 @@ body:
     attributes:
       value: "## About this bug"
   - type: textarea
-    id: summary
+    id: current_behavior
     attributes:
       label: Current Behavior
       description: A concise description of what you're experiencing. Do not add log/error reports here.
@@ -21,14 +21,18 @@ body:
     attributes:
       label: Expected Behavior
       description: What behavior do you expect to happen?
+      multiple: true
       options:
-        - Same Behavior
-        - Different Behavior
-        - Unknown Behavior
+        - Continues to scan
+        - Scanner to stop
+        - Scanner to export data
+        - Scanner to correctly exports data
+        - Supports my device configuration(s)
+        - Supports game new/edited content
     validations:
       required: true
   - type: textarea
-    id: reproduce
+    id: reproduce_behavior
     attributes:
       label: Reproduce a Behavior
       description: How can we reproduce the behavior? Please include a screenshot/screen recordings if possible.
@@ -47,7 +51,7 @@ body:
     attributes:
       label: Device OS
       description: What operating system are you using? Select one or more that applies.
-      multiple: true
+      multiple: false
       options:
         - Windows 11
         - Windows 10
@@ -59,16 +63,31 @@ body:
     validations:
       required: true
   - type: dropdown
-    id: genshinVersion
+    id: genshin_version
     attributes:
       label: Genshin Impact Version
       description: Select one or more that applies.
-      multiple: true
+      multiple: false
       options:
-        - 3.0 (pre-beta)
-        - 2.8 (beta)
-        - 2.7 (release)
-        - 2.6 (release)
+        - 3.0 (beta)
+        - 2.8 (pre-release)
+        - 2.7
+        - 2.6
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: scanner_version
+    attributes:
+      label: Genshin Impact Version
+      description: Select one or more that applies.
+      multiple: false
+      options:
+        - 1.2.7
+        - 1.2.6
+        - 1.2.5
+        - Older than 1.2.5
+        - Other
     validations:
       required: true
   - type: textarea
@@ -77,8 +96,6 @@ body:
       label: Screen resolution
       description: What screen resolution are you using?
       placeholder: "List all the screen resolution you are using..."
-      value: |
-        -
     validations:
       required: true
   - type: markdown
@@ -93,7 +110,7 @@ body:
     validations:
       required: false
   - type: checkboxes
-    id: checklist
+    id: preflight_checklist
     attributes:
       label: Preflight Checklist
       description: Checklist before sending the bug report.
@@ -102,11 +119,15 @@ body:
           required: true
         - label: "I am using the latest version of the scanner."
           required: true
-        - label: "I did not enable any image filtering softwares or plugins (ie. HDR, Image Sharpening, etc.)"
-          required: true
         - label: "I tried setting the scanning delay to maximum and it still doesn't work."
           required: false
         - label: "I have attatched the video recording to the bug report."
           required: false
         - label: "I have attatched the error log to the bug report."
           required: false
+        - label: "I am available to later explains the issue."
+          required: false
+        - label: "I did not enable any image filtering softwares or plugins (ie. HDR, Image Sharpening, etc.) while scanning."
+          required: true
+        - label: "I use default keybindings or have configured keybindings to the scanner."
+          required: true
