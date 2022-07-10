@@ -1,0 +1,112 @@
+name: Bug Report
+description: Scanner crashed? Report the bug!
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: "# Bug Report template"
+  - type: markdown
+    attributes:
+      value: "## About this bug"
+  - type: textarea
+    id: summary
+    attributes:
+      label: Current Behavior
+      description: A concise description of what you're experiencing. Do not add log/error reports here.
+      placeholder: "Describe the current behavior..."
+    validations:
+      required: true
+  - type: dropdown
+    id: expected_behavior
+    attributes:
+      label: Expected Behavior
+      description: What behavior do you expect to happen?
+      options:
+        - Same Behavior
+        - Different Behavior
+        - Unknown Behavior
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduce a Behavior
+      description: How can we reproduce the behavior? Please include a screenshot/screen recordings if possible.
+      placeholder: "Describe how we can reproduce the behavior..."
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: "## About your computer"
+  - type: dropdown
+    id: deviceOS
+    attributes:
+      label: Device OS
+      description: What operating system are you using? Select one or more that applies.
+      multiple: true
+      options:
+        - Windows 11
+        - Windows 10
+        - Windows 8
+        - Windows 7
+        - Linux
+        - macOS
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: genshinVersion
+    attributes:
+      label: Genshin Impact Version
+      description: Select one or more that applies.
+      multiple: true
+      options:
+        - 3.0 (pre-beta)
+        - 2.8 (beta)
+        - 2.7 (release)
+        - 2.6 (release)
+    validations:
+      required: true
+  - type: textarea
+    id: screen_resolution
+    attributes:
+      label: Screen resolution
+      description: What screen resolution are you using?
+      placeholder: "List all the screen resolution you are using..."
+      value: |
+        -
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: "## About any other information"
+  - type: textarea
+    id: remarks
+    attributes:
+      label: Additional notes and remarks
+      description: Do you have any other notes, remarks, and log files?
+      placeholder: "Add any other context about the problem and log files here. If you managed to find any related or similar issue, please paste a link or Issue Number here."
+    validations:
+      required: false
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Preflight Checklist
+      description: Checklist before sending the bug report.
+      options:
+        - label: "I have checked the issue page and there is none that is similar to the one I'm reporting."
+          required: true
+        - label: "I am using the latest version of the scanner."
+          required: true
+        - label: "I did not enable any image filtering softwares or plugins (ie. HDR, Image Sharpening, etc.)"
+          required: true
+        - label: "I tried setting the scanning delay to maximum and it still doesn't work."
+          required: false
+        - label: "I have attatched the video recording to the bug report."
+          required: false
+        - label: "I have attatched the error log to the bug report."
+          required: false
