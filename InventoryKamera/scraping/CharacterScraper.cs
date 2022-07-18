@@ -38,7 +38,7 @@ namespace InventoryKamera
 						Logger.Info("Prevented {0} duplicate scan", character.Name);
                     }
 				}
-                else 
+                else
 				{
 					string error = "";
 					if (!character.HasValidName()) error += "Invalid character name\n";
@@ -56,16 +56,25 @@ namespace InventoryKamera
 			}
 
             // Childe passive buff fix
-            foreach (var character in Characters)
+            foreach (var character in Characters.Select((value, i) => new { i, value}))
             {
-				if (character.Name.ToLower() == "tartaglia" && character.Ascension >= 4)
+				if (character.value.Name.ToLower() == "tartaglia" && character.value.Ascension >= 4)
                 {
-					for (int i = 0; i < Characters.Count; i++)
+					if(character.i < 4)
 					{
-						Characters[i].Talents["auto"] -= 1;
+						for (int i = 0; i < 4; i++)
+						{
+							Characters[i].Talents["auto"] -= 1;
+						}
+						Logger.Info("Ascension 4+ Tartaglia found, applied auto attack fix.");
+						break;
 					}
-					Logger.Info("Ascension 4+ Tartaglia found, applied auto attack fix.");
-					break;
+					else
+					{
+						Characters[character.i].Talents["auto"] -= 1;
+						Logger.Info("Ascension 4+ Tartaglia found, applied auto attack fix.");
+						break;
+					}
 				}
             }
 		}
