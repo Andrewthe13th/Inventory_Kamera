@@ -1,0 +1,146 @@
+name: Bug Report
+description: Scanner crashed? Report the bug!
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: "# Bug Report template"
+  - type: markdown
+    attributes:
+      value: "Please describe each question as much as you can. This will speed up our bug fixing process."
+  - type: markdown
+    attributes:
+      value: "## About this bug"
+  - type: textarea
+    id: current_behavior
+    attributes:
+      label: Current Behavior
+      description: "A concise description of what you're experiencing. Please include a screenshot/screen recording if possible."
+      placeholder: "Describe the current behavior..."
+    validations:
+      required: true
+  - type: dropdown
+    id: expected_behavior
+    attributes:
+      label: Expected Behavior
+      description: "What behavior would you expect to see if the bug was fixed?"
+      multiple: true
+      options:
+        - Continues to scan
+        - Scanner to stop
+        - Scanner to export data
+        - Scanner to not skip rows/items
+        - Scanner to correctly exports data
+        - Supports my device configuration(s)
+        - Supports game new/edited content
+        - Other (please specify in additional notes)
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce_behavior
+    attributes:
+      label: Reproduce a Behavior
+      description: How can we reproduce the behavior? Please include a screenshot/screen recording if possible.
+      placeholder: "Describe how we can reproduce the behavior..."
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: "## About your computer"
+  - type: dropdown
+    id: deviceOS
+    attributes:
+      label: "Device OS"
+      description: "What operating system are you using? (e.g. Windows, Mac, Linux)"
+      multiple: false
+      options:
+        - "Windows 11"
+        - "Windows 10"
+        - "Windows 8"
+        - "Windows 7"
+        - "Other Windows (please specify in additional notes)"
+        - "macOS Ventura (13)"
+        - "macOS Monterey (12)"
+        - "macOS Big Sur (11)"
+        - "Other macOS (please specify in additional notes)"
+        - "Linux (please specify in additional notes)"
+    validations:
+      required: true
+  - type: dropdown
+    id: genshin_version
+    attributes:
+      label: Genshin Impact Version
+      description: Which Genshin Impact version did this issue happen?
+      multiple: false
+      options:
+        - 3.0 (beta)
+        - 2.8 (pre-release)
+        - "2.7"
+        - "Other (please specify in additional notes)"
+    validations:
+      required: true
+  - type: dropdown
+    id: scanner_version
+    attributes:
+      label: Inventory Kamera Version
+      description: Which Inventory Kamera are you using?
+      multiple: false
+      options:
+        - 1.2.7
+        - 1.2.6
+        - "Other (please specify in additional notes)"
+    validations:
+      required: true
+  - type: textarea
+    id: screen_resolution
+    attributes:
+      label: Screen resolution, screen mode, and UI scale
+      description: What screen resolution(s) are you using?
+      placeholder: "List all the screen resolutions you are using. (ie. 1920x1080, 1920x1200, etc.)"
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: "## About any other information"
+  - type: textarea
+    id: remarks
+    attributes:
+      label: Additional notes and remarks
+      description: Do you have any other notes or remarks you want to add?
+      placeholder: "Please give us some additional information that you seem fit and could speed up our process.<br>If you managed to find any related issue, please paste a link or Issue Number with #, followed by a number (ie. #300)."
+    validations:
+      required: false
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Do you have any error log, scanner log, scanner export file (.good), screenshots, screen recording, or other evidence?
+      placeholder: "Add any evidence here by dragging and dropping the files here. A log file is located in the scanner log folder."
+    validations:
+      required: false
+  - type: checkboxes
+    id: preflight_checklist
+    attributes:
+      label: Preflight Checklist
+      description: Checklist before sending the bug report.
+      options:
+        - label: "I have checked the issue page, and there were none that similar to the one I'm reporting."
+          required: true
+        - label: "I am using the latest version of the scanner."
+          required: false
+        - label: "I tried setting the scanning delay to maximum, and it still doesn't work."
+          required: false
+        - label: "I have attached the video recording to the bug report."
+          required: false
+        - label: "I have attached the error log to the bug report."
+          required: false
+        - label: "I am available to later explains the issue."
+          required: false
+        - label: "I did not enable any image filtering software or plugins (ie. HDR, Image Sharpening, etc.) while scanning."
+          required: true
+        - label: "I use default keybindings or have configured keybindings to the scanner."
+          required: true
