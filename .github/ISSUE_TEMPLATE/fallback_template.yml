@@ -1,0 +1,57 @@
+name: Other issue
+description: I have something else to report
+labels: ["help wanted"]
+body:
+  - type: markdown
+    attributes:
+      value: "# Misc. issue template"
+  - type: dropdown
+    attributes:
+      label: "Cause of the issue"
+      description: "What caused you to report this issue?"
+      multiple: false
+      options:
+        - "Missing dependencies"
+        - "Missing documentation"
+        - "Missing game information(s)"
+        - "Typos"
+        - "Confusing explaination(s)"
+        - "Other"
+        - "I have no idea what is this"
+  - type: textarea
+    attributes:
+      label: "Describe your issue"
+      description: "What seems to be the issue?"
+      placeholder: "Describe your issue..."
+  - type: markdown
+    attributes:
+      value: "## Possible solutions"
+  - type: dropdown
+    attributes:
+      label: "How can we fix this?"
+      description: "What are you looking for to resolve this issue?"
+      multiple: true
+      options:
+        - "I can help/fix by myself"
+        - "Waiting for community's help"
+        - "Waiting for developer's help"
+        - "Waiting for game's help"
+        - "Waiting for scanner's documentation"
+        - "Other"
+  - type: checkboxes
+    attributes:
+      label: "Preflight Checklist"
+      description: "Select one or more solutions"
+      options:
+        - label: "This is not a feature request or enhancement request."
+          required: true
+        - label: "This is not a question or a bug report."
+          required: true
+        - label: "I am available for further questions."
+          required: false
+        - label: "I can code or I can help with documentation."
+          required: false
+        - label: "I understand the codebase and I can fix the issue."
+          required: false
+        - label: "I have checked the Issue page and Discussion page, and there is none similar to mine."
+          required: true
