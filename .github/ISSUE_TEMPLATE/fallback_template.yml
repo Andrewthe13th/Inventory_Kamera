@@ -1,23 +1,20 @@
-name: Other issue
-description: I have something else to report
-labels: ["help wanted"]
+name: Documentation Issue
+description: We missed something in the documentation? Starts here.
+labels: ["documentation"]
 body:
   - type: markdown
     attributes:
-      value: "# Misc. issue template"
+      value: "# Documentation Report"
   - type: dropdown
     attributes:
       label: "Cause of the issue"
       description: "What caused you to report this issue?"
       multiple: false
       options:
-        - "Missing dependencies"
-        - "Missing documentation"
-        - "Missing game information(s)"
+        - "Missing game information or instruction"
         - "Typos"
-        - "Confusing explaination(s)"
+        - "Confusing explaination"
         - "Other"
-        - "I have no idea what is this"
   - type: textarea
     attributes:
       label: "Describe your issue"
@@ -33,25 +30,30 @@ body:
       multiple: true
       options:
         - "I can help/fix by myself"
-        - "Waiting for community's help"
-        - "Waiting for developer's help"
-        - "Waiting for game's help"
-        - "Waiting for scanner's documentation"
-        - "Other"
+        - "Waiting for community's explaination"
+        - "Waiting for scanner developer's help"
+        - "Waiting for HoYoverse to fix the issue"
+        - "Other (please specify in additional notes)"
+  - type: textarea
+    id: remarks
+    attributes:
+      label: Additional notes and remarks
+      description: Do you have any other notes or remarks you want to add?
+      placeholder: "Please give us some additional information that you seem fit and could speed up our process. "
   - type: checkboxes
     attributes:
       label: "Preflight Checklist"
       description: "Select one or more solutions"
       options:
-        - label: "This is not a feature request or enhancement request."
+        - label: "I understands that this is not a feature request or enhancement request. That will be done in Discussions tab."
           required: true
-        - label: "This is not a question or a bug report."
+        - label: "I understands that this is not a question, crash report, error report, or a bug report. That will be done in Issues > Bug Report."
           required: true
         - label: "I am available for further questions."
           required: false
-        - label: "I can code or I can help with documentation."
+        - label: "I can help with documentation."
           required: false
-        - label: "I understand the codebase and I can fix the issue."
+        - label: "I understand the scanner's codebase."
           required: false
-        - label: "I have checked the Issue page and Discussion page, and there is none similar to mine."
+        - label: "I have checked the Issues tab and Discussions tab, and there is none similar to mine."
           required: true
