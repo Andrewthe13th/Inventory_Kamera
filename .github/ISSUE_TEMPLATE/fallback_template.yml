@@ -1,5 +1,5 @@
 name: Documentation Issue
-description: We missed something in the documentation? Starts here.
+description: Did we miss something in the documentation? Report them here.
 labels: ["documentation"]
 body:
   - type: markdown
@@ -13,8 +13,8 @@ body:
       options:
         - "Missing game information or instruction"
         - "Typos"
-        - "Confusing explaination"
-        - "Other"
+        - "Confusing explanation"
+        - "Others"
   - type: textarea
     attributes:
       label: "Describe your issue"
@@ -22,32 +22,32 @@ body:
       placeholder: "Describe your issue..."
   - type: markdown
     attributes:
-      value: "## Possible solutions"
+      value: "## Possible solution(s)"
   - type: dropdown
     attributes:
       label: "How can we fix this?"
       description: "What are you looking for to resolve this issue?"
       multiple: true
       options:
-        - "I can help/fix by myself"
-        - "Waiting for community's explaination"
-        - "Waiting for scanner developer's help"
-        - "Waiting for HoYoverse to fix the issue"
-        - "Other (please specify in additional notes)"
+        - "I can help or fix the issue by myself"
+        - "I am waiting for the community's explanation"
+        - "I am waiting for the developer(s) to help"
+        - "I am waiting for HoYoverse to fix the issue"
+        - "Others (please specify in additional notes)"
   - type: textarea
     id: remarks
     attributes:
       label: Additional notes and remarks
       description: Do you have any other notes or remarks you want to add?
-      placeholder: "Please give us some additional information that you seem fit and could speed up our process. "
+      placeholder: "Please give us any other additional information that could speed up the process. "
   - type: checkboxes
     attributes:
       label: "Preflight Checklist"
-      description: "Select one or more solutions"
+      description: "Select one or more solution(s)"
       options:
-        - label: "I understands that this is not a feature request or enhancement request. That will be done in Discussions tab."
+        - label: "I understand that this is not a feature request or enhancement request. Requests can be made in the Discussions tab."
           required: true
-        - label: "I understands that this is not a question, crash report, error report, or a bug report. That will be done in Issues > Bug Report."
+        - label: "I understand that this is not a question, a crash report, an error report, or a bug report. Bug reports can be reported in Issues > Bug Report."
           required: true
         - label: "I am available for further questions."
           required: false
@@ -55,5 +55,5 @@ body:
           required: false
         - label: "I understand the scanner's codebase."
           required: false
-        - label: "I have checked the Issues tab and Discussions tab, and there is none similar to mine."
+        - label: "I have checked the Issues tab and Discussions tab, and there are none similar to mine."
           required: true
