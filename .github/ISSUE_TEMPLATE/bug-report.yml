@@ -4,10 +4,10 @@ labels: ["bug"]
 body:
   - type: markdown
     attributes:
-      value: "# Bug Report template"
+      value: "# Bug Report"
   - type: markdown
     attributes:
-      value: "Please describe each question as much as you can. This will speed up our bug fixing process."
+      value: "Try to describe as much as best as you can. This surely speed up our patching process."
   - type: markdown
     attributes:
       value: "## About this bug"
@@ -15,7 +15,7 @@ body:
     id: current_behavior
     attributes:
       label: Current Behavior
-      description: "A concise description of what you're experiencing. Please include a screenshot/screen recording if possible."
+      description: "A concise description of what you're experiencing. Please include a screenshot or screen recording if possible."
       placeholder: "Describe the current behavior..."
     validations:
       required: true
@@ -23,30 +23,30 @@ body:
     id: expected_behavior
     attributes:
       label: Expected Behavior
-      description: "What behavior would you expect to see if the bug was fixed?"
-      multiple: true
+      description: "What working behavior would you expect to see, if the bug was fixed?"
+      multiple: false
       options:
-        - Scanner continues to scan
-        - Scanner to stop scanning
-        - Scanner to export any data
-        - Scanner to correctly exports data
-        - Scanner to not skip rows/items
-        - Scanner to supports my device configurations (please in additional notes)
-        - Scanner to supports game new/edited content
+        - The scanner continues to scan
+        - The scanner stops scanning
+        - The scanner exports the data
+        - The scanner to correctly exports the data
+        - The scanner to not skip rows or items
+        - The scanner to supports my device configurations (please specify in additional notes)
+        - The scanner to supports game new or edited content
         - Other (please specify in additional notes)
     validations:
       required: true
   - type: textarea
     id: reproduce_behavior
     attributes:
-      label: Reproduce a Behavior
-      description: How can we reproduce the behavior? Please include a screenshot/screen recording if possible.
+      label: Reproducing a Behavior
+      description: How can we reproduce the behavior? Please include a screenshot or screen recording if possible.
       placeholder: "Describe how we can reproduce the behavior..."
     validations:
       required: true
   - type: markdown
     attributes:
-      value: "## About your computer"
+      value: "## About your device"
   - type: dropdown
     id: deviceOS
     attributes:
@@ -70,16 +70,16 @@ body:
     id: genshin_version
     attributes:
       label: Genshin Impact Version
-      description: Which Genshin Impact version did this issue happen?
-      placeholder: Please enter the Genshin Impact version (i.e. 2.8)..."
+      description: Which Genshin Impact version did your issue affect?
+      placeholder: Please enter the Genshin Impact version (e.g. 2.8)..."
     validations:
       required: true
   - type: input
     id: scanner_version
     attributes:
       label: Inventory Kamera Version
-      description: Which Inventory Kamera are you using?
-      placeholder: Please enter the Inventory Kamera version (i.e. 1.2.7)..."
+      description: Which Inventory Kamera version are you using?
+      placeholder: Please enter the Inventory Kamera version (e.g. 1.2.7)..."
     validations:
       required: true
   - type: input
@@ -92,21 +92,21 @@ body:
       required: true
   - type: markdown
     attributes:
-      value: "## About any other information"
+      value: "## Anything else you want to explain?"
   - type: textarea
     id: remarks
     attributes:
       label: Additional notes and remarks
-      description: Do you have any other notes or remarks you want us to know?
-      placeholder: "Please give us some additional information that you seem fit and could speed up our process. If you managed to find any related issue(s) or discussion(s), please paste a link or Issue Number with #, followed by a number (i.e. #300)."
+      description: Do you have any other notes or remarks you want us to know about?
+      placeholder: "Please provide us with any additional information you have that could speed up our process. If you find any related issue(s) or discussion(s), you can include a link or issue number preceded by a number (i.e., #300)."
     validations:
       required: false
   - type: textarea
     id: evidence
     attributes:
       label: Evidence
-      description: Do you have any error log, scanner log, scanner export file (.good), screenshots, screen recording, or other evidence?
-      placeholder: "Add any evidence here by dragging and dropping the files here. A log file is located in the scanner log folder."
+      description: Do you have any error logs, scanner logs, scanner export files (.good), screenshots, screen recordings, or other evidence?
+      placeholder: "Add any evidence here by dragging and dropping the files here. Log files are located in the scanner's log folder."
     validations:
       required: false
   - type: checkboxes
@@ -115,7 +115,7 @@ body:
       label: Preflight Checklist
       description: Checklist before sending the bug report.
       options:
-        - label: "I have checked the issue page, and there were none that similar to the one I'm reporting."
+        - label: "I have checked for similar issues in the issue page, and I have not found any similar to mine."
           required: true
         - label: "I am using the latest version of the scanner."
           required: false
@@ -127,7 +127,7 @@ body:
           required: false
         - label: "I am available to later explains the issue."
           required: false
-        - label: "I did not enable any image filtering software or plugins (ie. HDR, Image Sharpening, etc.) while scanning."
+        - label: "I have disabled all screen filtering software or plugins (i.e. HDR, Image Sharpening) while scanning."
           required: true
-        - label: "I use default keybindings or have configured keybindings to the scanner."
+        - label: "I use default in-game keybindings or have configured keybindings for the scanner."
           required: true
