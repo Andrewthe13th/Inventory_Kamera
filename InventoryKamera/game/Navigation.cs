@@ -26,6 +26,7 @@ namespace InventoryKamera
 		public static VirtualKeyCode escapeKey = VirtualKeyCode.ESCAPE;
 		public static VirtualKeyCode characterKey = VirtualKeyCode.VK_C;
 		public static VirtualKeyCode inventoryKey = VirtualKeyCode.VK_B;
+		public static VirtualKeyCode oneKey = VirtualKeyCode.VK_1;
 
 		[DllImport("user32.dll", SetLastError = true)]
 		private static extern bool GetClientRect(IntPtr hWnd, ref RECT Rect);
@@ -242,6 +243,8 @@ namespace InventoryKamera
 		public static void CharacterScreen()
 		{
 			sim.Keyboard.KeyPress(escapeKey);
+			SystemWait(Speed.UI);
+			sim.Keyboard.KeyPress(oneKey);
 			SystemWait(Speed.UI);
 			sim.Keyboard.KeyPress(characterKey);
 			SystemWait(Speed.UI);
