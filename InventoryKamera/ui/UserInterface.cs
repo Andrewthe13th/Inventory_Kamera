@@ -212,17 +212,26 @@ namespace InventoryKamera
 
 		public static void IncrementArtifactCount()
 		{
-			UpdateLabel($"{Int32.Parse(artifactCount_Label.Text) + 1}", artifactCount_Label);
+			lock (artifactCount_Label)
+			{
+				UpdateLabel($"{Int32.Parse(artifactCount_Label.Text) + 1}", artifactCount_Label);
+			}
 		}
 
 		public static void IncrementWeaponCount()
 		{
-			UpdateLabel($"{Int32.Parse(weaponCount_Label.Text) + 1}", weaponCount_Label);
+			lock (weaponCount_Label)
+			{
+				UpdateLabel($"{Int32.Parse(weaponCount_Label.Text) + 1}", weaponCount_Label);
+			}
 		}
 
 		public static void IncrementCharacterCount()
 		{
-			UpdateLabel($"{Int32.Parse(characterCount_Label.Text) + 1}", characterCount_Label);
+			lock (characterCount_Label)
+			{
+				UpdateLabel($"{Int32.Parse(characterCount_Label.Text) + 1}", characterCount_Label);
+			}
 		}
 
 		public static void SetProgramStatus(string status, bool ok = true)
