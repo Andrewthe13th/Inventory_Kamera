@@ -66,8 +66,7 @@ namespace InventoryKamera
 
 		private int _completed;
 		private int _todo;
-		private Dictionary<string, string> localVersions;
-        private Version RemoteVersion;
+
 
         public int TotalCompleted
 		{
@@ -143,6 +142,10 @@ namespace InventoryKamera
 
 		#endregion Progress Variables
 
+		internal Dictionary<string, string> localVersions;
+		internal Version GameVersion = new Version();
+		internal Version RemoteVersion;
+
 		public DatabaseManager()
 		{
 			Directory.CreateDirectory(ListsDir);
@@ -154,6 +157,10 @@ namespace InventoryKamera
 			RemoteVersion = new Version(Properties.Settings.Default.RemoteVersion);
 			localVersions = JToken.Parse(LoadJsonFromFile(versionJson)).ToObject<Dictionary<string, string>>();
 			if (localVersions.Keys.Count < 6) Properties.Settings.Default.LastUpdateCheck = DateTime.MinValue;
+			if (!UpdateAvailable())
+            {
+				GameVersion = new Version(localVersions["characters"]);
+            }
         }
 
         private void LoadMappings()

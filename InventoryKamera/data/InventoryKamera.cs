@@ -6,7 +6,6 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Shapes;
 using Newtonsoft.Json;
 
 namespace InventoryKamera

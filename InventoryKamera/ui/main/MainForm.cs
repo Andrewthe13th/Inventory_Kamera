@@ -181,18 +181,23 @@ namespace InventoryKamera
 				HotkeyManager.Current.AddOrReplace("Stop", Keys.Enter, Hotkey_Pressed);
 				Logger.Info("Hotkey registered");
 				var settings = Properties.Settings.Default;
-				var options = $"\n\tWeapons:\t\t\t\t {settings.ScanWeapons}\n" +
+                var gameVersion = new DatabaseManager().GameVersion;
+                var options =
+					$"\n\tGame Version:\t\t\t {gameVersion}\n" +
+					$"\tWeapons:\t\t\t\t {settings.ScanWeapons}\n" +
                     $"\tArtifacts:\t\t\t\t {settings.ScanArtifacts}\n" +
                     $"\tCharacters:\t\t\t\t {settings.ScanCharacters}\n" +
                     $"\tDev Items:\t\t\t\t {settings.ScanCharDevItems}\n" +
                     $"\tMaterials:\t\t\t\t {settings.ScanMaterials}\n" +
                     $"\tMin Weapon Rarity:\t\t {settings.MinimumWeaponRarity}\n" +
                     $"\tMin Weapon Level:\t\t {settings.MinimumWeaponLevel}\n" +
-					$"\tEquip Weapons:\t\t {settings.EquipWeapons}\n" +
+					$"\tEquip Weapons:\t\t\t {settings.EquipWeapons}\n" +
 					$"\tMin Artifact Rarity:\t {settings.MinimumArtifactRarity}\n" +
                     $"\tMin Artifact Level:\t\t {settings.MinimumArtifactLevel}\n" +
                     $"\tEquip Artifacts:\t\t {settings.EquipArtifacts}\n" +
                     $"\tDelay:\t\t\t\t\t {settings.ScannerDelay}";
+
+				Logger.Info("Scan settings: {0}", options);
 
 				scannerThread = new Thread(() =>
 				{
@@ -222,7 +227,6 @@ namespace InventoryKamera
 						// Add navigation delay
 						Navigation.SetDelay(ScannerDelayValue(Delay));
 
-						Logger.Info("Scan settings: {0}", options);
 						
 						// The Data object of json object
 						data.GatherData();
@@ -394,6 +398,7 @@ namespace InventoryKamera
                     break;
                 case UpdateStatus.Success:
 					MessageBox.Show("Update successful.", "Update status", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Information);
+					Logger.Info("Updated lookup tables to {0}", new DatabaseManager().localVersions);
 					break;
                 case UpdateStatus.Skipped:
 					var choice = MessageBox.Show($"No update necessary! You are already using the latest game data ({Properties.Settings.Default.RemoteVersion})." +
@@ -411,6 +416,7 @@ namespace InventoryKamera
 								break;
                             case UpdateStatus.Success:
 								MessageBox.Show("Update successful.", "Update status", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Information);
+								Logger.Info("Updated lookup tables to {0}", new DatabaseManager().localVersions);
 								break;
                             default:
                                 break;
@@ -496,6 +502,9 @@ namespace InventoryKamera
 								break;
 							case UpdateStatus.Success:
 								MessageBox.Show("Update successful.", "Update status", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Information);
+                                var databaseManager = new DatabaseManager();
+								databaseManager.GameVersion = new Version(databaseManager.localVersions["characters"]);
+                                Logger.Info("Updated lookup tables to {0}", databaseManager.GameVersion);
 								break;
 							case UpdateStatus.Skipped:
 								MessageBox.Show($"No update necessary! You are already using the latest game data ({Properties.Settings.Default.RemoteVersion})", "Update skipped", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Information);
