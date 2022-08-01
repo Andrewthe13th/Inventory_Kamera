@@ -494,16 +494,16 @@ namespace InventoryKamera
 					var result = MessageBox.Show(message, "Game Version Update", MessageBoxButtons.YesNo);
 					if (result == DialogResult.Yes)
 					{
-						var status = new DatabaseManager().UpdateAllLists(force: true);
+                        DatabaseManager databaseManager = new DatabaseManager();
+                        var status = databaseManager.UpdateAllLists(force: true);
 						switch (status)
 						{
 							case UpdateStatus.Fail:
 								MessageBox.Show("Unable to update lookup data. Please check the log for more details", "Update failed", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Stop);
 								break;
 							case UpdateStatus.Success:
-								MessageBox.Show("Update successful.", "Update status", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Information);
-                                var databaseManager = new DatabaseManager();
 								databaseManager.GameVersion = new Version(databaseManager.localVersions["characters"]);
+								MessageBox.Show($"Update for game version {databaseManager.GameVersion} successful.", "Update status", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Information);
                                 Logger.Info("Updated lookup tables to {0}", databaseManager.GameVersion);
 								break;
 							case UpdateStatus.Skipped:
