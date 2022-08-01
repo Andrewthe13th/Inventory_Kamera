@@ -67,7 +67,7 @@ Before starting the scanner, you can (optionally) choose to edit these following
 Starts the Inventory Kamera scans by **leaving the game screen with the Paimon Menu stays open** and click 'Scan' to start scanning.
 
 > **Warning**<br>
-> While scanning, **do not use your mouse or keyboard**. The scanner uses your keyboard and mouse imput to automate scanning.
+> While scanning, **do not use your mouse or keyboard**. The scanner uses your keyboard and mouse input to automate scanning.
 >
 > If you like to terminate the scan, press the `ENTER` button at any time. However, the application will not output any scanned results. You may press the 'Export Scanned Data' button to force an export of data that was collected in the most previous scan (complete or incomplete).
 
