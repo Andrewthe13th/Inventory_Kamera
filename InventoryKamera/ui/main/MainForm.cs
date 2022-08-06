@@ -240,14 +240,12 @@ namespace InventoryKamera
                         Logger.Info("Exported data");
 
                         UserInterface.SetProgramStatus("Finished");
-                        MainForm_Activate();
                     }
                     catch (ThreadAbortException)
                     {
                         // Workers can get stuck if the thread is aborted or an exception is raised
                         if (!(data is null)) data.StopImageProcessorWorkers();
                         UserInterface.SetProgramStatus("Scan stopped");
-                        MainForm_Activate();
                     }
                     catch (NotImplementedException ex)
                     {
@@ -260,7 +258,6 @@ namespace InventoryKamera
                         while (ex.InnerException != null) ex = ex.InnerException;
                         UserInterface.AddError(ex.ToString());
                         UserInterface.SetProgramStatus("Scan aborted", ok: false);
-                        MainForm_Activate();
                     }
                     finally
                     {
@@ -270,6 +267,7 @@ namespace InventoryKamera
                         {
                             ManualExportButton.Enabled = data.HasData;
                         });
+                        MainForm_Activate();
                     }
                 })
                 {
