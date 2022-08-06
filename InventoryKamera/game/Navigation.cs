@@ -318,14 +318,24 @@ namespace InventoryKamera
 		#region Window Focusing
 
 		[DllImport("user32.dll")]
-		private static extern bool IsIconic(IntPtr hWnd);
-
-		[DllImport("user32.dll")]
-		private static extern bool ShowWindowAsync(HandleRef hWnd, ShowWindowEnum flags);
-
-		[DllImport("user32.dll")]
 		private static extern int SetForegroundWindow(IntPtr hwnd);
 
+		[DllImport("user32.dll")]
+		private static extern bool GetWindowPlacement(IntPtr hWnd, ref WindowPlacement lpwndpl);
+		
+		[DllImport("user32.dll")]
+		private static extern bool SetWindowPlacement(IntPtr hWnd, ref WindowPlacement lpwndpl);
+		
+		private struct WindowPlacement
+		{
+			public int length;
+			public int flags;
+			public ShowWindowEnum showCmd;
+			public Point ptMinPosition;
+			public Point ptMaxPosition;
+			public Rectangle rcNormalPosition;
+		}
+		
 		private enum ShowWindowEnum
 		{
 			Hide = 0,
@@ -341,20 +351,23 @@ namespace InventoryKamera
 			// Get process
 			using (Process genshin = Process.GetProcessesByName(processName).FirstOrDefault())
 			{
-
 				// check if the process is running
 				if (genshin != null)
 				{
 					handle = genshin.MainWindowHandle;
 					
+					var windowPlacement = new WindowPlacement{length = Marshal.SizeOf(typeof(WindowPlacement))};
+					GetWindowPlacement(handle, ref windowPlacement);
+
 					// Check if minimized
-					if (IsIconic(handle))
+					if (windowPlacement.showCmd == ShowWindowEnum.ShowMinimized)
 					{
-						ShowWindowAsync(new HandleRef(null, genshin.Handle), ShowWindowEnum.Restore);
+						windowPlacement.showCmd = ShowWindowEnum.ShowNormal;
+						SetWindowPlacement(handle, ref windowPlacement);
 					}
 
 					// Bring game to front
-					SetForegroundWindow(genshin.MainWindowHandle);
+					SetForegroundWindow(handle);
 					return true;
 				}
 			}
