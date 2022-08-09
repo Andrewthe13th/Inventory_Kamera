@@ -267,6 +267,7 @@ namespace InventoryKamera
                         {
                             ManualExportButton.Enabled = data.HasData;
                         });
+                        MainForm_Activate();
                     }
                 })
                 {
@@ -540,6 +541,11 @@ namespace InventoryKamera
                 Logger.Info("Manually exported data");
                 Process.Start($@"{OutputPath_TextBox.Text}");
             }
+        }
+
+        private void MainForm_Activate()
+        {
+            BeginInvoke((MethodInvoker)delegate { Activate(); });
         }
     }
 }
