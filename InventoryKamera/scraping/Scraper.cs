@@ -45,7 +45,8 @@ namespace InventoryKamera
 			["electrodmgbonus"] = "electro_dmg_",
 			["cryodmgbonus"] = "cryo_dmg_",
 			["hydrodmgbonus"] = "hydro_dmg_",
-			["geodmgbonus"] = "geo_dmg_"
+			["geodmgbonus"] = "geo_dmg_",
+			["dendrodmgbonus"] = "dendro_dmg_"
 		};
 
 		public static readonly List<string> gearSlots = new List<string>
@@ -150,7 +151,7 @@ namespace InventoryKamera
 
 		public static void RestartEngines()
 		{
-			
+
 			if (engines is null) engines = new ConcurrentBag<TesseractEngine>();
 			lock (engines)
 			{
