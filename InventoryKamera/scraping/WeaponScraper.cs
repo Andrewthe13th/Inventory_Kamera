@@ -33,9 +33,14 @@ namespace InventoryKamera
 
 			StopScanning = false;
 
+			Logger.Info("Found {0} for weapon count.", weaponCount);
+
 			// Go through weapon list
 			while (cardsQueued < weaponCount)
 			{
+				Logger.Debug("Scanning weapon page {0}", page);
+				Logger.Debug("Located {0} possible item locations on page.", rectangles.Count);
+
 				int cardsRemaining =  weaponCount - cardsQueued ;
 				// Go through each "page" of items and queue. In the event that not a full page of
 				// items are scrolled to, offset the index of rectangle to start clicking from
@@ -51,9 +56,12 @@ namespace InventoryKamera
 					cardsQueued++;
 					if (cardsQueued >= weaponCount || StopScanning)
 					{
+						if (StopScanning) Logger.Info("Stopping weapon scan based on filtering");
+						else Logger.Info("Stopping weapon scan based on scans queued ({0} of {1})", cardsQueued, weaponCount);
 						return;
 					}
 				}
+				Logger.Debug("Finished queuing page of weapons. Scrolling...");
 
 				rowsQueued += rows;
 

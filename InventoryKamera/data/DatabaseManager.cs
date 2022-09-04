@@ -40,11 +40,16 @@ namespace InventoryKamera
 		private const string CharactersURL = "https://raw.githubusercontent.com/Dimbreath/GenshinData/master/ExcelBinOutput/AvatarExcelConfigData.json";
 		private const string ConstellationsURL = "https://raw.githubusercontent.com/Dimbreath/GenshinData/master/ExcelBinOutput/AvatarTalentExcelConfigData.json";
 		private const string SkillsURL = "https://raw.githubusercontent.com/Dimbreath/GenshinData/master/ExcelBinOutput/AvatarSkillExcelConfigData.json";
+
 		private const string ArtifactsURL = "https://raw.githubusercontent.com/Dimbreath/GenshinData/master/ExcelBinOutput/DisplayItemExcelConfigData.json";
+		private const string ArtifactsCodex = "https://raw.githubusercontent.com/Dimbreath/GenshinData/master/ExcelBinOutput/ReliquaryCodexExcelConfigData.json";
+		private const string SetArtifacts = "https://raw.githubusercontent.com/Dimbreath/GenshinData/master/ExcelBinOutput/ReliquaryExcelConfigData.json";
+
 		private const string WeaponsURL = "https://raw.githubusercontent.com/Dimbreath/GenshinData/master/ExcelBinOutput/WeaponExcelConfigData.json";
 		private const string MaterialsURL = "https://raw.githubusercontent.com/Dimbreath/GenshinData/master/ExcelBinOutput/MaterialExcelConfigData.json";
 		
 		private const string MappingsURL = "https://raw.githubusercontent.com/Dimbreath/GenshinData/master/TextMap/TextMapEN.json";
+
 
 		private Dictionary<string, string> Mappings = new Dictionary<string, string>();
 
@@ -198,9 +203,9 @@ namespace InventoryKamera
 			return GetList(ListType.Weapons).ToObject<Dictionary<string, string>>();
 		}
 
-		public Dictionary<string, string> LoadArtifacts()
+		public Dictionary<string, JObject> LoadArtifacts()
 		{
-			return GetList(ListType.Artifacts).ToObject<Dictionary<string, string>>();
+			return GetList(ListType.Artifacts).ToObject<Dictionary<string, JObject>>();
 		}
 
 		public Dictionary<string, string> LoadMaterials()
@@ -280,7 +285,7 @@ namespace InventoryKamera
             return overallStatus;
 		}
 
-		private UpdateStatus UpdateList(ListType list, bool @new = false, bool force = false)
+		internal UpdateStatus UpdateList(ListType list, bool @new = false, bool force = false)
 		{
 			Interlocked.Increment(ref updaters);
 			LoadMappings();
@@ -510,9 +515,13 @@ namespace InventoryKamera
 
 			try
 			{
-				Dictionary<string, string> data = JToken.Parse(LoadJsonFromFile(ArtifactsJson)).ToObject < Dictionary < string, string > >();
+				var data = JToken.Parse(LoadJsonFromFile(ArtifactsJson)).ToObject<Dictionary<string, JObject>>();
 				List<JObject> artifacts = JArray.Parse(LoadJsonFromURLAsync(ArtifactsURL)).ToObject<List<JObject>>();
 				artifacts.RemoveAll(artifact => artifact.TryGetValue("icon", out var icon) && !icon.ToString().Contains("RelicIcon"));
+
+				var artifactCodex = JArray.Parse(LoadJsonFromURLAsync(ArtifactsCodex)).ToObject<List<JObject>>();
+				var setArtifacts = JToken.Parse(LoadJsonFromURLAsync(SetArtifacts)).ToObject<List<JObject>>();
+
 
 				ArtifactsTodo = artifacts.Count;
 				Logger.Debug("Added {_artifactsTodo} artifacts. Total {TotalTodo}", _artifactsTodo, TotalTodo);
@@ -523,14 +532,75 @@ namespace InventoryKamera
 					{
                         if (Mappings.ContainsKey(artifact["nameTextMapHash"].ToString()))
                         {
-							var name = Mappings[artifact["nameTextMapHash"].ToString()];
-							string PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name);   // Archaic Petra
-							string nameGOOD = Regex.Replace(PascalCase, @"[\W]", string.Empty);				// ArchaicPetra
-							string nameKey = nameGOOD.ToLower();											// archaicpetra
+							var setName = Mappings[artifact["nameTextMapHash"].ToString()];						// Archaic Petra
+							string setNamePascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(setName);	// Archaic Petra
+							string setNameGOOD = Regex.Replace(setNamePascalCase, @"[\W]", string.Empty);					// ArchaicPetra
+							string setNameKey = setNameGOOD.ToLower();                                                // archaicpetra
 
-							if (!data.ContainsKey(nameKey))
+							var setID = (int)artifact["param"];
+
+							if (!data.ContainsKey(setNameKey))
 							{
-								data.Add(nameKey, nameGOOD);
+								var rarities = new JArray();
+								var temp = new JObject();
+
+								foreach (var set in artifactCodex)
+                                {
+									if ((int)set["suitId"] == setID)
+                                    {
+										if (rarities.Count > 0)
+                                        {
+											rarities.Add((int)set["level"]);
+											continue;
+                                        }
+
+										rarities.Add((int)set["level"]);
+
+										var cupID = set["cupId"];
+										var leatherID = set["leatherId"];
+										var capID = set["capId"];
+										var flowerID = set["flowerId"];
+										var sandID = set["sandId"];
+
+										var artifactIDs = new Dictionary<JToken, string> 
+										{
+											{cupID, "goblet"},
+											{leatherID, "plume" },
+											{capID, "circlet" },
+											{flowerID, "flower" },
+											{sandID, "sands" }
+										};
+
+										foreach (var setArtifact in setArtifacts)
+                                        {
+											if (artifactIDs.TryGetValue(setArtifact["id"], out string slot))
+                                            {
+												var artifactName = Mappings[setArtifact["nameTextMapHash"].ToString()];                               // Goblet of the Sojourner
+												string artifactNamePascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(artifactName);  // Goblet Of The Sojourner
+												string artifactNameGOOD = Regex.Replace(artifactNamePascalCase, @"[\W]", string.Empty);               // GobletOfTheSojourner
+												string artifactNormalized = artifactNameGOOD.ToLower();
+
+												temp.Add(slot, new JObject
+												{
+													{ "GOOD", artifactNameGOOD },
+													{ "artifactName", artifactName },
+													{ "normalizedName", artifactNormalized }
+												});
+                                            }
+											if (temp.Count >= 5) break;
+                                        }
+										
+									}
+                                }
+								if (temp.Count < 1) continue;
+								var value = new JObject
+								{
+									{ "GOOD", setNameGOOD },
+									{ "setName", setName },
+									{ "rarities",  rarities },
+									{ "artifacts", temp }
+								};
+								data.Add(setNameKey, value);
 							}
 						}
 						++ArtifactsCompleted;

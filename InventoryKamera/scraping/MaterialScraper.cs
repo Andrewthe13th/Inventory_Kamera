@@ -68,10 +68,15 @@ namespace InventoryKamera
 				// Find all items on the screen
 				(rectangles, cols, rows) = GetPageOfItems(section, page);
 
+
+
 				// Remove last row. Sometimes the bottom of a page of items is caught which results
 				// in a faded quantity that can't be parsed. Removing slightly increases the number of pages that
 				// need to be scrolled but it's fine.
 				var r = rectangles.Take(rectangles.Count() - cols).ToList();
+
+				Logger.Debug("Scanning material page {0}", page);
+				Logger.Debug("Located {0} possible item locations on page.", rectangles.Count);
 
 				foreach (var rectangle in r)
 				{
@@ -86,6 +91,7 @@ namespace InventoryKamera
 					// Check if new material has been found
 					if (inventory.Materials.Contains(material))
 					{
+						Logger.Debug("Repeat material found. Scrolling until end");
 						goto LastPage;
 					}
 					else
@@ -117,6 +123,9 @@ namespace InventoryKamera
 				Navigation.SetCursor(r.Last().Center().X, r.Last().Center().Y);
 				Navigation.Click();
 				Navigation.Wait(150);
+
+				Logger.Debug("Finished page of materials. Scrolling...");
+
 				// Scroll to next page
 				for (int i = 0; i < rows - 1; i++)
 				{
@@ -198,6 +207,7 @@ namespace InventoryKamera
 				}
 				else
 				{
+					Logger.Debug("Last material scanned, {0}.", inventory.Materials.Last().name);
 					nameplate.Dispose();
 					break;
 				}
@@ -456,8 +466,8 @@ namespace InventoryKamera
 			Bitmap n = Scraper.ConvertToGrayscale(bm);
 			Scraper.SetInvert(ref n);
 
-			string text = Scraper.AnalyzeText(n);
-			text = Regex.Replace(text, @"[\W]", string.Empty).ToLower();
+			string text = Scraper.AnalyzeText(n,Tesseract.PageSegMode.Auto);
+			text = Regex.Replace(text, @"[\W\s]", string.Empty).ToLower();
 
 			//UI
 			n.Dispose();
@@ -474,6 +484,7 @@ namespace InventoryKamera
 
 		public static int ScanMaterialCount(Rectangle rectangle, out Bitmap quantity)
 		{
+			Dictionary<int, int> counts = new Dictionary<int, int>();
 			var region = new RECT(
 				Left: rectangle.X,
 				Top: (int)(rectangle.Y + (0.8 * rectangle.Height)), // Only get the bottom of inventory item
@@ -484,43 +495,53 @@ namespace InventoryKamera
 			{
 				quantity = (Bitmap)bm.Clone();
 
-				using (Bitmap rescaled = Scraper.ResizeImage(bm, (int)( bm.Width * 3 ), (int)( bm.Height * 3 )))
-				{
-					Bitmap copy = (Bitmap)rescaled.Clone();
-					Scraper.SetGamma(0.7, 0.7, 0.7, ref copy);
-					// Image Processing
-					Bitmap n  =  Scraper.ConvertToGrayscale(copy);
-					Scraper.SetContrast(65, ref n); // Setting a high contrast seems to be better than thresholding
+				for (var scale = 1.0; scale <= 3; scale += 0.5)
+                {
+					using (Bitmap rescaled = Scraper.ResizeImage(bm, (int)(bm.Width * scale), (int)(bm.Height * scale)))
+					{
+						Bitmap copy = (Bitmap)rescaled.Clone();
+						Scraper.SetContrast(65, ref copy);
+						Scraper.FilterColors(ref copy, new Accord.IntRange(0, 150), new Accord.IntRange(0, 150), new Accord.IntRange(0, 150));
 
-					string old_text = Scraper.AnalyzeText(n, Tesseract.PageSegMode.SingleWord).Trim().ToLower();
+						for (int i = 0; i < copy.Width; i++)
+							for (int j = 0; j < copy.Height / 3; j++)
+								copy.SetPixel(i, j, Color.White);
 
-					// Might be worth it to train some more numbers
-					var cleaned = old_text;
+						Bitmap n = Scraper.ConvertToGrayscale(copy);						
 
-					// Adhoc replacements. TODO: Maybe fix?
-					foreach (var c in new List<String> { "e", "=", "l"})
-                    {
-						cleaned = cleaned.Replace(c, "1");
-                    }
-                    foreach (var c in new List<String> { "a" })
-                    {
-						cleaned = cleaned.Replace(c, "4");
-                    }
-                    foreach (var c in new List<String> { "dt" })
-                    {
-						cleaned = cleaned.Replace(c, "14");
-                    }
+						string original = Scraper.AnalyzeText(n).Trim();
 
-					cleaned = Regex.Replace(cleaned, @"[^0-9]", string.Empty);
+						if (int.TryParse(original, out int val)) return val;
 
-					_ = int.TryParse(cleaned, out int count);
+						// Might be worth it to train some more numbers
+						var cleaned = original;
 
-					Logger.Debug($"{old_text} -> {cleaned} -> {count}");
+						cleaned = cleaned.Replace("M", "111");
 
-					copy.Dispose();
-					n.Dispose();
-					return count;
+						cleaned = Regex.Replace(cleaned, @"[^0-9]", string.Empty);
+
+						int.TryParse(cleaned, out val);
+
+						Logger.Debug($"{original} -> {cleaned} -> {val}");
+
+						copy.Dispose();
+						n.Dispose();
+
+						if (counts.ContainsKey(val))
+						{
+							if (counts[val] >= 3 && val != 0) return val;
+							counts[val]++;
+						}
+						else counts.Add(val, 1);
+					}
 				}
+			}
+			var mode = counts.Aggregate((l, r) => l.Value > r.Value ? l : r);
+			if (mode.Key == 0 && counts.Count >= 5) return 0;
+			else
+            {
+				counts.Remove(mode.Key);
+				return counts.Aggregate((l, r) => l.Value > r.Value ? l : r).Value;
 			}
 		}
 	}

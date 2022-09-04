@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using Accord.Imaging;
 
 namespace InventoryKamera
@@ -126,13 +128,13 @@ namespace InventoryKamera
 				// Scan Constellation
 				Navigation.SelectCharacterConstellation();
 				character.Constellation = ScanConstellations();
-				Logger.Info("{0} Constellation: {0}", character.Name, character.Constellation);
+				Logger.Info("{0} Constellation: {1}", character.Name, character.Constellation);
 				Navigation.SystemWait(Navigation.Speed.Normal);
 
 				// Scan Talents
 				Navigation.SelectCharacterTalents();
 				character.Talents = ScanTalents(name);
-				Logger.Info("{0} Talents: {1}", character.Name, character.Talents);
+				Logger.Info("{0} Talents: {1}", character.Name, "{" + string.Join(", ", character.Talents.Select(kv => kv.Key + "=" + kv.Value).ToArray()) + "}");
 				Navigation.SystemWait(Navigation.Speed.Normal);
 
 				// Scale down talents due to constellations
@@ -143,15 +145,18 @@ namespace InventoryKamera
 						// get talent if character
 						if (character.Constellation >= 5)
 						{
+							Logger.Info("{0} constellation 5+, adjusting scanned skill and burst levels", character.Name);
 							character.Talents["skill"] -= 3;
 							character.Talents["burst"] -= 3;
 						}
 						else if ((string)Scraper.Characters[name.ToLower()]["ConstellationOrder"][0] == "skill")
 						{
+							Logger.Info("{0} constellation 3+, adjusting scanned skill level", character.Name);
 							character.Talents["skill"] -= 3;
 						}
 						else
 						{
+							Logger.Info("{0} constellation 3+, adjusting scanned burst level", character.Name);
 							character.Talents["burst"] -= 3;
 						}
 					}
@@ -262,6 +267,7 @@ namespace InventoryKamera
 						}
 					}
 					n.Dispose();
+					Logger.Debug("Scanned character name as {0} with element {1}", name, element);
 
 					if (!string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(element))
 					{
@@ -315,12 +321,15 @@ namespace InventoryKamera
 						UserInterface.SetCharacter_Level(bm, level, maxLevel);
 						n.Dispose();
 						bm.Dispose();
+						Logger.Debug("Scanned character level as {0}", level);
 						return level;
 					}
 					n.Dispose();
 					bm.Dispose();
 				}
 				Navigation.SystemWait(Navigation.Speed.Normal);
+				Logger.Debug("Scanned character level as {0} (text)", text);
+
 			} while (level == -1);
 
 			return -1;

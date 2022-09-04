@@ -32,14 +32,18 @@ namespace InventoryKamera
 
 			StopScanning = false;
 
+			Logger.Info("Found {0} for artifact count.", artifactCount);
+
 			var minLevel = Properties.Settings.Default.MinimumArtifactLevel;
 
 			if (minLevel >= 1)
 			{
+				Logger.Debug("Sorting by level to optimize total scan time");
                 // Check if sorted by level
                 // If not, sort by level
                 if (CurrentSortingMethod() != "level")
                 {
+					Logger.Debug("Not already sorting by level...");
 					Navigation.SetCursor(
 						X: (int)(230 / 1280.0 * Navigation.GetWidth()),
 						Y: (int)(680 / 720.0 * Navigation.GetHeight()));
@@ -51,12 +55,15 @@ namespace InventoryKamera
 					Navigation.Click();
 					Navigation.Wait();
 				}
+				Logger.Debug("Inventory is sorted by level.");
 			}
 			else
             {
-                // Check if sorted by quality
-                if (CurrentSortingMethod() != "quality")
+				Logger.Debug("Sorting by quality to scan all artifacts matching quality filter.");
+				// Check if sorted by quality
+				if (CurrentSortingMethod() != "quality")
 				{
+					Logger.Debug("Not already sorting by quality...");
 					// If not, sort by quality
 					Navigation.SetCursor(
 						X: (int)(230 / 1280.0 * Navigation.GetWidth()),
@@ -69,11 +76,15 @@ namespace InventoryKamera
 					Navigation.Click();
 					Navigation.Wait();
 				}
+				Logger.Debug("Inventory is sorted by quality");
 			}
 
 			// Go through artifact list
 			while (cardsQueued < artifactCount)
 			{
+				Logger.Debug("Scanning artifact page {0}", page);
+				Logger.Debug("Located {0} possible item locations on page.", rectangles.Count);
+
 				int cardsRemaining = artifactCount - cardsQueued;
 				// Go through each "page" of items and queue. In the event that not a full page of
 				// items are scrolled to, offset the index of rectangle to start clicking from
@@ -89,9 +100,13 @@ namespace InventoryKamera
 					cardsQueued++;
 					if (cardsQueued >= artifactCount || StopScanning)
 					{
+						if (StopScanning) Logger.Info("Stopping artifact scan based on filtering");
+						else Logger.Info("Stopping artifact scan based on scans queued ({0} of {1})", cardsQueued, artifactCount);
 						return;
 					}
 				}
+
+				Logger.Debug("Finished queuing page of artifacts. Scrolling...");
 
 				rowsQueued += rows;
 
@@ -477,26 +492,20 @@ namespace InventoryKamera
 				artifactImages.ForEach(i => i.Dispose());
 				return;
             }
-			// Send images to Worker Queue
-			InventoryKamera.workerQueue.Enqueue(new OCRImageCollection(artifactImages, "artifact", id));
-		}
+            // Send images to Worker Queue
+            InventoryKamera.workerQueue.Enqueue(new OCRImageCollection(artifactImages, "artifact", id));
+        }
 
-		public static async Task<Artifact> CatalogueFromBitmapsAsync(List<Bitmap> bm, int id)
+        public static async Task<Artifact> CatalogueFromBitmapsAsync(List<Bitmap> bm, int id)
 		{
 			// Init Variables
 			string gearSlot = null;
 			string mainStat = null;
-
-			int rarity = 0;
-
-			int level = 0;
-
-			List<SubStat> subStats = new List<SubStat>();
-
 			string setName = null;
-
 			string equippedCharacter = null;
-
+			List<SubStat> subStats = new List<SubStat>();
+			int rarity = 0;
+			int level = 0;
 			bool _lock = false;
 
 			if (bm.Count >= 6)
@@ -521,13 +530,15 @@ namespace InventoryKamera
 				var taskGear  = Task.Run(() => gearSlot = ScanArtifactGearSlot(bm[a_gearSlot]));
 				var taskMain  = taskGear.ContinueWith( (antecedent) => mainStat = ScanArtifactMainStat(bm[a_mainStat], antecedent.Result));
 				var taskLevel = Task.Run(() => level = ScanArtifactLevel(bm[a_level]));
-				var taskSubs  = Task.Run(() => subStats = ScanArtifactSubStats(bm[a_subStats], ref setName));
+				var taskSubs  = Task.Run(() => subStats = ScanArtifactSubStats(bm[a_subStats]));
 				var taskEquip = Task.Run(() => equippedCharacter = ScanArtifactEquippedCharacter(bm[a_equippedCharacter]));
+				var taskName = Task.Run(() => setName = ScanArtifactSet(bm[a_name]));
 
 				tasks.Add(taskGear);
 				tasks.Add(taskMain);
 				tasks.Add(taskLevel);
 				tasks.Add(taskSubs);
+				tasks.Add(taskName);
 				if (b_equipped)
 				{
 					tasks.Add(taskEquip);
@@ -536,6 +547,7 @@ namespace InventoryKamera
 				await Task.WhenAll(tasks.ToArray());
 			}
 			if (!Properties.Settings.Default.EquipArtifacts) equippedCharacter = "";
+
 			return new Artifact(setName, rarity, level, gearSlot, mainStat, subStats.ToArray(), subStats.Count, equippedCharacter, id, _lock);
 		}
 
@@ -655,7 +667,7 @@ namespace InventoryKamera
 			return int.TryParse(text, out int level) ? level : -1;
 		}
 
-		private static List<SubStat> ScanArtifactSubStats(Bitmap artifactImage, ref string setName)
+		private static List<SubStat> ScanArtifactSubStats(Bitmap artifactImage)
 		{
 			Bitmap bm = (Bitmap)artifactImage.Clone();
 			Scraper.SetBrightness(-30, ref bm);
@@ -734,7 +746,6 @@ namespace InventoryKamera
 					{
 						continue;
 					}
-					setName = string.IsNullOrWhiteSpace(setName) ? task.Result : setName;
 					tasks.Remove(task);
 					break;
 				}
@@ -764,6 +775,31 @@ namespace InventoryKamera
 			return null;
 		}
 
-		#endregion Task Methods
-	}
+		private static string ScanArtifactSet(Bitmap itemName)
+        {
+            Scraper.SetGamma(0.2, 0.2, 0.2, ref itemName);
+            Bitmap grayscale = Scraper.ConvertToGrayscale(itemName);
+            Scraper.SetInvert(ref grayscale);
+
+            // Analyze
+            using (Bitmap padded = new Bitmap((int)(grayscale.Width + grayscale.Width * .1), grayscale.Height + (int)(grayscale.Height * .5)))
+            {
+                using (Graphics g = Graphics.FromImage(padded))
+                {
+                    g.Clear(Color.White);
+                    g.DrawImage(grayscale, (padded.Width - grayscale.Width) / 2, (padded.Height - grayscale.Height) / 2);
+
+                    var scannedText = Scraper.AnalyzeText(grayscale, Tesseract.PageSegMode.Auto).ToLower().Replace("\n", " ");
+                    string text = Regex.Replace(scannedText, @"[\W]", string.Empty);
+                    text = Scraper.FindClosestArtifactSetFromArtifactName(text);
+
+					grayscale.Dispose();
+
+					return text;
+                }
+            }
+        }
+
+        #endregion Task Methods
+    }
 }

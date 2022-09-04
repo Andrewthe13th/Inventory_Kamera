@@ -14,6 +14,7 @@ using Accord.Imaging;
 using Accord.Imaging.Filters;
 using Newtonsoft.Json.Linq;
 using Tesseract;
+using static Microsoft.WindowsAPICodePack.Shell.PropertySystem.SystemProperties.System;
 
 namespace InventoryKamera
 {
@@ -26,7 +27,7 @@ namespace InventoryKamera
 		private static readonly string tesseractDatapath = $"{Directory.GetCurrentDirectory()}\\tessdata";
 		private static readonly string tesseractLanguage = "genshin_fast_09_04_21";
 
-		public static readonly Dictionary<string, string> Stats = new Dictionary<string, string>
+		public static Dictionary<string, string> Stats = new Dictionary<string, string>
 		{
 			["hp"] = "hp",
 			["hp%"] = "hp_",
@@ -40,12 +41,6 @@ namespace InventoryKamera
 			["critrate"] = "critRate_",
 			["critdmg"] = "critDMG_",
 			["physicaldmgbonus"] = "physical_dmg_",
-			["anemodmgbonus"] = "anemo_dmg_",
-			["pyrodmgbonus"] = "pyro_dmg_",
-			["electrodmgbonus"] = "electro_dmg_",
-			["cryodmgbonus"] = "cryo_dmg_",
-			["hydrodmgbonus"] = "hydro_dmg_",
-			["geodmgbonus"] = "geo_dmg_"
 		};
 
 		public static readonly List<string> gearSlots = new List<string>
@@ -79,9 +74,9 @@ namespace InventoryKamera
 
 		public static ConcurrentBag<TesseractEngine> engines;
 
-		public static readonly Dictionary<string, string> Artifacts, Weapons, DevMaterials, Materials, AllMaterials, Elements;
+		public static readonly Dictionary<string, string> Weapons, DevMaterials, Materials, AllMaterials, Elements;
 
-		public static Dictionary<string, JObject> Characters;
+		public static Dictionary<string, JObject> Characters, Artifacts;
 
 		static Scraper()
         {
@@ -97,7 +92,12 @@ namespace InventoryKamera
             AllMaterials = listManager.LoadAllMaterials();
             Elements = new Dictionary<string, string>();
 
-            foreach (var element in elements) Elements.Add(element, char.ToUpper(element[0]) + element.Substring(1));
+			foreach (var element in elements)
+			{
+				Stats.Add($"{element.ToLower()}dmgbonus", $"{element.ToLower()}_dmg_");  // ["anemodmgbonus"] = "anemo_dmg_"
+				Elements.Add(element, char.ToUpper(element[0]) + element.Substring(1));
+			}
+
             Logger.Info("Scraper initialized");
         }
 
@@ -211,8 +211,13 @@ namespace InventoryKamera
 
 		public static bool IsValidSetName(string setName)
 		{
-			return Artifacts.ContainsValue(setName) || Artifacts.ContainsKey(setName.ToLower());
+			return true; // Artifacts.ContainsValue(setName) || Artifacts.ContainsKey(setName.ToLower());
 		}
+
+		public static bool IsValidArtifactName(string artifactName)
+        {
+			return false;
+        }
 
 		internal static bool IsValidMaterial(string name)
 		{
@@ -265,7 +270,7 @@ namespace InventoryKamera
 			return input;
 		}
 
-		public static string FindClosestStat(string stat, int maxEdits = 15)
+		public static string FindClosestStat(string stat, int maxEdits = 5)
 		{
 			return FindClosestInDict(source: stat, targets: Stats, maxEdits: maxEdits);
 		}
@@ -275,14 +280,40 @@ namespace InventoryKamera
 			return FindClosestInDict(source: name, targets: Elements, maxEdits: maxEdits);
 		}
 
-		public static string FindClosestWeapon(string name, int maxEdits = 7)
+		public static string FindClosestWeapon(string name, int maxEdits = 5)
 		{
 			return FindClosestInDict(source: name, targets: Weapons, maxEdits: maxEdits);
 		}
 
-		public static string FindClosestSetName(string name, int maxEdits = 15)
+		public static string FindClosestSetName(string name, int maxEdits = 5)
 		{
 			return FindClosestInDict(source: name, targets: Artifacts, maxEdits: maxEdits);
+		}
+		
+		public static string FindClosestArtifactSetFromArtifactName(string name, int maxEdits = 5)
+		{
+			if (string.IsNullOrWhiteSpace(name)) return "";
+			string closestMatch = null;
+			int edits = int.MaxValue;
+
+
+            foreach (var artifactSet in Artifacts)
+            {
+                foreach (var slot in artifactSet.Value["artifacts"].Values())
+                {
+                    string normalizedName = slot["normalizedName"].ToString();
+                    if (name == normalizedName)
+						return artifactSet.Value["GOOD"].ToString();
+
+					int dist = CalcDistance(name, slot["normalizedName"].ToString(), maxEdits);
+					if (dist < maxEdits && dist < edits)
+					{
+						edits = dist;
+						closestMatch = artifactSet.Value["GOOD"].ToString();
+					}
+				}
+			}
+			return closestMatch;
 		}
 
 		public static string FindClosestCharacterName(string name, int maxEdits = 10)
@@ -589,6 +620,7 @@ namespace InventoryKamera
 		{
 			return ResizeImage(image, (int)( image.Width * factor ), (int)( image.Height * factor ));
 		}
+
 		public static bool CompareColors(Color a, Color b)
 		{
 			int[] diff = new int[3];
@@ -598,6 +630,7 @@ namespace InventoryKamera
 
 			return diff[0] < 10 && diff[1] < 10 && diff[2] < 10;
 		}
+
 		internal static Color ClosestColor(List<Color> colors, ImageStatistics color)
 		{
 			var c2 = Color.FromArgb((int)color.Red.Mean, (int)color.Green.Mean, (int)color.Blue.Mean);
@@ -753,7 +786,8 @@ namespace InventoryKamera
 			{
 				Red = red,
 				Green = green,
-				Blue = blue
+				Blue = blue,
+				FillColor = new RGB(255,255,255)
 			};
 			colorFilter.ApplyInPlace(bm);
 		}
@@ -794,6 +828,6 @@ namespace InventoryKamera
 			return result;
 		}
 
-		#endregion Image Operations
-	}
+        #endregion Image Operations
+    }
 }
