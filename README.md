@@ -38,19 +38,14 @@ Download the latest version of [Inventory Kamera](https://github.com/Andrewthe13
 
 To upgrade from a previous version, download a newer release and unzip its files into the current Inventory Kamera location (allow it to replace old files when prompted) or a new folder of your choosing.
 
-> **Warning**
->
-> Due to the way Inventory Kamera is compiled, application settings that you change (most importantly the export folder!) will reset to default values. It is recommended to continue using one folder location when unzipping future releases. More information can be [found here](https://github.com/Andrewthe13th/Inventory_Kamera/issues/301#issuecomment-1179611917)
-
 ## Setting up Genshin Impact
 
 1. Log in to Genshin Impact and click start.
 2. Open [Paimon menu](https://genshin-impact.fandom.com/wiki/Paimon_Menu) (Default shortcut: `ESC`).
 3. Go to `Settings` (Cog Icon ⚙) and set these settings:
    - Under `Languages`, set _Game Language_ to English.
-   - Under `Graphics`, set _Display Mode_ to _any windowed resolution_ that has _16:9_ or _16:10 ratio_. Make sure that the entire game window is visible on the screen.
-     - Example of 16:9 includes 1920x1080 (Full HD), 3840x2160 (4K), 2560x1440 (2K).
-     - Example of 16:10 includes 1920x1200.
+   - The game resolution should be _16:9_ or _16:10_. If your screen has a matching native resolution, you may set _Display Mode_ under `Graphics` to fullscreen. Otherwise, you'll have to switch it to any _windowed_ resolution that matches one of these aspect ratios.
+     - Some examples of good resolutions are: 1920x1080 (Full HD), 1920x1200, 2560x1440 (2K), 3840x2160 (4K), etc.
      - Don't know if a resolution is 16:9 or 16:10? [Find out here](https://andrew.hedges.name/experiments/aspect_ratio/).
      - > **Warning**
        >
