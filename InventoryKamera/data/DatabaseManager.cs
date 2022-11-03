@@ -162,9 +162,16 @@ namespace InventoryKamera
 			RemoteVersion = new Version(Properties.Settings.Default.RemoteVersion);
 			localVersions = JToken.Parse(LoadJsonFromFile(versionJson)).ToObject<Dictionary<string, string>>();
 			if (localVersions.Keys.Count < 6) Properties.Settings.Default.LastUpdateCheck = DateTime.MinValue;
-			if (!UpdateAvailable())
+			try
+			{
+				if (!UpdateAvailable())
+				{
+					GameVersion = new Version(localVersions["characters"]);
+				}
+			}
+			catch
             {
-				GameVersion = new Version(localVersions["characters"]);
+				GameVersion = new Version();
             }
         }
 

@@ -480,8 +480,8 @@ namespace InventoryKamera
 
         private void CheckForUpdates()
         {
-            var databaseManager = new DatabaseManager();
             goto Hotfix;
+            var databaseManager = new DatabaseManager();
             try
             {
                 var updatesAvailable = databaseManager.UpdateAvailable();
