@@ -417,8 +417,7 @@ namespace InventoryKamera
 
 			bool a = false;
 
-			StopScanning = StopScanning || GetRarity(name) < Properties.Settings.Default.MinimumWeaponRarity;
-			StopScanning = StopScanning || ScanLevel(level, ref a) < Properties.Settings.Default.MinimumWeaponLevel;
+			StopScanning = GetRarity(name) < Properties.Settings.Default.MinimumWeaponRarity && ScanLevel(level, ref a) < Properties.Settings.Default.MinimumWeaponLevel;
 
 			if (StopScanning)
             {

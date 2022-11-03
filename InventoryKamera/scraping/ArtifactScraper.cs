@@ -484,8 +484,7 @@ namespace InventoryKamera
 			artifactImages.Add(card);
 
 
-			StopScanning = StopScanning || GetRarity(name) < Properties.Settings.Default.MinimumArtifactRarity;
-			StopScanning = StopScanning || ScanArtifactLevel(level) < Properties.Settings.Default.MinimumArtifactLevel;
+			StopScanning = GetRarity(name) < Properties.Settings.Default.MinimumArtifactRarity && ScanArtifactLevel(level) < Properties.Settings.Default.MinimumArtifactLevel;
 
 			if (StopScanning)
             {

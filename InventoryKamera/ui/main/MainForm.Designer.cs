@@ -648,12 +648,13 @@
             this.inventoryToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.inventoryToolStripTextBox});
             this.inventoryToolStripMenuItem.Name = "inventoryToolStripMenuItem";
-            this.inventoryToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.inventoryToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
             this.inventoryToolStripMenuItem.Text = "Inventory Key";
             // 
             // inventoryToolStripTextBox
             // 
             this.inventoryToolStripTextBox.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
+            this.inventoryToolStripTextBox.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.inventoryToolStripTextBox.MaxLength = 2;
             this.inventoryToolStripTextBox.Name = "inventoryToolStripTextBox";
             this.inventoryToolStripTextBox.Size = new System.Drawing.Size(90, 23);
@@ -667,12 +668,13 @@
             this.characterScreenToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.characterToolStripTextBox});
             this.characterScreenToolStripMenuItem.Name = "characterScreenToolStripMenuItem";
-            this.characterScreenToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.characterScreenToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
             this.characterScreenToolStripMenuItem.Text = "Character Screen Key";
             // 
             // characterToolStripTextBox
             // 
             this.characterToolStripTextBox.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
+            this.characterToolStripTextBox.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.characterToolStripTextBox.MaxLength = 2;
             this.characterToolStripTextBox.Name = "characterToolStripTextBox";
             this.characterToolStripTextBox.Size = new System.Drawing.Size(90, 23);
@@ -683,15 +685,17 @@
             // 
             // DatabaseUpdateMenuItem
             // 
+            this.DatabaseUpdateMenuItem.Enabled = false;
             this.DatabaseUpdateMenuItem.Name = "DatabaseUpdateMenuItem";
-            this.DatabaseUpdateMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.DatabaseUpdateMenuItem.Size = new System.Drawing.Size(190, 22);
             this.DatabaseUpdateMenuItem.Text = "Update Lookup Tables";
+            this.DatabaseUpdateMenuItem.ToolTipText = "Auto Updater is disabled for now";
             this.DatabaseUpdateMenuItem.Click += new System.EventHandler(this.DatabaseUpdateMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(191, 22);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(190, 22);
             this.toolStripMenuItem1.Text = "Open Export Folder";
             this.toolStripMenuItem1.Click += new System.EventHandler(this.ExportFolderMenuItem_Click);
             // 
