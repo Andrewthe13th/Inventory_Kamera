@@ -527,22 +527,37 @@ namespace InventoryKamera
 						copy.Dispose();
 						n.Dispose();
 
-						if (counts.ContainsKey(val))
+						if (counts.TryGetValue(val, out var counter))
 						{
-							if (counts[val] >= 3 && val != 0) return val;
+							if (counter >= 3 && val != 0) return val;
 							counts[val]++;
 						}
-						else counts.Add(val, 1);
+						else
+						{
+							counts.Add(val, 1);
+						}
 					}
 				}
 			}
-			var mode = counts.Aggregate((l, r) => l.Value > r.Value ? l : r);
-			if (mode.Key == 0 && counts.Count >= 5) return 0;
-			else
-            {
-				counts.Remove(mode.Key);
-				return counts.Aggregate((l, r) => l.Value > r.Value ? l : r).Value;
-			}
+			
+			var nullableMode = SafeExtractMaxCounter(counts);
+			if (nullableMode == null)
+				return 0;
+
+			var mode = nullableMode.Value;
+			if (mode.Key == 0 && counts.Count >= 5) 
+				return 0;
+			
+			counts.Remove(mode.Key);
+			return SafeExtractMaxCounter(counts)?.Value ?? 0;
+		}
+
+		private static KeyValuePair<int, int>? SafeExtractMaxCounter(Dictionary<int, int> counts)
+		{
+			if (counts.Count == 0)
+				return null;
+
+			return counts.Aggregate((l, r) => l.Value > r.Value ? l : r);
 		}
 	}
 }
