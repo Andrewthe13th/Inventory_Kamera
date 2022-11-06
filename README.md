@@ -4,6 +4,8 @@ Fan-made Genshin Impact tool that scans characters, weapons, artifacts, material
 
 This scanner exports in `.GOOD`, a JSON-based exporting format, which allows you to use it with compatible online Genshin Impact tools. These tools include artifact optimizing tools including [Genshin Optimizer](https://frzyc.github.io/genshin-optimizer/#/), [SEELIE.me](https://seelie.me/) and [Aspirine's Genshin Impact Calculator](https://genshin.aspirine.su/).
 
+[DOWNLOAD FROM HERE](https://github.com/Andrewthe13th/Inventory_Kamera/releases/latest)
+
 ## DISCORD
 https://discord.gg/zh56aVWe3U
 
@@ -34,7 +36,7 @@ Before installing Inventory Kamera, please have **the following things installed
 - [GenshinImpact.exe](https://genshin.hoyoverse.com/) or [YuanShen.exe](https://ys.mihoyo.com/) launcher
 - [Microsoft Visual C++ Redistributable for Visual Studio 2015-2022 (x86 or x64)](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#visual-studio-2015-2017-2019-and-2022)
 
-Download the latest version of [Inventory Kamera](https://github.com/Andrewthe13th/Inventory_Kamera/releases) and unzip its files into a folder of your choosing, then launch the extracted .exe file. It will likely prompt you for Security and/or User Access. This access is required to interact with the game.
+[Download the latest version of Inventory Kamera here](https://github.com/Andrewthe13th/Inventory_Kamera/releases/latest) and unzip its files into a folder of your choosing, then launch the extracted .exe file. It will likely prompt you for Security and/or User Access. This access is required to interact with the game.
 
 To upgrade from a previous version, download a newer release and unzip its files into the current Inventory Kamera location (allow it to replace old files when prompted) or a new folder of your choosing.
 
