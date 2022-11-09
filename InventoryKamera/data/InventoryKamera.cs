@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,11 +7,10 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 namespace InventoryKamera
 {
-	public class InventoryKamera
+    public class InventoryKamera
 	{
 
 		private static NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
@@ -96,9 +96,17 @@ namespace InventoryKamera
 
 			Scraper.RestartEngines();
 
+
 			// Scan Main character Name
-			string mainCharacterName = CharacterScraper.ScanMainCharacterName();
-			Scraper.AssignTravelerName(mainCharacterName);
+			if (!string.IsNullOrEmpty(Properties.Settings.Default.TravelerName))
+            {
+				Scraper.AssignTravelerName(Properties.Settings.Default.TravelerName);
+            }
+			else
+            {
+				Scraper.AssignTravelerName(CharacterScraper.ScanMainCharacterName());
+			}
+
 
 			if (Properties.Settings.Default.ScanWeapons)
 			{

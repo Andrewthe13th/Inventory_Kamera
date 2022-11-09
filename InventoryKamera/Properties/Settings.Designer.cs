@@ -8,14 +8,11 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-using System.Configuration;
-
 namespace InventoryKamera.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.2.0.0")]
-    [SettingsProvider(typeof(JsonUserSettingsProvider))]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -251,6 +248,18 @@ namespace InventoryKamera.Properties {
             }
             set {
                 this["EquipArtifacts"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string TravelerName {
+            get {
+                return ((string)(this["TravelerName"]));
+            }
+            set {
+                this["TravelerName"] = value;
             }
         }
     }

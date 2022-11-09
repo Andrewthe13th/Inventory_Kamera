@@ -88,8 +88,11 @@
             this.MinimumWeaponLevelLabel = new System.Windows.Forms.Label();
             this.MinimumArtifactLevelLabel = new System.Windows.Forms.Label();
             this.ManualExportButton = new System.Windows.Forms.Button();
-            this.EquipArtifactsCheckBox = new System.Windows.Forms.CheckBox();
+            this.button1 = new System.Windows.Forms.Button();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.EquipWeaponsCheckBox = new System.Windows.Forms.CheckBox();
+            this.EquipArtifactsCheckBox = new System.Windows.Forms.CheckBox();
             this.LogScreenshotsCheckBox = new System.Windows.Forms.CheckBox();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.MinimumWeaponLevelControl = new System.Windows.Forms.NumericUpDown();
@@ -738,7 +741,7 @@
             // ManualExportButton
             // 
             this.ManualExportButton.Enabled = false;
-            this.ManualExportButton.Location = new System.Drawing.Point(7, 437);
+            this.ManualExportButton.Location = new System.Drawing.Point(6, 418);
             this.ManualExportButton.Name = "ManualExportButton";
             this.ManualExportButton.Size = new System.Drawing.Size(144, 23);
             this.ManualExportButton.TabIndex = 97;
@@ -746,18 +749,33 @@
             this.ManualExportButton.UseVisualStyleBackColor = true;
             this.ManualExportButton.Click += new System.EventHandler(this.Export_Button_Click);
             // 
-            // EquipArtifactsCheckBox
+            // button1
             // 
-            this.EquipArtifactsCheckBox.AutoSize = true;
-            this.EquipArtifactsCheckBox.Checked = global::InventoryKamera.Properties.Settings.Default.EquipArtifacts;
-            this.EquipArtifactsCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.EquipArtifactsCheckBox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::InventoryKamera.Properties.Settings.Default, "EquipArtifacts", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.EquipArtifactsCheckBox.Location = new System.Drawing.Point(328, 88);
-            this.EquipArtifactsCheckBox.Name = "EquipArtifactsCheckBox";
-            this.EquipArtifactsCheckBox.Size = new System.Drawing.Size(94, 17);
-            this.EquipArtifactsCheckBox.TabIndex = 98;
-            this.EquipArtifactsCheckBox.Text = "Equip Artifacts";
-            this.EquipArtifactsCheckBox.UseVisualStyleBackColor = true;
+            this.button1.Location = new System.Drawing.Point(7, 442);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(143, 23);
+            this.button1.TabIndex = 100;
+            this.button1.Text = "Open Export Folder";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.ExportFolderMenuItem_Click);
+            // 
+            // textBox1
+            // 
+            this.textBox1.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::InventoryKamera.Properties.Settings.Default, "TravelerName", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.textBox1.Location = new System.Drawing.Point(328, 111);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(169, 20);
+            this.textBox1.TabIndex = 101;
+            this.textBox1.Text = global::InventoryKamera.Properties.Settings.Default.TravelerName;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(238, 114);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(87, 13);
+            this.label1.TabIndex = 102;
+            this.label1.Text = "Traveler\'s Name:";
             // 
             // EquipWeaponsCheckBox
             // 
@@ -771,6 +789,19 @@
             this.EquipWeaponsCheckBox.TabIndex = 99;
             this.EquipWeaponsCheckBox.Text = "Equip Weapons";
             this.EquipWeaponsCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // EquipArtifactsCheckBox
+            // 
+            this.EquipArtifactsCheckBox.AutoSize = true;
+            this.EquipArtifactsCheckBox.Checked = global::InventoryKamera.Properties.Settings.Default.EquipArtifacts;
+            this.EquipArtifactsCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.EquipArtifactsCheckBox.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::InventoryKamera.Properties.Settings.Default, "EquipArtifacts", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.EquipArtifactsCheckBox.Location = new System.Drawing.Point(328, 88);
+            this.EquipArtifactsCheckBox.Name = "EquipArtifactsCheckBox";
+            this.EquipArtifactsCheckBox.Size = new System.Drawing.Size(94, 17);
+            this.EquipArtifactsCheckBox.TabIndex = 98;
+            this.EquipArtifactsCheckBox.Text = "Equip Artifacts";
+            this.EquipArtifactsCheckBox.UseVisualStyleBackColor = true;
             // 
             // LogScreenshotsCheckBox
             // 
@@ -959,6 +990,9 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(234)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
             this.ClientSize = new System.Drawing.Size(595, 472);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.EquipWeaponsCheckBox);
             this.Controls.Add(this.EquipArtifactsCheckBox);
             this.Controls.Add(this.ManualExportButton);
@@ -1112,6 +1146,9 @@
         private System.Windows.Forms.Button ManualExportButton;
         private System.Windows.Forms.CheckBox EquipArtifactsCheckBox;
         private System.Windows.Forms.CheckBox EquipWeaponsCheckBox;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Label label1;
     }
 }
 

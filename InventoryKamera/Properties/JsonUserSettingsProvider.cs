@@ -1,10 +1,10 @@
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Specialized;
 using System.Configuration;
 using System.IO;
 using System.Windows.Forms;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace InventoryKamera.Properties
 {

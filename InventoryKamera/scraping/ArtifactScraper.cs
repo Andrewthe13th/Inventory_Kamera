@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Accord.Imaging;
+using Accord.Imaging.Filters;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -6,15 +8,15 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Accord.Imaging;
-using Accord.Imaging.Filters;
 using static InventoryKamera.Artifact;
 
 namespace InventoryKamera
 {
-	public static class ArtifactScraper
+    public static class ArtifactScraper
 	{
 		private static NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
+		private static bool SortByLevel;
 		public static bool StopScanning { get; set; }
 
 		public static void ScanArtifacts(int count = 0)
@@ -34,9 +36,9 @@ namespace InventoryKamera
 
 			Logger.Info("Found {0} for artifact count.", artifactCount);
 
-			var minLevel = Properties.Settings.Default.MinimumArtifactLevel;
+			SortByLevel = Properties.Settings.Default.MinimumArtifactLevel > 1;
 
-			if (minLevel >= 1)
+			if (SortByLevel)
 			{
 				Logger.Debug("Sorting by level to optimize total scan time");
                 // Check if sorted by level
@@ -484,9 +486,11 @@ namespace InventoryKamera
 			artifactImages.Add(card);
 
 
-			StopScanning = GetRarity(name) < Properties.Settings.Default.MinimumArtifactRarity && ScanArtifactLevel(level) < Properties.Settings.Default.MinimumArtifactLevel;
+            bool belowRarity = GetRarity(name) < Properties.Settings.Default.MinimumArtifactRarity;
+            bool belowLevel = ScanArtifactLevel(level) < Properties.Settings.Default.MinimumArtifactLevel;
+            StopScanning = (SortByLevel && belowLevel) || (!SortByLevel && belowRarity);
 
-			if (StopScanning)
+			if (StopScanning || belowRarity || belowLevel)
             {
 				artifactImages.ForEach(i => i.Dispose());
 				return;

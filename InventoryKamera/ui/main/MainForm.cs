@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Microsoft.WindowsAPICodePack.Dialogs;
+using NHotkey;
+using NHotkey.WindowsForms;
+using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -10,9 +12,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
-using Microsoft.WindowsAPICodePack.Dialogs;
-using NHotkey;
-using NHotkey.WindowsForms;
 using WindowsInput.Native;
 
 namespace InventoryKamera

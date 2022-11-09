@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Accord;
+using Accord.Imaging;
+using Accord.Imaging.Filters;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,16 +13,11 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Accord;
-using Accord.Imaging;
-using Accord.Imaging.Filters;
-using Newtonsoft.Json.Linq;
 using Tesseract;
-using static Microsoft.WindowsAPICodePack.Shell.PropertySystem.SystemProperties.System;
 
 namespace InventoryKamera
 {
-	public static class Scraper
+    public static class Scraper
 	{
 		private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -118,9 +117,11 @@ namespace InventoryKamera
 
 		public static void AssignTravelerName(string traveler)
 		{
+			traveler = traveler.ToLower();
 			if (!string.IsNullOrEmpty(traveler))
 			{
 				AddTravelerToCharacterList(traveler);
+				UserInterface.SetMainCharacterName(traveler);
 				Logger.Debug("Parsed traveler name {traveler}", traveler);
 			}
 			else
@@ -190,18 +191,6 @@ namespace InventoryKamera
 			}
 			engines.Add(e);
 
-			return text;
-		}
-
-		public static string AnalyzeFewText(Bitmap img)
-		{
-			string text = "";
-			using (var ocr = new TesseractEngine(tesseractDatapath, "eng", EngineMode.TesseractOnly))
-			{
-				var page = ocr.Process(img, PageSegMode.SparseText);
-				ocr.SetVariable("tessedit_char_whitelist", "0123456789");
-				text = page.GetText();
-			}
 			return text;
 		}
 

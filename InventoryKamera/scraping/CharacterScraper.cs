@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections;
+﻿using Accord.Imaging;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Xml.Linq;
-using Accord.Imaging;
 
 namespace InventoryKamera
 {
-	public static class CharacterScraper
+    public static class CharacterScraper
 	{
 		private static NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -127,7 +126,7 @@ namespace InventoryKamera
 
 				// Scan Constellation
 				Navigation.SelectCharacterConstellation();
-				character.Constellation = ScanConstellations();
+				character.Constellation = ScanConstellations(character.Name);
 				Logger.Info("{0} Constellation: {1}", character.Name, character.Constellation);
 				Navigation.SystemWait(Navigation.Speed.Normal);
 
@@ -205,7 +204,6 @@ namespace InventoryKamera
 				// Only keep text up until first space
 				text = Regex.Replace(text, @"\s+\w*", string.Empty);
 
-				UserInterface.SetMainCharacterName(text);
 			}
 			else
 			{
@@ -371,7 +369,7 @@ namespace InventoryKamera
 			return experience;
 		}
 
-		private static int ScanConstellations()
+		private static int ScanConstellations(string character)
 		{
 			double yReference = 720.0;
 			int constellation;
@@ -402,6 +400,13 @@ namespace InventoryKamera
 
 				var pause = constellation == 0 ? 700 : 550;
 				Navigation.SystemWait(pause);
+
+				if (Properties.Settings.Default.LogScreenshots)
+				{
+					var screenshot = Navigation.CaptureWindow();
+					Directory.CreateDirectory($"./logging/characters/{character}");
+					screenshot.Save($"./logging/characters/{character}/constellation_{constellation + 1}.png");
+				}
 
 				// Grab Color
 				using (Bitmap region = Navigation.CaptureRegion(constActivate))

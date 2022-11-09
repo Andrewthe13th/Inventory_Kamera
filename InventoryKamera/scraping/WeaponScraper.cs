@@ -1,17 +1,19 @@
-﻿using System;
+﻿using Accord.Imaging;
+using Accord.Imaging.Filters;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Accord.Imaging;
-using Accord.Imaging.Filters;
 
 namespace InventoryKamera
 {
-	public static class WeaponScraper
+    public static class WeaponScraper
 	{
 		private static NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
+		private static bool SortByLevel = false;
 
 		public static bool StopScanning { get; set; }
 
@@ -34,6 +36,51 @@ namespace InventoryKamera
 			StopScanning = false;
 
 			Logger.Info("Found {0} for weapon count.", weaponCount);
+
+			SortByLevel = Properties.Settings.Default.MinimumWeaponLevel > 1;
+
+			if (SortByLevel)
+			{
+				Logger.Debug("Sorting by level to optimize scan time.");
+				// Check if sorted by level
+				// If not, sort by level
+				if (CurrentSortingMethod() != "level")
+				{
+					Logger.Debug("Not already sorting by level...");
+					Navigation.SetCursor(
+						X: (int)(230 / 1280.0 * Navigation.GetWidth()),
+						Y: (int)(680 / 720.0 * Navigation.GetHeight()));
+					Navigation.Click();
+					Navigation.Wait();
+					Navigation.SetCursor(
+						X: (int)(250 / 1280.0 * Navigation.GetWidth()),
+						Y: (int)(575 / 720.0 * Navigation.GetHeight()));
+					Navigation.Click();
+					Navigation.Wait();
+				}
+				Logger.Debug("Inventory is sorted by level.");
+			}
+			else
+			{
+				Logger.Debug("Sorting by quality to optimize scan time.");
+				// Check if sorted by quality
+				if (CurrentSortingMethod() != "quality")
+				{
+					Logger.Debug("Not already sorting by quality...");
+					// If not, sort by quality
+					Navigation.SetCursor(
+						X: (int)(230 / 1280.0 * Navigation.GetWidth()),
+						Y: (int)(680 / 720.0 * Navigation.GetHeight()));
+					Navigation.Click();
+					Navigation.Wait();
+					Navigation.SetCursor(
+						X: (int)(250 / 1280.0 * Navigation.GetWidth()),
+						Y: (int)(615 / 720.0 * Navigation.GetHeight()));
+					Navigation.Click();
+					Navigation.Wait();
+				}
+				Logger.Debug("Inventory is sorted by quality");
+			}
 
 			// Go through weapon list
 			while (cardsQueued < weaponCount)
@@ -97,6 +144,22 @@ namespace InventoryKamera
 				}
 				++page;
 				(rectangles, cols, rows) = GetPageOfItems(page);
+			}
+		}
+
+		private static string CurrentSortingMethod()
+		{
+			var region = new Rectangle(
+				x: (int)(100.0 / 1280.0 * Navigation.GetWidth()),
+				y: (int)(660.0 / 720.0 * Navigation.GetHeight()),
+				width: (int)(175.0 / 1280.0 * Navigation.GetWidth()),
+				height: (int)(40.0 / 720.0 * Navigation.GetHeight()));
+
+			using (var bm = Navigation.CaptureRegion(region))
+			{
+				var g = Scraper.ConvertToGrayscale(bm);
+				var mode = Scraper.AnalyzeText(g).Trim().ToLower();
+				return mode.Contains("level") ? "level" : mode.Contains("quality") ? "quality" : null;
 			}
 		}
 
@@ -417,9 +480,11 @@ namespace InventoryKamera
 
 			bool a = false;
 
-			StopScanning = GetRarity(name) < Properties.Settings.Default.MinimumWeaponRarity && ScanLevel(level, ref a) < Properties.Settings.Default.MinimumWeaponLevel;
+            bool belowRarity = GetRarity(name) < Properties.Settings.Default.MinimumWeaponRarity;
+            bool belowLevel = ScanLevel(level, ref a) < Properties.Settings.Default.MinimumWeaponLevel;
+            StopScanning = (SortByLevel && belowLevel) || (!SortByLevel && belowRarity);
 
-			if (StopScanning)
+			if (StopScanning || belowRarity || belowLevel)
             {
 				weaponImages.ForEach(i => i.Dispose());
 				return;

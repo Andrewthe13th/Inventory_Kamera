@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace InventoryKamera
 {
-	public class Inventory
+    public class Inventory
 	{
 		[JsonProperty]
 		public List<Weapon> Weapons { get; private set; }

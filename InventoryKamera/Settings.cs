@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace InventoryKamera.Properties
+﻿namespace InventoryKamera.Properties
 {
 
 
