@@ -369,44 +369,6 @@ namespace InventoryKamera
 			return experience;
 		}
 
-		private static bool ScanConstellation(string character, int contellation)
-        {
-			// Select Constellation
-			int yOffset = (int)((180 + (constellation * 75)) / yReference * Navigation.GetHeight());
-
-			if (Navigation.GetAspectRatio() == new Size(8, 5))
-			{
-				yOffset = (int)((225 + (constellation * 75)) / yReference * Navigation.GetHeight());
-			}
-
-			Navigation.SetCursor((int)(1130 / 1280.0 * Navigation.GetWidth()), yOffset);
-			Navigation.Click();
-
-			var pause = constellation == 0 ? 700 : 550;
-			Navigation.SystemWait(pause);
-
-			if (Properties.Settings.Default.LogScreenshots)
-			{
-				var screenshot = Navigation.CaptureWindow();
-				Directory.CreateDirectory($"./logging/characters/{character}");
-				screenshot.Save($"./logging/characters/{character}/constellation_{constellation + 1}.png");
-			}
-
-			// Grab Color
-			using (Bitmap region = Navigation.CaptureRegion(constActivate))
-			{
-				// Check a small region next to the text "Activate"
-				// for a mostly white backround
-				ImageStatistics statistics = new ImageStatistics(region);
-				if (statistics.Red.Mean >= 190 && statistics.Green.Mean >= 190 && statistics.Blue.Mean >= 190)
-				{
-					return false;
-				}
-			}
-
-			return true;
-		}
-
 		private static int ScanConstellations(string character)
 		{
 			double yReference = 720.0;
@@ -423,11 +385,49 @@ namespace InventoryKamera
 				Right:  (int)( 100 / 1280.0 * Navigation.GetWidth() ),
 				Bottom: (int)( 695 / 720.0 * Navigation.GetHeight() ));
 
+			bool ScanConstellation (int c)
+			{
+				// Select Constellation
+				int yOffset = (int)((180 + (c * 75)) / yReference * Navigation.GetHeight());
+
+				if (Navigation.GetAspectRatio() == new Size(8, 5))
+				{
+					yOffset = (int)((225 + (c * 75)) / yReference * Navigation.GetHeight());
+				}
+
+				Navigation.SetCursor((int)(1130 / 1280.0 * Navigation.GetWidth()), yOffset);
+				Navigation.Click();
+
+				var pause = c == 0 ? 700 : 550;
+				Navigation.SystemWait(pause);
+
+				if (Properties.Settings.Default.LogScreenshots)
+				{
+					var screenshot = Navigation.CaptureWindow();
+					Directory.CreateDirectory($"./logging/characters/{character}");
+					screenshot.Save($"./logging/characters/{character}/constellation_{c + 1}.png");
+				}
+
+				// Grab Color
+				using (Bitmap region = Navigation.CaptureRegion(constActivate))
+				{
+					// Check a small region next to the text "Activate"
+					// for a mostly white backround
+					ImageStatistics statistics = new ImageStatistics(region);
+					if (statistics.Red.Mean >= 190 && statistics.Green.Mean >= 190 && statistics.Blue.Mean >= 190)
+					{
+						return false;
+					}
+				}
+
+				return true;
+			};
+
 			if (ScanConstellation(3))
             {
 				for (constellation = 4; constellation <= 5; constellation++)
 				{
-					if (!ScanConstellation(character, constellation))
+					if (!ScanConstellation(constellation))
                     {
 						break;
                     }
@@ -437,7 +437,7 @@ namespace InventoryKamera
             {
 				for (constellation = 3; constellation >= 1; constellation--)
 				{
-					if (ScanConstellation(character, constellation - 1))
+					if (ScanConstellation(constellation - 1))
 					{
 						break;
 					}
