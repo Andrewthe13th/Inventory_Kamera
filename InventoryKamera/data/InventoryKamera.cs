@@ -53,8 +53,7 @@ namespace InventoryKamera
 					NumWorkers = 2;
 					break;
             }
-
-            ResetLogging();
+			Logger.Info("Kamera initialized");
 		}
 
 		public void ResetLogging()
@@ -85,6 +84,9 @@ namespace InventoryKamera
 
 		public void GatherData()
 		{
+
+			ResetLogging();
+
 			// Initize Image Processors
 			for (int i = 0; i < NumWorkers; i++)
 			{
@@ -97,15 +99,11 @@ namespace InventoryKamera
 			Scraper.RestartEngines();
 
 
-			// Scan Main character Name
-			if (!string.IsNullOrEmpty(Properties.Settings.Default.TravelerName))
-            {
-				Scraper.AssignTravelerName(Properties.Settings.Default.TravelerName);
-            }
-			else
-            {
-				Scraper.AssignTravelerName(CharacterScraper.ScanMainCharacterName());
-			}
+			// Assign Traveler's custom name
+			Scraper.AssignTravelerName(Properties.Settings.Default.TravelerName);
+            
+			// Assign Wanderer's custom name
+			Scraper.UpdateCharacterKey("wanderer", Properties.Settings.Default.WandererName);
 
 
 			if (Properties.Settings.Default.ScanWeapons)

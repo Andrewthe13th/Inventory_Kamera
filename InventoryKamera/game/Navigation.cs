@@ -151,6 +151,15 @@ namespace InventoryKamera
 			SetCursor(buttonX, buttonY);
 			Click();
 			SystemWait(Speed.UI);
+
+			// Scroll item preview hotfix
+			buttonX = (int)(975 / 1280.0 * GetWidth());
+			buttonY = (int)(360 / 720.0 * GetHeight());
+
+			SetCursor(buttonX, buttonY);
+			Click();
+			Scroll(Direction.UP, 15);
+			Wait(200);
 		}
 
 		public static void SelectArtifactInventory()
@@ -160,6 +169,15 @@ namespace InventoryKamera
 			SetCursor(buttonX, buttonY);
 			Click();
 			SystemWait(Speed.UI);
+
+			// Scroll item preview hotfix
+			buttonX = (int)(975 / 1280.0 * GetWidth());
+			buttonY = (int)(360 / 720.0 * GetHeight());
+
+			SetCursor(buttonX, buttonY);
+			Click();
+			Scroll(Direction.UP, 15);
+			Wait(200);
 		}
 
 		public static void SelectCharacterDevelopmentInventory()
@@ -169,6 +187,15 @@ namespace InventoryKamera
 			SetCursor(buttonX, buttonY);
 			Click();
 			SystemWait(Speed.UI);
+
+			// Scroll item preview hotfix
+			buttonX = (int)(975 / 1280.0 * GetWidth());
+			buttonY = (int)(360 / 720.0 * GetHeight());
+
+			SetCursor(buttonX, buttonY);
+			Click();
+			Scroll(Direction.UP, 15);
+			Wait(200);
 		}
 
 		public static void SelectMaterialInventory()
@@ -178,6 +205,15 @@ namespace InventoryKamera
 			SetCursor(buttonX, buttonY);
 			Click();
 			SystemWait(Speed.UI);
+
+			// Scroll item preview hotfix
+			buttonX = (int)(975 / 1280.0 * GetWidth());
+			buttonY = (int)(360 / 720.0 * GetHeight());
+
+			SetCursor(buttonX, buttonY);
+			Click();
+			Scroll(Direction.UP, 15);
+			Wait(200);
 		}
 
 		public static void SelectCharacterAttributes()
@@ -393,6 +429,41 @@ namespace InventoryKamera
 			else
 				sim.Mouse.LeftButtonClick();
 		}
+
+		public static void Scroll(Direction direction, int scrolls, int delay = 1)
+        {
+			Action Scroll;
+            switch (direction)
+            {
+                case Direction.UP:
+					Scroll = () => sim.Mouse.VerticalScroll(1);
+					break;
+                case Direction.DOWN:
+					Scroll = () => sim.Mouse.VerticalScroll(-1);
+                    break;
+                case Direction.LEFT:
+					Scroll = () => sim.Mouse.HorizontalScroll(-1);
+                    break;
+                case Direction.RIGHT:
+					Scroll = () => sim.Mouse.HorizontalScroll(1);
+                    break;
+                default:
+                    return;
+            }
+            for (int i = 0; i < scrolls; i++)
+            {
+				Scroll();
+				Wait(delay);
+            }
+        }
+
+		public enum Direction
+        {
+			UP = 0,
+			DOWN = 1,
+			LEFT = 2,
+			RIGHT = 3,
+        }
 
 		#endregion Mouse
 

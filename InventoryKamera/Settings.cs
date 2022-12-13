@@ -1,4 +1,6 @@
-﻿namespace InventoryKamera.Properties
+﻿using System.Configuration;
+
+namespace InventoryKamera.Properties
 {
 
 
@@ -7,6 +9,7 @@
     //  The PropertyChanged event is raised after a setting's value is changed.
     //  The SettingsLoaded event is raised after the setting values are loaded.
     //  The SettingsSaving event is raised before the setting values are saved.
+    [SettingsProvider(typeof(JsonUserSettingsProvider))]
     internal sealed partial class Settings
     {
 
@@ -19,12 +22,12 @@
             // this.SettingsSaving += this.SettingsSavingEventHandler;
             //
 
-            this.PropertyChanged += this.SettingChangedEventHandler;
+            PropertyChanged += SettingChangedEventHandler;
         }
 
         private void SettingChangedEventHandler(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            this.Save();
+            Save();
         }
 
         private void SettingChangingEventHandler(object sender, System.Configuration.SettingChangingEventArgs e)

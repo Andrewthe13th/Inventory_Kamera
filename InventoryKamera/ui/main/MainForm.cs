@@ -219,7 +219,6 @@ namespace InventoryKamera
                         if (Navigation.GetSize() != Navigation.CaptureWindow().Size) throw new FormatException("Window size and screenshot size mismatch. Please make sure the game is not in a fullscreen mode.");
 
                         data = new InventoryKamera();
-                        data.ResetLogging();
 
                         Logger.Info("Resolution: {0}x{1}", Navigation.GetSize().Width, Navigation.GetSize().Height);
 

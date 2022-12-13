@@ -100,29 +100,26 @@ namespace InventoryKamera
             Logger.Info("Scraper initialized");
         }
 
-        public static void AddTravelerToCharacterList(string traveler)
-		{
-			Characters = new DatabaseManager().LoadCharacters();
+		internal static void UpdateCharacterKey(string target, string name)
+        {
+			if (target == name) return;
 
-			if (!Characters.ContainsKey(traveler))
+			if (Characters.TryGetValue(target, out JObject value))
 			{
-				if (Characters.TryGetValue("traveler", out JObject value))
-				{
-					Characters.Add(traveler, value);
-					Characters.Remove("traveler");
-				}
-				else throw new KeyNotFoundException("Could not find 'traveler' entry in characters.json");
+				Characters.Add(name, value);
+				Characters.Remove(target);
+				Logger.Info("Internally set {0} custom name to {0}", target, name);
 			}
+			else throw new KeyNotFoundException($"Could not find '{target}' entry in characters.json");
 		}
 
-		public static void AssignTravelerName(string traveler)
+		public static void AssignTravelerName(string name)
 		{
-			traveler = traveler.ToLower();
-			if (!string.IsNullOrEmpty(traveler))
+			name = string.IsNullOrWhiteSpace(name) ? CharacterScraper.ScanMainCharacterName() : name.ToLower();
+			if (!string.IsNullOrWhiteSpace(name))
 			{
-				AddTravelerToCharacterList(traveler);
-				UserInterface.SetMainCharacterName(traveler);
-				Logger.Debug("Parsed traveler name {traveler}", traveler);
+				UpdateCharacterKey("traveler", name);
+				UserInterface.SetMainCharacterName(name);
 			}
 			else
 			{
