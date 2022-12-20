@@ -9,9 +9,11 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading;
 using Tesseract;
 
@@ -51,7 +53,7 @@ namespace InventoryKamera
 			"circlet",
 		};
 
-		public static readonly List<string> elements = new List<string>
+		private static readonly List<string> elements = new List<string>
 		{
 			"pyro",
 			"hydro",
@@ -71,9 +73,15 @@ namespace InventoryKamera
 			"sanctifyingessence",
 		};
 
+		public static readonly List<string> customNames = new List<string>
+		{
+			"Traveler",
+			"Wanderer"
+		};
+
 		public static ConcurrentBag<TesseractEngine> engines;
 
-		public static readonly Dictionary<string, string> Weapons, DevMaterials, Materials, AllMaterials, Elements;
+		public static Dictionary<string, string> Weapons, DevItems, Materials, Elements;
 
 		public static Dictionary<string, JObject> Characters, Artifacts;
 
@@ -81,34 +89,46 @@ namespace InventoryKamera
         {
             InitEngines();
 
-            var listManager = new DatabaseManager();
+			ReloadData();
 
-            Characters = listManager.LoadCharacters();
-            Artifacts = listManager.LoadArtifacts();
-            Weapons = listManager.LoadWeapons();
-            DevMaterials = listManager.LoadDevMaterials();
-            Materials = listManager.LoadMaterials();
-            AllMaterials = listManager.LoadAllMaterials();
-            Elements = new Dictionary<string, string>();
-
+			Elements = new Dictionary<string, string>();
 			foreach (var element in elements)
 			{
 				Stats.Add($"{element.ToLower()}dmgbonus", $"{element.ToLower()}_dmg_");  // ["anemodmgbonus"] = "anemo_dmg_"
 				Elements.Add(element, char.ToUpper(element[0]) + element.Substring(1));
 			}
 
-            Logger.Info("Scraper initialized");
+			Logger.Info("Scraper initialized");
         }
+
+		internal static void ReloadData()
+        {
+			var listManager = new DatabaseManager();
+
+			Characters = listManager.LoadCharacters();
+			Artifacts = listManager.LoadArtifacts();
+			Weapons = listManager.LoadWeapons();
+			DevItems = listManager.LoadDevItems();
+			Materials = listManager.LoadMaterials();
+
+		}
 
 		internal static void UpdateCharacterKey(string target, string name)
         {
+			target = ConvertToGOOD(target).ToLower();
+			name = ConvertToGOOD(name).ToLower();
+
 			if (target == name) return;
 
 			if (Characters.TryGetValue(target, out JObject value))
 			{
 				Characters.Add(name, value);
 				Characters.Remove(target);
-				Logger.Info("Internally set {0} custom name to {0}", target, name);
+				Logger.Info("Internally set {0} custom name to {1}", target, name);
+			}
+			else if (Characters.ContainsKey(name))
+			{
+				Logger.Info("{0} already exists internally");
 			}
 			else throw new KeyNotFoundException($"Could not find '{target}' entry in characters.json");
 		}
@@ -197,7 +217,12 @@ namespace InventoryKamera
 
 		public static bool IsValidSetName(string setName)
 		{
-			return true; // Artifacts.ContainsValue(setName) || Artifacts.ContainsKey(setName.ToLower());
+			if (Artifacts.TryGetValue(setName, out var _) || Artifacts.TryGetValue(setName.ToLower(), out var _)) return true;
+			foreach (var artifactSet in Artifacts.Values)
+				foreach (var field in artifactSet)
+					if (field.ToString() == setName) return true;
+                
+			return false;
 		}
 
 		public static bool IsValidArtifactName(string artifactName)
@@ -207,7 +232,7 @@ namespace InventoryKamera
 
 		internal static bool IsValidMaterial(string name)
 		{
-			return AllMaterials.ContainsValue(name) || AllMaterials.ContainsKey(name.ToLower());
+			return Materials.ContainsValue(name) || Materials.ContainsKey(name.ToLower());
 		}
 
 		public static bool IsValidStat(string stat)
@@ -222,7 +247,7 @@ namespace InventoryKamera
 
 		public static bool IsValidCharacter(string character)
 		{
-			return character == "Traveler" || Characters.ContainsKey(character.ToLower());
+			return character.Contains("Traveler") || character == "Wanderer" || Characters.ContainsKey(character.ToLower());
 		}
 
 		public static bool IsValidElement(string element)
@@ -232,7 +257,7 @@ namespace InventoryKamera
 
 		public static bool IsEnhancementMaterial(string material)
 		{
-			return enhancementMaterials.Contains(material.ToLower()) || AllMaterials.ContainsValue(material) || AllMaterials.ContainsKey(material.ToLower());
+			return enhancementMaterials.Contains(material.ToLower()) || Materials.ContainsValue(material) || Materials.ContainsKey(material.ToLower());
 		}
 
 		public static bool IsValidWeapon(string weapon)
@@ -309,14 +334,14 @@ namespace InventoryKamera
 
 		public static string FindClosestDevelopmentName(string name, int maxEdits = 15)
 		{
-			string value = FindClosestInDict(source: name, targets: DevMaterials, maxEdits: maxEdits);
-			return !string.IsNullOrWhiteSpace(value) ? value : FindClosestInDict(source: name, targets: AllMaterials, maxEdits: maxEdits);
+			string value = FindClosestInDict(source: name, targets: DevItems, maxEdits: maxEdits);
+			return !string.IsNullOrWhiteSpace(value) ? value : FindClosestInDict(source: name, targets: Materials, maxEdits: maxEdits);
 		}
 
 		public static string FindClosestMaterialName(string name, int maxEdits = 15)
 		{
 			string value = FindClosestInDict(source: name, targets: Materials, maxEdits: maxEdits);
-			return !string.IsNullOrWhiteSpace(value) ? value : FindClosestInDict(source: name, targets: AllMaterials, maxEdits: maxEdits);
+			return !string.IsNullOrWhiteSpace(value) ? value : FindClosestInDict(source: name, targets: Materials, maxEdits: maxEdits);
 		}
 
 		private static string FindClosestInDict(string source, Dictionary<string, string> targets, int maxEdits = 5)
@@ -814,6 +839,13 @@ namespace InventoryKamera
 			return result;
 		}
 
-        #endregion Image Operations
-    }
+		#endregion Image Operations
+
+		private static string ConvertToGOOD(string text)
+		{
+			text = text.ToLower();
+			var pascal = CultureInfo.GetCultureInfo("en-US").TextInfo.ToTitleCase(text);
+			return Regex.Replace(pascal, @"[\W]", string.Empty);
+		}
+	}
 }

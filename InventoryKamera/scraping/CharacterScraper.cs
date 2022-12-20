@@ -24,19 +24,21 @@ namespace InventoryKamera
 			while (true)
 			{
 				var character = ScanCharacter(first);
-				if (Characters.Count > 0 && character.Name == Characters.ElementAt(0).Name) break;
+				if (Characters.Count > 0 && character.NameGOOD == Characters.ElementAt(0).NameGOOD) break;
 				if (character.IsValid())
 				{
-					if (!scanned.Contains(character.Name))
+					if (!scanned.Contains(character.NameGOOD))
 					{
+						if (character.NameGOOD == "Traveler")
+							character.NameGOOD += character.Element;
 						Characters.Add(character);
 						UserInterface.IncrementCharacterCount();
-						Logger.Info("Scanned {0} successfully", character.Name);
-						if (Characters.Count == 1) first = character.Name;
+						Logger.Info("Scanned {0} successfully", character.NameGOOD);
+						if (Characters.Count == 1) first = character.NameGOOD;
 					}
 					else
                     {
-						Logger.Info("Prevented {0} duplicate scan", character.Name);
+						Logger.Info("Prevented {0} duplicate scan", character.NameGOOD);
                     }
 				}
                 else
@@ -59,7 +61,7 @@ namespace InventoryKamera
 			// Childe passive buff fix
 			for (int i = 0; i < Characters.Count; i++)
 			{
-				if (Characters[i].Name.ToLower() == "tartaglia" && Characters[i].Ascension >= 4)
+				if (Characters[i].NameGOOD.ToLower() == "tartaglia" && Characters[i].Ascension >= 4)
 				{
 					Logger.Info("Ascension 4+ Tartaglia found at position {0}.", i);
 					if (i < 4)
@@ -67,18 +69,18 @@ namespace InventoryKamera
 						for (int j = 0; j < 4; j++)
 						{
 							Characters[j].Talents["auto"] -= 1;
-							Logger.Info("Applied Tartaglia auto attack fix to {0} at position {1}.", Characters[j].Name, j);
+							Logger.Info("Applied Tartaglia auto attack fix to {0} at position {1}.", Characters[j].NameGOOD, j);
 						}
 						break;
 					}
 					else
 					{
 						Characters[i].Talents["auto"] -= 1;
-						Logger.Info("Applied Tartaglia auto attack fix to self only.", Characters[i].Name);
+						Logger.Info("Applied Tartaglia auto attack fix to self only.");
 						break;
 					}
 				}
-				else if (Characters[i].Name.ToLower() == "tartaglia") break;
+				else if (Characters[i].NameGOOD.ToLower() == "tartaglia") break;
             }
 		}
 
@@ -99,26 +101,26 @@ namespace InventoryKamera
 				return character;
 			}
 
-			character.Name = name;
+			character.NameGOOD = name;
 			character.Element = element;
 
 			// Check if character was first scanned
-			if (name != firstCharacter)
+			if (character.NameGOOD != firstCharacter)
 			{
 				bool ascended = false;
 				// Scan Level and ascension
 				int level = ScanLevel(ref ascended);
 				if (level == -1)
 				{
-					UserInterface.AddError($"Could not determine {name}'s level. Setting to 1.");
+					UserInterface.AddError($"Could not determine {character.NameGOOD}'s level. Setting to 1.");
 					level = 1;
 					ascended = false;
 				}
 				character.Level = level;
 				character.Ascended = ascended;
 
-				Logger.Info("{0} Level: {1}", character.Name, character.Level);
-				Logger.Info("{0} Ascended: {1}", character.Name, character.Ascended);
+				Logger.Info("{0} Level: {1}", character.NameGOOD, character.Level);
+				Logger.Info("{0} Ascended: {1}", character.NameGOOD, character.Ascended);
 
 				// Scan Experience
 				//experience = ScanExperience();
@@ -126,14 +128,14 @@ namespace InventoryKamera
 
 				// Scan Constellation
 				Navigation.SelectCharacterConstellation();
-				character.Constellation = ScanConstellations(character.Name);
-				Logger.Info("{0} Constellation: {1}", character.Name, character.Constellation);
+				character.Constellation = ScanConstellations(character);
+				Logger.Info("{0} Constellation: {1}", character.NameGOOD, character.Constellation);
 				Navigation.SystemWait(Navigation.Speed.Normal);
 
 				// Scan Talents
 				Navigation.SelectCharacterTalents();
-				character.Talents = ScanTalents(name);
-				Logger.Info("{0} Talents: {1}", character.Name, "{" + string.Join(", ", character.Talents.Select(kv => kv.Key + "=" + kv.Value).ToArray()) + "}");
+				character.Talents = ScanTalents(character);
+				Logger.Info("{0} Talents: {1}", character.NameGOOD, "{" + string.Join(", ", character.Talents.Select(kv => kv.Key + "=" + kv.Value).ToArray()) + "}");
 				Navigation.SystemWait(Navigation.Speed.Normal);
 
 				// Scale down talents due to constellations
@@ -141,21 +143,25 @@ namespace InventoryKamera
 				{
 					if (Scraper.Characters.ContainsKey(name.ToLower()))
 					{
-						// get talent if character
-						if (character.Constellation >= 5)
+						string talentLeveledAtConst3 = character.NameGOOD == "Traveler"
+                            ? (string)Scraper.Characters[name.ToLower()]["ConstellationOrder"][character.Element.ToLower()][0]
+                            : (string)Scraper.Characters[name.ToLower()]["ConstellationOrder"][0];
+
+                        // Scale down talents
+                        if (character.Constellation >= 5)
 						{
-							Logger.Info("{0} constellation 5+, adjusting scanned skill and burst levels", character.Name);
+							Logger.Info("{0} constellation 5+, adjusting scanned skill and burst levels", character.NameInternal);
 							character.Talents["skill"] -= 3;
 							character.Talents["burst"] -= 3;
 						}
-						else if ((string)Scraper.Characters[name.ToLower()]["ConstellationOrder"][0] == "skill")
+						else if (talentLeveledAtConst3 == "skill")
 						{
-							Logger.Info("{0} constellation 3+, adjusting scanned skill level", character.Name);
+							Logger.Info("{0} constellation 3+, adjusting scanned skill level", character.NameInternal);
 							character.Talents["skill"] -= 3;
 						}
 						else
 						{
-							Logger.Info("{0} constellation 3+, adjusting scanned burst level", character.Name);
+							Logger.Info("{0} constellation 3+, adjusting scanned burst level", character.NameInternal);
 							character.Talents["burst"] -= 3;
 						}
 					}
@@ -163,7 +169,7 @@ namespace InventoryKamera
 						return character;
 				}
 
-				character.WeaponType = Scraper.Characters[name.ToLower()]["WeaponType"].ToObject<WeaponType>();
+				character.WeaponType = Scraper.Characters[character.NameInternal]["WeaponType"].ToObject<WeaponType>();
 
 				return character;
 			}
@@ -254,16 +260,7 @@ namespace InventoryKamera
 						// Find character based on string after /
 						// Long name characters might search by their last name only but it'll still work.
 						name = Scraper.FindClosestCharacterName(Regex.Replace(split[1], @"[\W]", string.Empty));
-						if (name == "Traveler")
-						{
-							foreach (var item in from item in Scraper.Characters
-												 where item.Value["GOOD"].ToString() == "Traveler"
-												 select item)
-							{
-								name = item.Key;
-							}
-						}
-					}
+                    }
 					n.Dispose();
 					Logger.Debug("Scanned character name as {0} with element {1}", name, element);
 
@@ -275,7 +272,7 @@ namespace InventoryKamera
 				}
 				attempts++;
 				Navigation.SystemWait(Navigation.Speed.Normal);
-			} while (( string.IsNullOrWhiteSpace(name) || string.IsNullOrEmpty(element) ) && ( attempts < maxAttempts ));
+			} while ( attempts < maxAttempts );
 			name = null;
 			element = null;
 		}
@@ -283,6 +280,7 @@ namespace InventoryKamera
 		private static int ScanLevel(ref bool ascended)
 		{
 			int level = -1;
+			int rescans = 0;
 
 			var xRef = 1280.0;
 			var yRef = 720.0;
@@ -307,8 +305,10 @@ namespace InventoryKamera
 				Scraper.SetContrast(30.0, ref bm);
 
 				string text = Scraper.AnalyzeText(n).Trim();
+				Logger.Debug("Scanned character level as {0}", text);
 
 				text = Regex.Replace(text, @"(?![0-9/]).", string.Empty);
+				Logger.Debug("Filtered scanned text to {0}", text);
 				if (text.Contains("/"))
 				{
 					var values = text.Split('/');
@@ -319,16 +319,16 @@ namespace InventoryKamera
 						UserInterface.SetCharacter_Level(bm, level, maxLevel);
 						n.Dispose();
 						bm.Dispose();
-						Logger.Debug("Scanned character level as {0}", level);
+						Logger.Debug("Parsed character level as {0}", level);
 						return level;
 					}
 					n.Dispose();
 					bm.Dispose();
 				}
+				Logger.Debug("Failed to parse character level and ascension from {0} (text), retrying", text);
+				rescans++;
 				Navigation.SystemWait(Navigation.Speed.Normal);
-				Logger.Debug("Scanned character level as {0} (text)", text);
-
-			} while (level == -1);
+			} while (rescans < 10);
 
 			return -1;
 		}
@@ -369,7 +369,7 @@ namespace InventoryKamera
 			return experience;
 		}
 
-		private static int ScanConstellations(string character)
+		private static int ScanConstellations(Character character)
 		{
 			double yReference = 720.0;
 			int constellation;
@@ -404,8 +404,8 @@ namespace InventoryKamera
 				if (Properties.Settings.Default.LogScreenshots)
 				{
 					var screenshot = Navigation.CaptureWindow();
-					Directory.CreateDirectory($"./logging/characters/{character}");
-					screenshot.Save($"./logging/characters/{character}/constellation_{constellation + 1}.png");
+					Directory.CreateDirectory($"./logging/characters/{character.NameGOOD}");
+					screenshot.Save($"./logging/characters/{character.NameGOOD}/constellation_{constellation + 1}.png");
 				}
 
 				// Grab Color
@@ -414,10 +414,9 @@ namespace InventoryKamera
 					// Check a small region next to the text "Activate"
 					// for a mostly white backround
 					ImageStatistics statistics = new ImageStatistics(region);
-					if (statistics.Red.Mean >= 190 && statistics.Green.Mean >= 190 && statistics.Blue.Mean >= 190)
-					{
+					if (statistics.Red.Mean >= 190 && statistics.Green.Mean >= 190 && statistics.Blue.Mean >= 190) 
 						break;
-					}
+					
 				}
 			}
 
@@ -426,7 +425,7 @@ namespace InventoryKamera
 			return constellation;
 		}
 
-		private static Dictionary<string, int> ScanTalents(string name)
+		private static Dictionary<string, int> ScanTalents(Character character)
 		{
 			var talents = new Dictionary<string, int>
 			{
@@ -439,7 +438,7 @@ namespace InventoryKamera
 
 			// Check if character has a movement talent like
 			// Mona or Ayaka
-			if (name.Contains("Mona") || name.Contains("Ayaka")) specialOffset = 1;
+			if (character.NameGOOD.Contains("Mona") || character.NameGOOD.Contains("Ayaka")) specialOffset = 1;
 
 			var xRef = 1280.0;
 			var yRef = 720.0;

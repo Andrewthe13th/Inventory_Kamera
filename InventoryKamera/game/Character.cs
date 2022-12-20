@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json;
 
 namespace InventoryKamera
@@ -7,24 +8,22 @@ namespace InventoryKamera
 	[Serializable]
 	public class Character
 	{
-		private string name;
-
 		[JsonProperty("key")]
-		public string Name { 
-			
-			get { return name; }
+		public string NameGOOD { get; internal set; }
 
-			internal set 
+        [JsonIgnore]
+		public string NameInternal
+		{
+			get 
 			{
-				try
-				{
-					name = (string)Scraper.Characters[value.ToLower()]["GOOD"];
-				}
-				catch (Exception)
-				{
-					name = value;
-				}
-			} 
+                foreach (var keyValuePair in from keyValuePair in Scraper.Characters
+                                             where keyValuePair.Value["GOOD"].ToString().Equals(NameGOOD)
+                                             select keyValuePair)
+                {
+                    return keyValuePair.Key;
+                }
+				return NameGOOD.ToLower();
+            }
 		}
 
 		[JsonProperty("level")]
@@ -95,7 +94,7 @@ namespace InventoryKamera
 
 		public bool HasValidName()
 		{
-			return !string.IsNullOrWhiteSpace(Name) && Scraper.IsValidCharacter(Name);
+			return !string.IsNullOrWhiteSpace(NameInternal) && Scraper.IsValidCharacter(NameInternal);
 		}
 
 		public bool HasValidLevel()
@@ -168,7 +167,7 @@ namespace InventoryKamera
 		public override string ToString()
 		{
 			string output = "Character\n";
-			output += $"Name: {Name}\n";
+			output += $"Name: {NameInternal}\n";
 			output += $"Element: {Element}\n";
 			output += $"Level: {Level}{( Ascended ? "+" : "" )}\n";
 			output += $"Ascension Level: {Ascension}\n";

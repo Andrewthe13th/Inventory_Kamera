@@ -180,9 +180,9 @@ namespace InventoryKamera
                 HotkeyManager.Current.AddOrReplace("Stop", Keys.Enter, Hotkey_Pressed);
                 Logger.Info("Hotkey registered");
                 var settings = Properties.Settings.Default;
-                var gameVersion = new DatabaseManager().GameVersion;
+                var gameVersion = new DatabaseManager().LocalVersion;
                 var options =
-                    $"\n\tGame Version:\t\t\t {gameVersion}\n" +
+                    $"\n\tGame Version Data:\t\t\t {gameVersion}\n" +
                     $"\tWeapons:\t\t\t\t {settings.ScanWeapons}\n" +
                     $"\tArtifacts:\t\t\t\t {settings.ScanArtifacts}\n" +
                     $"\tCharacters:\t\t\t\t {settings.ScanCharacters}\n" +
@@ -388,34 +388,33 @@ namespace InventoryKamera
         private void DatabaseUpdateMenuItem_Click(object sender, EventArgs e)
         {
             var database = new DatabaseManager();
-            var status = database.UpdateAllLists();
-            Logger.Info("Update status {0}", status);
+            var status = database.UpdateGameData();
             switch (status)
             {
                 case UpdateStatus.Fail:
-                    MessageBox.Show("Unable to update lookup data. Please check the log for more details", "Update failed", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Stop);
+                    MessageBox.Show("Unable to update game data. Please check the log for more details", "Update failed", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Stop);
                     break;
                 case UpdateStatus.Success:
-                    MessageBox.Show("Update successful.", "Update status", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Information);
-                    Logger.Info("Updated lookup tables to {0}", new DatabaseManager().localVersions);
+                    MessageBox.Show($"Update for game version {database.LocalVersion} successful.", "Update status", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Information);
+                    Logger.Info("Updated game date to {0}", database.LocalVersion);
                     break;
                 case UpdateStatus.Skipped:
-                    var choice = MessageBox.Show($"No update necessary! You are already using the latest game data ({Properties.Settings.Default.RemoteVersion})." +
+                    var choice = MessageBox.Show($"No update necessary! You are already using the latest game data ({database.LocalVersion})." +
                         $" Would you like to force an update?",
                         "Already Up to Date",
                         buttons: MessageBoxButtons.YesNo,
                         icon: MessageBoxIcon.Information);
                     if (choice == DialogResult.Yes)
                     {
-                        status = database.UpdateAllLists(force: true);
+                        status = database.UpdateGameData(force: true);
                         switch (status)
                         {
                             case UpdateStatus.Fail:
-                                MessageBox.Show("Unable to update lookup data. Please check the log for more details", "Update failed", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Stop);
+                                MessageBox.Show("Unable to update game data. Please check the log for more details", "Update failed", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Stop);
                                 break;
                             case UpdateStatus.Success:
-                                MessageBox.Show("Update successful.", "Update status", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Information);
-                                Logger.Info("Updated lookup tables to {0}", new DatabaseManager().localVersions);
+                                MessageBox.Show($"Update for game version {database.LocalVersion} successful.", "Update success", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Information);
+                                Logger.Info("Successfully updated game data to {0}", new DatabaseManager().LocalVersion);
                                 break;
                             default:
                                 break;
@@ -478,7 +477,6 @@ namespace InventoryKamera
 
         private void CheckForUpdates()
         {
-            goto Hotfix;
             var databaseManager = new DatabaseManager();
             try
             {
@@ -489,19 +487,15 @@ namespace InventoryKamera
                     var result = MessageBox.Show(message, "Game Version Update", MessageBoxButtons.YesNo);
                     if (result == DialogResult.Yes)
                     {
-                        var status = databaseManager.UpdateAllLists(force: true);
+                        var status = databaseManager.UpdateGameData(force: true);
                         switch (status)
                         {
                             case UpdateStatus.Fail:
-                                MessageBox.Show("Unable to update lookup data. Please check the log for more details", "Update failed", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Stop);
+                                MessageBox.Show("Unable to update game data. Please check the log for more details", "Update failed", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Stop);
                                 break;
                             case UpdateStatus.Success:
-                                databaseManager.GameVersion = new Version(databaseManager.localVersions["characters"]);
-                                MessageBox.Show($"Update for game version {databaseManager.GameVersion} successful.", "Update status", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Information);
-                                Logger.Info("Updated lookup tables to {0}", databaseManager.GameVersion);
-                                break;
-                            case UpdateStatus.Skipped:
-                                MessageBox.Show($"No update necessary! You are already using the latest game data ({Properties.Settings.Default.RemoteVersion})", "Update skipped", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Information);
+                                MessageBox.Show($"Update for game version {databaseManager.LocalVersion} successful.", "Update status", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Information);
+                                Logger.Info("Updated game data to {0}", databaseManager.LocalVersion);
                                 break;
                             default:
                                 break;
@@ -514,14 +508,15 @@ namespace InventoryKamera
                             " under 'options'", "Update declined", MessageBoxButtons.OK);
                     }
                 }
+                else
+                    Logger.Info("Current game data is up to date with data for {0}", databaseManager.LocalVersion);
             }
             catch (Exception ex)
             {
                 Logger.Warn(ex, "Could not check for list updates");
                 MessageBox.Show("Could not check for updates. Consider trying again in an hour or so.", "Game Version Update", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            Hotfix:
-                Properties.Settings.Default.LastUpdateCheck = DateTime.Now;
+            Properties.Settings.Default.LastUpdateCheck = DateTime.Now;
         }
 
         private void MainForm_Shown(object sender, EventArgs e)
@@ -534,7 +529,7 @@ namespace InventoryKamera
 
             var good = new GOOD(data);
 
-            if (data.Inventory.Size > 0)
+            if (data.Inventory.Size > 0 || data.Characters.Count > 0)
             {
                 good.WriteToJSON(OutputPath_TextBox.Text);
                 Logger.Info("Manually exported data");

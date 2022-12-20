@@ -690,11 +690,9 @@
             // 
             // DatabaseUpdateMenuItem
             // 
-            this.DatabaseUpdateMenuItem.Enabled = false;
             this.DatabaseUpdateMenuItem.Name = "DatabaseUpdateMenuItem";
             this.DatabaseUpdateMenuItem.Size = new System.Drawing.Size(190, 22);
             this.DatabaseUpdateMenuItem.Text = "Update Lookup Tables";
-            this.DatabaseUpdateMenuItem.ToolTipText = "Auto Updater is disabled for now";
             this.DatabaseUpdateMenuItem.Click += new System.EventHandler(this.DatabaseUpdateMenuItem_Click);
             // 
             // toolStripMenuItem1

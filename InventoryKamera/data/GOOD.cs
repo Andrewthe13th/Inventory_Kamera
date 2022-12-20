@@ -45,7 +45,7 @@ namespace InventoryKamera
 		{
 			// Get rid of VS warning since we are converting this class to JSON
 			Format = "GOOD";
-			Version = 1;
+			Version = 2;
 			AppVersion = Regex.Replace(Assembly.GetExecutingAssembly().GetName().Version.ToString(), @"[.0]*$", string.Empty);
 			Source = "Inventory_Kamera";
 

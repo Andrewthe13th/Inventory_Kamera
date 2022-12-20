@@ -87,6 +87,8 @@ namespace InventoryKamera
 
 			ResetLogging();
 
+			Scraper.ReloadData();
+
 			// Initize Image Processors
 			for (int i = 0; i < NumWorkers; i++)
 			{
@@ -420,10 +422,10 @@ namespace InventoryKamera
 			{
 				foreach (Character character in Characters)
 				{
-					if (artifact.EquippedCharacter == character.Name)
+					if (artifact.EquippedCharacter == character.NameInternal)
 					{
 						character.AssignArtifact(artifact); // Do we even need to do this?
-						Logger.Debug("Assigned {fearSlot} to {character}", artifact.GearSlot, character.Name);
+						Logger.Debug("Assigned {fearSlot} to {character}", artifact.GearSlot, character.NameInternal);
 						break;
 					}
 				}
@@ -436,17 +438,17 @@ namespace InventoryKamera
 			{
 				foreach (Weapon weapon in equippedWeapons)
 				{
-					if (weapon.EquippedCharacter == character.Name)
+					if (weapon.EquippedCharacter == character.NameInternal)
 					{
 						character.AssignWeapon(weapon);
-						Logger.Debug("Assigned {weapon} to {character}", weapon.Name, character.Name);
+						Logger.Debug("Assigned {weapon} to {character}", weapon.Name, character.NameInternal);
 						break;
 					}
 				}
 				if (character.Weapon is null)
 				{
-					Inventory.Add(new Weapon(character.WeaponType, character.Name));
-					Logger.Info("Default weapon assigned to {character}", character.Name);
+					Inventory.Add(new Weapon(character.WeaponType, character.NameInternal));
+					Logger.Info("Default weapon assigned to {character}", character.NameInternal);
 				}
 			}
 		}

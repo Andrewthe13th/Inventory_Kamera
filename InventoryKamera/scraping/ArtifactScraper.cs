@@ -36,7 +36,7 @@ namespace InventoryKamera
 
 			Logger.Info("Found {0} for artifact count.", artifactCount);
 
-			SortByLevel = Properties.Settings.Default.MinimumArtifactLevel > 1;
+			SortByLevel = Properties.Settings.Default.MinimumArtifactLevel > 0;
 
 			if (SortByLevel)
 			{
