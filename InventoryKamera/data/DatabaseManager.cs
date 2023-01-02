@@ -672,6 +672,14 @@ namespace InventoryKamera
 
         private string ConvertToGOOD(string text)
         {
+            foreach (Match match in Regex.Matches(text, @"&#\d*;"))
+            {
+                if (int.TryParse(Regex.Replace(match.Value, @"\D", string.Empty), out int dec))
+                    text = text.Replace(match.Value, Char.ToString(Convert.ToChar(dec)));
+
+                else
+                    Logger.Warn("Failed to parse decimal value {0} from string {1}", match.Value, text);
+            }
             var pascal = CultureInfo.GetCultureInfo("en-US").TextInfo.ToTitleCase(text);
             return Regex.Replace(pascal, @"[\W]", string.Empty);
         }
