@@ -116,6 +116,10 @@ namespace InventoryKamera
                             Logger.Debug("Version {0} is released!", version);
                             return version;
                         }
+                        else
+                        {
+                            Logger.Debug("Version {0} is announced but not released!", version);
+                        }
                     }
                     else Logger.Debug("Could not parse date from {0} for version {1}", entry[2], entry[0]);
                 }
@@ -184,46 +188,55 @@ namespace InventoryKamera
 
         public UpdateStatus UpdateGameData(bool force = false)
         {
-            UpdateStatus overallStatus = UpdateStatus.Success;
-            var statusLock = new Object();
-
-            if (force)
+            try
             {
-                Logger.Info("Forcing update for game data");
-                Properties.Settings.Default.LastUpdateCheck = DateTime.MinValue;
-                RemoteVersion = CheckRemoteVersion();
-                if (RemoteVersion is null) return UpdateStatus.Fail;
-            }
+                UpdateStatus overallStatus = UpdateStatus.Success;
+                var statusLock = new Object();
 
-            var lists = Enum.GetValues(typeof(ListType)).Cast<ListType>().ToList();
-
-            lists.RemoveAll(e => e == ListType.CharacterDevelopmentItems);
-
-            lists.AsParallel().ForAll(e =>
-            {
-                var status = UpdateList(e, force);
-                if (status == UpdateStatus.Fail)
+                if (force)
                 {
-                    lock (statusLock) overallStatus = UpdateStatus.Fail;
-                    Logger.Error("Failed to update {0} data", e);
+                    Logger.Info("Forcing update for game data");
+                    Properties.Settings.Default.LastUpdateCheck = DateTime.MinValue;
+                    RemoteVersion = CheckRemoteVersion();
                 }
-                else if (overallStatus != UpdateStatus.Fail)
+
+                var lists = Enum.GetValues(typeof(ListType)).Cast<ListType>().ToList();
+
+                lists.RemoveAll(e => e == ListType.CharacterDevelopmentItems);
+
+                lists.AsParallel().ForAll(e =>
                 {
-                    lock (statusLock) overallStatus = status;
+                    var status = UpdateList(e, force);
+                    if (status == UpdateStatus.Fail)
+                    {
+                        lock (statusLock) overallStatus = UpdateStatus.Fail;
+                        Logger.Error("Failed to update {0} data", e);
+                    }
+                    else if (overallStatus != UpdateStatus.Fail)
+                    {
+                        lock (statusLock) overallStatus = status;
+                    }
+                });
+
+                if (overallStatus == UpdateStatus.Success)
+                {
+                    LocalVersion = RemoteVersion;
+                    File.WriteAllText(ListsDir + NewVersion, LocalVersion.ToString());
                 }
-            });
+                else if (overallStatus == UpdateStatus.Fail)
+                    Logger.Error($"Could not update all information for version {RemoteVersion}");
+                else
+                    Logger.Info("No update neccessary");
 
-            if (overallStatus == UpdateStatus.Success)
-            {
-                LocalVersion = RemoteVersion;
-                File.WriteAllText(ListsDir + NewVersion, LocalVersion.ToString());
+                return overallStatus;
             }
-            else if (overallStatus == UpdateStatus.Fail)
-                Logger.Error($"Could not update all information for version {RemoteVersion}");
-            else
-                Logger.Info("No update neccessary");
+            catch (Exception e)
+            {
 
-            return overallStatus;
+                Logger.Error(e);
+                return UpdateStatus.Fail;
+            }
+            
         }
 
         private UpdateStatus UpdateList(ListType list, bool force = false)
@@ -255,14 +268,15 @@ namespace InventoryKamera
                     default:
                         break;
                 }
+                Logger.Info("Finished updating {0} ({1})", list, status);
             }
-            catch
+            catch (Exception e)
             {
-                status = UpdateStatus.Fail;
                 Logger.Error("Failed to update {0} data", list);
+                Logger.Error(e);
+                return UpdateStatus.Fail;
             }
 
-            Logger.Info("Finished updating {0} ({1})", list, status);
             return status;
         }
 
@@ -284,8 +298,7 @@ namespace InventoryKamera
                                .Descendants("tr")
                                .Where(tr => tr.Elements("td").Count() > 1)
                                .Select(tr => tr.Elements("td").Where(t => t.InnerText.Trim().Length > 0).ToList());
-            try
-            {
+            
                 table.AsParallel().ForAll(entry =>
                 {
                     var nameCell = entry[0].FirstChild;
@@ -293,158 +306,166 @@ namespace InventoryKamera
                     var characterName = nameCell.InnerText.Trim();
                     var nameGOOD = ConvertToGOOD(characterName);
                     var nameKey = nameGOOD.ToLower();
-
-                    if (data.ContainsKey(nameKey)) return;
-
-                    var characterLink = Wiki + nameCell.Attributes["href"].Value;
-
-                    var constellationOrder = new JArray();
-                    var constellationName = new JArray();
-                    WeaponType weaponType;
-                    var value = new JObject();
-
-                    if (nameKey != "traveler")
+                    try
                     {
-                        var characterHTML = FetchHTML(characterLink);
-                        var characterDoc = new HtmlDocument();
+                        if (data.ContainsKey(nameKey)) return;
 
-                        characterDoc.LoadHtml(characterHTML);
+                        var characterLink = Wiki + nameCell.Attributes["href"].Value;
 
-                        var talents = characterDoc.DocumentNode.SelectSingleNode("//div[contains(@class, 'talent-table')]")
-                                                   .Descendants("tr")
-                                                   .Where(tr => tr.Elements("td").Count() == 3)
-                                                   .Take(3)
-                                                   .ToList();
-                        var skill = talents[1].ChildNodes[1].InnerText;
-                        var burst = talents[2].ChildNodes[1].InnerText;
+                        var constellationOrder = new JArray();
+                        var constellationName = new JArray();
+                        WeaponType weaponType;
+                        var value = new JObject();
 
-                        constellationName = new JArray(characterDoc.DocumentNode.SelectSingleNode("//div[contains(@data-source, 'constellation')]")
-                                                             .Descendants("div")
-                                                             .First().FirstChild.InnerText);
-
-
-                        var constellationTable = characterDoc.DocumentNode.SelectSingleNode("//table[contains(@class, 'wikitable talent_table')]")
-                                                              .Descendants("tr")
-                                                              .ToList();
-                        var constellationDescriptions = constellationTable.Where(tr => tr.Elements("td").Count() == 1)
-                                                              .ToList();
-
-                        if (constellationDescriptions[2].InnerText.Contains(skill))
+                        if (nameKey != "traveler")
                         {
-                            Logger.Debug($"{characterName} skill is leveled at constellation 3");
-                            constellationOrder.Add("skill");
-                            constellationOrder.Add("burst");
-                        }
-                        else if (constellationDescriptions[2].InnerText.Contains(burst))
-                        {
-                            Logger.Debug($"{characterName} burst is leveled at constellation 3");
-                            constellationOrder.Add("burst");
-                            constellationOrder.Add("skill");
-                        }
-                        else
-                        {
-                            Logger.Debug($"{characterName} doesn't have skill or burst leveled at constellation 3??");
-                            constellationOrder.Add("skill");
-                            constellationOrder.Add("burst");
-                        }
+                            var characterHTML = FetchHTML(characterLink);
+                            var characterDoc = new HtmlDocument();
 
-                        var weapon = characterDoc.DocumentNode.SelectSingleNode("//td[contains(@data-source, 'weapon')]").Descendants("a").First().Attributes["title"].Value.ToLower();
-                        switch (weapon)
-                        {
-                            case "sword":
-                                weaponType = WeaponType.Sword;
-                                break;
-                            case "claymore":
-                                weaponType = WeaponType.Claymore;
-                                break;
-                            case "polearm":
-                                weaponType = WeaponType.Polearm;
-                                break;
-                            case "catalyst":
-                                weaponType = WeaponType.Catalyst;
-                                break;
-                            case "bow":
-                                weaponType = WeaponType.Bow;
-                                break;
-                            default:
-                                throw new IndexOutOfRangeException($"{characterName} uses unknown weapon type {weapon}");
-                        }
-                        value = new JObject
-                    {
-                        { "GOOD", nameGOOD },
-                        { "ConstellationName", constellationName },
-                        { "ConstellationOrder", constellationOrder },
-                        { "WeaponType", (int)weaponType }
-                    };
-                    }
-                    else
-                    {
-                        constellationName = JArray.FromObject(new string[] { "Viator", "Viatrix" });
-                        weaponType = WeaponType.Sword;
+                            characterDoc.LoadHtml(characterHTML);
 
-                        var constellationOrders = new JObject();
-
-                        foreach (var element in elements)
-                        {
-                            string travelerHTML;
-                            var travelerLink = characterLink + $"_({element})";
-
-                            try
-                            {
-                                travelerHTML = FetchHTML(travelerLink);
-                            }
-                            catch { Logger.Debug($"Error trying to fetch {element} page for Traveler. Probably is not in the game yet."); continue; }
-                            var travelerDoc = new HtmlDocument();
-                            travelerDoc.LoadHtml(travelerHTML);
-
-                            var talents = travelerDoc.DocumentNode.SelectSingleNode("//div[contains(@class, 'talent-table')]")
-                                                .Descendants("tr")
-                                                .Where(tr => tr.InnerText.Contains("Normal Attack") || tr.InnerText.Contains("Elemental Skill") || tr.InnerText.Contains("Elemental Burst"))
-                                                .Where(tr => tr.Elements("td").Count() == 3)
-                                                .Take(3)
-                                                .ToList();
+                            var talents = characterDoc.DocumentNode.SelectSingleNode("//div[contains(@class, 'talent-table')]")
+                                                       .Descendants("tr")
+                                                       .Where(tr => tr.Elements("td").Count() == 3)
+                                                       .Take(3)
+                                                       .ToList();
                             var skill = talents[1].ChildNodes[1].InnerText;
                             var burst = talents[2].ChildNodes[1].InnerText;
 
+                            constellationName = new JArray(characterDoc.DocumentNode.SelectSingleNode("//div[contains(@data-source, 'constellation')]")
+                                                                 .Descendants("div")
+                                                                 .First().FirstChild.InnerText);
 
-                            var constellationTable = travelerDoc.DocumentNode.SelectSingleNode("//table[contains(@class, 'wikitable talent_table')]")
-                                                                    .Descendants("tr")
-                                                                    .ToList();
+
+                            var constellationTable = characterDoc.DocumentNode.SelectSingleNode("//table[contains(@class, 'wikitable talent_table')]")
+                                                                  .Descendants("tr")
+                                                                  .ToList();
                             var constellationDescriptions = constellationTable.Where(tr => tr.Elements("td").Count() == 1)
-                                                                    .ToList();
+                                                                  .ToList();
 
-                            constellationOrder = new JArray();
                             if (constellationDescriptions[2].InnerText.Contains(skill))
                             {
-                                Logger.Debug("{0} {1} skill is leveled at constellation 3", element, characterName);
+                                Logger.Debug($"{characterName} skill is leveled at constellation 3");
                                 constellationOrder.Add("skill");
                                 constellationOrder.Add("burst");
                             }
                             else if (constellationDescriptions[2].InnerText.Contains(burst))
                             {
-                                Logger.Debug("{0} {1} burst is leveled at constellation 3", element, characterName);
+                                Logger.Debug($"{characterName} burst is leveled at constellation 3");
                                 constellationOrder.Add("burst");
                                 constellationOrder.Add("skill");
                             }
+                            else
+                            {
+                                Logger.Debug($"{characterName} doesn't have skill or burst leveled at constellation 3??");
+                                constellationOrder.Add("skill");
+                                constellationOrder.Add("burst");
+                            }
 
-                            constellationOrders.Add(element.ToLower(), constellationOrder);
-                        }
-                        value = new JObject
+                            var weapon = characterDoc.DocumentNode.SelectSingleNode("//td[contains(@data-source, 'weapon')]").Descendants("a").First().Attributes["title"].Value.ToLower();
+                            switch (weapon)
+                            {
+                                case "sword":
+                                    weaponType = WeaponType.Sword;
+                                    break;
+                                case "claymore":
+                                    weaponType = WeaponType.Claymore;
+                                    break;
+                                case "polearm":
+                                    weaponType = WeaponType.Polearm;
+                                    break;
+                                case "catalyst":
+                                    weaponType = WeaponType.Catalyst;
+                                    break;
+                                case "bow":
+                                    weaponType = WeaponType.Bow;
+                                    break;
+                                default:
+                                    throw new IndexOutOfRangeException($"{characterName} uses unknown weapon type {weapon}");
+                            }
+                            value = new JObject
                         {
                             { "GOOD", nameGOOD },
                             { "ConstellationName", constellationName },
-                            { "ConstellationOrder", constellationOrders },
+                            { "ConstellationOrder", constellationOrder },
                             { "WeaponType", (int)weaponType }
                         };
+                        }
+                        else
+                        {
+                            constellationName = JArray.FromObject(new string[] { "Viator", "Viatrix" });
+                            weaponType = WeaponType.Sword;
+
+                            var constellationOrders = new JObject();
+
+                            foreach (var element in elements)
+                            {
+                                string travelerHTML;
+                                var travelerLink = characterLink + $"_({element})";
+
+                                try
+                                {
+                                    travelerHTML = FetchHTML(travelerLink);
+                                }
+                                catch { Logger.Debug($"Error trying to fetch {element} page for Traveler. Probably is not in the game yet."); continue; }
+                                var travelerDoc = new HtmlDocument();
+                                travelerDoc.LoadHtml(travelerHTML);
+
+                                var talents = travelerDoc.DocumentNode.SelectSingleNode("//div[contains(@class, 'talent-table')]")
+                                                    .Descendants("tr")
+                                                    .Where(tr => tr.InnerText.Contains("Normal Attack") || tr.InnerText.Contains("Elemental Skill") || tr.InnerText.Contains("Elemental Burst"))
+                                                    .Where(tr => tr.Elements("td").Count() == 3)
+                                                    .Take(3)
+                                                    .ToList();
+                                var skill = talents[1].ChildNodes[1].InnerText;
+                                var burst = talents[2].ChildNodes[1].InnerText;
+
+
+                                var constellationTable = travelerDoc.DocumentNode.SelectSingleNode("//table[contains(@class, 'wikitable talent_table')]")
+                                                                        .Descendants("tr")
+                                                                        .ToList();
+                                var constellationDescriptions = constellationTable.Where(tr => tr.Elements("td").Count() == 1)
+                                                                        .ToList();
+
+                                constellationOrder = new JArray();
+                                if (constellationDescriptions[2].InnerText.Contains(skill))
+                                {
+                                    Logger.Debug("{0} {1} skill is leveled at constellation 3", element, characterName);
+                                    constellationOrder.Add("skill");
+                                    constellationOrder.Add("burst");
+                                }
+                                else if (constellationDescriptions[2].InnerText.Contains(burst))
+                                {
+                                    Logger.Debug("{0} {1} burst is leveled at constellation 3", element, characterName);
+                                    constellationOrder.Add("burst");
+                                    constellationOrder.Add("skill");
+                                }
+
+                                constellationOrders.Add(element.ToLower(), constellationOrder);
+                            }
+                            value = new JObject
+                            {
+                                { "GOOD", nameGOOD },
+                                { "ConstellationName", constellationName },
+                                { "ConstellationOrder", constellationOrders },
+                                { "WeaponType", (int)weaponType }
+                            };
+                        }
+                        lock (statusLock)
+                            if (data.TryAdd(nameKey, value) && status != UpdateStatus.Fail)
+                                status = UpdateStatus.Success;
                     }
-
-                    if (data.TryAdd(nameKey, value))
-                        lock (statusLock) status = UpdateStatus.Success;
+                    catch (Exception e)
+                    {
+                        Logger.Error("An error was encountered when gathering information for the character {0}", nameCell); 
+                        Logger.Error(e);
+                        lock (statusLock) status = UpdateStatus.Fail;
+                    }
                 });
-            }
-            catch { status = UpdateStatus.Fail; }
+            
 
-            SaveJsonToFile(JsonConvert.SerializeObject(data), CharactersJson);
+            if (status == UpdateStatus.Success)
+                SaveJsonToFile(JsonConvert.SerializeObject(data), CharactersJson);
 
             return status;
         }
@@ -473,50 +494,51 @@ namespace InventoryKamera
                 var setName = entry[0].InnerText.Trim();
                 var setGOOD = ConvertToGOOD(setName);
                 var setKey = setGOOD.ToLower();
-
-                var setLink = Wiki + entry[0].FirstChild.Attributes["href"].Value;
-                var setHTML = FetchHTML(setLink);
-                var setDoc = new HtmlDocument();
-
-                setDoc.LoadHtml(setHTML);
-
-                var aside = setDoc.DocumentNode.SelectSingleNode("//aside[contains(@class, 'portable-infobox')]")
-                                   .Descendants("div")
-                                   .Where(div =>
-                                   {
-                                       var text = div.InnerText.ToLower().Trim();
-                                       return
-                                       text.Contains("flower of life") ||
-                                       text.Contains("plume of death") ||
-                                       text.Contains("sands of eon") ||
-                                       text.Contains("goblet of eonothem") ||
-                                       text.Contains("circlet of logos");
-                                   })
-                                   .Where(div =>
-                                   {
-                                       return div.Attributes["class"].Value.Contains("value");
-                                   }
-                                   ).ToList();
-                var artifacts = new JObject();
-                foreach (var slotNode in aside)
+                try
                 {
-                    var slot = slotNode.FirstChild.InnerText.Trim();
+                    var setLink = Wiki + entry[0].FirstChild.Attributes["href"].Value;
+                    var setHTML = FetchHTML(setLink);
+                    var setDoc = new HtmlDocument();
 
-                    slot = slots.Where(x => slot.ToLower().Contains(x)).First().Split(' ').First();
+                    setDoc.LoadHtml(setHTML);
 
-                    var name = slotNode.LastChild.InnerText.Trim();
-                    var nameGOOD = ConvertToGOOD(name);
-                    var nameNormalized = nameGOOD.ToLower();
+                    var aside = setDoc.DocumentNode.SelectSingleNode("//aside[contains(@class, 'portable-infobox')]")
+                                       .Descendants("div")
+                                       .Where(div =>
+                                       {
+                                           var text = div.InnerText.ToLower().Trim();
+                                           return
+                                           text.Contains("flower of life") ||
+                                           text.Contains("plume of death") ||
+                                           text.Contains("sands of eon") ||
+                                           text.Contains("goblet of eonothem") ||
+                                           text.Contains("circlet of logos");
+                                       })
+                                       .Where(div =>
+                                       {
+                                           return div.Attributes["class"].Value.Contains("value");
+                                       }
+                                       ).ToList();
+                    var artifacts = new JObject();
+                    foreach (var slotNode in aside)
+                    {
+                        var slot = slotNode.FirstChild.InnerText.Trim();
 
-                    artifacts.Add(slot, new JObject
+                        slot = slots.Where(x => slot.ToLower().Contains(x)).First().Split(' ').First();
+
+                        var name = slotNode.LastChild.InnerText.Trim();
+                        var nameGOOD = ConvertToGOOD(name);
+                        var nameNormalized = nameGOOD.ToLower();
+
+                        artifacts.Add(slot, new JObject
                     {
                         { "artifactName", name },
                         { "GOOD", nameGOOD },
                         { "normalizedName", nameNormalized }
                     });
-                }
+                    }
 
-                var value = new JObject
+                    var value = new JObject
                 {
                     { "setName", setName },
                     { "GOOD", setGOOD },
@@ -524,11 +546,19 @@ namespace InventoryKamera
                     { "artifacts", artifacts }
                 };
 
-                if (data.TryAdd(setKey, value))
-                    lock (statusLock) status = UpdateStatus.Success;
+                    if (data.TryAdd(setKey, value))
+                        lock (statusLock) status = UpdateStatus.Success;
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("An error was encountered when gathering information for the artifact set {0}", setName);
+                    Logger.Error(e);
+                    lock (statusLock) status = UpdateStatus.Fail;
+                }
             });
 
-            SaveJsonToFile(JsonConvert.SerializeObject(data), ArtifactsJson);
+            if (status == UpdateStatus.Success)
+                SaveJsonToFile(JsonConvert.SerializeObject(data), ArtifactsJson);
 
             return status;
         }
@@ -561,7 +591,8 @@ namespace InventoryKamera
                     lock (statusLock) status = UpdateStatus.Success;
             });
 
-            SaveJsonToFile(JsonConvert.SerializeObject(data), WeaponsJson);
+            if (status == UpdateStatus.Success)
+                SaveJsonToFile(JsonConvert.SerializeObject(data), WeaponsJson);
 
             return status;
         }
@@ -597,9 +628,9 @@ namespace InventoryKamera
                 doc.LoadHtml(html);
 
                 var items = doc.DocumentNode.SelectSingleNode("//table[contains(@class, 'hlist')]")
-                                .SelectNodes("//div[contains(@class, 'mini_card_image')]")
-                                .Select(i => i.FirstChild.Attributes["title"].Value.Trim())
-                                .ToList();
+                                .SelectNodes("//span[contains(@class, 'card-image')]")
+                                .Descendants("a")
+                                .Select(i => i.Attributes["title"].Value.Trim()).ToList();
 
                 foreach (var item in items)
                 {
@@ -613,7 +644,8 @@ namespace InventoryKamera
                 }
             }
 
-            SaveJsonToFile(JsonConvert.SerializeObject(data), MaterialsJson);
+            if (status == UpdateStatus.Success)
+                SaveJsonToFile(JsonConvert.SerializeObject(data), MaterialsJson);
 
             return status;
         }

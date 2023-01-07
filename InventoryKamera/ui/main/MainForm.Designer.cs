@@ -422,13 +422,15 @@
             // ErrorLog_Label
             // 
             this.ErrorLog_Label.AutoSize = true;
-            this.ErrorLog_Label.ForeColor = System.Drawing.SystemColors.Control;
+            this.ErrorLog_Label.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.ErrorLog_Label.ForeColor = System.Drawing.SystemColors.MenuHighlight;
             this.ErrorLog_Label.Location = new System.Drawing.Point(7, 221);
             this.ErrorLog_Label.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.ErrorLog_Label.Name = "ErrorLog_Label";
-            this.ErrorLog_Label.Size = new System.Drawing.Size(56, 13);
+            this.ErrorLog_Label.Size = new System.Drawing.Size(122, 13);
             this.ErrorLog_Label.TabIndex = 54;
-            this.ErrorLog_Label.Text = "Error Log: ";
+            this.ErrorLog_Label.Text = "Error Log:  ( scroll/click )";
+            this.ErrorLog_Label.Click += new System.EventHandler(this.ErrorLog_Label_Click);
             // 
             // ErrorReport_Label
             // 

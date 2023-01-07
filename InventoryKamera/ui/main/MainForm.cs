@@ -541,5 +541,10 @@ namespace InventoryKamera
         {
             BeginInvoke((MethodInvoker)delegate { Activate(); });
         }
+
+        private void ErrorLog_Label_Click(object sender, EventArgs e)
+        {
+            Process.Start($@"logging");
+        }
     }
 }
