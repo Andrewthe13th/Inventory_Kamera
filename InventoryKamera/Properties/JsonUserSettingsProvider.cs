@@ -51,7 +51,7 @@ namespace InventoryKamera.Properties
                 {
                     settingsJson = JObject.Parse(File.ReadAllText(SettingsFile));
                 }
-                catch (JsonReaderException exception)
+                catch (JsonReaderException)
                 {
                     // Using default setting cause file isn't valid JSON
                 }

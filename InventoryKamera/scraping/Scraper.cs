@@ -25,7 +25,7 @@ namespace InventoryKamera
 
 		private const int numEngines = 8;
 
-		private static readonly string tesseractDatapath = $"{Directory.GetCurrentDirectory()}\\tessdata";
+		private static readonly string tesseractDatapath = $".\\tessdata";
 		private static readonly string tesseractLanguage = "genshin_fast_09_04_21";
 
 		public static Dictionary<string, string> Stats = new Dictionary<string, string>
@@ -224,11 +224,6 @@ namespace InventoryKamera
                 
 			return false;
 		}
-
-		public static bool IsValidArtifactName(string artifactName)
-        {
-			return false;
-        }
 
 		internal static bool IsValidMaterial(string name)
 		{
@@ -462,11 +457,9 @@ namespace InventoryKamera
 
 			void Swap<T>(ref T arg1, ref T arg2)
 			{
-				T temp = arg1;
-				arg1 = arg2;
-				arg2 = temp;
-			}
-		}
+                (arg2, arg1) = (arg1, arg2);
+            }
+        }
 
 		#endregion Element Searching
 
@@ -475,7 +468,7 @@ namespace InventoryKamera
 		{
 			Navigation.SetDelay(180);
 			int delayOffset = 20;
-			bool bStoppedOnce = false; bool bStop = false;
+			bool bStoppedOnce = false;
 			Bitmap card1; Bitmap card2; Bitmap card3;
 			Rectangle item1 = rectangles[0];
 
@@ -582,9 +575,8 @@ namespace InventoryKamera
 				{
 					if (bStoppedOnce)
 					{
-						bStop = true;
-					}
-					bStoppedOnce = true;
+                    }
+                    bStoppedOnce = true;
 				}
 			} while (!bStoppedOnce && ( Navigation.GetDelay() - delayOffset > 0 ));
 

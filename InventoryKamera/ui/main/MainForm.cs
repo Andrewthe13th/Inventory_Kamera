@@ -54,7 +54,7 @@ namespace InventoryKamera
                 Navigation_Image);
             MaximizeBox = false;
             MinimizeBox = false;
-            Logger.Info("MainForm initialization complete");
+            
         }
 
         private double ScannerDelayValue(int value)

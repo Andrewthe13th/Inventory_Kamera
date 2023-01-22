@@ -34,7 +34,7 @@ namespace InventoryKamera
         private const string CharactersJson = "characters.json";
         private const string MaterialsJson = "materials.json";
 
-        private string NewVersion = "version.txt";
+        private readonly string NewVersion = "version.txt";
 
         private const string Wiki = "https://genshin-impact.fandom.com";
         private const string CharacterWiki = Wiki + "/wiki/Character/List";
@@ -182,8 +182,9 @@ namespace InventoryKamera
 
             if (!File.Exists(ListsDir + file)) throw new FileNotFoundException($"Data file does not exist for {list}.");
             string json = LoadJsonFromFile(file);
-            if (json == "{}") throw new FormatException($"Data file for {list} is invalid. Please try running the auto updater and try again.");
-            return JToken.Parse(json);
+            return json == "{}"
+                ? throw new FormatException($"Data file for {list} is invalid. Please try running the auto updater and try again.")
+                : JToken.Parse(json);
         }
 
         public UpdateStatus UpdateGameData(bool force = false)
@@ -337,7 +338,7 @@ namespace InventoryKamera
                                                                  .First().FirstChild.InnerText);
 
 
-                            var constellationTable = characterDoc.DocumentNode.SelectSingleNode("//table[contains(@class, 'wikitable talent_table')]")
+                            var constellationTable = characterDoc.DocumentNode.SelectSingleNode("//div[contains(@class, 'talent-table-container')]")
                                                                   .Descendants("tr")
                                                                   .ToList();
                             var constellationDescriptions = constellationTable.Where(tr => tr.Elements("td").Count() == 1)

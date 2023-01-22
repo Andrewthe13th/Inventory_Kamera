@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using InventoryKamera.ui.main;
+using NLog;
 using System;
 using System.Windows.Forms;
 
@@ -22,6 +23,7 @@ namespace InventoryKamera
 				Application.EnableVisualStyles();
 				Application.SetCompatibleTextRenderingDefault(false);
 				Application.Run(new MainForm());
+				//Application.Run(new MainUI());
             }
             catch (Exception ex)
             {
@@ -31,6 +33,7 @@ namespace InventoryKamera
 					"Application Crashed",
 					MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+			Logger.Info("Application closed");
 		}
 
         private static void ConfigureLogging()

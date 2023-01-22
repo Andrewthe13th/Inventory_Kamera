@@ -14,7 +14,7 @@ namespace InventoryKamera
 {
     public static class ArtifactScraper
 	{
-		private static NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+		private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
 		private static bool SortByLevel;
 		public static bool StopScanning { get; set; }
@@ -554,7 +554,7 @@ namespace InventoryKamera
 			return new Artifact(setName, rarity, level, gearSlot, mainStat, subStats.ToArray(), subStats.Count, equippedCharacter, id, _lock);
 		}
 
-		private static int GetRarity(Bitmap bm, double scale = 1)
+		private static int GetRarity(Bitmap bm)
 		{
 			var averageColor = new ImageStatistics(bm);
 

@@ -279,10 +279,9 @@ namespace InventoryKamera
 
 		private static int ScanLevel(ref bool ascended)
 		{
-			int level = -1;
-			int rescans = 0;
+            int rescans = 0;
 
-			var xRef = 1280.0;
+            var xRef = 1280.0;
 			var yRef = 720.0;
 			if (Navigation.GetAspectRatio() == new Size(8, 5))
 			{
@@ -312,17 +311,17 @@ namespace InventoryKamera
 				if (text.Contains("/"))
 				{
 					var values = text.Split('/');
-					if (int.TryParse(values[0], out level) && int.TryParse(values[1], out int maxLevel))
-					{
-						maxLevel = (int)Math.Round(maxLevel / 10.0, MidpointRounding.AwayFromZero) * 10;
-						ascended = 20 <= level && level < maxLevel;
-						UserInterface.SetCharacter_Level(bm, level, maxLevel);
-						n.Dispose();
-						bm.Dispose();
-						Logger.Debug("Parsed character level as {0}", level);
-						return level;
-					}
-					n.Dispose();
+                    if (int.TryParse(values[0], out int level) && int.TryParse(values[1], out int maxLevel))
+                    {
+                        maxLevel = (int)Math.Round(maxLevel / 10.0, MidpointRounding.AwayFromZero) * 10;
+                        ascended = 20 <= level && level < maxLevel;
+                        UserInterface.SetCharacter_Level(bm, level, maxLevel);
+                        n.Dispose();
+                        bm.Dispose();
+                        Logger.Debug("Parsed character level as {0}", level);
+                        return level;
+                    }
+                    n.Dispose();
 					bm.Dispose();
 				}
 				Logger.Debug("Failed to parse character level and ascension from {0} (text), retrying", text);
