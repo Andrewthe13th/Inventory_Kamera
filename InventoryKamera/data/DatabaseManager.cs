@@ -233,7 +233,6 @@ namespace InventoryKamera
             }
             catch (Exception e)
             {
-
                 Logger.Error(e);
                 return UpdateStatus.Fail;
             }
@@ -325,7 +324,7 @@ namespace InventoryKamera
 
                             characterDoc.LoadHtml(characterHTML);
 
-                            var talents = characterDoc.DocumentNode.SelectSingleNode("//div[contains(@class, 'talent-table')]")
+                            var talents = characterDoc.DocumentNode.SelectSingleNode("//span[@id='Talents']").ParentNode.NextSibling.NextSibling
                                                        .Descendants("tr")
                                                        .Where(tr => tr.Elements("td").Count() == 3)
                                                        .Take(3)
@@ -338,19 +337,19 @@ namespace InventoryKamera
                                                                  .First().FirstChild.InnerText);
 
 
-                            var constellationTable = characterDoc.DocumentNode.SelectSingleNode("//div[contains(@class, 'talent-table-container')]")
+                            var constellationTable = characterDoc.DocumentNode.SelectSingleNode("//span[@id='Constellation']").ParentNode.NextSibling.NextSibling
                                                                   .Descendants("tr")
-                                                                  .ToList();
-                            var constellationDescriptions = constellationTable.Where(tr => tr.Elements("td").Count() == 1)
+                                                                  .ToList()
+                                                                  .Where(tr => tr.Elements("td").Count() == 1)
                                                                   .ToList();
 
-                            if (constellationDescriptions[2].InnerText.Contains(skill))
+                            if (constellationTable[2].InnerText.Contains(skill))
                             {
                                 Logger.Debug($"{characterName} skill is leveled at constellation 3");
                                 constellationOrder.Add("skill");
                                 constellationOrder.Add("burst");
                             }
-                            else if (constellationDescriptions[2].InnerText.Contains(burst))
+                            else if (constellationTable[2].InnerText.Contains(burst))
                             {
                                 Logger.Debug($"{characterName} burst is leveled at constellation 3");
                                 constellationOrder.Add("burst");
@@ -389,7 +388,7 @@ namespace InventoryKamera
                             { "GOOD", nameGOOD },
                             { "ConstellationName", constellationName },
                             { "ConstellationOrder", constellationOrder },
-                            { "WeaponType", (int)weaponType }
+                            { "WeaponType", (int)weaponType },
                         };
                         }
                         else
