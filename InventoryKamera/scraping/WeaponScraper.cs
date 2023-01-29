@@ -223,15 +223,29 @@ namespace InventoryKamera
 				try
 				{
 					var (rectangles, cols, rows) = ProcessScreenshot(screenshot);
-					if (cols != 8 || rows < 5 || Properties.Settings.Default.LogScreenshots)
+					int weight = 0;
+					while ((cols != 8 || rows != 5) && weight < 15)
 					{
+						Logger.Warn("Unable to locate full page of weapons with weight {0}", weight);
+
 						// Generated rectangles
 						screenshot.Save($"./logging/weapons/WeaponInventory.png");
 						using (Graphics g = Graphics.FromImage(screenshot))
 							rectangles.ForEach(r => g.DrawRectangle(new Pen(Color.Green, 2), r));
-						
-						screenshot.Save($"./logging/weapons/WeaponInventory{page}_{cols}x{rows}.png");
+
+						screenshot.Save($"./logging/weapons/WeaponInventory{page}_{cols}x{rows} - weight {weight}.png");
+
+						weight += 3;
+						(rectangles, cols, rows) = ProcessScreenshot(screenshot, weight);
 					}
+					if (Properties.Settings.Default.LogScreenshots)
+					{
+                        screenshot.Save($"./logging/weapons/WeaponInventory.png");
+                        using (Graphics g = Graphics.FromImage(screenshot))
+                            rectangles.ForEach(r => g.DrawRectangle(new Pen(Color.Green, 2), r));
+
+                        screenshot.Save($"./logging/weapons/WeaponInventory{page}_{cols}x{rows} - weight {weight}.png");
+                    }
 					return (rectangles, cols, rows);
 				}
 				catch (Exception)
@@ -243,7 +257,7 @@ namespace InventoryKamera
 
 		}
 
-		public static (List<Rectangle> rectangles, int cols, int rows) ProcessScreenshot(Bitmap screenshot)
+		public static (List<Rectangle> rectangles, int cols, int rows) ProcessScreenshot(Bitmap screenshot, int weight = 0)
 		{
 			// Size of an item card is the same in 16:10 and 16:9. Also accounts for character icon and resolution size.
 			double base_aspect_width = 1280.0;
@@ -263,10 +277,10 @@ namespace InventoryKamera
 			using (BlobCounter blobCounter = new BlobCounter
 			{
 				FilterBlobs = true,
-				MinHeight = card.Height - ((int)(card.Height * 0.2)),
-				MaxHeight = card.Height + ((int)(card.Height * 0.2)),
-				MinWidth = card.Width - ((int)(card.Width * 0.2)),
-				MaxWidth = card.Width + ((int)(card.Width * 0.2)),
+				MinHeight = card.Height - ((int)(card.Height * 0.2)) - weight,
+				MaxHeight = card.Height + ((int)(card.Height * 0.2)) + weight,
+				MinWidth = card.Width - ((int)(card.Width * 0.2)) - weight,
+				MaxWidth = card.Width + ((int)(card.Width * 0.2)) + weight,
 			})
 			{
 				// Image pre-processing
@@ -277,11 +291,6 @@ namespace InventoryKamera
 				blobCounter.ProcessImage(screenshot);
 				// Note: Processing won't always detect all item rectangles on screen. Since the
 				// background isn't a solid color it's a bit trickier to filter out.
-
-				if (blobCounter.ObjectsCount < 7)
-				{
-					throw new Exception("Insufficient items found in artifact inventory");
-				}
 
 				// Don't save overlapping blobs
 				List<Rectangle> rectangles = new List<Rectangle>();

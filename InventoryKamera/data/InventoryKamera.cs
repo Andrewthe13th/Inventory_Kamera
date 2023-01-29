@@ -105,7 +105,7 @@ namespace InventoryKamera
 			Scraper.AssignTravelerName(Properties.Settings.Default.TravelerName);
             
 			// Assign Wanderer's custom name
-			Scraper.UpdateCharacterKey("wanderer", Properties.Settings.Default.WandererName);
+			Scraper.UpdateCharacterName("wanderer", Properties.Settings.Default.WandererName);
 
 
 			if (Properties.Settings.Default.ScanWeapons)

@@ -113,22 +113,17 @@ namespace InventoryKamera
 
 		}
 
-		internal static void UpdateCharacterKey(string target, string name)
+		internal static void UpdateCharacterName(string target, string name)
         {
 			target = ConvertToGOOD(target).ToLower();
 			name = ConvertToGOOD(name).ToLower();
 
 			if (target == name) return;
 
-			if (Characters.TryGetValue(target, out JObject value))
+            if (Characters.TryGetValue(target, out _))
 			{
-				Characters.Add(name, value);
-				Characters.Remove(target);
-				Logger.Info("Internally set {0} custom name to {1}", target, name);
-			}
-			else if (Characters.ContainsKey(name))
-			{
-				Logger.Info("{0} already exists internally");
+				Characters[target]["CustomName"] = name;
+				Logger.Info("Internally set {0} custom name to {1}", target, Characters[target]["CustomName"]);
 			}
 			else throw new KeyNotFoundException($"Could not find '{target}' entry in characters.json");
 		}
@@ -138,7 +133,7 @@ namespace InventoryKamera
 			name = string.IsNullOrWhiteSpace(name) ? CharacterScraper.ScanMainCharacterName() : name.ToLower();
 			if (!string.IsNullOrWhiteSpace(name))
 			{
-				UpdateCharacterKey("traveler", name);
+				UpdateCharacterName("traveler", name);
 				UserInterface.SetMainCharacterName(name);
 			}
 			else
@@ -324,7 +319,15 @@ namespace InventoryKamera
 
 		public static string FindClosestCharacterName(string name, int maxEdits = 10)
 		{
-			return FindClosestInDict(source: name, targets: Characters, maxEdits: maxEdits);
+			var temp = new Dictionary<string, JObject>();
+			foreach (var character in Characters)
+			{
+				if (character.Value.TryGetValue("CustomName", out var CustomName)) temp.Add(((string)CustomName), character.Value);
+				else temp.Add(character.Key, character.Value);
+			}
+			var n = FindClosestInDict(source: name, targets: temp, maxEdits: maxEdits);
+
+            return n;
 		}
 
 		public static string FindClosestDevelopmentName(string name, int maxEdits = 15)
