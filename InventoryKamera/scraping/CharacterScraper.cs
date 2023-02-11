@@ -141,11 +141,11 @@ namespace InventoryKamera
 				// Scale down talents due to constellations
 				if (character.Constellation >= 3)
 				{
-					if (Scraper.Characters.ContainsKey(name.ToLower()))
+					if (Scraper.Characters.ContainsKey(character.NameInternal))
 					{
 						string talentLeveledAtConst3 = character.NameGOOD == "Traveler"
-                            ? (string)Scraper.Characters[name.ToLower()]["ConstellationOrder"][character.Element.ToLower()][0]
-                            : (string)Scraper.Characters[name.ToLower()]["ConstellationOrder"][0];
+                            ? (string)Scraper.Characters[character.NameInternal]["ConstellationOrder"][character.Element.ToLower()][0]
+                            : (string)Scraper.Characters[character.NameInternal]["ConstellationOrder"][0];
 
                         // Scale down talents
                         if (character.Constellation >= 5)
