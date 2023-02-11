@@ -24,7 +24,8 @@ namespace InventoryKamera
 			while (true)
 			{
 				var character = ScanCharacter(first);
-				if (Characters.Count > 0 && character.NameGOOD == Characters.ElementAt(0).NameGOOD) break;
+				if (Characters.Count > 0 && (character.NameGOOD == Characters.ElementAt(0).NameGOOD 
+                                             || character.NameGOOD == "Traveler" && character.NameGOOD + character.Element == Characters.ElementAt(0).NameGOOD)) break;
 				if (character.IsValid())
 				{
 					if (!scanned.Contains(character.NameGOOD))
@@ -105,7 +106,7 @@ namespace InventoryKamera
 			character.Element = element;
 
 			// Check if character was first scanned
-			if (character.NameGOOD != firstCharacter)
+			if (character.NameGOOD == "Traveler" && character.NameGOOD + character.Element != firstCharacter || character.NameGOOD != "Traveler" && character.NameGOOD != firstCharacter)
 			{
 				bool ascended = false;
 				// Scan Level and ascension
