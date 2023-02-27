@@ -27,10 +27,8 @@ namespace InventoryKamera
 				if (Characters.Count > 0 && character.NameGOOD == Characters.ElementAt(0).NameGOOD) break;
 				if (character.IsValid())
 				{
-					if (!scanned.Contains(character.NameGOOD))
+                    if (!scanned.Contains(character.NameGOOD))
 					{
-						if (character.NameGOOD == "Traveler")
-							character.NameGOOD += character.Element;
 						Characters.Add(character);
 						UserInterface.IncrementCharacterCount();
 						Logger.Info("Scanned {0} successfully", character.NameGOOD);
@@ -143,25 +141,25 @@ namespace InventoryKamera
 				{
 					if (Scraper.Characters.ContainsKey(name.ToLower()))
 					{
-						string talentLeveledAtConst3 = character.NameGOOD == "Traveler"
+						string talentLeveledAtConst3 = character.NameGOOD.Contains("Traveler")
                             ? (string)Scraper.Characters[name.ToLower()]["ConstellationOrder"][character.Element.ToLower()][0]
                             : (string)Scraper.Characters[name.ToLower()]["ConstellationOrder"][0];
 
                         // Scale down talents
                         if (character.Constellation >= 5)
 						{
-							Logger.Info("{0} constellation 5+, adjusting scanned skill and burst levels", character.NameInternal);
+							Logger.Info("{0} constellation 5+, adjusting scanned skill and burst levels", character.NameGOOD);
 							character.Talents["skill"] -= 3;
 							character.Talents["burst"] -= 3;
 						}
 						else if (talentLeveledAtConst3 == "skill")
 						{
-							Logger.Info("{0} constellation 3+, adjusting scanned skill level", character.NameInternal);
+							Logger.Info("{0} constellation 3+, adjusting scanned skill level", character.NameGOOD);
 							character.Talents["skill"] -= 3;
 						}
 						else
 						{
-							Logger.Info("{0} constellation 3+, adjusting scanned burst level", character.NameInternal);
+							Logger.Info("{0} constellation 3+, adjusting scanned burst level", character.NameGOOD);
 							character.Talents["burst"] -= 3;
 						}
 					}
@@ -169,7 +167,6 @@ namespace InventoryKamera
 						return character;
 				}
 
-				character.WeaponType = Scraper.Characters[character.NameInternal]["WeaponType"].ToObject<WeaponType>();
 
 				return character;
 			}

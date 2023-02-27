@@ -120,6 +120,12 @@ namespace InventoryKamera
 
 			if (target == name) return;
 
+			if (target != "traveler" && Characters.TryGetValue(name, out _))
+			{
+				Logger.Warn("{0} already exists as a character in the game. " +
+					"This may wind up confusing Kamera when connecting items to characters.", name);
+			}
+
             if (Characters.TryGetValue(target, out _))
 			{
 				Characters[target]["CustomName"] = name;

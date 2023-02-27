@@ -422,10 +422,10 @@ namespace InventoryKamera
 			{
 				foreach (Character character in Characters)
 				{
-					if (artifact.EquippedCharacter == character.NameInternal)
+					if (artifact.EquippedCharacter == character.NameGOOD)
 					{
 						character.AssignArtifact(artifact); // Do we even need to do this?
-						Logger.Debug("Assigned {fearSlot} to {character}", artifact.GearSlot, character.NameInternal);
+						Logger.Debug("Assigned {fearSlot} to {character}", artifact.GearSlot, character.NameGOOD);
 						break;
 					}
 				}
@@ -438,17 +438,17 @@ namespace InventoryKamera
 			{
 				foreach (Weapon weapon in equippedWeapons)
 				{
-					if (weapon.EquippedCharacter == character.NameInternal)
+					if (weapon.EquippedCharacter == character.NameGOOD)
 					{
 						character.AssignWeapon(weapon);
-						Logger.Debug("Assigned {weapon} to {character}", weapon.Name, character.NameInternal);
+						Logger.Debug("Assigned {weapon} to {character}", weapon.Name, character.NameGOOD);
 						break;
 					}
 				}
 				if (character.Weapon is null)
 				{
-					Inventory.Add(new Weapon(character.WeaponType, character.NameInternal));
-					Logger.Info("Default weapon assigned to {character}", character.NameInternal);
+					Inventory.Add(new Weapon(character.WeaponType, character.NameGOOD));
+					Logger.Info("Default weapon assigned to {character}", character.NameGOOD);
 				}
 			}
 		}
