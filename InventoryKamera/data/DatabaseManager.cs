@@ -421,7 +421,7 @@ namespace InventoryKamera
                                 var burst = talents[2].ChildNodes[1].InnerText;
 
 
-                                var constellationTable = travelerDoc.DocumentNode.SelectSingleNode("//table[contains(@class, 'wikitable talent_table')]")
+                                var constellationTable = travelerDoc.DocumentNode.SelectSingleNode("//table[contains(@class, 'wikitable talent-table')]")
                                                                         .Descendants("tr")
                                                                         .ToList();
                                 var constellationDescriptions = constellationTable.Where(tr => tr.Elements("td").Count() == 1)
