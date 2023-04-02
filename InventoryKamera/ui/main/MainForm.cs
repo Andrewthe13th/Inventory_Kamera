@@ -399,12 +399,11 @@ namespace InventoryKamera
                     Logger.Info("Updated game date to {0}", database.LocalVersion);
                     break;
                 case UpdateStatus.Skipped:
-                    var choice = MessageBox.Show($"No update necessary! You are already using the latest game data ({database.LocalVersion})." +
+                    if (MessageBox.Show($"No update necessary! You are already using the latest game data ({database.LocalVersion})." +
                         $" Would you like to force an update?",
                         "Already Up to Date",
                         buttons: MessageBoxButtons.YesNo,
-                        icon: MessageBoxIcon.Information);
-                    if (choice == DialogResult.Yes)
+                        icon: MessageBoxIcon.Information) == DialogResult.Yes)
                     {
                         status = database.UpdateGameData(force: true);
                         switch (status)
@@ -412,11 +411,9 @@ namespace InventoryKamera
                             case UpdateStatus.Fail:
                                 MessageBox.Show("Unable to update game data. Please check the log for more details", "Update failed", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Stop);
                                 break;
-                            case UpdateStatus.Success:
+                            default:
                                 MessageBox.Show($"Update for game version {database.LocalVersion} successful.", "Update success", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Information);
                                 Logger.Info("Successfully updated game data to {0}", new DatabaseManager().LocalVersion);
-                                break;
-                            default:
                                 break;
                         }
                     }
@@ -487,8 +484,7 @@ namespace InventoryKamera
                     var result = MessageBox.Show(message, "Game Version Update", MessageBoxButtons.YesNo);
                     if (result == DialogResult.Yes)
                     {
-                        var status = databaseManager.UpdateGameData(force: true);
-                        switch (status)
+                        switch (databaseManager.UpdateGameData())
                         {
                             case UpdateStatus.Fail:
                                 MessageBox.Show("Unable to update game data. Please check the log for more details", "Update failed", buttons: MessageBoxButtons.OK, icon: MessageBoxIcon.Stop);

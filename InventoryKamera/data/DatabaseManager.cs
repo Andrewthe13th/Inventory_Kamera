@@ -192,7 +192,7 @@ namespace InventoryKamera
             try
             {
                 UpdateStatus overallStatus = UpdateStatus.Success;
-                var statusLock = new Object();
+                var statusLock = new object();
 
                 if (force)
                 {
@@ -219,15 +219,17 @@ namespace InventoryKamera
                     }
                 });
 
-                if (overallStatus == UpdateStatus.Success)
+                if (overallStatus != UpdateStatus.Fail)
                 {
-                    LocalVersion = RemoteVersion;
-                    File.WriteAllText(ListsDir + NewVersion, LocalVersion.ToString());
+
+                    if (RemoteVersion != new Version())
+                    {
+                        LocalVersion = RemoteVersion;
+                        File.WriteAllText(ListsDir + NewVersion, LocalVersion.ToString());
+                    }
                 }
-                else if (overallStatus == UpdateStatus.Fail)
-                    Logger.Error($"Could not update all information for version {RemoteVersion}");
                 else
-                    Logger.Info("No update neccessary");
+                    Logger.Error($"Could not update all information for version {RemoteVersion}");
 
                 return overallStatus;
             }
