@@ -411,7 +411,7 @@ namespace InventoryKamera
                                 var travelerDoc = new HtmlDocument();
                                 travelerDoc.LoadHtml(travelerHTML);
 
-                                var talents = travelerDoc.DocumentNode.SelectSingleNode("//div[contains(@class, 'talent-table')]")
+                                var talents = travelerDoc.DocumentNode.SelectSingleNode("//table[contains(@class, 'talent-table')]")
                                                     .Descendants("tr")
                                                     .Where(tr => tr.InnerText.Contains("Normal Attack") || tr.InnerText.Contains("Elemental Skill") || tr.InnerText.Contains("Elemental Burst"))
                                                     .Where(tr => tr.Elements("td").Count() == 3)
