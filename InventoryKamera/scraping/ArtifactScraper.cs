@@ -222,22 +222,36 @@ namespace InventoryKamera
 			{
 				try
 				{
-					var (rectangles, cols, rows) = ProcessScreenshot(screenshot);
-					int weight = 0;
-					while ((cols != 8 || rows != 5) && weight < 15)
+                    List<Rectangle> rectangles;
+                    int cols, rows, itemCount, counter = 0;
+                    double weight = 0;
+					do
 					{
-						Logger.Warn("Unable to locate full page of artifacts with weight {0}", weight);
+						(rectangles, cols, rows) = ProcessScreenshot(screenshot, weight);
+						itemCount = rows * cols;
+						if (itemCount != 40)
+						{
+							Logger.Warn("Unable to locate full page of artifacts with weight {0}", weight);
+							Logger.Warn("Detected {0} rows and {1} columns of items", rows, cols);
 
-						// Generated rectangles
-						screenshot.Save($"./logging/artifacts/ArtifactInventory.png");
-						using (Graphics g = Graphics.FromImage(screenshot))
-							rectangles.ForEach(r => g.DrawRectangle(new Pen(Color.Green, 2), r));
+							// Generate rectangles
+							using (Bitmap copy = (Bitmap)screenshot.Clone())
+							{
+								copy.Save($"./logging/artifacts/ArtifactInventory.png");
+								using (Graphics g = Graphics.FromImage(copy))
+									rectangles.ForEach(r => g.DrawRectangle(new Pen(Color.Green, 2), r));
+								copy.Save($"./logging/artifacts/ArtifactInventory{page}_{cols}x{rows} - weight {weight}.png");
+							}
+						}
+						else break;
 
-						screenshot.Save($"./logging/artifacts/ArtifactInventory{page}_{cols}x{rows} - weight {weight}.png");
+						if (itemCount != 40)
+							weight += 0.05;
+						else
+						{ weight -= 0.015; ++counter; }
+					}
+					while (itemCount != 40 && weight < 0.5 && counter < 25);
 
-                        weight += 3;
-                        (rectangles, cols, rows) = ProcessScreenshot(screenshot, weight);
-                    }
 					if (Properties.Settings.Default.LogScreenshots)
 					{
                         screenshot.Save($"./logging/artifacts/ArtifactInventory.png");
@@ -257,12 +271,12 @@ namespace InventoryKamera
 			}
 		}
 
-		public static (List<Rectangle> rectangles, int cols, int rows) ProcessScreenshot(Bitmap screenshot, int weight = 0)
+		public static (List<Rectangle> rectangles, int cols, int rows) ProcessScreenshot(Bitmap screenshot, double weight = 0)
 		{
             // Size of an item card is the same in 16:10 and 16:9. Also accounts for character icon and resolution size.
             double base_aspect_width = 1280.0;
             double base_aspect_height = 720.0;
-            var card = new RECT(
+            var icon = new RECT(
 				Left: 0,
 				Top: 0,
 				Right: (int)(85 / base_aspect_width * screenshot.Width),
@@ -273,15 +287,19 @@ namespace InventoryKamera
 				base_aspect_height = 800.0;
 			}
 
-			// Filter for relative size of items in inventory, give or take a few pixels
-			using (BlobCounter blobCounter = new BlobCounter
+            // Filter for relative size of items in inventory, give or take a few pixels
+            int iconMinHeight = icon.Height - ((int)(icon.Height * 0.2));
+            int iconMaxHeight = icon.Height + ((int)(icon.Height * 0.2));
+            int iconMinWidth = icon.Width - ((int)(icon.Width * 0.2));
+            int iconMaxWidth = icon.Width + ((int)(icon.Width * 0.2));
+            using (BlobCounter blobCounter = new BlobCounter
 			{
 				FilterBlobs = true,
-				MinHeight = card.Height - ((int)(card.Height * 0.2)) - weight,
-				MaxHeight = card.Height + ((int)(card.Height * 0.2)) + weight,
-				MinWidth = card.Width - ((int)(card.Width * 0.2)) - weight,
-				MaxWidth = card.Width + ((int)(card.Width * 0.2)) + weight,
-			})
+                MinHeight = (int)(iconMinHeight * (1 - weight)),
+                MaxHeight = (int)(iconMaxHeight * (1 + weight)),
+                MinWidth = (int)(iconMinWidth * (1 - weight)),
+                MaxWidth = (int)(iconMaxWidth * (1 + weight)),
+            })
 			{
 				// Image pre-processing
 				screenshot = new KirschEdgeDetector().Apply(screenshot); // Algorithm to find edges. Really good but can take ~1s
