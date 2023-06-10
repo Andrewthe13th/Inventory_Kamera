@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.StartScan_Button = new System.Windows.Forms.Button();
             this.WeaponArtifact_Label = new System.Windows.Forms.Label();
@@ -107,6 +108,9 @@
             this.ScannerDelay_TrackBar = new System.Windows.Forms.TrackBar();
             this.label4 = new System.Windows.Forms.Label();
             this.wandererNameTextBox = new System.Windows.Forms.TextBox();
+            this.equipWeaponToolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.equipArtifactsToolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.screenshotsToolTip = new System.Windows.Forms.ToolTip(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.CharacterTalent3_PictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.CharacterTalent2_PictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.CharacterTalent1_PictureBox)).BeginInit();
@@ -790,6 +794,7 @@
             this.EquipWeaponsCheckBox.Size = new System.Drawing.Size(102, 17);
             this.EquipWeaponsCheckBox.TabIndex = 99;
             this.EquipWeaponsCheckBox.Text = "Equip Weapons";
+            this.equipWeaponToolTip.SetToolTip(this.EquipWeaponsCheckBox, "Keeps weapons equipped to characters in export");
             this.EquipWeaponsCheckBox.UseVisualStyleBackColor = true;
             // 
             // EquipArtifactsCheckBox
@@ -803,6 +808,7 @@
             this.EquipArtifactsCheckBox.Size = new System.Drawing.Size(94, 17);
             this.EquipArtifactsCheckBox.TabIndex = 98;
             this.EquipArtifactsCheckBox.Text = "Equip Artifacts";
+            this.equipArtifactsToolTip.SetToolTip(this.EquipArtifactsCheckBox, "Keeps artifacts equipped to characters in export");
             this.EquipArtifactsCheckBox.UseVisualStyleBackColor = true;
             // 
             // LogScreenshotsCheckBox
@@ -815,6 +821,8 @@
             this.LogScreenshotsCheckBox.Size = new System.Drawing.Size(120, 17);
             this.LogScreenshotsCheckBox.TabIndex = 96;
             this.LogScreenshotsCheckBox.Text = "Log All Screenshots";
+            this.screenshotsToolTip.SetToolTip(this.LogScreenshotsCheckBox, "Debug tool. If enabled, all screenshots will be logged to local files. \r\nAll scre" +
+        "enshots will be cleared when a new scan is started.\r\n");
             this.LogScreenshotsCheckBox.UseVisualStyleBackColor = true;
             // 
             // numericUpDown1
@@ -1003,6 +1011,10 @@
             this.wandererNameTextBox.TabIndex = 105;
             this.wandererNameTextBox.Text = global::InventoryKamera.Properties.Settings.Default.WandererName;
             // 
+            // screenshotsToolTip
+            // 
+            this.screenshotsToolTip.ToolTipIcon = System.Windows.Forms.ToolTipIcon.Warning;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -1172,6 +1184,9 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox wandererNameTextBox;
+        private System.Windows.Forms.ToolTip equipWeaponToolTip;
+        private System.Windows.Forms.ToolTip equipArtifactsToolTip;
+        private System.Windows.Forms.ToolTip screenshotsToolTip;
     }
 }
 
