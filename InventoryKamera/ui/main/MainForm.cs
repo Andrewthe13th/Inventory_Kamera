@@ -492,7 +492,6 @@ namespace InventoryKamera
 
             Version latestVersion = new Version(Regex.Replace(latest.TagName, "[a-zA-Z]", string.Empty));
             Version currentVersion = Assembly.GetExecutingAssembly().GetName().Version;
-            currentVersion = new Version();
             if (currentVersion.CompareTo(latestVersion) < 0)
             {
                 var message = $"A new version of Inventory Kamera is available.\n\n" +
