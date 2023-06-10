@@ -1,11 +1,13 @@
 ﻿using Microsoft.WindowsAPICodePack.Dialogs;
 using NHotkey;
 using NHotkey.WindowsForms;
+using Octokit;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -13,6 +15,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 using WindowsInput.Native;
+using Application = System.Windows.Forms.Application;
 
 namespace InventoryKamera
 {
@@ -472,7 +475,39 @@ namespace InventoryKamera
             }
         }
 
-        private void CheckForUpdates()
+
+
+        private void MainForm_Shown(object sender, EventArgs e)
+        {
+            CheckForKameraUpdates();
+            CheckForGenshinUpdates();
+        }
+
+        private async void CheckForKameraUpdates()
+        {
+            var client = new GitHubClient(new ProductHeaderValue("Inventory_Kamera"));
+            var releases = await client.Repository.Release.GetAll("Andrewthe13th", "Inventory_Kamera");
+            var latest = releases.First();
+
+
+            Version latestVersion = new Version(Regex.Replace(latest.TagName, "[a-zA-Z]", string.Empty));
+            Version currentVersion = Assembly.GetExecutingAssembly().GetName().Version;
+            currentVersion = new Version();
+            if (currentVersion.CompareTo(latestVersion) < 0)
+            {
+                var message = $"A new version of Inventory Kamera is available.\n\n" +
+                    $"Current Version: {currentVersion}\nLatest Version: {latestVersion}\n\n" +
+                    $"Would you like to download the update?";
+                var result = MessageBox.Show(message, "Inventory Kamera Update", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (result == DialogResult.Yes)
+                {
+                    Process.Start(new ProcessStartInfo(latest.HtmlUrl) { UseShellExecute = true });
+                }
+            }
+            
+        }
+
+        private void CheckForGenshinUpdates()
         {
             var databaseManager = new DatabaseManager();
             try
@@ -513,11 +548,6 @@ namespace InventoryKamera
                 MessageBox.Show("Could not check for updates. Consider trying again in an hour or so.", "Game Version Update", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             Properties.Settings.Default.LastUpdateCheck = DateTime.Now;
-        }
-
-        private void MainForm_Shown(object sender, EventArgs e)
-        {
-            CheckForUpdates();
         }
 
         private void Export_Button_Click(object sender, EventArgs e)
