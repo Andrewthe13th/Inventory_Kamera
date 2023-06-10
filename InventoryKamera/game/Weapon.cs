@@ -20,7 +20,7 @@ namespace InventoryKamera
 
 		[JsonProperty("location")]
 		[DefaultValue("")]
-		public string EquippedCharacter { get; private set; }
+		public string EquippedCharacter { get; internal set; }
 
 		[JsonProperty("lock")]
 		public bool Lock { get; private set; }

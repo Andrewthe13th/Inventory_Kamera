@@ -567,7 +567,6 @@ namespace InventoryKamera
 
 				await Task.WhenAll(tasks.ToArray());
 			}
-			if (!Properties.Settings.Default.EquipWeapons) equippedCharacter = "";
 			return new Weapon(name, level, ascended, refinementLevel, locked, equippedCharacter, id, rarity);
 		}
 

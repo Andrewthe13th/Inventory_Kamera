@@ -576,8 +576,6 @@ namespace InventoryKamera
 
 				await Task.WhenAll(tasks.ToArray());
 			}
-			if (!Properties.Settings.Default.EquipArtifacts) equippedCharacter = "";
-
 			return new Artifact(setName, rarity, level, gearSlot, mainStat, subStats.ToArray(), subStats.Count, equippedCharacter, id, _lock);
 		}
 

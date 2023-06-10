@@ -26,7 +26,7 @@ namespace InventoryKamera
 		public SubStat[] SubStats { get; private set; }
 
 		[JsonProperty("location")]
-		public string EquippedCharacter { get; private set; }	
+		public string EquippedCharacter { get; internal set; }	
 
 		[JsonProperty("lock")]
 		public bool Lock { get; private set; }
