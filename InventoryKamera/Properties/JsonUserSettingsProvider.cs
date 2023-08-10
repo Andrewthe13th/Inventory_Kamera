@@ -1,6 +1,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Configuration;
 using System.IO;
@@ -9,8 +10,10 @@ using System.Windows.Forms;
 namespace InventoryKamera.Properties
 {
     /// <summary>
-    /// Simple JSON SettingsProvider with only support of <see cref="SettingsSerializeAs.String"/> serialized properties
-    /// with <see cref="UserScopedSettingAttribute"/>
+    /// Simple JSON SettingsProvider with only support of 
+    /// <see cref="SettingsSerializeAs.String"/> and <see cref="SettingsSerializeAs.Xml"/> 
+    /// serialized properties 
+    /// with scoping attribute <see cref="UserScopedSettingAttribute"/>
     /// </summary>
     /// <exception cref="ConfigurationErrorsException"></exception>
     public class JsonUserSettingsProvider : SettingsProvider
@@ -23,6 +26,8 @@ namespace InventoryKamera.Properties
 
         private static string SettingsFile => Path.Combine(SettingsDirectory, SettingsFileName);
 
+        private static List<SettingsSerializeAs> validSerializations;
+
         public override string ApplicationName
         {
             get => Path.GetFileNameWithoutExtension(Application.ExecutablePath);
@@ -34,6 +39,7 @@ namespace InventoryKamera.Properties
         public override void Initialize(string name, NameValueCollection config)
         {
             base.Initialize(Name, config);
+            validSerializations = new List<SettingsSerializeAs>() { SettingsSerializeAs.Xml, SettingsSerializeAs.String };
         }
 
         public override SettingsPropertyValueCollection GetPropertyValues(SettingsContext context,
@@ -72,10 +78,10 @@ namespace InventoryKamera.Properties
                 JToken settingToken = settingsJson[propertyName];
                 if (settingToken != null)
                 {
-                    if (property.SerializeAs != SettingsSerializeAs.String)
+                    if (!validSerializations.Contains(value.Property.SerializeAs))
                     {
                         throw new ConfigurationErrorsException(
-                            "Propeties with serialization otherwise String aren't supported");
+                            "Propeties with serialization other than String or XML aren't supported");
                     }
 
                     value.SerializedValue = settingToken.ToString();
@@ -105,10 +111,10 @@ namespace InventoryKamera.Properties
                     throw new ConfigurationErrorsException("Application scoped properties aren't supported");
                 }
 
-                if (value.Property.SerializeAs != SettingsSerializeAs.String)
+                if (!validSerializations.Contains(value.Property.SerializeAs))
                 {
                     throw new ConfigurationErrorsException(
-                        "Propeties with serialization otherwise String aren't supported");
+                        "Propeties with serialization other than String or XML aren't supported");
                 }
 
                 settingsJson[value.Name] = new JValue((string) value.SerializedValue);

@@ -111,6 +111,7 @@
             this.equipWeaponToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.equipArtifactsToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.screenshotsToolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.updateExecutablesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.CharacterTalent3_PictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.CharacterTalent2_PictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.CharacterTalent1_PictureBox)).BeginInit();
@@ -649,7 +650,8 @@
             this.inventoryToolStripMenuItem,
             this.characterScreenToolStripMenuItem,
             this.DatabaseUpdateMenuItem,
-            this.toolStripMenuItem1});
+            this.toolStripMenuItem1,
+            this.updateExecutablesToolStripMenuItem});
             this.keysToolStripMenuItem.Name = "keysToolStripMenuItem";
             this.keysToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             this.keysToolStripMenuItem.Text = "Options";
@@ -1015,6 +1017,13 @@
             // 
             this.screenshotsToolTip.ToolTipIcon = System.Windows.Forms.ToolTipIcon.Warning;
             // 
+            // updateExecutablesToolStripMenuItem
+            // 
+            this.updateExecutablesToolStripMenuItem.Name = "updateExecutablesToolStripMenuItem";
+            this.updateExecutablesToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.updateExecutablesToolStripMenuItem.Text = "Update Executables";
+            this.updateExecutablesToolStripMenuItem.Click += new System.EventHandler(this.updateExecutablesToolStripMenuItem_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -1187,6 +1196,7 @@
         private System.Windows.Forms.ToolTip equipWeaponToolTip;
         private System.Windows.Forms.ToolTip equipArtifactsToolTip;
         private System.Windows.Forms.ToolTip screenshotsToolTip;
+        private System.Windows.Forms.ToolStripMenuItem updateExecutablesToolStripMenuItem;
     }
 }
 

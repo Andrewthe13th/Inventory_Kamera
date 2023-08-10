@@ -65,5 +65,12 @@
     <Setting Name="WandererName" Type="System.String" Scope="User">
       <Value Profile="(Default)">wanderer</Value>
     </Setting>
+    <Setting Name="Executables" Type="System.Collections.Specialized.StringCollection" Scope="User">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfString xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+  &lt;string&gt;GenshinImpact&lt;/string&gt;
+  &lt;string&gt;YuanShen&lt;/string&gt;
+&lt;/ArrayOfString&gt;</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -150,8 +150,8 @@
     <Reference Include="NLog, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <HintPath>..\packages\NLog.5.1.1\lib\net46\NLog.dll</HintPath>
     </Reference>
-    <Reference Include="Octokit, Version=6.0.0.0, Culture=neutral, PublicKeyToken=0be8860aee462442, processorArchitecture=MSIL">
-      <HintPath>..\packages\Octokit.6.0.0\lib\netstandard2.0\Octokit.dll</HintPath>
+    <Reference Include="Octokit, Version=7.1.0.0, Culture=neutral, PublicKeyToken=0be8860aee462442, processorArchitecture=MSIL">
+      <HintPath>..\packages\Octokit.7.1.0\lib\netstandard2.0\Octokit.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -237,6 +237,12 @@
     <Compile Include="scraping\MaterialScraper.cs" />
     <Compile Include="scraping\CharacterScraper.cs" />
     <Compile Include="data\GOOD.cs" />
+    <Compile Include="ui\ExecutablesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ui\ExecutablesForm.Designer.cs">
+      <DependentUpon>ExecutablesForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="ui\main\MainUI.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -260,6 +266,9 @@
     <Compile Include="ui\UserInterface.cs" />
     <Compile Include="game\Weapon.cs" />
     <Compile Include="scraping\WeaponScraper.cs" />
+    <EmbeddedResource Include="ui\ExecutablesForm.resx">
+      <DependentUpon>ExecutablesForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="ui\main\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
       <SubType>Designer</SubType>
