@@ -1,4 +1,5 @@
-﻿using Microsoft.WindowsAPICodePack.Dialogs;
+﻿using InventoryKamera.ui;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using NHotkey;
 using NHotkey.WindowsForms;
 using Octokit;
@@ -35,7 +36,7 @@ namespace InventoryKamera
 
             Language_ComboBox.SelectedItem = "ENG";
 
-            var version = Regex.Replace(Assembly.GetExecutingAssembly().GetName().Version.ToString(), @"[.0]*$", string.Empty);
+            var version = Assembly.GetExecutingAssembly().GetName().Version.ToString(3);
             Logger.Info("Inventory Kamera version {0}", version);
 
             Text = $"Inventory Kamera V{version}";
@@ -570,6 +571,11 @@ namespace InventoryKamera
         private void ErrorLog_Label_Click(object sender, EventArgs e)
         {
             Process.Start($@"logging");
+        }
+
+        private void updateExecutablesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            new ExecutablesForm().Show();
         }
     }
 }

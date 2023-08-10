@@ -22,7 +22,7 @@ namespace InventoryKamera.ui.main
         {
             InitializeComponent();
 
-            var version = Regex.Replace(Assembly.GetExecutingAssembly().GetName().Version.ToString(), @"[.0]*$", string.Empty);
+            var version = Assembly.GetExecutingAssembly().GetName().Version.ToString(3);
 
             Logger.Info("Inventory Kamera Version {0}", version);
             versionLabel.Text = version;

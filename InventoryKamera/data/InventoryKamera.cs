@@ -288,7 +288,7 @@ namespace InventoryKamera
 								Directory.CreateDirectory(weaponPath);
 								using (var writer = File.CreateText(weaponPath + "log.txt"))
 								{
-									writer.WriteLine($"Version: {Regex.Replace(Assembly.GetExecutingAssembly().GetName().Version.ToString(), @"[.0]*$", string.Empty)}");
+									writer.WriteLine($"Version: {Assembly.GetExecutingAssembly().GetName().Version.ToString(3)}");
 									writer.WriteLine($"Resolution: {Navigation.GetWidth()}x{Navigation.GetHeight()}");
 									writer.WriteLine($"Error log:\n\t{error.Replace("\n", "\n\t")}");
 								}
@@ -354,7 +354,7 @@ namespace InventoryKamera
 								Directory.CreateDirectory(artifactPath);
 								using (var writer = File.CreateText(artifactPath + "log.txt"))
 								{
-									writer.WriteLine($"Version: {Regex.Replace(Assembly.GetExecutingAssembly().GetName().Version.ToString(), @"[.0]*$", string.Empty)}");
+									writer.WriteLine($"Version: {Assembly.GetExecutingAssembly().GetName().Version.ToString(3)}");
 									writer.WriteLine($"Resolution: {Navigation.GetWidth()}x{Navigation.GetHeight()}");
 									writer.WriteLine($"Error Log:\n\t{error.Replace("\n", "\n\t")}");
 								}
