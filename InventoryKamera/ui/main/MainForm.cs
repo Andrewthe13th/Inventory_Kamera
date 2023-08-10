@@ -37,6 +37,9 @@ namespace InventoryKamera
             Language_ComboBox.SelectedItem = "ENG";
 
             var version = Assembly.GetExecutingAssembly().GetName().Version.ToString(3);
+#if DEBUG
+            version = Assembly.GetExecutingAssembly().GetName().Version.ToString(4);
+#endif
             Logger.Info("Inventory Kamera version {0}", version);
 
             Text = $"Inventory Kamera V{version}";
