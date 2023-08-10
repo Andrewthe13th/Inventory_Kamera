@@ -5,6 +5,10 @@ VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryKamera", "InventoryKamera\InventoryKamera.csproj", "{7B7F907E-11F4-4000-B711-8E532A36F8A9}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Inventory Kamera Installer", "Inventory Kamera Installer\Inventory Kamera Installer.vdproj", "{A0A931B9-288D-48F5-9E1D-E0307BD5F3CD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InventoryKameraWPF", "InventoryKameraWPF\InventoryKameraWPF.csproj", "{01D9CF37-EF4D-4396-B955-28C1879359D7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +31,24 @@ Global
 		{7B7F907E-11F4-4000-B711-8E532A36F8A9}.Release|x64.Build.0 = Release|x64
 		{7B7F907E-11F4-4000-B711-8E532A36F8A9}.Release|x86.ActiveCfg = Release|x86
 		{7B7F907E-11F4-4000-B711-8E532A36F8A9}.Release|x86.Build.0 = Release|x86
+		{A0A931B9-288D-48F5-9E1D-E0307BD5F3CD}.Debug|Any CPU.ActiveCfg = Debug
+		{A0A931B9-288D-48F5-9E1D-E0307BD5F3CD}.Debug|x64.ActiveCfg = Debug
+		{A0A931B9-288D-48F5-9E1D-E0307BD5F3CD}.Debug|x86.ActiveCfg = Debug
+		{A0A931B9-288D-48F5-9E1D-E0307BD5F3CD}.Release|Any CPU.ActiveCfg = Release
+		{A0A931B9-288D-48F5-9E1D-E0307BD5F3CD}.Release|x64.ActiveCfg = Release
+		{A0A931B9-288D-48F5-9E1D-E0307BD5F3CD}.Release|x86.ActiveCfg = Release
+		{01D9CF37-EF4D-4396-B955-28C1879359D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01D9CF37-EF4D-4396-B955-28C1879359D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01D9CF37-EF4D-4396-B955-28C1879359D7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{01D9CF37-EF4D-4396-B955-28C1879359D7}.Debug|x64.Build.0 = Debug|Any CPU
+		{01D9CF37-EF4D-4396-B955-28C1879359D7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{01D9CF37-EF4D-4396-B955-28C1879359D7}.Debug|x86.Build.0 = Debug|Any CPU
+		{01D9CF37-EF4D-4396-B955-28C1879359D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01D9CF37-EF4D-4396-B955-28C1879359D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01D9CF37-EF4D-4396-B955-28C1879359D7}.Release|x64.ActiveCfg = Release|Any CPU
+		{01D9CF37-EF4D-4396-B955-28C1879359D7}.Release|x64.Build.0 = Release|Any CPU
+		{01D9CF37-EF4D-4396-B955-28C1879359D7}.Release|x86.ActiveCfg = Release|Any CPU
+		{01D9CF37-EF4D-4396-B955-28C1879359D7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

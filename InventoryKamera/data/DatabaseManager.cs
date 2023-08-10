@@ -1,14 +1,15 @@
-﻿using HtmlAgilityPack;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text.RegularExpressions;
 
 
@@ -36,13 +37,22 @@ namespace InventoryKamera
 
         private readonly string NewVersion = "version.txt";
 
-        private const string Wiki = "https://genshin-impact.fandom.com";
-        private const string CharacterWiki = Wiki + "/wiki/Character/List";
-        private const string ArtifactsWiki = Wiki + "/wiki/Artifact/Sets";
-        private const string WeaponsWiki = Wiki + "/wiki/Weapon/List";
-        private const string DevelopmentItemWiki = Wiki + "/wiki/Character_Development_Item";
-        private const string MaterialsWiki = Wiki + "/wiki/Material";
-        private const string VersionURL = "https://genshin-impact.fandom.com/wiki/Version";
+        private const string commitsAPIURL = "https://gitlab.com/api/v4/projects/41287973/repository/commits";
+        private const string repoBaseURL = "https://gitlab.com/Dimbreath/AnimeGameData/-/raw/master/";
+        private const string TextMapEnURL = repoBaseURL + "TextMap/TextMapEN.json";
+        private const string CharactersURL = repoBaseURL + "ExcelBinOutput/AvatarExcelConfigData.json";
+        private const string ConstellationsURL = repoBaseURL + "ExcelBinOutput/FetterInfoExcelConfigData.json";
+        private const string TalentsURL = repoBaseURL + "ExcelBinOutput/AvatarTalentExcelConfigData.json";
+        private const string SkillsURL = repoBaseURL + "ExcelBinOutput/AvatarSkillExcelConfigData.json";
+
+        private const string ArtifactsDisplayItemURL = repoBaseURL + "ExcelBinOutput/DisplayItemExcelConfigData.json";
+        private const string ArtifactsCodex = repoBaseURL + "ExcelBinOutput/ReliquaryCodexExcelConfigData.json";
+        private const string ArtifactSetConfig = repoBaseURL + "ExcelBinOutput/ReliquaryExcelConfigData.json";
+
+        private const string WeaponsURL = repoBaseURL + "ExcelBinOutput/WeaponExcelConfigData.json";
+        private const string MaterialsURL = repoBaseURL + "ExcelBinOutput/MaterialExcelConfigData.json";
+
+        private ConcurrentDictionary<string, string> Mappings = new ConcurrentDictionary<string, string>();
 
         internal Version LocalVersion = new Version();
         internal Version RemoteVersion = new Version();
@@ -83,49 +93,38 @@ namespace InventoryKamera
             Logger.Info("Checking for newer game data...");
             RemoteVersion = CheckRemoteVersion();
             return RemoteVersion == null
-                ? throw new NullReferenceException("Could not get current Genshin version from Wiki.")
+                ? throw new NullReferenceException("Could not get current Genshin version.")
                 : RemoteVersion.CompareTo(LocalVersion) > 0;
         }
 
         private Version CheckRemoteVersion()
         {
-            var html = FetchHTML(VersionURL);
-            var doc = new HtmlDocument();
-
-            doc.LoadHtml(html);
-
-            List<List<string>> table = doc.DocumentNode.SelectNodes("//table[contains(@class, 'wikitable')]")
-                                              .Descendants("tr")
-                                              .Where(tr => tr.Elements("td").Count() > 1)
-                                              .Select(tr => tr.Elements("td").Select(td => td.InnerText.Trim()).ToList())
-                                              .ToList();
-
-            Logger.Debug("Parsing wiki version history.");
-            foreach (var entry in table)
+            var client = new HttpClient
             {
-                if (Version.TryParse(entry[0], out Version version))
-                {
-                    if (DateTime.TryParse(entry[2], out DateTime date))
-                    {
-                        if (version == LocalVersion)
-                            return version;
+                BaseAddress = new Uri(commitsAPIURL)
+            };
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add( new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json") );
 
-                        Logger.Debug("Parsed release date {0} for version {1}", date, version);
-                        if (DateTime.Now > date)
-                        {
-                            Logger.Debug("Version {0} is released!", version);
-                            return version;
-                        }
-                        else
-                        {
-                            Logger.Debug("Version {0} is announced but not released!", version);
-                        }
+
+            using (var response = client.GetAsync(commitsAPIURL))
+            {
+                string pattern = @"(\d+\.\d+\.\d+)";
+
+                string body = response.Result.Content.ReadAsStringAsync().Result;
+                var commits = JsonConvert.DeserializeObject<List<JObject>>(body);
+                foreach (var commit in commits)
+                {
+                    var c = commit.ToObject<Dictionary<string, object>>();
+                    var match = Regex.Match(c["title"].ToString(), pattern);
+                    if (match.Success)
+                    {
+                        var v = match.Groups[1].Value;
+                        Debug.WriteLine("Latest version found {0}", v);
+                        return new Version(v);
                     }
-                    else Logger.Debug("Could not parse date from {0} for version {1}", entry[2], entry[0]);
                 }
-                else Logger.Debug("Could not parse version from {0}", entry[0]);
             }
-            Logger.Warn("Could not determine latest game version from {0}", VersionURL);
             return null;
         }
 
@@ -193,6 +192,7 @@ namespace InventoryKamera
             {
                 UpdateStatus overallStatus = UpdateStatus.Success;
                 var statusLock = new object();
+                LoadMappings();
 
                 if (force)
                 {
@@ -231,14 +231,46 @@ namespace InventoryKamera
                 else
                     Logger.Error($"Could not update all information for version {RemoteVersion}");
 
+                ReleaseMappings();
                 return overallStatus;
             }
             catch (Exception e)
             {
+                ReleaseMappings();
                 Logger.Error(e);
                 return UpdateStatus.Fail;
             }
             
+        }
+
+        private void LoadMappings()
+        {
+            lock (Mappings)
+            {
+                if (!Mappings.Any())
+                {
+                    Mappings = new ConcurrentDictionary<string, string>(JObject.Parse(LoadJsonFromURLAsync(TextMapEnURL))
+                        .ToObject<Dictionary<string, string>>()
+                        .Where(e => !string.IsNullOrWhiteSpace(e.Value)) // Remove any mapping with empty
+                        .ToDictionary(i => i.Key, i => i.Value));
+                }
+            }
+        }
+
+        private void ReleaseMappings()
+        {
+            Mappings.Clear();
+        }
+
+        private string LoadJsonFromURLAsync(string url)
+        {
+            string json = "";
+            using (WebClient client = new WebClient())
+            {
+                client.Encoding = System.Text.Encoding.UTF8;
+                json = client.DownloadString(url);
+            }
+            return json;
         }
 
         private UpdateStatus UpdateList(ListType list, bool force = false)
@@ -287,187 +319,156 @@ namespace InventoryKamera
             if (force) File.Delete(ListsDir + CharactersJson);
 
             var status = UpdateStatus.Skipped;
-            var statusLock = new Object();
 
             var data = JToken.Parse(LoadJsonFromFile(CharactersJson)).ToObject<ConcurrentDictionary<string, JObject>>();
 
-            var html = FetchHTML(CharacterWiki);
-            var doc = new HtmlDocument();
+            try
+            {
+                var characters = JArray.Parse(LoadJsonFromURLAsync(CharactersURL)).ToObject<List<JObject>>();
+                var constellations = JArray.Parse(LoadJsonFromURLAsync(ConstellationsURL)).ToObject<List<JObject>>();
+                var talents = JArray.Parse(LoadJsonFromURLAsync(TalentsURL)).ToObject<List<JObject>>();
+                var skills = JArray.Parse(LoadJsonFromURLAsync(SkillsURL)).ToObject<List<JObject>>();
 
-            doc.LoadHtml(html);
+                characters.RemoveAll(c => !c.ContainsKey("useType") || c["useType"].ToString() != "AVATAR_FORMAL");
 
-            var table = doc.DocumentNode.SelectSingleNode("//table[contains(@class, 'article-table')]")
-                               .Descendants("tr")
-                               .Where(tr => tr.Elements("td").Count() > 1)
-                               .Select(tr => tr.Elements("td").Where(t => t.InnerText.Trim().Length > 0).ToList());
-            
-                table.AsParallel().ForAll(entry =>
+                Logger.Debug("Found {0} playable characters available", characters.Count);
+                characters.AsParallel().ForAll(character =>
                 {
-                    var nameCell = entry[0].FirstChild;
+                    string name = Mappings[character["nameTextMapHash"].ToString()].ToString();
 
-                    var characterName = nameCell.InnerText.Trim();
-                    var nameGOOD = ConvertToGOOD(characterName);
-                    var nameKey = nameGOOD.ToLower();
                     try
                     {
-                        if (data.ContainsKey(nameKey)) return;
 
-                        var characterLink = Wiki + nameCell.Attributes["href"].Value;
+                        if (name.ToLower() == "PlayerGirl".ToLower()) return; // Both travelers are listed but are essentially identical
 
-                        var constellationOrder = new JArray();
-                        var constellationName = new JArray();
-                        WeaponType weaponType;
+                        string PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name);
+                        string nameGOOD = Regex.Replace(PascalCase, @"[\W]", string.Empty);
+                        string nameKey = nameGOOD.ToLower();
+                        int characterID = (int)character["id"];
+
+                        string const3Description = "";
+                        string skill = "";
+
                         var value = new JObject();
 
-                        if (nameKey != "traveler")
+                        if (!data.ContainsKey(nameKey))
                         {
-                            var characterHTML = FetchHTML(characterLink);
-                            var characterDoc = new HtmlDocument();
+                            value.Add("GOOD", nameGOOD);
 
-                            characterDoc.LoadHtml(characterHTML);
+                            // Some characters have different internal names.
+                            // Ex: Jean -> Qin, Yanfei -> Feiyan, etc.
+                            name = character["iconName"].ToString().Split('_').Last(); // UI_AvatarIcon_[Qin] -> Qin
 
-                            var talents = characterDoc.DocumentNode.SelectSingleNode("//span[@id='Talents']").ParentNode.NextSibling.NextSibling
-                                                       .Descendants("tr")
-                                                       .Where(tr => tr.Elements("td").Count() == 3)
-                                                       .Take(3)
-                                                       .ToList();
-                            var skill = talents[1].ChildNodes[1].InnerText;
-                            var burst = talents[2].ChildNodes[1].InnerText;
-
-                            constellationName = new JArray(characterDoc.DocumentNode.SelectSingleNode("//div[contains(@data-source, 'constellation')]")
-                                                                 .Descendants("div")
-                                                                 .First().FirstChild.InnerText);
-
-
-                            var constellationTable = characterDoc.DocumentNode.SelectSingleNode("//span[@id='Constellation']").ParentNode.NextSibling.NextSibling
-                                                                  .Descendants("tr")
-                                                                  .ToList()
-                                                                  .Where(tr => tr.Elements("td").Count() == 1)
-                                                                  .ToList();
-
-                            if (constellationTable[2].InnerText.Contains(skill))
+                            if (name.ToLower() == "PlayerBoy".ToLower()) // Handle traveler elements separately
                             {
-                                Logger.Debug($"{characterName} skill is leveled at constellation 3");
-                                constellationOrder.Add("skill");
-                                constellationOrder.Add("burst");
-                            }
-                            else if (constellationTable[2].InnerText.Contains(burst))
-                            {
-                                Logger.Debug($"{characterName} burst is leveled at constellation 3");
-                                constellationOrder.Add("burst");
-                                constellationOrder.Add("skill");
-                            }
-                            else
-                            {
-                                Logger.Debug($"{characterName} doesn't have skill or burst leveled at constellation 3??");
-                                constellationOrder.Add("skill");
-                                constellationOrder.Add("burst");
-                            }
+                                var constellationNames = new JArray { "Viator", "Viatrix" };
+                                var constellationOrder = new JObject();
 
-                            var weapon = characterDoc.DocumentNode.SelectSingleNode("//td[contains(@data-source, 'weapon')]").Descendants("a").First().Attributes["title"].Value.ToLower();
-                            switch (weapon)
-                            {
-                                case "sword":
-                                    weaponType = WeaponType.Sword;
-                                    break;
-                                case "claymore":
-                                    weaponType = WeaponType.Claymore;
-                                    break;
-                                case "polearm":
-                                    weaponType = WeaponType.Polearm;
-                                    break;
-                                case "catalyst":
-                                    weaponType = WeaponType.Catalyst;
-                                    break;
-                                case "bow":
-                                    weaponType = WeaponType.Bow;
-                                    break;
-                                default:
-                                    throw new IndexOutOfRangeException($"{characterName} uses unknown weapon type {weapon}");
-                            }
-                            value = new JObject
-                        {
-                            { "GOOD", nameGOOD },
-                            { "ConstellationName", constellationName },
-                            { "ConstellationOrder", constellationOrder },
-                            { "WeaponType", (int)weaponType },
-                        };
-                        }
-                        else
-                        {
-                            constellationName = JArray.FromObject(new string[] { "Viator", "Viatrix" });
-                            weaponType = WeaponType.Sword;
-
-                            var constellationOrders = new JObject();
-
-                            foreach (var element in elements)
-                            {
-                                string travelerHTML;
-                                var travelerLink = characterLink + $"_({element})";
-
-                                try
+                                var playerElements = new Dictionary<string, string>
                                 {
-                                    travelerHTML = FetchHTML(travelerLink);
+                                    { "Electric", "electro" },
+                                    { "Fire", "pyro" },
+                                    { "Grass", "dendro" },
+                                    { "Rock", "geo"},
+                                    { "Water", "hydro"},
+                                    { "Wind", "anemo"}
+                                };
+
+                                foreach (var element in playerElements)
+                                {
+                                    var elementSkill = skills.FirstOrDefault(entry => entry["skillIcon"].ToString().Contains($"Player{element.Key}") && !entry.ContainsKey("costElemType"));
+                                    
+
+                                    if (elementSkill == null) continue;
+
+                                    skill = Mappings[elementSkill["nameTextMapHash"].ToString()].ToString();
+
+                                    const3Description = talents.Where(entry => entry["openConfig"].ToString().Contains($"Player_{element.Key}")).ElementAt(2)["descTextMapHash"].ToString();
+                                    const3Description = Mappings[const3Description].ToString();
+
+                                    if (const3Description.Contains(skill))
+                                    {
+                                        constellationOrder.Add(element.Value, new JArray { "skill", "burst" });
+                                    }
+                                    else
+                                    {
+                                        constellationOrder.Add(element.Value, new JArray { "burst", "skill" });
+                                    }
                                 }
-                                catch { Logger.Debug($"Error trying to fetch {element} page for Traveler. Probably is not in the game yet."); continue; }
-                                var travelerDoc = new HtmlDocument();
-                                travelerDoc.LoadHtml(travelerHTML);
-
-                                var talents = travelerDoc.DocumentNode.SelectSingleNode("//table[contains(@class, 'talent-table')]")
-                                                    .Descendants("tr")
-                                                    .Where(tr => tr.InnerText.Contains("Normal Attack") || tr.InnerText.Contains("Elemental Skill") || tr.InnerText.Contains("Elemental Burst"))
-                                                    .Where(tr => tr.Elements("td").Count() == 3)
-                                                    .Take(3)
-                                                    .ToList();
-                                var skill = talents[1].ChildNodes[1].InnerText;
-                                var burst = talents[2].ChildNodes[1].InnerText;
+                                value.Add("ConstellationOrder", constellationOrder);
+                            }
+                            else // Any other character that isn't traveler
+                            {
+                                skill = skills.First(entry => entry["skillIcon"].ToString().Contains($"Skill_S_{name}"))["nameTextMapHash"].ToString();
+                                skill = Mappings[skill].ToString();
 
 
-                                var constellationTable = travelerDoc.DocumentNode.SelectSingleNode("//table[contains(@class, 'wikitable talent-table')]")
-                                                                        .Descendants("tr")
-                                                                        .ToList();
-                                var constellationDescriptions = constellationTable.Where(tr => tr.Elements("td").Count() == 1)
-                                                                        .ToList();
-
-                                constellationOrder = new JArray();
-                                if (constellationDescriptions[2].InnerText.Contains(skill))
+                                value.Add("ConstellationName", new JArray
                                 {
-                                    Logger.Debug("{0} {1} skill is leveled at constellation 3", element, characterName);
+                                    GetConstellationNameFromId(characterID)
+                                });
+
+                                var constellationOrder = new JArray();
+
+                                // The skill/burst name is always mentioned in the constellation's description so we'll check for it
+                                const3Description = talents.Where(entry => entry["icon"].ToString().Contains(name)).ElementAt(2)["descTextMapHash"].ToString();
+                                const3Description = Mappings[const3Description].ToString();
+
+                                if (const3Description.Contains(skill))
+                                {
                                     constellationOrder.Add("skill");
                                     constellationOrder.Add("burst");
                                 }
-                                else if (constellationDescriptions[2].InnerText.Contains(burst))
+                                else
                                 {
-                                    Logger.Debug("{0} {1} burst is leveled at constellation 3", element, characterName);
                                     constellationOrder.Add("burst");
                                     constellationOrder.Add("skill");
                                 }
 
-                                constellationOrders.Add(element.ToLower(), constellationOrder);
+                                value.Add("ConstellationOrder", constellationOrder);
                             }
-                            value = new JObject
-                            {
-                                { "GOOD", nameGOOD },
-                                { "ConstellationName", constellationName },
-                                { "ConstellationOrder", constellationOrders },
-                                { "WeaponType", (int)weaponType }
-                            };
+
+                            var archetype = character["weaponType"].ToString();
+                            WeaponType weaponType;
+                            if (archetype.Contains("SWORD_ONE_HAND")) weaponType = WeaponType.Sword;
+                            else if (archetype.Contains("CLAYMORE")) weaponType = WeaponType.Claymore;
+                            else if (archetype.Contains("POLE")) weaponType = WeaponType.Polearm;
+                            else if (archetype.Contains("BOW")) weaponType = WeaponType.Bow;
+                            else if (archetype.Contains("CATALYST")) weaponType = WeaponType.Catalyst;
+                            else throw new IndexOutOfRangeException($"{name} uses unknown weapon type {archetype}");
+
+                            value.Add("WeaponType", (int)weaponType);
+
+                            if (data.TryAdd(nameKey, value)) status = UpdateStatus.Success;
                         }
-                        lock (statusLock)
-                            if (data.TryAdd(nameKey, value) && status != UpdateStatus.Fail)
-                                status = UpdateStatus.Success;
                     }
-                    catch (Exception e)
+                    catch (Exception ex)
                     {
-                        Logger.Error("An error was encountered when gathering information for the character {0}", nameCell); 
-                        Logger.Error(e);
-                        lock (statusLock) status = UpdateStatus.Fail;
+                        Logger.Warn("Problem when generating character information for {0}", name);
+                        Logger.Warn(ex);
                     }
                 });
-            
+
+                string GetConstellationNameFromId(int targetID)
+                {
+                    foreach (var constellation in from constellation in constellations
+                                                  where (((int)constellation["avatarId"]) == targetID)
+                                                  select constellation)
+                    {
+                        return Mappings[constellation["avatarConstellationBeforTextMapHash"].ToString()].ToString();
+                    }
+
+                    return "";
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Warn(ex);
+                status = UpdateStatus.Fail;
+            }            
 
             if (status == UpdateStatus.Success)
-                SaveJsonToFile(JsonConvert.SerializeObject(data), CharactersJson);
+                SaveJsonToFile(JsonConvert.SerializeObject(new SortedDictionary<string, JObject>(data)), CharactersJson);
 
             return status;
         }
@@ -475,92 +476,87 @@ namespace InventoryKamera
         private UpdateStatus UpdateArtifacts(bool force)
         {
             if (force) File.Delete(ListsDir + ArtifactsJson);
-            var status = UpdateStatus.Skipped;
-            var statusLock = new Object();
 
+            var status = UpdateStatus.Skipped;
 
             var data = JToken.Parse(LoadJsonFromFile(ArtifactsJson)).ToObject<ConcurrentDictionary<string, JObject>>();
 
-            var html = FetchHTML(ArtifactsWiki);
-            var doc = new HtmlDocument();
+            var artifactDisplays = JArray.Parse(LoadJsonFromURLAsync(ArtifactsDisplayItemURL)).ToObject<List<JObject>>();
+            artifactDisplays.RemoveAll(a => a.TryGetValue("icon", out var icon) && !icon.ToString().Contains("RelicIcon"));
 
-            doc.LoadHtml(html);
+            var codex = JArray.Parse(LoadJsonFromURLAsync(ArtifactsCodex)).ToObject<List<JObject>>();
+            var sets = JArray.Parse(LoadJsonFromURLAsync(ArtifactSetConfig)).ToObject<List<JObject>>();
 
-            var table = doc.DocumentNode.SelectSingleNode("//table[contains(@class, 'wikitable')]")
-                               .Descendants("tr")
-                               .Where(tr => tr.Elements("td").Count() == 4)
-                               .Select(tr => tr.Elements("td").ToList()).ToList();
-
-            table.AsParallel().ForAll(entry =>
+            artifactDisplays.AsParallel().ForAll(artifactDisplay =>
             {
-                var setName = entry[0].InnerText.Trim();
-                var setGOOD = ConvertToGOOD(setName);
-                var setKey = setGOOD.ToLower();
-                try
+                if (Mappings.ContainsKey(artifactDisplay["nameTextMapHash"].ToString()))
                 {
-                    var setLink = Wiki + entry[0].FirstChild.Attributes["href"].Value;
-                    var setHTML = FetchHTML(setLink);
-                    var setDoc = new HtmlDocument();
-
-                    setDoc.LoadHtml(setHTML);
-
-                    var aside = setDoc.DocumentNode.SelectSingleNode("//aside[contains(@class, 'portable-infobox')]")
-                                       .Descendants("div")
-                                       .Where(div =>
-                                       {
-                                           var text = div.InnerText.ToLower().Trim();
-                                           return
-                                           text.Contains("flower of life") ||
-                                           text.Contains("plume of death") ||
-                                           text.Contains("sands of eon") ||
-                                           text.Contains("goblet of eonothem") ||
-                                           text.Contains("circlet of logos");
-                                       })
-                                       .Where(div =>
-                                       {
-                                           return div.Attributes["class"].Value.Contains("value");
-                                       }
-                                       ).ToList();
-                    var artifacts = new JObject();
-                    foreach (var slotNode in aside)
+                    string setName = Mappings[artifactDisplay["nameTextMapHash"].ToString()];                  // Archaic Petra
+                    try
                     {
-                        var slot = slotNode.FirstChild.InnerText.Trim();
+                        var setNamePascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(setName); // Archaic Petra
+                        var setNameGOOD = Regex.Replace(setNamePascalCase, @"[\W]", string.Empty);              // ArchaicPetra
+                        var setNameKey = setNameGOOD.ToLower();                                                 // archaicpetra
+                        var setNameNormalized = setName;
+                        var setID = (int)artifactDisplay["param"];
 
-                        slot = slots.Where(x => slot.ToLower().Contains(x)).First().Split(' ').First();
+                        if (!data.ContainsKey(setNameKey))
+                        {
+                            foreach (var set in codex)
+                            {
+                                var artifacts = new JObject();
 
-                        var name = slotNode.LastChild.InnerText.Trim();
-                        var nameGOOD = ConvertToGOOD(name);
-                        var nameNormalized = nameGOOD.ToLower();
+                                if ((int)set["suitId"] == setID)
+                                {
+                                    var artifactIDs = new Dictionary<string, JToken>()
+                                    {
+                                        { "flower", set["flowerId"]},
+                                        { "plume", set["leatherId"] },
+                                        { "sands" , set["sandId"] },
+                                        { "goblet", set["cupId"] },
+                                        { "circlet", set["capId"] },
+                                    };
+                                    
+                                    foreach (var artifact in sets.Where(s => artifactIDs.Values.Contains((int)s["id"])))
+                                    {
+                                        var slot = artifactIDs.First(x => x.Value != null && (int)x.Value == (int)artifact["id"]).Key;
+                                        var artifactName = Mappings[artifact["nameTextMapHash"].ToString()];                                  // Goblet of the Sojourner
+                                        string artifactNamePascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(artifactName);  // Goblet Of The Sojourner
+                                        string artifactNameGOOD = Regex.Replace(artifactNamePascalCase, @"[\W]", string.Empty);               // GobletOfTheSojourner
+                                        string artifactNormalized = artifactNameGOOD.ToLower();                                               // gobletofthesojourner
 
-                        artifacts.Add(slot, new JObject
-                    {
-                        { "artifactName", name },
-                        { "GOOD", nameGOOD },
-                        { "normalizedName", nameNormalized }
-                    });
+                                        artifacts.Add(slot, new JObject
+                                        {
+                                            { "artifactName", artifactName },
+                                            { "GOOD", artifactNameGOOD },
+                                            { "normalizedName", artifactNormalized },
+                                        });
+                                    }
+                                }
+
+                                if (artifacts.Count < 1) continue;
+                                var value = new JObject
+                                {
+                                    { "setName", setName },
+                                    { "GOOD", setNameGOOD },
+                                    { "normalizedName", setNameGOOD.ToLower() },
+                                    { "artifacts", artifacts }
+                                };
+                                if (data.TryAdd(setNameKey, value) && status != UpdateStatus.Fail) status = UpdateStatus.Success;
+                            }
+                        }
                     }
-
-                    var value = new JObject
-                {
-                    { "setName", setName },
-                    { "GOOD", setGOOD },
-                    { "normalizedName", setGOOD.ToLower() },
-                    { "artifacts", artifacts }
-                };
-
-                    if (data.TryAdd(setKey, value))
-                        lock (statusLock) status = UpdateStatus.Success;
-                }
-                catch (Exception e)
-                {
-                    Logger.Error("An error was encountered when gathering information for the artifact set {0}", setName);
-                    Logger.Error(e);
-                    lock (statusLock) status = UpdateStatus.Fail;
+                    catch (Exception ex)
+                    {
+                        Logger.Error("An error was encountered when gathering information for the artifact set {0}", setName);
+                        Logger.Error(ex);
+                        status = UpdateStatus.Fail;
+                    }
                 }
             });
 
             if (status == UpdateStatus.Success)
-                SaveJsonToFile(JsonConvert.SerializeObject(data), ArtifactsJson);
+                SaveJsonToFile(JsonConvert.SerializeObject(new SortedDictionary<string, JObject>(data)), ArtifactsJson);
 
             return status;
         }
@@ -568,33 +564,41 @@ namespace InventoryKamera
         private UpdateStatus UpdateWeapons(bool force)
         {
             if (force) File.Delete(ListsDir + WeaponsJson);
+
             var status = UpdateStatus.Skipped;
-            var statusLock = new Object();
 
             var data = JToken.Parse(LoadJsonFromFile(WeaponsJson)).ToObject<ConcurrentDictionary<string, string>>();
 
-            var html = FetchHTML(WeaponsWiki);
-            var doc = new HtmlDocument();
-
-            doc.LoadHtml(html);
-
-            var table = doc.DocumentNode.SelectSingleNode("//table[contains(@class, 'article-table')]")
-                               .Descendants("tr")
-                               .Where(tr => tr.Elements("td").Count() > 1)
-                               .Select(tr => tr.Elements("td").Where(t => t.InnerText.Trim().Length > 0).ToList()).ToList();
-
-            table.AsParallel().ForAll(entry =>
+            try
             {
-                var weaponName = entry[0].InnerText.Trim();
-                var weaponGOOD = ConvertToGOOD(weaponName);
-                var weaponKey = weaponGOOD.ToLower();
+                List<JObject> weapons = JArray.Parse(LoadJsonFromURLAsync(WeaponsURL)).ToObject<List<JObject>>();
 
-                if (data.TryAdd(weaponKey, weaponGOOD))
-                    lock (statusLock) status = UpdateStatus.Success;
-            });
+                weapons.AsParallel().ForAll(weapon =>
+                {
+                    try
+                    {
+                        if (Mappings.ContainsKey(weapon["nameTextMapHash"].ToString()))
+                        {
+                            var name = Mappings[weapon["nameTextMapHash"].ToString()];
+                            string PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name); // Dull Blade
+                            string nameGOOD = Regex.Replace(PascalCase, @"[\W]", string.Empty);              // DullBlade
+                            string nameKey = nameGOOD.ToLower();                                             // dullblade
+
+                            if (!data.TryAdd(nameKey, nameGOOD)) status = UpdateStatus.Success;
+                        }
+                        else Logger.Warn("Weapon hash {0} not found in Mappings. It's likely unreleased.", weapon["nameTextMapHash"].ToString());
+                    }
+                    catch (Exception ex) { Logger.Warn(ex, weapon["nameTextMapHash"].ToString()); }
+                });
+            }
+            catch (Exception ex)
+            {
+                Logger.Warn(ex);
+                status = UpdateStatus.Fail;
+            }
 
             if (status == UpdateStatus.Success)
-                SaveJsonToFile(JsonConvert.SerializeObject(data), WeaponsJson);
+                SaveJsonToFile(JsonConvert.SerializeObject(new SortedDictionary<string, string>(data)), WeaponsJson);
 
             return status;
         }
@@ -602,52 +606,47 @@ namespace InventoryKamera
         private UpdateStatus UpdateMaterials(bool force)
         {
             if (force) File.Delete(ListsDir + MaterialsJson);
+
             var status = UpdateStatus.Skipped;
 
-            var data = JToken.Parse(LoadJsonFromFile(MaterialsJson)).ToObject<Dictionary<string, string>>();
-
-            var xpBooks = new List<string> { "Hero's Wit", "Adventurer's Experience", "Wanderer's Advice" };
-            foreach (var xpBook in xpBooks)
+            var materialCategories = new List<string>
             {
-                var itemGOOD = ConvertToGOOD(xpBook);
-                var itemKey = itemGOOD.ToLower();
+                "MATERIAL_EXP_FRUIT",
+                "MATERIAL_AVATAR_MATERIAL",
+                "MATERIAL_EXCHANGE",
+                "MATERIAL_WOOD",
+                "MATERIAL_FISH_BAIT",
+                "MATERIAL_WEAPON_EXP_STONE",
+            };
 
-                if (!data.ContainsKey(itemKey))
-                {
-                    data.Add(itemKey, itemGOOD);
-                    status = UpdateStatus.Success;
-                }
-            }
+            var data = JToken.Parse(LoadJsonFromFile(MaterialsJson)).ToObject<ConcurrentDictionary<string, string>>();
 
-            var wikis = new List<string> { DevelopmentItemWiki, MaterialsWiki };
+            var materials = JArray.Parse(LoadJsonFromURLAsync(MaterialsURL)).ToObject<List<JObject>>();
+            materials.RemoveAll(material => !(material.TryGetValue("materialType", out var materialType) && materialCategories.Contains(materialType.ToString())));
 
-
-            foreach (var wiki in wikis)
+            materials.AsParallel().ForAll(material =>
             {
-                var html = FetchHTML(wiki);
-                var doc = new HtmlDocument();
-
-                doc.LoadHtml(html);
-
-                var items = doc.DocumentNode.SelectSingleNode("//table[contains(@class, 'hlist')]")
-                                .SelectNodes("//span[contains(@class, 'card-image')]")
-                                .Descendants("a")
-                                .Select(i => i.Attributes["title"].Value.Trim()).ToList();
-
-                foreach (var item in items)
+                try
                 {
-                    var itemGOOD = ConvertToGOOD(item);
-                    var itemKey = itemGOOD.ToLower();
-                    if (!data.ContainsKey(itemKey))
+                    JToken jToken = material["nameTextMapHash"];
+                    if (Mappings.TryGetValue(jToken.ToString(), out var name))
                     {
-                        data.Add(itemKey, itemGOOD);
-                        status = UpdateStatus.Success;
+                        var PascalCase = CultureInfo.GetCultureInfo("en").TextInfo.ToTitleCase(name);
+                        var nameGood = Regex.Replace(PascalCase, @"[\W]", string.Empty);
+                        var nameKey = nameGood.ToLower();
+
+                        if (data.TryAdd(nameKey, nameGood) && status != UpdateStatus.Fail) status = UpdateStatus.Success;
+                    }
+                    else
+                    {
+                        Logger.Warn("Material hash {0} not found in Mappings.", material["nameTextMapHash"].ToString());
                     }
                 }
-            }
+                catch (Exception ex) { Logger.Warn(ex); }
+            });
 
             if (status == UpdateStatus.Success)
-                SaveJsonToFile(JsonConvert.SerializeObject(data), MaterialsJson);
+                SaveJsonToFile(JsonConvert.SerializeObject(new SortedDictionary<string, string>(data)), MaterialsJson);
 
             return status;
         }

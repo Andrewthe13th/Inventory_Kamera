@@ -364,3 +364,14 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/InventoryKameraWPF/InventoryKameraWPF.csproj
+/InventoryKameraWPF/Properties/AssemblyInfo.cs
+/InventoryKameraWPF/Properties/Resources.Designer.cs
+/InventoryKameraWPF/Properties/Resources.resx
+/InventoryKameraWPF/Properties/Settings.Designer.cs
+/InventoryKameraWPF/Properties/Settings.settings
+/InventoryKameraWPF/App.config
+/InventoryKameraWPF/App.xaml
+/InventoryKameraWPF/App.xaml.cs
+/InventoryKameraWPF/MainWindow.xaml
+/InventoryKameraWPF/MainWindow.xaml.cs
