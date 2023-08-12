@@ -374,6 +374,8 @@ namespace InventoryKamera
                                     { "Wind", "anemo"}
                                 };
 
+                                value.Add("Element", new JArray(playerElements.Values));
+
                                 foreach (var element in playerElements)
                                 {
                                     var elementSkill = skills.FirstOrDefault(entry => entry["skillIcon"].ToString().Contains($"Player{element.Key}") && !entry.ContainsKey("costElemType"));
@@ -426,16 +428,18 @@ namespace InventoryKamera
                                 }
 
                                 value.Add("ConstellationOrder", constellationOrder);
+
+                                value.Add("Element", new JArray(GetElementFromID(characterID)));
                             }
 
-                            var archetype = character["weaponType"].ToString();
+                            var weaponArchetype = character["weaponType"].ToString();
                             WeaponType weaponType;
-                            if (archetype.Contains("SWORD_ONE_HAND")) weaponType = WeaponType.Sword;
-                            else if (archetype.Contains("CLAYMORE")) weaponType = WeaponType.Claymore;
-                            else if (archetype.Contains("POLE")) weaponType = WeaponType.Polearm;
-                            else if (archetype.Contains("BOW")) weaponType = WeaponType.Bow;
-                            else if (archetype.Contains("CATALYST")) weaponType = WeaponType.Catalyst;
-                            else throw new IndexOutOfRangeException($"{name} uses unknown weapon type {archetype}");
+                            if (weaponArchetype.Contains("SWORD_ONE_HAND")) weaponType = WeaponType.Sword;
+                            else if (weaponArchetype.Contains("CLAYMORE")) weaponType = WeaponType.Claymore;
+                            else if (weaponArchetype.Contains("POLE")) weaponType = WeaponType.Polearm;
+                            else if (weaponArchetype.Contains("BOW")) weaponType = WeaponType.Bow;
+                            else if (weaponArchetype.Contains("CATALYST")) weaponType = WeaponType.Catalyst;
+                            else throw new IndexOutOfRangeException($"{name} uses unknown weapon type {weaponArchetype}");
 
                             value.Add("WeaponType", (int)weaponType);
 
@@ -458,6 +462,17 @@ namespace InventoryKamera
                         return Mappings[constellation["avatarConstellationBeforTextMapHash"].ToString()].ToString();
                     }
 
+                    return "";
+                }
+
+                string GetElementFromID(int targetID)
+                {
+                    foreach (var element in from constellation in constellations
+                                            where (((int)constellation["avatarId"]) == targetID)
+                                            select constellation)
+                    {
+                        return Mappings[element["avatarVisionBeforTextMapHash"].ToString()].ToString().ToLower();
+                    }
                     return "";
                 }
             }

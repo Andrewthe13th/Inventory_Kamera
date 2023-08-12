@@ -896,5 +896,29 @@ namespace InventoryKamera
 			var pascal = CultureInfo.GetCultureInfo("en-US").TextInfo.ToTitleCase(text);
 			return Regex.Replace(pascal, @"[\W]", string.Empty);
 		}
-	}
+
+        internal static bool CharacterMatchesElement(string name, string element)
+        {
+            return !string.IsNullOrWhiteSpace(name.ToLower()) && GetCharactersElements(name.ToLower()).Contains(element.ToLower());
+        }
+
+        internal static List<string> GetCharactersElements(string name)
+		{
+            if (string.IsNullOrWhiteSpace(name.ToLower()))
+            {
+                return new List<string>();
+            }
+            else
+            {
+                if (Characters.TryGetValue(name.ToLower(), out var data))
+                {
+                    return data["Element"].ToObject<List<string>>();
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+    }
 }

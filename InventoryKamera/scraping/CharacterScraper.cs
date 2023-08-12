@@ -257,6 +257,8 @@ namespace InventoryKamera
 						// Find character based on string after /
 						// Long name characters might search by their last name only but it'll still work.
 						name = Scraper.FindClosestCharacterName(Regex.Replace(split[1], @"[\W]", string.Empty));
+
+						if (!Scraper.CharacterMatchesElement(name, element)) { name = ""; element = ""; }
                     }
 					n.Dispose();
 					Logger.Debug("Scanned character name as {0} with element {1}", name, element);
