@@ -277,53 +277,56 @@ namespace InventoryKamera
 			return input;
 		}
 
-		public static string FindClosestStat(string stat, int maxEdits = 5)
+		public static string FindClosestStat(string stat, int minConfidence = 90)
 		{
-			return FindClosestInDict(source: stat, targets: Stats, maxEdits: maxEdits);
+			return FindClosestInDict(source: stat, targets: Stats, minConfidence: minConfidence);
 		}
 
-		public static string FindElementByName(string name, int maxEdits = 5)
+		public static string FindElementByName(string name, int minConfidence = 90)
 		{
-			return FindClosestInDict(source: name, targets: Elements, maxEdits: maxEdits);
+			return FindClosestInDict(source: name, targets: Elements, minConfidence: minConfidence);
 		}
 
-		public static string FindClosestWeapon(string name, int maxEdits = 5)
+		public static string FindClosestWeapon(string name, int maxEdits = 90)
 		{
-			return FindClosestInDict(source: name, targets: Weapons, maxEdits: maxEdits);
+			return FindClosestInDict(source: name, targets: Weapons, minConfidence: maxEdits);
 		}
 
-		public static string FindClosestSetName(string name, int maxEdits = 5)
+		public static string FindClosestSetName(string name, int minConfidence = 90)
 		{
-			return FindClosestInDict(source: name, targets: Artifacts, maxEdits: maxEdits);
+			return FindClosestInDict(source: name, targets: Artifacts, minConfidence: minConfidence);
 		}
 		
-		public static string FindClosestArtifactSetFromArtifactName(string name, int maxEdits = 5)
+		public static string FindClosestArtifactSetFromArtifactName(string name, int minConfidence = 90)
 		{
 			if (string.IsNullOrWhiteSpace(name)) return "";
 			string closestMatch = null;
-			int edits = int.MaxValue;
+			double highestConfidence = 0;
 
 
             foreach (var artifactSet in Artifacts)
             {
+                string currentSet = artifactSet.Value["GOOD"].ToString();
+
                 foreach (var slot in artifactSet.Value["artifacts"].Values())
                 {
-                    string normalizedName = slot["normalizedName"].ToString();
-                    if (name == normalizedName)
-						return artifactSet.Value["GOOD"].ToString();
+                    string artifactName = slot["normalizedName"].ToString();
+                    if (artifactName == name) return currentSet;
 
-					int dist = CalcDistance(name, slot["normalizedName"].ToString(), maxEdits);
-					if (dist < maxEdits && dist < edits)
+					double artifactSimilarity = StringSimilarity(name, artifactName);
+
+					if ( artifactSimilarity > minConfidence && artifactSimilarity > highestConfidence)
 					{
-						edits = dist;
-						closestMatch = artifactSet.Value["GOOD"].ToString();
+						highestConfidence = artifactSimilarity;
+						closestMatch = currentSet;
 					}
 				}
 			}
-			return closestMatch;
+
+            return closestMatch;
 		}
 
-		public static string FindClosestCharacterName(string name, int maxEdits = 10)
+		public static string FindClosestCharacterName(string name, int minConfidence = 90)
 		{
 			var temp = new Dictionary<string, JObject>();
 			foreach (var character in Characters)
@@ -331,24 +334,24 @@ namespace InventoryKamera
 				if (character.Value.TryGetValue("CustomName", out var CustomName)) temp.Add(((string)CustomName), character.Value);
 				else temp.Add(character.Key, character.Value);
 			}
-			var n = FindClosestInDict(source: name, targets: temp, maxEdits: maxEdits);
+			var n = FindClosestInDict(source: name, targets: temp, minConfidence: minConfidence);
 
             return n;
 		}
 
-		public static string FindClosestDevelopmentName(string name, int maxEdits = 15)
+		public static string FindClosestDevelopmentName(string name, int minConfidence = 90)
 		{
-			string value = FindClosestInDict(source: name, targets: DevItems, maxEdits: maxEdits);
-			return !string.IsNullOrWhiteSpace(value) ? value : FindClosestInDict(source: name, targets: Materials, maxEdits: maxEdits);
+			string value = FindClosestInDict(source: name, targets: DevItems, minConfidence: minConfidence);
+			return !string.IsNullOrWhiteSpace(value) ? value : FindClosestInDict(source: name, targets: Materials, minConfidence: minConfidence);
 		}
 
-		public static string FindClosestMaterialName(string name, int maxEdits = 15)
+		public static string FindClosestMaterialName(string name, int minConfidence = 90)
 		{
-			string value = FindClosestInDict(source: name, targets: Materials, maxEdits: maxEdits);
-			return !string.IsNullOrWhiteSpace(value) ? value : FindClosestInDict(source: name, targets: Materials, maxEdits: maxEdits);
+			string value = FindClosestInDict(source: name, targets: Materials, minConfidence: minConfidence);
+			return !string.IsNullOrWhiteSpace(value) ? value : FindClosestInDict(source: name, targets: Materials, minConfidence: minConfidence);
 		}
 
-		private static string FindClosestInDict(string source, Dictionary<string, string> targets, int maxEdits = 5)
+		private static string FindClosestInDict(string source, Dictionary<string, string> targets, int minConfidence)
 		{
 			if (string.IsNullOrWhiteSpace(source)) return "";
 			if (targets.TryGetValue(source, out string value)) return value;
@@ -357,12 +360,12 @@ namespace InventoryKamera
 
 			if (keys.Where(key => key.Contains(source)).Count() == 1) return targets[keys.First(key => key.Contains(source))];
 
-			source = FindClosestInList(source, keys, maxEdits);
+			source = FindClosestInList(source, keys, minConfidence);
 
 			return targets.TryGetValue(source, out value) ? value : source;
 		}
 
-		private static string FindClosestInDict(string source, Dictionary<string, JObject> targets, int maxEdits = 5)
+		private static string FindClosestInDict(string source, Dictionary<string, JObject> targets, int minConfidence)
 		{
 			if (string.IsNullOrWhiteSpace(source)) return "";
 			if (targets.TryGetValue(source, out JObject value)) return (string)value["GOOD"];
@@ -371,33 +374,38 @@ namespace InventoryKamera
 
 			if (keys.Where(key => key.Contains(source)).Count() == 1) return (string)targets[keys.First(key => key.Contains(source))]["GOOD"];
 
-			source = FindClosestInList(source, keys, maxEdits);
+			source = FindClosestInList(source, keys, minConfidence);
 
 			return targets.TryGetValue(source, out value) ? (string)value["GOOD"] : source;
 		}
 
-		private static string FindClosestInList(string source, HashSet<string> targets, int maxEdits)
+		private static string FindClosestInList(string source, HashSet<string> targets, double minConfidence)
 		{
 			if (targets.Contains(source)) return source;
 			if (string.IsNullOrWhiteSpace(source)) return null;
 
-			string value = "";
+			string mostSimilarString = "";
+			double mostSimilarValue = 0;
 
 			foreach (var target in targets)
 			{
-				int edits = CalcDistance(source, target, maxEdits);
+                double similarityValue = StringSimilarity(source, target);
 
-				if (edits < maxEdits)
+				if (similarityValue > minConfidence && similarityValue > mostSimilarValue)
 				{
-					value = target;
-					maxEdits = edits;
+					mostSimilarValue = similarityValue;
+					mostSimilarString = target;
 				}
 			}
-			return value;
+
+			if (!string.IsNullOrWhiteSpace(mostSimilarString))
+				Logger.Debug("Most similar string found for {0} as {1} ({2}%)", source, mostSimilarString, mostSimilarValue);
+
+			return mostSimilarString;
 		}
 
 		// Adapted from https://stackoverflow.com/a/9454016/13205651
-		private static int CalcDistance(string text, string setName, int maxEdits)
+		private static int CalcDistance_1(string text, string setName, int maxEdits)
 		{
 			int length1 = text.Length;
 			int length2 = setName.Length;
@@ -470,10 +478,50 @@ namespace InventoryKamera
             }
         }
 
-		#endregion Element Searching
+		private static int LevenshteinDistance(string s1, string s2)
+		{
+            int m = s1.Length;
+            int n = s2.Length;
+            int[,] dp = new int[m + 1, n + 1];
+
+            for (int i = 0; i <= m; i++)
+            {
+                for (int j = 0; j <= n; j++)
+                {
+                    if (i == 0)
+                    {
+                        dp[i, j] = j;
+                    }
+                    else if (j == 0)
+                    {
+                        dp[i, j] = i;
+                    }
+                    else if (s1[i - 1] == s2[j - 1])
+                    {
+                        dp[i, j] = dp[i - 1, j - 1];
+                    }
+                    else
+                    {
+                        dp[i, j] = 1 + Math.Min(Math.Min(dp[i - 1, j], dp[i, j - 1]), dp[i - 1, j - 1]);
+                    }
+                }
+            }
+
+            return dp[m, n];
+        }
+
+        private static double StringSimilarity(string s1, string s2)
+        {
+            int distance = LevenshteinDistance(s1, s2);
+            int maxLength = Math.Max(s1.Length, s2.Length);
+            double similarity = 1.0 - (distance / (double)maxLength);
+            return similarity * 100.0;
+        }
+
+        #endregion Element Searching
 
 
-		public static void FindDelay(List<Rectangle> rectangles)
+        public static void FindDelay(List<Rectangle> rectangles)
 		{
 			Navigation.SetDelay(180);
 			int delayOffset = 20;

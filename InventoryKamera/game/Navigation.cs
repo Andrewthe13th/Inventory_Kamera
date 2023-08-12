@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -12,14 +11,14 @@ using WindowsInput.Native;
 
 namespace InventoryKamera
 {
-	public static class Navigation
+    public static class Navigation
 	{
 		private static NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
 		internal static InputSimulator sim = new InputSimulator();
-		internal static RECT WindowSize;
-		internal static RECT WindowPosition;
-		internal static Size AspectRatio;
+		private static RECT WindowSize;
+		private static RECT WindowPosition;
+		private static Size AspectRatio;
 
 		private static double delay = 1;
 
@@ -36,12 +35,7 @@ namespace InventoryKamera
 
 		public static void Initialize()
 		{
-			var executables = new List<string>
-			{
-				"GenshinImpact",
-				"YuanShen"
-			};
-
+			var executables = Properties.Settings.Default.Executables;
 			foreach (var processName in executables)
 			{
 				Logger.Debug("Checking for {genshin}.exe", processName);
@@ -65,6 +59,7 @@ namespace InventoryKamera
 					}
 
 					Logger.Debug("Found {0}.exe", processName);
+					Logger.Debug("Window ({0}x{1}): x={2}, y={3}", WindowSize.Width, WindowSize.Height, WindowPosition.Left, WindowPosition.Top);
 					return;
 				}
 				Logger.Debug("Could not find {0}.exe", processName);
@@ -88,7 +83,8 @@ namespace InventoryKamera
 			Bitmap bmp = new Bitmap(GetWidth(), GetHeight(), format);
 			using (Graphics gfxBmp = Graphics.FromImage(bmp))
 			{
-				gfxBmp.CopyFromScreen(WindowPosition.Left, WindowPosition.Top, 0, 0, bmp.Size);
+				gfxBmp.CopyFromScreen(GetPosition().Left, GetPosition().Top, 0, 0, bmp.Size);
+				Logger.Debug($"Copying window ({GetWidth()}x{GetHeight()}) starting at x={GetPosition().Left}, y={GetPosition().Top}");
 
 				var uidRegion = new RECT(
 					Left: (int)( 1070 / 1280.0 * bmp.Width ),
@@ -105,7 +101,7 @@ namespace InventoryKamera
 			Bitmap bmp = new Bitmap(region.Width, region.Height, format);
 			using (Graphics gfxBmp = Graphics.FromImage(bmp))
 			{
-				gfxBmp.CopyFromScreen(WindowPosition.Left + region.Left, WindowPosition.Top + region.Top, 0, 0, bmp.Size);
+				gfxBmp.CopyFromScreen(GetPosition().Left + region.Left, GetPosition().Top + region.Top, 0, 0, bmp.Size);
 			}
 			return bmp;
 		}

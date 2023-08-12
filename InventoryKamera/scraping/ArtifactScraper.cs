@@ -617,7 +617,7 @@ namespace InventoryKamera
 
 			// Analyze
 			string name = Regex.Replace(Scraper.AnalyzeText(n).ToLower(), @"[\W]", string.Empty);
-			name = Scraper.FindClosestMaterialName(name, 3);
+			name = Scraper.FindClosestMaterialName(name);
 			n.Dispose();
 
 			return name;
@@ -791,7 +791,7 @@ namespace InventoryKamera
 
 			if (equippedCharacter != "")
 			{
-				if (equippedCharacter.Contains(":"))
+				if (equippedCharacter.Contains("equipped") && equippedCharacter.Contains(":"))
 				{
 					equippedCharacter = Regex.Replace(equippedCharacter.Split(':')[1], @"[\W]", string.Empty);
 					equippedCharacter = Scraper.FindClosestCharacterName(equippedCharacter);

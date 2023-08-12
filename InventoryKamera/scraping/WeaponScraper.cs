@@ -601,7 +601,7 @@ namespace InventoryKamera
 
 			// Analyze
 			string name = Regex.Replace(Scraper.AnalyzeText(n).ToLower(), @"[\W]", string.Empty);
-			name = Scraper.FindClosestMaterialName(name, 3);
+			name = Scraper.FindClosestMaterialName(name);
 			n.Dispose();
 
 			return name;
