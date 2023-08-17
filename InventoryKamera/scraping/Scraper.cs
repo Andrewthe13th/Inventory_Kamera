@@ -28,7 +28,7 @@ namespace InventoryKamera
 		private static readonly string tesseractDatapath = $".\\tessdata";
 		private static readonly string tesseractLanguage = "genshin_fast_09_04_21";
 
-		public static Dictionary<string, string> Stats = new Dictionary<string, string>
+		internal static Dictionary<string, string> Stats = new Dictionary<string, string>
 		{
 			["hp"] = "hp",
 			["hp%"] = "hp_",
@@ -44,7 +44,7 @@ namespace InventoryKamera
 			["physicaldmgbonus"] = "physical_dmg_",
 		};
 
-		public static readonly List<string> gearSlots = new List<string>
+		internal static readonly List<string> gearSlots = new List<string>
 		{
 			"flower",
 			"plume",
@@ -64,7 +64,7 @@ namespace InventoryKamera
 			"geo",
 		};
 
-		public static readonly HashSet<string> enhancementMaterials = new HashSet<string>
+		internal static readonly HashSet<string> enhancementMaterials = new HashSet<string>
 		{
 			"enhancementore",
 			"fineenhancementore",
@@ -73,17 +73,17 @@ namespace InventoryKamera
 			"sanctifyingessence",
 		};
 
-		public static readonly List<string> customNames = new List<string>
+		internal static readonly List<string> customNames = new List<string>
 		{
 			"Traveler",
 			"Wanderer"
 		};
 
-		public static ConcurrentBag<TesseractEngine> engines;
+		internal static ConcurrentBag<TesseractEngine> engines;
 
-		public static Dictionary<string, string> Weapons, DevItems, Materials, Elements;
+		internal static Dictionary<string, string> Weapons, DevItems, Materials, Elements;
 
-		public static Dictionary<string, JObject> Characters, Artifacts;
+		internal static Dictionary<string, JObject> Characters, Artifacts;
 
 		static Scraper()
         {
@@ -134,7 +134,7 @@ namespace InventoryKamera
 			else throw new KeyNotFoundException($"Could not find '{target}' entry in characters.json");
 		}
 
-		public static void AssignTravelerName(string name)
+		internal static void AssignTravelerName(string name)
 		{
 			name = string.IsNullOrWhiteSpace(name) ? CharacterScraper.ScanMainCharacterName() : name.ToLower();
 			if (!string.IsNullOrWhiteSpace(name))
@@ -167,7 +167,7 @@ namespace InventoryKamera
 			}
 		}
 
-		public static void RestartEngines()
+		internal static void RestartEngines()
 		{
 			
 			if (engines is null) engines = new ConcurrentBag<TesseractEngine>();
@@ -188,7 +188,7 @@ namespace InventoryKamera
 		}
 
 		/// <summary> Use Tesseract OCR to find words on picture to string </summary>
-		public static string AnalyzeText(Bitmap bitmap, PageSegMode pageMode = PageSegMode.SingleLine, bool numbersOnly = false)
+		internal static string AnalyzeText(Bitmap bitmap, PageSegMode pageMode = PageSegMode.SingleLine, bool numbersOnly = false)
 		{
 			string text = "";
 			TesseractEngine e;
@@ -216,7 +216,7 @@ namespace InventoryKamera
 
 		#region Check valid parameters
 
-		public static bool IsValidSetName(string setName)
+		internal static bool IsValidSetName(string setName)
 		{
 			if (Artifacts.TryGetValue(setName, out var _) || Artifacts.TryGetValue(setName.ToLower(), out var _)) return true;
 			foreach (var artifactSet in Artifacts.Values)
@@ -231,32 +231,32 @@ namespace InventoryKamera
 			return Materials.ContainsValue(name) || Materials.ContainsKey(name.ToLower());
 		}
 
-		public static bool IsValidStat(string stat)
+		internal static bool IsValidStat(string stat)
 		{
-			return string.IsNullOrWhiteSpace(stat) || Stats.ContainsValue(stat);
+			return Stats.ContainsValue(stat);
 		}
 
-		public static bool IsValidSlot(string gearSlot)
+		internal static bool IsValidSlot(string gearSlot)
 		{
 			return gearSlots.Contains(gearSlot);
 		}
 
-		public static bool IsValidCharacter(string character)
+		internal static bool IsValidCharacter(string character)
 		{
 			return character.Contains("Traveler") || character == "Wanderer" || Characters.ContainsKey(character.ToLower());
 		}
 
-		public static bool IsValidElement(string element)
+		internal static bool IsValidElement(string element)
 		{
 			return Elements.ContainsValue(element) || Elements.ContainsKey(element.ToLower());
 		}
 
-		public static bool IsEnhancementMaterial(string material)
+		internal static bool IsEnhancementMaterial(string material)
 		{
 			return enhancementMaterials.Contains(material.ToLower()) || Materials.ContainsValue(material) || Materials.ContainsKey(material.ToLower());
 		}
 
-		public static bool IsValidWeapon(string weapon)
+		internal static bool IsValidWeapon(string weapon)
 		{
 			return Weapons.ContainsValue(weapon) || Weapons.ContainsKey(weapon.ToLower());
 		}
@@ -265,7 +265,7 @@ namespace InventoryKamera
 
 		#region Element Searching
 
-		public static string FindClosestGearSlot(string input)
+		internal static string FindClosestGearSlot(string input)
 		{
 			foreach (var slot in gearSlots)
 			{
@@ -277,27 +277,27 @@ namespace InventoryKamera
 			return input;
 		}
 
-		public static string FindClosestStat(string stat, int minConfidence = 90)
+		internal static string FindClosestStat(string stat, int minConfidence = 90)
 		{
 			return FindClosestInDict(source: stat, targets: Stats, minConfidence: minConfidence);
 		}
 
-		public static string FindElementByName(string name, int minConfidence = 90)
+		internal static string FindElementByName(string name, int minConfidence = 90)
 		{
 			return FindClosestInDict(source: name, targets: Elements, minConfidence: minConfidence);
 		}
 
-		public static string FindClosestWeapon(string name, int maxEdits = 90)
+		internal static string FindClosestWeapon(string name, int maxEdits = 90)
 		{
 			return FindClosestInDict(source: name, targets: Weapons, minConfidence: maxEdits);
 		}
 
-		public static string FindClosestSetName(string name, int minConfidence = 90)
+		internal static string FindClosestSetName(string name, int minConfidence = 90)
 		{
 			return FindClosestInDict(source: name, targets: Artifacts, minConfidence: minConfidence);
 		}
 		
-		public static string FindClosestArtifactSetFromArtifactName(string name, int minConfidence = 90)
+		internal static string FindClosestArtifactSetFromArtifactName(string name, int minConfidence = 90)
 		{
 			if (string.IsNullOrWhiteSpace(name)) return "";
 			string closestMatch = null;
@@ -326,7 +326,7 @@ namespace InventoryKamera
             return closestMatch;
 		}
 
-		public static string FindClosestCharacterName(string name, int minConfidence = 90)
+		internal static string FindClosestCharacterName(string name, int minConfidence = 90)
 		{
 			var temp = new Dictionary<string, JObject>();
 			foreach (var character in Characters)
@@ -339,13 +339,13 @@ namespace InventoryKamera
             return n;
 		}
 
-		public static string FindClosestDevelopmentName(string name, int minConfidence = 90)
+		internal static string FindClosestDevelopmentName(string name, int minConfidence = 90)
 		{
 			string value = FindClosestInDict(source: name, targets: DevItems, minConfidence: minConfidence);
 			return !string.IsNullOrWhiteSpace(value) ? value : FindClosestInDict(source: name, targets: Materials, minConfidence: minConfidence);
 		}
 
-		public static string FindClosestMaterialName(string name, int minConfidence = 90)
+		internal static string FindClosestMaterialName(string name, int minConfidence = 90)
 		{
 			string value = FindClosestInDict(source: name, targets: Materials, minConfidence: minConfidence);
 			return !string.IsNullOrWhiteSpace(value) ? value : FindClosestInDict(source: name, targets: Materials, minConfidence: minConfidence);
@@ -398,7 +398,7 @@ namespace InventoryKamera
 				}
 			}
 
-			if (!string.IsNullOrWhiteSpace(mostSimilarString))
+			if (!string.IsNullOrWhiteSpace(mostSimilarString) && targets != new HashSet<string>(Stats.Keys))
 				Logger.Debug("Most similar string found for {0} as {1} ({2}%)", source, mostSimilarString, mostSimilarValue);
 
 			return mostSimilarString;
@@ -521,7 +521,7 @@ namespace InventoryKamera
         #endregion Element Searching
 
 
-        public static void FindDelay(List<Rectangle> rectangles)
+        internal static void FindDelay(List<Rectangle> rectangles)
 		{
 			Navigation.SetDelay(180);
 			int delayOffset = 20;
@@ -651,7 +651,7 @@ namespace InventoryKamera
 
         #region Image Operations
 
-        public static Bitmap ResizeImage(System.Drawing.Image image, int width, int height)
+        internal static Bitmap ResizeImage(System.Drawing.Image image, int width, int height)
 		{
 			var destRect = new Rectangle(0, 0, width, height);
 			var destImage = new Bitmap(width, height);
@@ -676,12 +676,12 @@ namespace InventoryKamera
 			return destImage;
 		}
 
-		public static Bitmap ScaleImage(System.Drawing.Image image, double factor)
+		internal static Bitmap ScaleImage(System.Drawing.Image image, double factor)
 		{
 			return ResizeImage(image, (int)( image.Width * factor ), (int)( image.Height * factor ));
 		}
 
-		public static bool CompareColors(Color a, Color b)
+		internal static bool CompareColors(Color a, Color b)
 		{
 			int[] diff = new int[3];
 			diff[0] = Math.Abs(a.R - b.R);
@@ -710,17 +710,17 @@ namespace InventoryKamera
 			return r*r + g*g + b*b;
 		}
 
-        public static Bitmap ConvertToGrayscale(Bitmap bitmap)
+        internal static Bitmap ConvertToGrayscale(Bitmap bitmap)
 		{
 			return new Grayscale(0.2125, 0.7154, 0.0721).Apply(bitmap);
 		}
 
-		public static void SetContrast(double contrast, ref Bitmap bitmap)
+		internal static void SetContrast(double contrast, ref Bitmap bitmap)
 		{
 			new ContrastCorrection((int)contrast).ApplyInPlace(bitmap);
 		}
 
-		public static void SetGamma(double red, double green, double blue, ref Bitmap bitmap)
+		internal static void SetGamma(double red, double green, double blue, ref Bitmap bitmap)
 		{
 			Bitmap temp = bitmap;
 			Bitmap bmap = (Bitmap)temp.Clone();
@@ -751,12 +751,12 @@ namespace InventoryKamera
 			return gammaArray;
 		}
 
-		public static void SetInvert(ref Bitmap bitmap)
+		internal static void SetInvert(ref Bitmap bitmap)
 		{
 			new Invert().ApplyInPlace(bitmap);
 		}
 
-		public static void SetColor(string colorFilterType, ref Bitmap bitmap)
+		internal static void SetColor(string colorFilterType, ref Bitmap bitmap)
 		{
 			Bitmap temp = bitmap;
 			Bitmap bmap = (Bitmap)temp.Clone();
@@ -803,7 +803,7 @@ namespace InventoryKamera
 			bitmap = (Bitmap)bmap.Clone();
 		}
 
-		public static void SetBrightness(int brightness, ref Bitmap bitmap)
+		internal static void SetBrightness(int brightness, ref Bitmap bitmap)
 		{
 			if (brightness < -255) brightness = -255;
 			if (brightness > 255) brightness = 255;
@@ -835,12 +835,12 @@ namespace InventoryKamera
 			bitmap = (Bitmap)bmap.Clone();
 		}
 
-		public static void SetThreshold(int threshold, ref Bitmap bitmap)
+		internal static void SetThreshold(int threshold, ref Bitmap bitmap)
 		{
 			new Threshold(threshold).ApplyInPlace(bitmap);
 		}
 
-		public static void FilterColors(ref Bitmap bm, IntRange red, IntRange green, IntRange blue)
+		internal static void FilterColors(ref Bitmap bm, IntRange red, IntRange green, IntRange blue)
 		{
 			ColorFiltering colorFilter = new ColorFiltering
 			{
@@ -852,7 +852,7 @@ namespace InventoryKamera
 			colorFilter.ApplyInPlace(bm);
 		}
 
-		public static bool CompareBitmapsFast(Bitmap bmp1, Bitmap bmp2)
+		internal static bool CompareBitmapsFast(Bitmap bmp1, Bitmap bmp2)
 		{
 			if (bmp1 == null || bmp2 == null)
 				return false;
