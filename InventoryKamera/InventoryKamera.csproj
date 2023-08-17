@@ -49,7 +49,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>none</DebugType>
+    <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
@@ -58,6 +58,9 @@
     <Prefer32Bit>false</Prefer32Bit>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
+    <DocumentationFile>
+    </DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <PropertyGroup />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
@@ -101,114 +104,15 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Accord, Version=3.8.0.0, Culture=neutral, PublicKeyToken=fa1a88e29555ccf7, processorArchitecture=MSIL">
-      <HintPath>..\packages\Accord.3.8.0\lib\net462\Accord.dll</HintPath>
-    </Reference>
-    <Reference Include="Accord.Imaging, Version=3.8.0.0, Culture=neutral, PublicKeyToken=fa1a88e29555ccf7, processorArchitecture=MSIL">
-      <HintPath>..\packages\Accord.Imaging.3.8.0\lib\net462\Accord.Imaging.dll</HintPath>
-    </Reference>
-    <Reference Include="Accord.Math, Version=3.8.0.0, Culture=neutral, PublicKeyToken=fa1a88e29555ccf7, processorArchitecture=MSIL">
-      <HintPath>..\packages\Accord.Math.3.8.0\lib\net462\Accord.Math.dll</HintPath>
-    </Reference>
-    <Reference Include="Accord.Math.Core, Version=3.8.0.0, Culture=neutral, PublicKeyToken=fa1a88e29555ccf7, processorArchitecture=MSIL">
-      <HintPath>..\packages\Accord.Math.3.8.0\lib\net462\Accord.Math.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Accord.Statistics, Version=3.8.0.0, Culture=neutral, PublicKeyToken=fa1a88e29555ccf7, processorArchitecture=MSIL">
-      <HintPath>..\packages\Accord.Statistics.3.8.0\lib\net462\Accord.Statistics.dll</HintPath>
-    </Reference>
-    <Reference Include="HtmlAgilityPack.NetCore, Version=1.5.0.1, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\HtmlAgilityPack.NetCore.1.5.0.1\lib\net45\HtmlAgilityPack.NetCore.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Win32.Primitives, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Win32.Primitives.4.3.0\lib\net46\Microsoft.Win32.Primitives.dll</HintPath>
-      <Private>True</Private>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAPICodePack.Core, Version=7.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\WindowsAPICodePack.7.0.1\lib\net472\Microsoft.WindowsAPICodePack.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAPICodePack.ExtendedLinguisticServices, Version=7.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\WindowsAPICodePack.7.0.1\lib\net472\Microsoft.WindowsAPICodePack.ExtendedLinguisticServices.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAPICodePack.Sensors, Version=7.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\WindowsAPICodePack.7.0.1\lib\net472\Microsoft.WindowsAPICodePack.Sensors.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAPICodePack.Shell, Version=7.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\WindowsAPICodePack.7.0.1\lib\net472\Microsoft.WindowsAPICodePack.Shell.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAPICodePack.ShellExtensions, Version=7.0.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\WindowsAPICodePack.7.0.1\lib\net472\Microsoft.WindowsAPICodePack.ShellExtensions.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.13.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="NHotkey, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a76ffb086700b11c, processorArchitecture=MSIL">
-      <HintPath>..\packages\NHotkey.2.1.0\lib\net45\NHotkey.dll</HintPath>
-    </Reference>
-    <Reference Include="NHotkey.WindowsForms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a76ffb086700b11c, processorArchitecture=MSIL">
-      <HintPath>..\packages\NHotkey.WindowsForms.2.1.0\lib\net45\NHotkey.WindowsForms.dll</HintPath>
-    </Reference>
-    <Reference Include="NLog, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
-      <HintPath>..\packages\NLog.5.1.1\lib\net46\NLog.dll</HintPath>
-    </Reference>
-    <Reference Include="Octokit, Version=7.1.0.0, Culture=neutral, PublicKeyToken=0be8860aee462442, processorArchitecture=MSIL">
-      <HintPath>..\packages\Octokit.7.1.0\lib\netstandard2.0\Octokit.dll</HintPath>
-    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
-    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
-    </Reference>
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Diagnostics.DiagnosticSource, Version=7.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Diagnostics.DiagnosticSource.7.0.0\lib\net462\System.Diagnostics.DiagnosticSource.dll</HintPath>
-    </Reference>
-    <Reference Include="System.IO" />
     <Reference Include="System.IO.Compression" />
-    <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Net.Http, Version=4.1.1.3, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Net.Http.4.3.4\lib\net46\System.Net.Http.dll</HintPath>
-      <Private>True</Private>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System.Numerics" />
-    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Runtime, Version=4.1.1.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Runtime.4.3.1\lib\net462\System.Runtime.dll</HintPath>
-      <Private>True</Private>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
-    </Reference>
     <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.Security.Cryptography.Algorithms, Version=4.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Security.Cryptography.Algorithms.4.3.1\lib\net463\System.Security.Cryptography.Algorithms.dll</HintPath>
-      <Private>True</Private>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Security.Cryptography.Encoding, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Security.Cryptography.Encoding.4.3.0\lib\net46\System.Security.Cryptography.Encoding.dll</HintPath>
-      <Private>True</Private>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Security.Cryptography.Primitives, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Security.Cryptography.Primitives.4.3.0\lib\net46\System.Security.Cryptography.Primitives.dll</HintPath>
-      <Private>True</Private>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.Security.Cryptography.X509Certificates, Version=4.1.1.2, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Security.Cryptography.X509Certificates.4.3.2\lib\net461\System.Security.Cryptography.X509Certificates.dll</HintPath>
-      <Private>True</Private>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Transactions" />
     <Reference Include="System.Xaml" />
@@ -220,13 +124,7 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
-    <Reference Include="Tesseract, Version=5.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Tesseract.5.2.0\lib\net47\Tesseract.dll</HintPath>
-    </Reference>
     <Reference Include="WindowsBase" />
-    <Reference Include="WindowsInput, Version=1.0.4.0, Culture=neutral, PublicKeyToken=9b287f7dc5073cad, processorArchitecture=MSIL">
-      <HintPath>..\packages\InputSimulator.1.0.4.0\lib\net20\WindowsInput.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="game\Artifact.cs" />
@@ -288,7 +186,6 @@
       <DependentUpon>MainUI.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.manifest" />
-    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -323,15 +220,52 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <PackageReference Include="Accord.Imaging">
+      <Version>3.8.0</Version>
+    </PackageReference>
+    <PackageReference Include="HtmlAgilityPack.NetCore">
+      <Version>1.5.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="InputSimulator">
+      <Version>1.0.4</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Win32.Primitives">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>13.0.2</Version>
+    </PackageReference>
+    <PackageReference Include="NHotkey.WindowsForms">
+      <Version>2.1.0</Version>
+    </PackageReference>
+    <PackageReference Include="NLog">
+      <Version>5.1.1</Version>
+    </PackageReference>
+    <PackageReference Include="Octokit">
+      <Version>7.1.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Collections">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Diagnostics.DiagnosticSource">
+      <Version>7.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Runtime">
+      <Version>4.3.1</Version>
+    </PackageReference>
+    <PackageReference Include="System.Security.Cryptography.Algorithms">
+      <Version>4.3.1</Version>
+    </PackageReference>
+    <PackageReference Include="System.Security.Cryptography.X509Certificates">
+      <Version>4.3.2</Version>
+    </PackageReference>
+    <PackageReference Include="Tesseract">
+      <Version>5.2.0</Version>
+    </PackageReference>
+    <PackageReference Include="WindowsAPICodePack">
+      <Version>7.0.1</Version>
+    </PackageReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Accord.3.8.0\build\Accord.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Accord.3.8.0\build\Accord.targets'))" />
-    <Error Condition="!Exists('..\packages\Tesseract.5.2.0\build\Tesseract.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Tesseract.5.2.0\build\Tesseract.targets'))" />
-  </Target>
-  <Import Project="..\packages\Accord.3.8.0\build\Accord.targets" Condition="Exists('..\packages\Accord.3.8.0\build\Accord.targets')" />
-  <Import Project="..\packages\Tesseract.5.2.0\build\Tesseract.targets" Condition="Exists('..\packages\Tesseract.5.2.0\build\Tesseract.targets')" />
 </Project>
