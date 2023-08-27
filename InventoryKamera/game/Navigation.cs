@@ -19,6 +19,7 @@ namespace InventoryKamera
 		private static RECT WindowSize;
 		private static RECT WindowPosition;
 		private static Size AspectRatio;
+		public static bool IsNormal { get; private set; }
 
 		private static double delay = 1;
 
@@ -117,23 +118,27 @@ namespace InventoryKamera
 
 		public static void DisplayBitmap(Bitmap bm, string text = "Image")
 		{
-			using (Form form = new Form())
+			Form form = new Form();
+			
+			int padding = 5;
+
+			form.StartPosition = FormStartPosition.Manual;
+			form.Location = Screen.PrimaryScreen.WorkingArea.Location;
+			form.Size = new Size(bm.Width + 5*padding, bm.Height + 10*padding);
+			form.Text = text;
+			form.BackColor = Color.Black;
+
+			PictureBox pb = new PictureBox
 			{
-				form.StartPosition = FormStartPosition.Manual;
-				form.Location = Screen.PrimaryScreen.WorkingArea.Location;
-				form.Size = new Size(bm.Width + 20, bm.Height + 40);
-				form.Text = text;
+				Dock = DockStyle.Fill,
+				Image = bm,
+				Padding = new Padding(5),
+				//Size = new Size(bm.Width + 2*padding, bm.Height + 2*padding),
+			};
 
-				PictureBox pb = new PictureBox
-				{
-					Dock = DockStyle.Fill,
-					Image = bm,
-					Location = new Point(0,0)
-				};
-
-				form.Controls.Add(pb);
-				form.ShowDialog();
-			}
+			form.Controls.Add(pb);
+			Application.Run(form);
+			
 		}
 
 		#endregion Image Displaying
@@ -315,7 +320,11 @@ namespace InventoryKamera
 			if (WindowSize.Height == 0) throw new DivideByZeroException("Genshin's window height cannot be 0");
 			int x = WindowSize.Width/GCD(WindowSize.Width, WindowSize.Height);
 			int y = WindowSize.Height/GCD(WindowSize.Width, WindowSize.Height);
-			return new Size(x, y);
+			var size = new Size(x, y);
+			
+			IsNormal = size == new Size(16, 9);
+
+			return size;
 		}
 
 		private static int GCD(int a, int b)

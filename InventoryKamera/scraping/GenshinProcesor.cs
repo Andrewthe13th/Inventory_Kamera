@@ -10,7 +10,6 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
@@ -19,7 +18,7 @@ using Tesseract;
 
 namespace InventoryKamera
 {
-    public static class Scraper
+    public static class GenshinProcesor
 	{
 		private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -85,7 +84,7 @@ namespace InventoryKamera
 
 		internal static Dictionary<string, JObject> Characters, Artifacts;
 
-		static Scraper()
+		static GenshinProcesor()
         {
             InitEngines();
 
@@ -676,6 +675,18 @@ namespace InventoryKamera
 			return destImage;
 		}
 
+		internal static Bitmap ResizeImage(Bitmap image, Size tSize)
+		{
+			int targetWidth = (int)Math.Round((double)image.Width * (tSize.Height / tSize.Width));
+			int targetHeight = (int)Math.Round((double)image.Height * (tSize.Height / tSize.Width));
+			using (var reSized = new Bitmap(targetWidth, targetHeight))
+			using (var g = Graphics.FromImage(reSized))
+			{
+				g.DrawImage(image, 0,0, targetWidth, targetHeight);
+				return (Bitmap)reSized.Clone();
+			}
+		}
+
 		internal static Bitmap ScaleImage(System.Drawing.Image image, double factor)
 		{
 			return ResizeImage(image, (int)( image.Width * factor ), (int)( image.Height * factor ));
@@ -887,6 +898,27 @@ namespace InventoryKamera
 
 			return result;
 		}
+
+		internal static Bitmap PreProcessImage(Bitmap image)
+		{
+			using (var edges = new KirschEdgeDetector().Apply(image)) // Algorithm to find edges. Really good but can take ~1s
+			using (var grayscale = ConvertToGrayscale(edges))
+			{
+				return new Threshold(70).Apply(grayscale);
+			}
+		}
+
+		internal static Bitmap CopyBitmap(Bitmap source, Rectangle region)
+		{
+			ClipToSource(source, ref region);
+            return source.Clone(region, source.PixelFormat);
+
+			void ClipToSource(Bitmap s, ref Rectangle r)
+			{
+				if (r.X + r.Width > source.Width) { r.Width = s.Width - r.X; }
+				if (r.Y + r.Height > source.Height) { r.Height = s.Height - r.Y; }
+			}
+        }
 
 		#endregion Image Operations
 

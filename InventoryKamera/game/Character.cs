@@ -55,7 +55,7 @@ namespace InventoryKamera
         [JsonIgnore]
         public WeaponType WeaponType { 
             
-            get => Scraper.Characters[_nameKey.ToLower()]["WeaponType"].ToObject<WeaponType>();
+            get => GenshinProcesor.Characters[_nameKey.ToLower()]["WeaponType"].ToObject<WeaponType>();
             
             internal set { WeaponType = value; } 
         }
@@ -95,7 +95,7 @@ namespace InventoryKamera
 
         public bool HasValidName()
         {
-            return !string.IsNullOrWhiteSpace(NameGOOD) && Scraper.IsValidCharacter(NameGOOD);
+            return !string.IsNullOrWhiteSpace(NameGOOD) && GenshinProcesor.IsValidCharacter(NameGOOD);
         }
 
         public bool HasValidLevel()
@@ -105,7 +105,7 @@ namespace InventoryKamera
 
         public bool HasValidElement()
         {
-            return !string.IsNullOrWhiteSpace(Element) && Scraper.IsValidElement(Element);
+            return !string.IsNullOrWhiteSpace(Element) && GenshinProcesor.IsValidElement(Element);
         }
 
         public bool HasValidConstellation()

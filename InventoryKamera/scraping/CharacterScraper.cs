@@ -139,11 +139,11 @@ namespace InventoryKamera
 				// Scale down talents due to constellations
 				if (character.Constellation >= 3)
 				{
-					if (Scraper.Characters.ContainsKey(name.ToLower()))
+					if (GenshinProcesor.Characters.ContainsKey(name.ToLower()))
 					{
 						string talentLeveledAtConst3 = character.NameGOOD.Contains("Traveler")
-                            ? (string)Scraper.Characters[name.ToLower()]["ConstellationOrder"][character.Element.ToLower()][0]
-                            : (string)Scraper.Characters[name.ToLower()]["ConstellationOrder"][0];
+                            ? (string)GenshinProcesor.Characters[name.ToLower()]["ConstellationOrder"][character.Element.ToLower()][0]
+                            : (string)GenshinProcesor.Characters[name.ToLower()]["ConstellationOrder"][0];
 
                         // Scale down talents
                         if (character.Constellation >= 5)
@@ -192,13 +192,13 @@ namespace InventoryKamera
 			Bitmap nameBitmap = Navigation.CaptureRegion(region);
 
 			//Image Operations
-			Scraper.SetGamma(0.2, 0.2, 0.2, ref nameBitmap);
-			Scraper.SetInvert(ref nameBitmap);
-			Bitmap n = Scraper.ConvertToGrayscale(nameBitmap);
+			GenshinProcesor.SetGamma(0.2, 0.2, 0.2, ref nameBitmap);
+			GenshinProcesor.SetInvert(ref nameBitmap);
+			Bitmap n = GenshinProcesor.ConvertToGrayscale(nameBitmap);
 
 			UserInterface.SetNavigation_Image(nameBitmap);
 
-			string text = Scraper.AnalyzeText(n).Trim();
+			string text = GenshinProcesor.AnalyzeText(n).Trim();
 			if (text != "")
 			{
 				// Only keep a-Z and 0-9
@@ -232,13 +232,13 @@ namespace InventoryKamera
 				Navigation.SystemWait(Navigation.Speed.Fast);
 				using (Bitmap bm = Navigation.CaptureRegion(region))
 				{
-					Bitmap n = Scraper.ConvertToGrayscale(bm);
-					Scraper.SetThreshold(110, ref n);
-					Scraper.SetInvert(ref n);
+					Bitmap n = GenshinProcesor.ConvertToGrayscale(bm);
+					GenshinProcesor.SetThreshold(110, ref n);
+					GenshinProcesor.SetInvert(ref n);
 
-					n = Scraper.ResizeImage(n, n.Width * 2, n.Height * 2);
-					string block = Scraper.AnalyzeText(n, Tesseract.PageSegMode.Auto).ToLower().Trim();
-					string line = Scraper.AnalyzeText(n, Tesseract.PageSegMode.SingleLine).ToLower().Trim();
+					n = GenshinProcesor.ResizeImage(n, n.Width * 2, n.Height * 2);
+					string block = GenshinProcesor.AnalyzeText(n, Tesseract.PageSegMode.Auto).ToLower().Trim();
+					string line = GenshinProcesor.AnalyzeText(n, Tesseract.PageSegMode.SingleLine).ToLower().Trim();
 
 					// Characters with wrapped names will not have a slash
 					string nameAndElement = line.Contains("/") ? line : block;
@@ -252,13 +252,13 @@ namespace InventoryKamera
 						// Long name characters might look like
 						// <Element>   <First Name>
 						// /           <Last Name>
-						element = !split[0].Contains(" ") ? Scraper.FindElementByName(split[0].Trim()) : Scraper.FindElementByName(split[0].Split(' ')[0].Trim());
+						element = !split[0].Contains(" ") ? GenshinProcesor.FindElementByName(split[0].Trim()) : GenshinProcesor.FindElementByName(split[0].Split(' ')[0].Trim());
 
 						// Find character based on string after /
 						// Long name characters might search by their last name only but it'll still work.
-						name = Scraper.FindClosestCharacterName(Regex.Replace(split[1], @"[\W]", string.Empty));
+						name = GenshinProcesor.FindClosestCharacterName(Regex.Replace(split[1], @"[\W]", string.Empty));
 
-						if (!Scraper.CharacterMatchesElement(name, element)) { name = ""; element = ""; }
+						if (!GenshinProcesor.CharacterMatchesElement(name, element)) { name = ""; element = ""; }
                     }
 					n.Dispose();
 					Logger.Debug("Scanned character name as {0} with element {1}", name, element);
@@ -297,12 +297,12 @@ namespace InventoryKamera
 			{
 				Bitmap bm = Navigation.CaptureRegion(region);
 
-				bm = Scraper.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
-				Bitmap n = Scraper.ConvertToGrayscale(bm);
-				Scraper.SetInvert(ref n);
-				Scraper.SetContrast(30.0, ref bm);
+				bm = GenshinProcesor.ResizeImage(bm, bm.Width * 2, bm.Height * 2);
+				Bitmap n = GenshinProcesor.ConvertToGrayscale(bm);
+				GenshinProcesor.SetInvert(ref n);
+				GenshinProcesor.SetContrast(30.0, ref bm);
 
-				string text = Scraper.AnalyzeText(n).Trim();
+				string text = GenshinProcesor.AnalyzeText(n).Trim();
 				Logger.Debug("Scanned character level as {0}", text);
 
 				text = Regex.Replace(text, @"(?![0-9/]).", string.Empty);
@@ -344,12 +344,12 @@ namespace InventoryKamera
 			g.CopyFromScreen(screenLocation_X, screenLocation_Y, 0, 0, bm.Size);
 
 			//Image Operations
-			bm = Scraper.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
+			bm = GenshinProcesor.ResizeImage(bm, bm.Width * 6, bm.Height * 6);
 			//Scraper.ConvertToGrayscale(ref bm);
 			//Scraper.SetInvert(ref bm);
-			Scraper.SetContrast(30.0, ref bm);
+			GenshinProcesor.SetContrast(30.0, ref bm);
 
-			string text = Scraper.AnalyzeText(bm);
+			string text = GenshinProcesor.AnalyzeText(bm);
 			text = text.Trim();
 			text = Regex.Replace(text, @"(?![0-9\s/]).", string.Empty);
 
@@ -476,13 +476,13 @@ namespace InventoryKamera
 				{
 					Bitmap talentLevel = Navigation.CaptureRegion(region);
 
-					talentLevel = Scraper.ResizeImage(talentLevel, talentLevel.Width * 2, talentLevel.Height * 2);
+					talentLevel = GenshinProcesor.ResizeImage(talentLevel, talentLevel.Width * 2, talentLevel.Height * 2);
 
-					Bitmap n = Scraper.ConvertToGrayscale(talentLevel);
-					Scraper.SetContrast(60, ref n);
-					Scraper.SetInvert(ref n);
+					Bitmap n = GenshinProcesor.ConvertToGrayscale(talentLevel);
+					GenshinProcesor.SetContrast(60, ref n);
+					GenshinProcesor.SetInvert(ref n);
 
-					string text = Scraper.AnalyzeText(n).Trim();
+					string text = GenshinProcesor.AnalyzeText(n).Trim();
 					text = Regex.Replace(text, @"\D", string.Empty);
 
 					if (int.TryParse(text, out int level))

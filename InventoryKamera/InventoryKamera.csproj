@@ -132,6 +132,7 @@
     <Compile Include="scraping\ArtifactScraper.cs" />
     <Compile Include="game\Character.cs" />
     <Compile Include="data\DatabaseManager.cs" />
+    <Compile Include="scraping\InventoryScraper.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="scraping\MaterialScraper.cs" />
     <Compile Include="scraping\CharacterScraper.cs" />
@@ -161,7 +162,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="data\Rect.cs" />
-    <Compile Include="scraping\Scraper.cs" />
+    <Compile Include="scraping\GenshinProcesor.cs" />
     <Compile Include="ui\UserInterface.cs" />
     <Compile Include="game\Weapon.cs" />
     <Compile Include="scraping\WeaponScraper.cs" />

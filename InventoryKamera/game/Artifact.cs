@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using Newtonsoft.Json;
 
 namespace InventoryKamera
@@ -23,7 +25,7 @@ namespace InventoryKamera
 		public int Level { get; private set; }
 
 		[JsonProperty("substats")]
-		public SubStat[] SubStats { get; private set; }
+		public List<SubStat> SubStats { get; private set; }
 
 		[JsonProperty("location")]
 		public string EquippedCharacter { get; internal set; }	
@@ -33,9 +35,6 @@ namespace InventoryKamera
 
         [JsonProperty("id")]
 		public int Id { get; private set; }
-
-        [JsonIgnore]
-		public int SubStatsCount { get; private set; }
 		
 		public Artifact()
 		{
@@ -43,22 +42,20 @@ namespace InventoryKamera
 			GearSlot = null;
 			MainStat = null;
 			Level = -1;
-			SubStats = new SubStat[4];
-			SubStatsCount = 4;
+			SubStats = new List<SubStat>(4);
 			SetName = null;
 			EquippedCharacter = null;
 			Lock = false;
 			Id = 0;
 		}
 
-		public Artifact(string _setName, int _rarity, int _level, string _gearSlot, string _mainStat, SubStat[] _subStats, int _subStatsCount, string _equippedCharacter = null, int _id = 0, bool _Lock = false)
+		public Artifact(string _setName, int _rarity, int _level, string _gearSlot, string _mainStat, List<SubStat> _subStats, string _equippedCharacter = null, int _id = 0, bool _Lock = false)
 		{
 			GearSlot = string.IsNullOrWhiteSpace(_gearSlot) ? "" : _gearSlot;
 			Rarity = _rarity;
 			MainStat = string.IsNullOrWhiteSpace(_mainStat) ? "" : _mainStat;
 			Level = _level;
-			SubStats = _subStats;
-			SubStatsCount = _subStatsCount;
+			SubStats = _subStats.ToList().Where(e => e.value > 0).ToList();
 			SetName = string.IsNullOrWhiteSpace(_setName) ? "" : _setName;
 			EquippedCharacter = string.IsNullOrWhiteSpace(_equippedCharacter) ? "" : _equippedCharacter;
 			Lock = _Lock;
@@ -82,35 +79,38 @@ namespace InventoryKamera
 
 		public bool HasValidSlot()
 		{
-			return Scraper.IsValidSlot(GearSlot);
+			return GenshinProcesor.IsValidSlot(GearSlot);
 		}
 
 		public bool HasValidSetName()
 		{
-			return Scraper.IsValidSetName(SetName);
+			return GenshinProcesor.IsValidSetName(SetName);
 		}
 
 		public bool HasValidMainStat()
 		{
-			return Scraper.IsValidStat(MainStat);
+			return GenshinProcesor.IsValidStat(MainStat);
 		}
 
 		public bool HasValidSubStats()
 		{
 			bool valid = true;
-			for (int i = 0; i < SubStatsCount; i++)
+
+			SubStats.ForEach(s =>
 			{
-				if (!Scraper.IsValidStat(SubStats[i].stat) || SubStats[i].value == (decimal)( -1.0 ))
-				{
-					valid = false;
-				}
-			}
+                if (!string.IsNullOrWhiteSpace(s.stat) &&
+                    (!GenshinProcesor.IsValidStat(s.stat) || s.value == (decimal)(-1.0)))
+                {
+                    valid = false;
+                }
+            });
+
 			return valid;
 		}
 
 		public bool HasValidEquippedCharacter()
 		{
-			return string.IsNullOrWhiteSpace(EquippedCharacter) || Scraper.IsValidCharacter(EquippedCharacter);
+			return string.IsNullOrWhiteSpace(EquippedCharacter) || GenshinProcesor.IsValidCharacter(EquippedCharacter);
 		}
 
 		[Serializable]
@@ -121,7 +121,7 @@ namespace InventoryKamera
 			public string stat;
 
 			[JsonProperty("value")]
-			[DefaultValue(0)]
+			[DefaultValue(-1)]
 			public decimal value;
 
 			public override string ToString()
@@ -156,7 +156,6 @@ namespace InventoryKamera
 				&& MainStat == artifact.MainStat
 				&& Level == artifact.Level
 				&& SubStats == artifact.SubStats
-				&& SubStatsCount == artifact.SubStatsCount
 				&& SetName == artifact.SetName
 				&& EquippedCharacter == artifact.EquippedCharacter
 				&& Lock == artifact.Lock;
@@ -171,10 +170,7 @@ namespace InventoryKamera
 				+ $"Level: {Level}\n"
 				+ $"Main Stat: {MainStat}\n";
 
-			for (int i = 0; i < SubStatsCount; i++)
-			{
-				if (!string.IsNullOrWhiteSpace(SubStats[i].stat)) output += $"Substat {i + 1}: {SubStats[i]}\n";
-			}
+			SubStats.ForEach(s => output += $"Substat {SubStats.IndexOf(s)+1}: {s}\n");
 
 			output += $"Locked: {Lock}\n";
 
@@ -182,7 +178,7 @@ namespace InventoryKamera
 			return output;
 		}
 
-		public override int GetHashCode() => (GearSlot, Rarity, MainStat, Level, SubStats, SubStatsCount, SetName, EquippedCharacter, Lock).GetHashCode();
+		public override int GetHashCode() => (GearSlot, Rarity, MainStat, Level, SubStats, SetName, EquippedCharacter, Lock).GetHashCode();
 
 		public static bool operator ==(Artifact lhs, Artifact rhs)
 		{

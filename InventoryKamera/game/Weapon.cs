@@ -108,12 +108,12 @@ namespace InventoryKamera
 
 		public bool HasValidWeaponName()
 		{
-			return Scraper.IsValidWeapon(Name);
+			return GenshinProcesor.IsValidWeapon(Name);
 		}
 
 		public bool HasValidEquippedCharacter()
 		{
-			return string.IsNullOrWhiteSpace(EquippedCharacter) || Scraper.IsValidCharacter(EquippedCharacter) ;
+			return string.IsNullOrWhiteSpace(EquippedCharacter) || GenshinProcesor.IsValidCharacter(EquippedCharacter) ;
 		}
 
 		public int AscensionCount()
