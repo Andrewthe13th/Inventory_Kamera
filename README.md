@@ -4,17 +4,18 @@ Fan-made Genshin Impact tool that scans characters, weapons, artifacts, material
 
 This scanner exports in `.GOOD`, a JSON-based exporting format, which allows you to use it with compatible online Genshin Impact tools. These tools include artifact optimizing tools including [Genshin Optimizer](https://frzyc.github.io/genshin-optimizer/#/), [SEELIE.me](https://seelie.me/) and [Aspirine's Genshin Impact Calculator](https://genshin.aspirine.su/).
 
-[DOWNLOAD FROM HERE](https://github.com/Andrewthe13th/Inventory_Kamera/releases/latest)
+## Download
+[LATEST DOWNLOAD HERE](https://github.com/Andrewthe13th/Inventory_Kamera/releases/latest) <- CLICK ME NOT THE "CODE" BUTTON NEAR THE TOP OF THIS PAGE
 
 ## DISCORD
 https://discord.gg/zh56aVWe3U
 
+
+
+## Table of Contents
 > **Note**
 >
 > Please **read the following instructions carefully** and setup before using the scanner.
-
-## Table of Contents
-
 - Getting Started
   - [Installing Inventory Kamera](#installing-inventory-kamera)
   - [Setting up Genshin Impact](#setting-up-genshin-impact)
@@ -63,46 +64,149 @@ Before starting the scanner, you can (optionally) edit the following options:
 - Configure minimum weapon and artifact rarity to be scanned.
 - Set the scanner delays to slow Inventory Kamera's scanning speed if you experience problems with scanning.
 - Set the file export destination in the File Directory.
+- Inventory Kamera uses the default keybinds to open the inventory (B) and character screens (C). These settings may be customized within Inventory Kamera's options.
 
 ## How to run Inventory Kamera
 
-Start the Inventory Kamera scan by **leaving the game with the Paimon Menu open** and clicking 'Scan'.
-
+1. Start the Inventory Kamera scan by **leaving the game with the Paimon Menu open** and clicking 'Scan'.
 > **Warning**
 >
 > While scanning, **do not use your mouse or keyboard**. The scanner uses keyboard and mouse input to automate scanning.
 >
-> If you want to terminate the scan, press `ENTER` button at any time. It will cancel the scan, and the application will not output any scanned results. You may press the 'Export Scanned Data' button to force the export of the most recently collected data (whether it's complete or incomplete).
+> If you want to terminate the scan early, you can press `ENTER` button at any time. This will cancel the scan, and the application will not automatically output any scanned results. You may press the 'Export Scanned Data' button to force the export of the most recently collected data (whether it's complete or incomplete).
+
+2. Wait for Inventory Kamera to complete its scan for the `Scan Items` selections.
+
+3. Press the `Open Export Folder` button to open a File Explorer window. This is where Inventory Kamera exports its scanned data.
+
+
+
 
 ## Updating for new game versions
 
-Inventory Kamera uses lists of valid items and characters to assist with text recognition. These lists are kept locally in the `inventorylists` folder. These lists should be updated every time a new version of the game is released, and it can be done automatically or manually.
+Inventory Kamera uses lists of valid items and characters to assist with text recognition. These lists are kept locally in the `inventorylists` folder. These lists should be updated every time a new version of the game is released, and it can be done either automatically or manually.
 
 ### Updating automatically
 
-If the update window does not show up when the applications starts, you can select `Update Lookup Tables` under `Options` to run the automatic updater. You may optionally force the updater to run if it does not detect a new Genshin Impact version. Inventory Kamera syncs with [Dimbreath's Genshin Data GitHub Repo](https://github.com/Dimbreath/GenshinData). Big thanks for all the hard work done there.
+A notification window will appear when starting the application and a new version of Genshin game data is found. Inventory Kamera syncs with [Dimbreath's Anime Game Data Repo](https://gitlab.com/Dimbreath/AnimeGameData) for new game versions. Big thanks for all the hard work done there.
+
+If the update window does not show up when the applications starts, you can select `Update Lookup Tables` under `Options` to run the automatic updater. You may optionally force the updater to run if it does not detect a new Genshin Impact version. 
 
 ### Updating manually
 
-All lists, except for characters, are kept in a simple key:value JSON-readable format. 'value' is the name of an item in [PascalCase](<https://en.wikipedia.org/wiki/Naming_convention_(programming)#Examples_of_multiple-word_identifier_formats>) and 'key' is whatever 'value' is but in lowercase. `materialscomplete.json` is the combination of `devmaterials.json` and `materials.json`, so updating either of those requires an update to `materialscomplete.json` as well. The format for manually updating characters is slightly different. The key for a character is still the lowercase version of the character's name in PascalCase, and the value is in the following format:
+> **Warning**
+> 
+> This option should only be necessary if Inventory Kamera's `Update Lookup Tables` reports an error or the generated ouputs are invalid.
 
+The materials and weapons lists are kept in a simple key:value JSON-readable format. 'value' is the name of an item in [PascalCase](<https://en.wikipedia.org/wiki/Naming_convention_(programming)#Examples_of_multiple-word_identifier_formats>) and 'key' is whatever 'value' is but in lowercase. 
+
+The format for manually updating characters and artifacts is slightly different. The key for both json files is still the lowercase version of the character/artifact set name in PascalCase, and the value is in the following example formats:
+
+characters.json
 ```json
-{
-  "GOOD": "SangonomiyaKokomi",
-  "ConstellationOrder": ["burst", "skill"],
-  "WeaponType": 4
-}
-```
+"albedo": {
+    "GOOD": "Albedo",
+    "ConstellationName": [
+      "Princeps Cretaceus"
+    ],
+    "ConstellationOrder": [
+      "skill",
+      "burst"
+    ],
+    "Element": [
+      "geo"
+    ],
+    "WeaponType": 0
+  },
 
-The character's name is as it appears in the party menu on the right side of the in-world UI or the character's menu screen in the top left corner. The constellation order depends on which talent the third constellation upgrades for each character. The weapon type values are as follows:
+
+"traveler": {
+    "GOOD": "Traveler",
+    "Element": [
+      "electro",
+      "pyro",
+      "dendro",
+      "geo",
+      "hydro",
+      "anemo"
+    ],
+    "ConstellationOrder": {
+      "electro": [
+        "burst",
+        "skill"
+      ],
+      "dendro": [
+        "skill",
+        "burst"
+      ],
+      "geo": [
+        "burst",
+        "skill"
+      ],
+      "hydro": [
+        "skill",
+        "burst"
+      ],
+      "anemo": [
+        "burst",
+        "skill"
+      ]
+    },
+    "WeaponType": 0
+  },
+```
+Note: The ConstellationName value is formatted as an array. This primarily applies to only the traveler as the male and female versions of the characters have different constellation names.
+Note: The Traveler is a unique case in which constellation skill orders are be provided for each currently available element.
+
+The character's name is as it appears in the party menu on the right side of the in-world UI or the character's menu screen in the top left corner. The constellation order depends on which talent the third constellation upgrades for each character.
+
+Weapon type values are as follows:
 
 0 = Sword, 1 = Claymore, 2 = Polearm, 3 = Bow, 4 = Catalyst
+
+artifacts.json
+```json
+"adventurer": {
+    "setName": "Adventurer",
+    "GOOD": "Adventurer",
+    "normalizedName": "adventurer",
+    "artifacts": {
+      "goblet": {
+        "artifactName": "Adventurer's Golden Goblet",
+        "GOOD": "AdventurersGoldenGoblet",
+        "normalizedName": "adventurersgoldengoblet"
+      },
+      "plume": {
+        "artifactName": "Adventurer's Tail Feather",
+        "GOOD": "AdventurersTailFeather",
+        "normalizedName": "adventurerstailfeather"
+      },
+      "circlet": {
+        "artifactName": "Adventurer's Bandana",
+        "GOOD": "AdventurersBandana",
+        "normalizedName": "adventurersbandana"
+      },
+      "flower": {
+        "artifactName": "Adventurer's Flower",
+        "GOOD": "AdventurersFlower",
+        "normalizedName": "adventurersflower"
+      },
+      "sands": {
+        "artifactName": "Adventurer's Pocket Watch",
+        "GOOD": "AdventurersPocketWatch",
+        "normalizedName": "adventurerspocketwatch"
+      }
+    }
+  },
+```
 
 Consider using [a JSON text validator](https://jsonlint.com/) after following this manual method. Support may or may not be provided if you choose this route.
 
 ## Reporting an issue
 
-If you run into a problem with our scanner (e.g. a bug, app crash, invalid export format), please [create an issue here](https://github.com/Andrewthe13th/Inventory_Kamera/issues/new/choose) and try to fill it out as much as possible. It, along with the evidence, will greatly speed up the bug-fixing process.
+If you run into a problem with our scanner (e.g. a bug, app crash, invalid export format), please [create an issue here](https://github.com/Andrewthe13th/Inventory_Kamera/issues/new/choose) and try to fill it out as much as possible. It, along with the evidence, will greatly speed up the bug-fixing process. 
+
+Alternatively, the [Inventory Kamera Discord](https://discord.gg/zh56aVWe3U) is open for more real-time discussion and support help.
 
 > **Note**
 >
@@ -110,7 +214,7 @@ If you run into a problem with our scanner (e.g. a bug, app crash, invalid expor
 >
 > Start by leaving a reaction emoji to that issue (more reactions means more dev attention!). Please try to limit comments to new or helpful information (i.e. not "Same issue here" comments). You can choose to _subscribe_ to that issue by clicking 'Subscribe' in the Notifications section to get notifications on thread developments.
 
-### Writing a new issue
+### Creating a new issue
 
 We would **love to have Screenshots (especially video recordings!) and Error Logs as evidence**. These can be very helpful for debugging your problem. Add it to the issue via drag-and-drop or by attaching the file to the template. Inventory Kamera may place screenshots in the `logging` folder (divided into categories) when it thinks it encountered an issue. Attaching a zipped copy of your `logging` folder is the best way to submit logs. You may check the 'Log All Screenshots' box to force this behavior in most areas that may concern the devs.
 
@@ -118,9 +222,12 @@ We would **love to have Screenshots (especially video recordings!) and Error Log
 
 If you would like to request a new feature, please visit the [discussion forum](https://github.com/Andrewthe13th/Inventory_Kamera/discussions) before opening a new feature request using [Inventory Kamera feature request form](https://github.com/Andrewthe13th/Inventory_Kamera/discussions/new?category=ideas-or-feature-requests).
 
+Alternatively, the [Inventory Kamera Discord](https://discord.gg/zh56aVWe3U) is has a feature request channel.
+
 ## Asking a question
 
-General questions? Start by looking for similar questions in the [Inventory Kamera discussion forum](https://github.com/Andrewthe13th/Inventory_Kamera/discussions).
+General questions? Start by looking for similar questions in the [Inventory Kamera discussion forum](https://github.com/Andrewthe13th/Inventory_Kamera/discussions) OR the [Inventory Kamera Discord](https://discord.gg/zh56aVWe3U).
+
 If you have a question that doesn't have a thread, create a new [general](https://github.com/Andrewthe13th/Inventory_Kamera/discussions/new?category=general) or [Q&A](https://github.com/Andrewthe13th/Inventory_Kamera/discussions/new?category=q-a) thread.
 
 ## Frequently Asked Questions (FAQ)
@@ -129,10 +236,18 @@ If you have a question that doesn't have a thread, create a new [general](https:
 
 According to [HoYoverse's response to Script, Plug-In, and Third-Party Software](https://genshin.hoyoverse.com/en/news/detail/5763), we believe, no.
 
-The scanner does not provide any exploits or game progression. It only takes screenshots of a portion of the game window, processes the image and exports the data. The account will still be yours to keep. We do not provide any account exchanges or primogem top-ups.
+The scanner does not provide any exploits or game progression. It only takes screenshots of a portion of the game window, processes the image and exports the data. The account will still be yours to keep. We do not provide any account exchanges or primogem top-ups. Game interaction is limited to only menu navigation.
 
 In addition, we have not received any warnings about the application development.
-However, that does not mean it will stay that way forever: we are at the mercy of HoYoverse.
+However, that does not mean it will stay that way forever! We are at the mercy of HoYoverse.
+
+#### What Languages does Inventory Kamera support?
+
+Inventory Kamera only supports _**English**_ currently. This limitation is due to only having a trained dataset available for the English language. The in-game "Game Langugae" option must be set to Engish. Scanning efficiency is not guaranteed for other languages. More languages may be implemented in the future but there are no current plans.
+
+#### I need help! Where can I go?
+
+Help may be found in the [Inventory Kamera discussion forum](https://github.com/Andrewthe13th/Inventory_Kamera/discussions) or in the [Inventory Kamera Discord](https://discord.gg/zh56aVWe3U).
 
 ## License
 
