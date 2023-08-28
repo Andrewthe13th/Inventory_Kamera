@@ -30,7 +30,6 @@ namespace InventoryKamera
 			int totalRows = (int)Math.Ceiling(artifactCount / (decimal)cols);
 			int cardsQueued = 0;
 			int rowsQueued = 0;
-			int offset = 0;
 			UserInterface.SetArtifact_Max(artifactCount);
 
 			StopScanning = false;
@@ -93,7 +92,7 @@ namespace InventoryKamera
 				for (int i = cardsRemaining < fullPage ? ( rows - ( totalRows - rowsQueued ) ) * cols : 0; i < rectangles.Count; i++)
 				{
 					Rectangle item = rectangles[i];
-					Navigation.SetCursor(item.Center().X, item.Center().Y + offset);
+					Navigation.SetCursor(item.Center().X, item.Center().Y);
 					Navigation.Click();
 					Navigation.SystemWait(Navigation.Speed.SelectNextInventoryItem);
 
@@ -117,10 +116,6 @@ namespace InventoryKamera
 				// only scroll a few rows
 				if (totalRows - rowsQueued <= rows)
 				{
-					if (Navigation.GetAspectRatio() == new Size(8, 5))
-					{
-						offset = 35; // Lazy fix
-					}
 					for (int i = 0; i < 10 * ( totalRows - rowsQueued ) - 1; i++)
 					{
 						Navigation.sim.Mouse.VerticalScroll(-1);
@@ -131,11 +126,7 @@ namespace InventoryKamera
 				else
 				{
 					// Scroll back one to keep it from getting too crazy
-					if (rowsQueued % 15 == 0)
-					{
-						Navigation.sim.Mouse.VerticalScroll(1);
-					}
-					for (int i = 0; i < 10 * rows - 1; i++)
+					for (int i = 0; i < 10 * rows - (page % 2 == 0 ? 1 : 2); i++)
 					{
 						Navigation.sim.Mouse.VerticalScroll(-1);
 						Navigation.Wait(1);
@@ -143,7 +134,7 @@ namespace InventoryKamera
 					Navigation.SystemWait(Navigation.Speed.Fast);
 				}
 				++page;
-				(rectangles, cols, rows) = GetPageOfItems(page);
+				(rectangles, cols, rows) = GetPageOfItems(page, acceptLess: totalRows - rowsQueued <= fullPage);
 			}
 		}
 
@@ -370,9 +361,8 @@ namespace InventoryKamera
 
 					// Remove anything not a-z as well as removes spaces/underscores
 					mainStat = Regex.Replace(mainStat, @"[\W_0-9]", string.Empty);
-					// Replace double characters (ex. aanemodmgbonus). Seemed to be a somewhat common problem.
-					mainStat = Regex.Replace(mainStat, "(.)\\1+", "$1");
-					mainStat = GenshinProcesor.FindClosestStat(mainStat);
+
+					mainStat = GenshinProcesor.FindClosestStat(mainStat, 80);
 
 					if (mainStat == "def" || mainStat == "atk" || mainStat == "hp")
 					{

@@ -102,7 +102,7 @@ namespace InventoryKamera
                     Navigation.SystemWait(Navigation.Speed.Fast);
                 }
                 ++page;
-                (rectangles, cols, rows) = GetPageOfItems(page);
+                (rectangles, cols, rows) = GetPageOfItems(page, acceptLess: totalRows - rowsQueued <= fullPage);
             }
 
             void SelectLevelSorting()

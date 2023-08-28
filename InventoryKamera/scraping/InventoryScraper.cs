@@ -413,11 +413,12 @@ namespace InventoryKamera
                         else break;
 
                         if (itemCount <= 40)
-                            weight += 0.05;
+                            weight += 0.125;
                         else
-                        { weight -= 0.025; ++counter; }
+                        { weight -= 0.095; ++counter; }
+                        weight = Math.Min(weight, 1);
                     }
-                    while (itemCount != 40 && weight < 0.25 && counter < 25);
+                    while (itemCount != 40 && weight < 1 && counter < 25);
 
                     if (Properties.Settings.Default.LogScreenshots)
                     {

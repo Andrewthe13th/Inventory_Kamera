@@ -397,7 +397,7 @@ namespace InventoryKamera
 				}
 			}
 
-			if (!string.IsNullOrWhiteSpace(mostSimilarString) && targets != new HashSet<string>(Stats.Keys))
+			if (!string.IsNullOrWhiteSpace(mostSimilarString) && !targets.Contains("critrate"))	// Only print this statement when not looking to match for a closest stat
 				Logger.Debug("Most similar string found for {0} as {1} ({2}%)", source, mostSimilarString, mostSimilarValue);
 
 			return mostSimilarString;

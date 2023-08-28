@@ -39,7 +39,7 @@ namespace InventoryKamera
 			var executables = Properties.Settings.Default.Executables;
 			foreach (var processName in executables)
 			{
-				Logger.Debug("Checking for {genshin}.exe", processName);
+				Logger.Debug("Checking for {0}.exe", processName);
 				if (InitializeProcess(processName, out IntPtr handle))
 				{
 					// Get area and position
@@ -60,7 +60,7 @@ namespace InventoryKamera
 					}
 
 					Logger.Debug("Found {0}.exe", processName);
-					Logger.Debug("Window ({0}x{1}): x={2}, y={3}", WindowSize.Width, WindowSize.Height, WindowPosition.Left, WindowPosition.Top);
+					Logger.Debug("Window location ({0}x{1}): x={2}, y={3}", WindowSize.Width, WindowSize.Height, WindowPosition.Left, WindowPosition.Top);
 					return;
 				}
 				Logger.Debug("Could not find {0}.exe", processName);
@@ -85,7 +85,6 @@ namespace InventoryKamera
 			using (Graphics gfxBmp = Graphics.FromImage(bmp))
 			{
 				gfxBmp.CopyFromScreen(GetPosition().Left, GetPosition().Top, 0, 0, bmp.Size);
-				Logger.Debug($"Copying window ({GetWidth()}x{GetHeight()}) starting at x={GetPosition().Left}, y={GetPosition().Top}");
 
 				var uidRegion = new RECT(
 					Left: (int)( 1070 / 1280.0 * bmp.Width ),
