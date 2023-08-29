@@ -504,8 +504,8 @@ namespace InventoryKamera
         {
             return GenshinProcesor.CopyBitmap(card,
                 new Rectangle(
-                    x: 0,
-                    y: (int)(double)(card.Height * (double)(Navigation.IsNormal ? 0.927 : 0.936)),
+                    x: (int)(card.Width * 0.15),
+                    y: (int)(double)(card.Height * (double)(Navigation.IsNormal ? 0.938 : 0.943)),
                     width: card.Width,
                     height: card.Height));
         }
