@@ -490,23 +490,27 @@ namespace InventoryKamera
         private async void CheckForKameraUpdates()
         {
             var client = new GitHubClient(new ProductHeaderValue("Inventory_Kamera"));
-            var releases = await client.Repository.Release.GetAll("Andrewthe13th", "Inventory_Kamera");
-            var latest = releases.First();
-
-
-            Version latestVersion = new Version(Regex.Replace(latest.TagName, "[a-zA-Z]", string.Empty));
-            Version currentVersion = Assembly.GetExecutingAssembly().GetName().Version;
-            if (currentVersion.CompareTo(latestVersion) < 0)
+            try
             {
-                var message = $"A new version of Inventory Kamera is available.\n\n" +
-                    $"Current Version: {currentVersion}\nLatest Version: {latestVersion}\n\n" +
-                    $"Would you like to download the update?";
-                var result = MessageBox.Show(message, "Inventory Kamera Update", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                if (result == DialogResult.Yes)
+                var releases = await client.Repository.Release.GetAll("Andrewthe13th", "Inventory_Kamera");
+                var latest = releases.First();
+
+
+                Version latestVersion = new Version(Regex.Replace(latest.TagName, "[a-zA-Z]", string.Empty));
+                Version currentVersion = Assembly.GetExecutingAssembly().GetName().Version;
+                if (currentVersion.CompareTo(latestVersion) < 0)
                 {
-                    Process.Start(new ProcessStartInfo(latest.HtmlUrl) { UseShellExecute = true });
+                    var message = $"A new version of Inventory Kamera is available.\n\n" +
+                        $"Current Version: {currentVersion}\nLatest Version: {latestVersion}\n\n" +
+                        $"Would you like to download the update?";
+                    var result = MessageBox.Show(message, "Inventory Kamera Update", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (result == DialogResult.Yes)
+                    {
+                        Process.Start(new ProcessStartInfo(latest.HtmlUrl) { UseShellExecute = true });
+                    }
                 }
             }
+            catch (RateLimitExceededException) { Logger.Warn("Rate limit exceeded checking for Kamera Update!!!! This warning should be resolved in an hour."); }
             
         }
 
