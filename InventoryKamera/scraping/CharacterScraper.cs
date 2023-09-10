@@ -261,16 +261,21 @@ namespace InventoryKamera
 						if (!GenshinProcesor.CharacterMatchesElement(name, element)) { name = ""; element = ""; }
                     }
 					n.Dispose();
-					Logger.Debug("Scanned character name as {0} with element {1}", name, element);
 
 					if (!string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(element))
 					{
-						UserInterface.SetCharacter_NameAndElement(bm, name, element);
+						Logger.Debug("Scanned character name as {0} with element {1}", name, element);
+                        UserInterface.SetCharacter_NameAndElement(bm, name, element);
 						return;
 					}
+					else
+                    {
+                        Logger.Debug("Could not parse character name/element (Atempt {0}/{1}). Retrying...", attempts+1, maxAttempts);
+                        bm.Save($"./logging/characters/{bm.GetHashCode()}.png");
+                    }
 				}
 				attempts++;
-				Navigation.SystemWait(Navigation.Speed.Normal);
+				Navigation.SystemWait(Navigation.Speed.Fast);
 			} while ( attempts < maxAttempts );
 			name = null;
 			element = null;
@@ -278,7 +283,7 @@ namespace InventoryKamera
 
 		private static int ScanLevel(ref bool ascended)
 		{
-            int rescans = 0;
+            int attempt = 0;
 
             var xRef = 1280.0;
 			var yRef = 720.0;
@@ -320,13 +325,15 @@ namespace InventoryKamera
                         Logger.Debug("Parsed character level as {0}", level);
                         return level;
                     }
-                    n.Dispose();
-					bm.Dispose();
 				}
 				Logger.Debug("Failed to parse character level and ascension from {0} (text), retrying", text);
-				rescans++;
-				Navigation.SystemWait(Navigation.Speed.Normal);
-			} while (rescans < 10);
+
+				attempt++;
+
+                n.Dispose();
+                bm.Dispose();
+                Navigation.SystemWait(Navigation.Speed.Fast);
+			} while (attempt < 50);
 
 			return -1;
 		}

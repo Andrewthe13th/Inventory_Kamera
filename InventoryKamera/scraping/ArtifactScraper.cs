@@ -24,7 +24,7 @@ namespace InventoryKamera
 		{
 			// Get Max artifacts from screen
 			int artifactCount = count == 0 ? ScanItemCount() : count;
-			int page = 0;
+			int page = 1;
 			var (rectangles, cols, rows) = GetPageOfItems(page);
 			int fullPage = cols * rows;
 			int totalRows = (int)Math.Ceiling(artifactCount / (decimal)cols);
@@ -125,13 +125,20 @@ namespace InventoryKamera
 				}
 				else
 				{
-					// Scroll back one to keep it from getting too crazy
-					for (int i = 0; i < 10 * rows - (page % 2 == 0 ? 1 : 2); i++)
+                    
+                    for (int i = 0; i < 10 * rows - 1; i++)
 					{
 						Navigation.sim.Mouse.VerticalScroll(-1);
 						Navigation.Wait(1);
 					}
-					Navigation.SystemWait(Navigation.Speed.Fast);
+                    // Scroll back one to keep it from getting too crazy
+                    if (page % 3 == 0)
+                    {
+						Logger.Debug("Scrolled back one");
+						Navigation.sim.Mouse.VerticalScroll(1);
+						Navigation.Wait(1);
+                    }
+                    Navigation.SystemWait(Navigation.Speed.Fast);
 				}
 				++page;
 				(rectangles, cols, rows) = GetPageOfItems(page, acceptLess: totalRows - rowsQueued <= fullPage);

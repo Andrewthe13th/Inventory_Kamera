@@ -426,12 +426,28 @@ namespace InventoryKamera
 			return SetCursorPos(GetPosition().Left + X, GetPosition().Top + Y);
 		}
 
+		public static bool SetCursor(Point point)
+		{
+			return SetCursor(point.X, point.Y);
+		}
+
 		public static void Click()
 		{
 			if (SystemInformation.MouseButtonsSwapped)
 				sim.Mouse.RightButtonClick();
 			else
 				sim.Mouse.LeftButtonClick();
+		}
+
+		public static void Click(int x, int y)
+		{
+			SetCursor(x, y);
+			Click();
+		}
+
+		public static void Click(Point point)
+		{
+			Click(point.X, point.Y);
 		}
 
 		public static void Scroll(Direction direction, int scrolls, int delay = 1)
@@ -469,11 +485,11 @@ namespace InventoryKamera
 			RIGHT = 3,
         }
 
-		#endregion Mouse
+        #endregion Mouse
 
-		#region Delays
+        #region Delays
 
-		public static void SystemWait(Speed speed = Speed.Normal)
+        public static void SystemWait(Speed speed = Speed.Normal)
 		{
 			double value;
 			switch (speed)
@@ -559,7 +575,7 @@ namespace InventoryKamera
 			return delay;
 		}
 
-		public enum Speed
+        public enum Speed
 		{
 			Slowest,
 			Slower,

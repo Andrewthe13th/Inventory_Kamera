@@ -67,7 +67,7 @@ namespace InventoryKamera
 			Material previousMaterial = new Material(null, -1);
 
 			List<Rectangle> rectangles;
-			int page = 0;
+			int page = 1;
 
 			// Keep scanning while not repeating any items names
 			while (true)

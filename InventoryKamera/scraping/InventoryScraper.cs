@@ -57,6 +57,10 @@ namespace InventoryKamera
 
         protected readonly List<InventoryPage> materialPages;
 
+        private List<Rectangle> prevRect;
+        private int prevColumn = 0;
+        private int prevRow = 0;
+
         public InventoryScraper() 
         {
             materialPages = new List<InventoryPage>();
@@ -359,6 +363,15 @@ namespace InventoryKamera
                 // Sort by row then by column within each row
                 rectangles = rectangles.OrderBy(r => r.Top).ThenBy(r => r.Left).ToList();
 
+                var avgWidth = rectangles.Average(r => r.Width);
+                var avgHeight = rectangles.Average (r => r.Height);
+
+                rectangles.ForEach(r =>
+                {
+                    r.Width = (int)avgWidth;
+                    r.Height = (int)avgHeight;
+                });
+
                 return (rectangles, colCoords.Count, rowCoords.Count);
             }
         }
@@ -417,20 +430,35 @@ namespace InventoryKamera
                         else
                         { weight -= 0.095; ++counter; }
                         weight = Math.Min(weight, 1);
+                        rectangles = null;
                     }
                     while (itemCount != 40 && weight < 1 && counter < 25);
 
                     if (Properties.Settings.Default.LogScreenshots)
                     {
-                        SaveInventoryBitmap(screenshot, $"{inventoryPage}Inventory.png)");
+                        SaveInventoryBitmap(screenshot, $"{inventoryPage}Inventory.png");
                         using (Graphics g = Graphics.FromImage(screenshot))
                             rectangles.ForEach(r => g.DrawRectangle(new Pen(Color.Green, 2), r));
 
                         SaveInventoryBitmap(screenshot, $"{inventoryPage}Inventory{pageNum}_{cols}x{rows} - weight {weight}.png");
-
                     }
                     processedScreenshot.Dispose();
-                    return (rectangles, cols, rows);
+
+                    if (rectangles == null)
+                    {
+                        Logger.Warn("Could not find 40 items in inventory. Re-using previous item page.");
+
+                        return prevRect == null ?
+                            throw new ArgumentNullException("Could not find first page of items!") 
+                            :
+                            (prevRect, prevColumn, prevRow);
+                    }
+                    else
+                    {
+                        prevRect = rectangles; prevColumn = cols; prevRow = rows;
+                        return (rectangles, cols, rows);
+                    }
+
                 }
                 catch (Exception)
                 {
