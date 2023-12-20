@@ -37,48 +37,48 @@ namespace InventoryKamera
 			Logger.Info("Found {0} for artifact count.", artifactCount);
 
 
-			if (SortByLevel)
-			{
-				Logger.Debug("Sorting by level to optimize total scan time");
-                // Check if sorted by level
-                // If not, sort by level
-                if (CurrentSortingMethod() != "level")
-                {
-					Logger.Debug("Not already sorting by level...");
-					Navigation.SetCursor(
-						X: (int)(230 / 1280.0 * Navigation.GetWidth()),
-						Y: (int)(680 / 720.0 * Navigation.GetHeight()));
-					Navigation.Click();
-					Navigation.Wait();
-					Navigation.SetCursor(
-						X: (int)(250 / 1280.0 * Navigation.GetWidth()),
-						Y: (int)(615 / 720.0 * Navigation.GetHeight()));
-					Navigation.Click();
-					Navigation.Wait();
-				}
-				Logger.Debug("Inventory is sorted by level.");
-			}
-			else
-            {
-				Logger.Debug("Sorting by quality to scan all artifacts matching quality filter.");
-				// Check if sorted by quality
-				if (CurrentSortingMethod() != "quality")
-				{
-					Logger.Debug("Not already sorting by quality...");
-					// If not, sort by quality
-					Navigation.SetCursor(
-						X: (int)(230 / 1280.0 * Navigation.GetWidth()),
-						Y: (int)(680 / 720.0 * Navigation.GetHeight()));
-					Navigation.Click();
-					Navigation.Wait();
-					Navigation.SetCursor(
-						X: (int)(250 / 1280.0 * Navigation.GetWidth()),
-						Y: (int)(645 / 720.0 * Navigation.GetHeight()));
-					Navigation.Click();
-					Navigation.Wait();
-				}
-				Logger.Debug("Inventory is sorted by quality");
-			}
+			//if (SortByLevel)
+			//{
+			//	Logger.Debug("Sorting by level to optimize total scan time");
+			//	// Check if sorted by level
+			//	// If not, sort by level
+			//	if (CurrentSortingMethod() != "level")
+			//	{
+			//		Logger.Debug("Not already sorting by level...");
+			//		Navigation.SetCursor(
+			//			X: (int)(230 / 1280.0 * Navigation.GetWidth()),
+			//			Y: (int)(680 / 720.0 * Navigation.GetHeight()));
+			//		Navigation.Click();
+			//		Navigation.Wait();
+			//		Navigation.SetCursor(
+			//			X: (int)(250 / 1280.0 * Navigation.GetWidth()),
+			//			Y: (int)(615 / 720.0 * Navigation.GetHeight()));
+			//		Navigation.Click();
+			//		Navigation.Wait();
+			//	}
+			//	Logger.Debug("Inventory is sorted by level.");
+			//}
+			//else
+			//{
+			//	Logger.Debug("Sorting by quality to scan all artifacts matching quality filter.");
+			//	// Check if sorted by quality
+			//	if (CurrentSortingMethod() != "quality")
+			//	{
+			//		Logger.Debug("Not already sorting by quality...");
+			//		// If not, sort by quality
+			//		Navigation.SetCursor(
+			//			X: (int)(230 / 1280.0 * Navigation.GetWidth()),
+			//			Y: (int)(680 / 720.0 * Navigation.GetHeight()));
+			//		Navigation.Click();
+			//		Navigation.Wait();
+			//		Navigation.SetCursor(
+			//			X: (int)(250 / 1280.0 * Navigation.GetWidth()),
+			//			Y: (int)(645 / 720.0 * Navigation.GetHeight()));
+			//		Navigation.Click();
+			//		Navigation.Wait();
+			//	}
+			//	Logger.Debug("Inventory is sorted by quality");
+			//}
 
 			// Go through artifact list
 			while (cardsQueued < artifactCount)
