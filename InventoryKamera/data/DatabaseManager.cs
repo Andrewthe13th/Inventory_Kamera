@@ -37,7 +37,7 @@ namespace InventoryKamera
 
         private readonly string NewVersion = "version.txt";
 
-        private const string commitsAPIURL = "https://gitlab.com/api/v4/projects/41287973/repository/commits";
+        private const string commitsAPIURL = "https://gitlab.com/api/v4/projects/53209414/repository/commits";
         private const string repoBaseURL = "https://gitlab.com/Dimbreath/AnimeGameData/-/raw/master/";
         private const string TextMapEnURL = repoBaseURL + "TextMap/TextMapEN.json";
         private const string CharactersURL = repoBaseURL + "ExcelBinOutput/AvatarExcelConfigData.json";
@@ -190,7 +190,7 @@ namespace InventoryKamera
         {
             try
             {
-                UpdateStatus overallStatus = UpdateStatus.Success;
+                UpdateStatus overallStatus = UpdateStatus.Skipped;
                 var statusLock = new object();
                 LoadMappings();
 
@@ -208,14 +208,24 @@ namespace InventoryKamera
                 lists.AsParallel().ForAll(e =>
                 {
                     var status = UpdateList(e, force);
-                    if (status == UpdateStatus.Fail)
+
+                    lock (statusLock) 
                     {
-                        lock (statusLock) overallStatus = UpdateStatus.Fail;
-                        Logger.Error("Failed to update {0} data", e);
-                    }
-                    else if (overallStatus != UpdateStatus.Fail)
-                    {
-                        lock (statusLock) overallStatus = status;
+                        switch (status)
+                        {
+                            case UpdateStatus.Fail:
+                                overallStatus = UpdateStatus.Fail;
+                                Logger.Error("Failed to update {0} data", e);
+                                break;
+                            case UpdateStatus.Success:
+                                if (overallStatus != UpdateStatus.Fail)
+                                    overallStatus = UpdateStatus.Success;
+                                break;
+                            default:
+                                if (overallStatus == UpdateStatus.Skipped)
+                                    overallStatus = UpdateStatus.Skipped;
+                                break;
+                        }
                     }
                 });
 
