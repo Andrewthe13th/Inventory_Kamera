@@ -148,12 +148,14 @@ namespace InventoryKamera
         }
 
         private void UpdateKeyTextBoxes()
-        {
+        { 
             Navigation.inventoryKey = (VirtualKeyCode)Properties.Settings.Default.InventoryKey;
             Navigation.characterKey = (VirtualKeyCode)Properties.Settings.Default.CharacterKey;
+            Navigation.slotOneKey = (VirtualKeyCode)Properties.Settings.Default.Slot1Key;
 
             inventoryToolStripTextBox.Text = new KeysConverter().ConvertToString((Keys)Navigation.inventoryKey);
             characterToolStripTextBox.Text = new KeysConverter().ConvertToString((Keys)Navigation.characterKey);
+            slot1StripTextBox.Text = new KeysConverter().ConvertToString((Keys)Navigation.slotOneKey);
 
             // Make sure text boxes show key glyph and not "OEM..."
             if (inventoryToolStripTextBox.Text.ToUpper().Contains("OEM"))
@@ -164,7 +166,10 @@ namespace InventoryKamera
             {
                 characterToolStripTextBox.Text = KeyCodeToUnicode((Keys)Navigation.characterKey);
             }
-
+            if (slot1StripTextBox.Text.ToUpper().Contains("OEM"))
+            {
+                slot1StripTextBox.Text = KeyCodeToUnicode((Keys)Navigation.slotOneKey);
+            }
         }
 
         private void StartButton_Clicked(object sender, EventArgs e)
@@ -386,6 +391,12 @@ namespace InventoryKamera
                     Navigation.characterKey = (VirtualKeyCode)e.KeyCode;
                     Logger.Debug("Char key set to: {key}", Navigation.characterKey);
                     Properties.Settings.Default.CharacterKey = e.KeyValue;
+                    break;
+
+                case "slot1Key":
+                    Navigation.slotOneKey = (VirtualKeyCode)e.KeyCode;
+                    Logger.Debug("Slot 1 key set to: {key}", Navigation.slotOneKey);
+                    Properties.Settings.Default.Slot1Key = e.KeyValue;
                     break;
 
                 default:

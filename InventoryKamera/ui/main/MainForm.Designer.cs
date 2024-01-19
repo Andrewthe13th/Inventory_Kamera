@@ -81,8 +81,11 @@
             this.inventoryToolStripTextBox = new System.Windows.Forms.ToolStripTextBox();
             this.characterScreenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.characterToolStripTextBox = new System.Windows.Forms.ToolStripTextBox();
+            this.characterSlot1KeyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.slot1StripTextBox = new System.Windows.Forms.ToolStripTextBox();
             this.DatabaseUpdateMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.updateExecutablesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
@@ -90,8 +93,13 @@
             this.MinimumArtifactLevelLabel = new System.Windows.Forms.Label();
             this.ManualExportButton = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
-            this.textBox1 = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.equipWeaponToolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.equipArtifactsToolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.screenshotsToolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.wandererNameTextBox = new System.Windows.Forms.TextBox();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.EquipWeaponsCheckBox = new System.Windows.Forms.CheckBox();
             this.EquipArtifactsCheckBox = new System.Windows.Forms.CheckBox();
             this.LogScreenshotsCheckBox = new System.Windows.Forms.CheckBox();
@@ -106,12 +114,6 @@
             this.Weapons_CheckBox = new System.Windows.Forms.CheckBox();
             this.OutputPath_TextBox = new System.Windows.Forms.TextBox();
             this.ScannerDelay_TrackBar = new System.Windows.Forms.TrackBar();
-            this.label4 = new System.Windows.Forms.Label();
-            this.wandererNameTextBox = new System.Windows.Forms.TextBox();
-            this.equipWeaponToolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.equipArtifactsToolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.screenshotsToolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.updateExecutablesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.CharacterTalent3_PictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.CharacterTalent2_PictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.CharacterTalent1_PictureBox)).BeginInit();
@@ -649,6 +651,7 @@
             this.keysToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.inventoryToolStripMenuItem,
             this.characterScreenToolStripMenuItem,
+            this.characterSlot1KeyToolStripMenuItem,
             this.DatabaseUpdateMenuItem,
             this.toolStripMenuItem1,
             this.updateExecutablesToolStripMenuItem});
@@ -696,6 +699,26 @@
             this.characterToolStripTextBox.ToolTipText = "Key to open character screen";
             this.characterToolStripTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.OptionsMenuItem_KeyDown);
             // 
+            // characterSlot1KeyToolStripMenuItem
+            // 
+            this.characterSlot1KeyToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.slot1StripTextBox});
+            this.characterSlot1KeyToolStripMenuItem.Name = "characterSlot1KeyToolStripMenuItem";
+            this.characterSlot1KeyToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.characterSlot1KeyToolStripMenuItem.Text = "Character Slot 1 Key";
+            // 
+            // slot1StripTextBox
+            // 
+            this.slot1StripTextBox.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
+            this.slot1StripTextBox.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.slot1StripTextBox.MaxLength = 10;
+            this.slot1StripTextBox.Name = "slot1StripTextBox";
+            this.slot1StripTextBox.Size = new System.Drawing.Size(90, 23);
+            this.slot1StripTextBox.Tag = "slot1Key";
+            this.slot1StripTextBox.Text = "1";
+            this.slot1StripTextBox.ToolTipText = "Key to Select First Character";
+            this.slot1StripTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.OptionsMenuItem_KeyDown);
+            // 
             // DatabaseUpdateMenuItem
             // 
             this.DatabaseUpdateMenuItem.Name = "DatabaseUpdateMenuItem";
@@ -709,6 +732,13 @@
             this.toolStripMenuItem1.Size = new System.Drawing.Size(190, 22);
             this.toolStripMenuItem1.Text = "Open Export Folder";
             this.toolStripMenuItem1.Click += new System.EventHandler(this.ExportFolderMenuItem_Click);
+            // 
+            // updateExecutablesToolStripMenuItem
+            // 
+            this.updateExecutablesToolStripMenuItem.Name = "updateExecutablesToolStripMenuItem";
+            this.updateExecutablesToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.updateExecutablesToolStripMenuItem.Text = "Update Executables";
+            this.updateExecutablesToolStripMenuItem.Click += new System.EventHandler(this.updateExecutablesToolStripMenuItem_Click);
             // 
             // label2
             // 
@@ -767,15 +797,6 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.ExportFolderMenuItem_Click);
             // 
-            // textBox1
-            // 
-            this.textBox1.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::InventoryKamera.Properties.Settings.Default, "TravelerName", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.textBox1.Location = new System.Drawing.Point(328, 111);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(169, 20);
-            this.textBox1.TabIndex = 101;
-            this.textBox1.Text = global::InventoryKamera.Properties.Settings.Default.TravelerName;
-            // 
             // label1
             // 
             this.label1.AutoSize = true;
@@ -784,6 +805,37 @@
             this.label1.Size = new System.Drawing.Size(87, 13);
             this.label1.TabIndex = 102;
             this.label1.Text = "Traveler\'s Name:";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(230, 148);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(95, 13);
+            this.label4.TabIndex = 106;
+            this.label4.Text = "Wanderer\'s Name:";
+            // 
+            // screenshotsToolTip
+            // 
+            this.screenshotsToolTip.ToolTipIcon = System.Windows.Forms.ToolTipIcon.Warning;
+            // 
+            // wandererNameTextBox
+            // 
+            this.wandererNameTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::InventoryKamera.Properties.Settings.Default, "WandererName", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.wandererNameTextBox.Location = new System.Drawing.Point(328, 145);
+            this.wandererNameTextBox.Name = "wandererNameTextBox";
+            this.wandererNameTextBox.Size = new System.Drawing.Size(169, 20);
+            this.wandererNameTextBox.TabIndex = 105;
+            this.wandererNameTextBox.Text = global::InventoryKamera.Properties.Settings.Default.WandererName;
+            // 
+            // textBox1
+            // 
+            this.textBox1.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::InventoryKamera.Properties.Settings.Default, "TravelerName", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.textBox1.Location = new System.Drawing.Point(328, 111);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(169, 20);
+            this.textBox1.TabIndex = 101;
+            this.textBox1.Text = global::InventoryKamera.Properties.Settings.Default.TravelerName;
             // 
             // EquipWeaponsCheckBox
             // 
@@ -995,35 +1047,6 @@
             this.ScannerDelay_TrackBar.Value = global::InventoryKamera.Properties.Settings.Default.ScannerDelay;
             this.ScannerDelay_TrackBar.ValueChanged += new System.EventHandler(this.ScannerDelay_TrackBar_ValueChanged);
             // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(230, 148);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(95, 13);
-            this.label4.TabIndex = 106;
-            this.label4.Text = "Wanderer\'s Name:";
-            // 
-            // wandererNameTextBox
-            // 
-            this.wandererNameTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::InventoryKamera.Properties.Settings.Default, "WandererName", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.wandererNameTextBox.Location = new System.Drawing.Point(328, 145);
-            this.wandererNameTextBox.Name = "wandererNameTextBox";
-            this.wandererNameTextBox.Size = new System.Drawing.Size(169, 20);
-            this.wandererNameTextBox.TabIndex = 105;
-            this.wandererNameTextBox.Text = global::InventoryKamera.Properties.Settings.Default.WandererName;
-            // 
-            // screenshotsToolTip
-            // 
-            this.screenshotsToolTip.ToolTipIcon = System.Windows.Forms.ToolTipIcon.Warning;
-            // 
-            // updateExecutablesToolStripMenuItem
-            // 
-            this.updateExecutablesToolStripMenuItem.Name = "updateExecutablesToolStripMenuItem";
-            this.updateExecutablesToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
-            this.updateExecutablesToolStripMenuItem.Text = "Update Executables";
-            this.updateExecutablesToolStripMenuItem.Click += new System.EventHandler(this.updateExecutablesToolStripMenuItem_Click);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -1197,6 +1220,8 @@
         private System.Windows.Forms.ToolTip equipArtifactsToolTip;
         private System.Windows.Forms.ToolTip screenshotsToolTip;
         private System.Windows.Forms.ToolStripMenuItem updateExecutablesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem characterSlot1KeyToolStripMenuItem;
+        private System.Windows.Forms.ToolStripTextBox slot1StripTextBox;
     }
 }
 
