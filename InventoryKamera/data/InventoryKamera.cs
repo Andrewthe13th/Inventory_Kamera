@@ -384,6 +384,8 @@ namespace InventoryKamera
 								imageCollection.Bitmaps[4].Save(artifactPath + "substats/substats.png");
 								Directory.CreateDirectory(artifactPath + "equipped");
 								imageCollection.Bitmaps[5].Save(artifactPath + "equipped/equipped.png");
+								Directory.CreateDirectory(artifactPath + "locked");
+								imageCollection.Bitmaps[6].Save(artifactPath + "locked/locked.png");
 
 								imageCollection.Bitmaps.Last().Save(artifactPath + "card.png");
 
