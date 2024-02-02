@@ -262,7 +262,7 @@ namespace InventoryKamera
                     }
                     catch (NotImplementedException ex)
                     {
-                        UserInterface.AddError(ex.Message);
+                        UserInterface.AddError(ex.ToString());
                     }
                     catch (Exception ex)
                     {
