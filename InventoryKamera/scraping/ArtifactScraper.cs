@@ -36,6 +36,7 @@ namespace InventoryKamera
 
 			Logger.Info("Found {0} for artifact count.", artifactCount);
 
+			ClearFilters();
 
 			//if (SortByLevel)
 			//{
@@ -145,7 +146,25 @@ namespace InventoryKamera
 			}
 		}
 
-		public async void QueueScan(int id)
+        private void ClearFilters()
+        {
+
+            using (var x = Navigation.CaptureRegion(
+                x: (int)((Navigation.IsNormal ? 0.0750 : 0.0757) * Navigation.GetWidth()),
+                y: (int)((Navigation.IsNormal ? 0.8522 : 0.8678) * Navigation.GetHeight()),
+                width: (int)((Navigation.IsNormal ? 0.2244 : 0.2236) * Navigation.GetWidth()),
+                height: (int)((Navigation.IsNormal ? 0.0422 : 0.0367) * Navigation.GetHeight())))
+            {
+                //Navigation.DisplayBitmap(x);
+				var t = GenshinProcesor.AnalyzeText(x).Trim().ToLower();
+				if (t != null && t.Contains("filter"))
+				{
+					Navigation.ClearArtifactFilters();
+				}
+            }
+        }
+
+        public async void QueueScan(int id)
 		{
 			var card = GetItemCard();
             Bitmap name, gearSlot, mainStat, subStats, level, equipped, locked;
@@ -428,7 +447,7 @@ namespace InventoryKamera
 				if (line.Any(char.IsDigit))
 				{
 					SubStat substat = new SubStat();
-					Regex re = new Regex(@"([\w]+\W*)(\d+.*\d+)");
+					Regex re = new Regex(@"^(.*?)(\d+)");
 					var result = re.Match(line);
 					var stat = Regex.Replace(result.Groups[1].Value, @"[^\w]", string.Empty);
 					var value = result.Groups[2].Value;
@@ -441,14 +460,16 @@ namespace InventoryKamera
 					value = Regex.Replace(value, @"[^0-9]", string.Empty);
 
 					// Try to parse number
-					var cultureInfo = new CultureInfo("en-US");
-					if (!decimal.TryParse(value, NumberStyles.Number, cultureInfo, out substat.value))
+					if (!decimal.TryParse(value, NumberStyles.Number, CultureInfo.CurrentCulture, out substat.value))
 					{
+						Logger.Debug("Failed to parse stat value from: {1}", line);
 						substat.value = -1;
 					}
 
-					// Need to retain the decimal place for percent boosts
-					if (substat.stat.Contains("_")) substat.value /= 10;
+					if (string.IsNullOrWhiteSpace(substat.stat))
+					{
+						Logger.Debug("Failed to parse stat from: {1}", line);
+					}
 
 					substats.Insert(i, substat);
 				}

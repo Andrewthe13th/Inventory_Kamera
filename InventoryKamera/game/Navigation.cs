@@ -151,15 +151,6 @@ namespace InventoryKamera
 			SetCursor(buttonX, buttonY);
 			Click();
 			SystemWait(Speed.UI);
-
-			// Scroll item preview hotfix
-			buttonX = (int)(975 / 1280.0 * GetWidth());
-			buttonY = (int)(360 / 720.0 * GetHeight());
-
-			SetCursor(buttonX, buttonY);
-			Click();
-			Scroll(Direction.UP, 15);
-			Wait(200);
 		}
 
 		public static void SelectArtifactInventory()
@@ -169,15 +160,6 @@ namespace InventoryKamera
 			SetCursor(buttonX, buttonY);
 			Click();
 			SystemWait(Speed.UI);
-
-			// Scroll item preview hotfix
-			buttonX = (int)(975 / 1280.0 * GetWidth());
-			buttonY = (int)(360 / 720.0 * GetHeight());
-
-			SetCursor(buttonX, buttonY);
-			Click();
-			Scroll(Direction.UP, 15);
-			Wait(200);
 		}
 
 		public static void SelectCharacterDevelopmentInventory()
@@ -187,15 +169,6 @@ namespace InventoryKamera
 			SetCursor(buttonX, buttonY);
 			Click();
 			SystemWait(Speed.UI);
-
-			// Scroll item preview hotfix
-			buttonX = (int)(975 / 1280.0 * GetWidth());
-			buttonY = (int)(360 / 720.0 * GetHeight());
-
-			SetCursor(buttonX, buttonY);
-			Click();
-			Scroll(Direction.UP, 15);
-			Wait(200);
 		}
 
 		public static void SelectMaterialInventory()
@@ -205,15 +178,6 @@ namespace InventoryKamera
 			SetCursor(buttonX, buttonY);
 			Click();
 			SystemWait(Speed.UI);
-
-			// Scroll item preview hotfix
-			buttonX = (int)(975 / 1280.0 * GetWidth());
-			buttonY = (int)(360 / 720.0 * GetHeight());
-
-			SetCursor(buttonX, buttonY);
-			Click();
-			Scroll(Direction.UP, 15);
-			Wait(200);
 		}
 
 		public static void SelectCharacterAttributes()
@@ -574,6 +538,20 @@ namespace InventoryKamera
 		{
 			return delay;
 		}
+
+        internal static void ClearArtifactFilters()
+        {
+            var x = (IsNormal ? 0.0875 : 0.0868) * GetWidth();
+			var y = (IsNormal ? 0.9389 : 0.9444) * GetHeight();
+
+			for (var i = 0; i < 2; ++i)
+			{
+				Click((int)x, (int)y);
+				SystemWait(Speed.Normal);
+			}
+			sim.Keyboard.KeyPress(escapeKey);
+			SystemWait(Speed.Fast);
+        }
 
         public enum Speed
 		{

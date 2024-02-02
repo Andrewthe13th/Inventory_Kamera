@@ -98,16 +98,8 @@ namespace InventoryKamera
         }
 
         private Version CheckRemoteVersion()
-        {
-            var client = new HttpClient
-            {
-                BaseAddress = new Uri(commitsAPIURL)
-            };
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add( new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json") );
-
-
-            using (var response = client.GetAsync(commitsAPIURL))
+        { 
+            using (var response = new HttpClient().GetAsync(commitsAPIURL))
             {
                 string pattern = @"(\d+\.\d+\.\d+)";
 
