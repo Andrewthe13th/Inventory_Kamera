@@ -37,7 +37,7 @@ namespace InventoryKamera
 
         private readonly string NewVersion = "version.txt";
 
-        private const string commitsAPIURL = "https://gitlab.com/api/v4/projects/53209414/repository/commits";
+        private const string commitsAPIURL = "https://gitlab.com/api/v4/projects/53216109/repository/commits";
         private const string repoBaseURL = "https://gitlab.com/Dimbreath/AnimeGameData/-/raw/main/";
         private const string TextMapEnURL = repoBaseURL + "TextMap/TextMapEN.json";
         private const string CharactersURL = repoBaseURL + "ExcelBinOutput/AvatarExcelConfigData.json";
