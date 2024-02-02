@@ -113,8 +113,13 @@ namespace InventoryKamera
         {
             using (var streamWriter = new StreamWriter(outputFile))
             {
-                streamWriter.WriteLine(JsonConvert.SerializeObject(this).ToString());
+                streamWriter.WriteLine(ToString());
             }
+        }
+
+        public override string ToString()
+        {
+            return JsonConvert.SerializeObject(this).ToString();
         }
     }
 }

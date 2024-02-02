@@ -96,13 +96,13 @@
             this.label1 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.equipWeaponToolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.EquipWeaponsCheckBox = new System.Windows.Forms.CheckBox();
             this.equipArtifactsToolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.EquipArtifactsCheckBox = new System.Windows.Forms.CheckBox();
             this.screenshotsToolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.LogScreenshotsCheckBox = new System.Windows.Forms.CheckBox();
             this.wandererNameTextBox = new System.Windows.Forms.TextBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
-            this.EquipWeaponsCheckBox = new System.Windows.Forms.CheckBox();
-            this.EquipArtifactsCheckBox = new System.Windows.Forms.CheckBox();
-            this.LogScreenshotsCheckBox = new System.Windows.Forms.CheckBox();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.MinimumWeaponLevelControl = new System.Windows.Forms.NumericUpDown();
             this.ArtifactRarityControl = new System.Windows.Forms.NumericUpDown();
@@ -783,7 +783,7 @@
             this.ManualExportButton.Name = "ManualExportButton";
             this.ManualExportButton.Size = new System.Drawing.Size(144, 23);
             this.ManualExportButton.TabIndex = 97;
-            this.ManualExportButton.Text = "Export Scanned Data";
+            this.ManualExportButton.Text = "Open Genshin Optimizer";
             this.ManualExportButton.UseVisualStyleBackColor = true;
             this.ManualExportButton.Click += new System.EventHandler(this.Export_Button_Click);
             // 
@@ -815,28 +815,6 @@
             this.label4.TabIndex = 106;
             this.label4.Text = "Wanderer\'s Name:";
             // 
-            // screenshotsToolTip
-            // 
-            this.screenshotsToolTip.ToolTipIcon = System.Windows.Forms.ToolTipIcon.Warning;
-            // 
-            // wandererNameTextBox
-            // 
-            this.wandererNameTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::InventoryKamera.Properties.Settings.Default, "WandererName", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.wandererNameTextBox.Location = new System.Drawing.Point(328, 145);
-            this.wandererNameTextBox.Name = "wandererNameTextBox";
-            this.wandererNameTextBox.Size = new System.Drawing.Size(169, 20);
-            this.wandererNameTextBox.TabIndex = 105;
-            this.wandererNameTextBox.Text = global::InventoryKamera.Properties.Settings.Default.WandererName;
-            // 
-            // textBox1
-            // 
-            this.textBox1.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::InventoryKamera.Properties.Settings.Default, "TravelerName", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.textBox1.Location = new System.Drawing.Point(328, 111);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(169, 20);
-            this.textBox1.TabIndex = 101;
-            this.textBox1.Text = global::InventoryKamera.Properties.Settings.Default.TravelerName;
-            // 
             // EquipWeaponsCheckBox
             // 
             this.EquipWeaponsCheckBox.AutoSize = true;
@@ -865,6 +843,10 @@
             this.equipArtifactsToolTip.SetToolTip(this.EquipArtifactsCheckBox, "Keeps artifacts equipped to characters in export");
             this.EquipArtifactsCheckBox.UseVisualStyleBackColor = true;
             // 
+            // screenshotsToolTip
+            // 
+            this.screenshotsToolTip.ToolTipIcon = System.Windows.Forms.ToolTipIcon.Warning;
+            // 
             // LogScreenshotsCheckBox
             // 
             this.LogScreenshotsCheckBox.AutoSize = true;
@@ -878,6 +860,24 @@
             this.screenshotsToolTip.SetToolTip(this.LogScreenshotsCheckBox, "Debug tool. If enabled, all screenshots will be logged to local files. \r\nAll scre" +
         "enshots will be cleared when a new scan is started.\r\n");
             this.LogScreenshotsCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // wandererNameTextBox
+            // 
+            this.wandererNameTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::InventoryKamera.Properties.Settings.Default, "WandererName", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.wandererNameTextBox.Location = new System.Drawing.Point(328, 145);
+            this.wandererNameTextBox.Name = "wandererNameTextBox";
+            this.wandererNameTextBox.Size = new System.Drawing.Size(169, 20);
+            this.wandererNameTextBox.TabIndex = 105;
+            this.wandererNameTextBox.Text = global::InventoryKamera.Properties.Settings.Default.WandererName;
+            // 
+            // textBox1
+            // 
+            this.textBox1.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::InventoryKamera.Properties.Settings.Default, "TravelerName", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.textBox1.Location = new System.Drawing.Point(328, 111);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(169, 20);
+            this.textBox1.TabIndex = 101;
+            this.textBox1.Text = global::InventoryKamera.Properties.Settings.Default.TravelerName;
             // 
             // numericUpDown1
             // 

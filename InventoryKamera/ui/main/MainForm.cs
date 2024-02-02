@@ -1,5 +1,6 @@
 ﻿using InventoryKamera.ui;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using Newtonsoft.Json;
 using NHotkey;
 using NHotkey.WindowsForms;
 using Octokit;
@@ -251,11 +252,12 @@ namespace InventoryKamera
                         Logger.Info("Exported data");
 
                         UserInterface.SetProgramStatus("Finished");
+                        OpenOptimizerDialog(good);
                     }
                     catch (ThreadAbortException)
                     {
                         // Workers can get stuck if the thread is aborted or an exception is raised
-                        if (!(data is null)) data.StopImageProcessorWorkers();
+                        data?.StopImageProcessorWorkers();
                         UserInterface.SetProgramStatus("Scan stopped");
                     }
                     catch (NotImplementedException ex)
@@ -265,7 +267,7 @@ namespace InventoryKamera
                     catch (Exception ex)
                     {
                         // Workers can get stuck if the thread is aborted or an exception is raised
-                        if (!(data is null)) data.StopImageProcessorWorkers();
+                        data?.StopImageProcessorWorkers();
                         while (ex.InnerException != null) ex = ex.InnerException;
                         UserInterface.AddError(ex.ToString());
                         UserInterface.SetProgramStatus("Scan aborted", ok: false);
@@ -293,6 +295,24 @@ namespace InventoryKamera
                 else
                     UserInterface.AddError($"{OutputPath_TextBox.Text} is not a valid directory");
             }
+        }
+
+        private void OpenOptimizerDialog(GOOD data, bool skip = false)
+        {
+            if (!skip)
+            {
+                var message = "Scan complete! Would you like to upload the database to Genshin Optimizer?";
+                var result = MessageBox.Show(message, "Scan Complete", MessageBoxButtons.YesNo);
+                if (result == DialogResult.No)
+                    return;
+            }
+            var t = new Thread(() => Clipboard.SetText(data.ToString()));
+            t.SetApartmentState(ApartmentState.STA);
+            t.Start();
+            t.Join();
+            MessageBox.Show("Content copied to your clipboard! Paste the content into the textbox when prompted.", "Data Copied", MessageBoxButtons.OK);
+            Process.Start(new ProcessStartInfo("https://frzyc.github.io/genshin-optimizer/#/setting") { UseShellExecute = true });
+
         }
 
         private void Github_Label_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -490,8 +510,6 @@ namespace InventoryKamera
             }
         }
 
-
-
         private void MainForm_Shown(object sender, EventArgs e)
         {
             CheckForKameraUpdates();
@@ -570,15 +588,7 @@ namespace InventoryKamera
 
         private void Export_Button_Click(object sender, EventArgs e)
         {
-
-            var good = new GOOD(data);
-
-            if (data.Inventory.Size > 0 || data.Characters.Count > 0)
-            {
-                good.WriteToJSON(OutputPath_TextBox.Text);
-                Logger.Info("Manually exported data");
-                Process.Start($@"{OutputPath_TextBox.Text}");
-            }
+            OpenOptimizerDialog(new GOOD(data), true);
         }
 
         private void MainForm_Activate()
