@@ -114,15 +114,15 @@ namespace InventoryKamera
 
 		internal static void UpdateCharacterName(string target, string name)
         {
-			target = ConvertToGOOD(target).ToLower();
-			name = ConvertToGOOD(name).ToLower();
+			target = target.ConvertToGood().ToLower();
+			name = name.ConvertToGood().ToLower();
 
 			if (target == name) return;
 
-			if (target != "traveler" && Characters.TryGetValue(name, out _))
+			if (Characters.TryGetValue(name, out _))
 			{
-				Logger.Warn("{0} already exists as a character in the game. " +
-					"This may wind up confusing Kamera when connecting items to characters.", name);
+				Logger.Error("{0} already exists as a character in the game. " +
+					"This may wind up confusing Kamera when connecting items for {1}.", name, target);
 			}
 
             if (Characters.TryGetValue(target, out _))
@@ -922,12 +922,12 @@ namespace InventoryKamera
 
 		#endregion Image Operations
 
-		private static string ConvertToGOOD(string text)
+		internal static string ConvertToGood(this string text)
 		{
-			text = text.ToLower();
-			var pascal = CultureInfo.GetCultureInfo("en-US").TextInfo.ToTitleCase(text);
-			return Regex.Replace(pascal, @"[\W]", string.Empty);
-		}
+            text = text.ToLower();
+            var pascal = CultureInfo.GetCultureInfo("en-US").TextInfo.ToTitleCase(text);
+            return Regex.Replace(pascal, @"[\W]", string.Empty);
+        }
 
         internal static bool CharacterMatchesElement(string name, string element)
         {

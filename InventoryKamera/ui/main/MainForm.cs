@@ -61,9 +61,6 @@ namespace InventoryKamera
                 ProgramStatus_Label,
                 ErrorLog_TextBox,
                 Navigation_Image);
-            MaximizeBox = false;
-            MinimizeBox = false;
-            
         }
 
         private double ScannerDelayValue(int value)
@@ -145,7 +142,7 @@ namespace InventoryKamera
             {
                 OutputPath_TextBox.Text = Directory.GetCurrentDirectory() + @"\GenshinData";
             }
-
+            
         }
 
         private void UpdateKeyTextBoxes()
@@ -170,6 +167,36 @@ namespace InventoryKamera
             if (slot1StripTextBox.Text.ToUpper().Contains("OEM"))
             {
                 slot1StripTextBox.Text = KeyCodeToUnicode((Keys)Navigation.slotOneKey);
+            }
+        }
+
+        private void ValidateCustomName(object sender, EventArgs e)
+        {
+            var textbox = sender as TextBox;
+            var name = textbox.Text;
+
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                if (GenshinProcesor.Characters.ContainsKey(name.ConvertToGood().ToLower()))
+                {
+                    textbox.BackColor = Color.Yellow;
+                }
+                else
+                {
+                    textbox.BackColor = Color.White;
+                }
+            }
+        }
+
+        private void DisplayCustomNameTooltip(object sender, EventArgs e)
+        {
+            var textbox = sender as TextBox;
+            
+            if (textbox.BackColor == Color.Yellow)
+            {
+                var tooltip = new ToolTip();
+                tooltip.Show($"{textbox.Text} already exists as a character's name.\n" +
+                    $"This may affect equipping items to characters and is not fully supported yet.", textbox);
             }
         }
 

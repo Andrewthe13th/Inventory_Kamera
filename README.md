@@ -50,11 +50,12 @@ To upgrade from a previous version, download a newer release and unzip its files
    - The game resolution should be _16:9_ or _16:10_. If your screen has a matching native resolution, you may set _Display Mode_ under `Graphics` to fullscreen. Otherwise, you'll have to switch it to any _windowed_ resolution that matches one of these aspect ratios.
      - Some examples of good resolutions are: 1920x1080 (Full HD), 1920x1200, 2560x1440 (QHD), 3840x2160 (4K), etc.
      - Don't know if a resolution is 16:9 or 16:10? [Find out here](https://andrew.hedges.name/experiments/aspect_ratio/).
-     - > **Warning**
-       >
-       > If you have an ultrawide screen, please see [this thread](https://github.com/Andrewthe13th/Inventory_Kamera/issues/40)
+        > **Warning**
+        >
+        > If you have an ultrawide screen, please see [this thread](https://github.com/Andrewthe13th/Inventory_Kamera/issues/40)
+        > Additionally, HDR is not currently supported. If you experience scanning issues, please make sure this is disabled in Windows Settings
    - Under `Controls`, set _Control Type_ to Keyboard.
-     - If you rebound the inventory key (default: B) or character screen key (default: C), revert your binding to default or set up the new key binding in Inventory Kamera.
+     - If you rebound keys (inventory (default: B), character screen (default: C), or selecting character 1 (default: 1)) revert your binding to default or set up the new key binding in Inventory Kamera.
 
 ## How to configure Inventory Kamera
 

@@ -96,13 +96,13 @@
             this.label1 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.equipWeaponToolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.equipArtifactsToolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.screenshotsToolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.wandererNameTextBox = new System.Windows.Forms.TextBox();
-            this.textBox1 = new System.Windows.Forms.TextBox();
             this.EquipWeaponsCheckBox = new System.Windows.Forms.CheckBox();
+            this.equipArtifactsToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.EquipArtifactsCheckBox = new System.Windows.Forms.CheckBox();
+            this.screenshotsToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.LogScreenshotsCheckBox = new System.Windows.Forms.CheckBox();
+            this.wandererNameTextBox = new System.Windows.Forms.TextBox();
+            this.travelerNameTextBox = new System.Windows.Forms.TextBox();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.MinimumWeaponLevelControl = new System.Windows.Forms.NumericUpDown();
             this.ArtifactRarityControl = new System.Windows.Forms.NumericUpDown();
@@ -179,6 +179,7 @@
             // 
             this.Language_ComboBox.BackColor = System.Drawing.Color.White;
             this.Language_ComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Language_ComboBox.Enabled = false;
             this.Language_ComboBox.FormattingEnabled = true;
             this.Language_ComboBox.Items.AddRange(new object[] {
             "ENG"});
@@ -186,6 +187,7 @@
             this.Language_ComboBox.Margin = new System.Windows.Forms.Padding(2);
             this.Language_ComboBox.Name = "Language_ComboBox";
             this.Language_ComboBox.Size = new System.Drawing.Size(57, 21);
+            this.Language_ComboBox.Sorted = true;
             this.Language_ComboBox.TabIndex = 18;
             // 
             // ArtifactOutput_TextBox
@@ -816,28 +818,6 @@
             this.label4.TabIndex = 106;
             this.label4.Text = "Wanderer\'s Name:";
             // 
-            // screenshotsToolTip
-            // 
-            this.screenshotsToolTip.ToolTipIcon = System.Windows.Forms.ToolTipIcon.Warning;
-            // 
-            // wandererNameTextBox
-            // 
-            this.wandererNameTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::InventoryKamera.Properties.Settings.Default, "WandererName", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.wandererNameTextBox.Location = new System.Drawing.Point(328, 145);
-            this.wandererNameTextBox.Name = "wandererNameTextBox";
-            this.wandererNameTextBox.Size = new System.Drawing.Size(169, 20);
-            this.wandererNameTextBox.TabIndex = 105;
-            this.wandererNameTextBox.Text = global::InventoryKamera.Properties.Settings.Default.WandererName;
-            // 
-            // textBox1
-            // 
-            this.textBox1.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::InventoryKamera.Properties.Settings.Default, "TravelerName", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.textBox1.Location = new System.Drawing.Point(328, 111);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(169, 20);
-            this.textBox1.TabIndex = 101;
-            this.textBox1.Text = global::InventoryKamera.Properties.Settings.Default.TravelerName;
-            // 
             // EquipWeaponsCheckBox
             // 
             this.EquipWeaponsCheckBox.AutoSize = true;
@@ -866,6 +846,10 @@
             this.equipArtifactsToolTip.SetToolTip(this.EquipArtifactsCheckBox, "Keeps artifacts equipped to characters in export");
             this.EquipArtifactsCheckBox.UseVisualStyleBackColor = true;
             // 
+            // screenshotsToolTip
+            // 
+            this.screenshotsToolTip.ToolTipIcon = System.Windows.Forms.ToolTipIcon.Warning;
+            // 
             // LogScreenshotsCheckBox
             // 
             this.LogScreenshotsCheckBox.AutoSize = true;
@@ -879,6 +863,30 @@
             this.screenshotsToolTip.SetToolTip(this.LogScreenshotsCheckBox, "Debug tool. If enabled, all screenshots will be logged to local files. \r\nAll scre" +
         "enshots will be cleared when a new scan is started.\r\n");
             this.LogScreenshotsCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // wandererNameTextBox
+            // 
+            this.wandererNameTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::InventoryKamera.Properties.Settings.Default, "WandererName", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.wandererNameTextBox.Location = new System.Drawing.Point(328, 145);
+            this.wandererNameTextBox.Name = "wandererNameTextBox";
+            this.wandererNameTextBox.Size = new System.Drawing.Size(169, 20);
+            this.wandererNameTextBox.TabIndex = 105;
+            this.wandererNameTextBox.Text = global::InventoryKamera.Properties.Settings.Default.WandererName;
+            this.wandererNameTextBox.TextChanged += new System.EventHandler(this.ValidateCustomName);
+            this.wandererNameTextBox.MouseHover += new System.EventHandler(this.DisplayCustomNameTooltip);
+            this.wandererNameTextBox.ParentChanged += new System.EventHandler(this.ValidateCustomName);
+            // 
+            // travelerNameTextBox
+            // 
+            this.travelerNameTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::InventoryKamera.Properties.Settings.Default, "TravelerName", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.travelerNameTextBox.Location = new System.Drawing.Point(328, 111);
+            this.travelerNameTextBox.Name = "travelerNameTextBox";
+            this.travelerNameTextBox.Size = new System.Drawing.Size(169, 20);
+            this.travelerNameTextBox.TabIndex = 101;
+            this.travelerNameTextBox.Text = global::InventoryKamera.Properties.Settings.Default.TravelerName;
+            this.travelerNameTextBox.TextChanged += new System.EventHandler(this.ValidateCustomName);
+            this.travelerNameTextBox.MouseHover += new System.EventHandler(this.DisplayCustomNameTooltip);
+            this.travelerNameTextBox.ParentChanged += new System.EventHandler(this.ValidateCustomName);
             // 
             // numericUpDown1
             // 
@@ -1057,7 +1065,7 @@
             this.Controls.Add(this.label4);
             this.Controls.Add(this.wandererNameTextBox);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.travelerNameTextBox);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.EquipWeaponsCheckBox);
             this.Controls.Add(this.EquipArtifactsCheckBox);
@@ -1213,7 +1221,7 @@
         private System.Windows.Forms.CheckBox EquipArtifactsCheckBox;
         private System.Windows.Forms.CheckBox EquipWeaponsCheckBox;
         private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox travelerNameTextBox;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox wandererNameTextBox;
