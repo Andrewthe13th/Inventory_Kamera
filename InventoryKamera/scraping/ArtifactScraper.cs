@@ -447,7 +447,7 @@ namespace InventoryKamera
 				if (line.Any(char.IsDigit))
 				{
 					SubStat substat = new SubStat();
-					Regex re = new Regex(@"^(.*?)(\d+)");
+					Regex re = new Regex(@"^(.*?)(\d+.*)");
 					var result = re.Match(line);
 					var stat = Regex.Replace(result.Groups[1].Value, @"[^\w]", string.Empty);
 					var value = result.Groups[2].Value;
@@ -460,13 +460,17 @@ namespace InventoryKamera
 					value = Regex.Replace(value, @"[^0-9]", string.Empty);
 
 					// Try to parse number
-					if (!decimal.TryParse(value, NumberStyles.Number, CultureInfo.CurrentCulture, out substat.value))
+					if (!decimal.TryParse(value, out substat.value))
 					{
 						Logger.Debug("Failed to parse stat value from: {1}", line);
 						substat.value = -1;
 					}
+					else if (substat.stat.Contains("_"))
+					{
+						substat.value /= 10;
+					}
 
-					if (string.IsNullOrWhiteSpace(substat.stat))
+					if (string.IsNullOrWhiteSpace(substat.stat) || substat.value == -1)
 					{
 						Logger.Debug("Failed to parse stat from: {1}", line);
 					}
