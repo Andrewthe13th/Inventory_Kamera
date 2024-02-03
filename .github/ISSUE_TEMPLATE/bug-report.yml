@@ -127,7 +127,7 @@ body:
           required: false
         - label: "I am available to later explains the issue."
           required: false
-        - label: "I have disabled all screen filtering software or plugins (i.e. HDR, Image Sharpening) while scanning."
+        - label: "I have disabled (or documented) all screen filtering software, plugins, and enhancements while scanning."
           required: true
         - label: "I use default in-game keybindings or have configured keybindings for the scanner."
           required: true
