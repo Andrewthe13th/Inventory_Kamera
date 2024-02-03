@@ -447,7 +447,7 @@ namespace InventoryKamera
 				if (line.Any(char.IsDigit))
 				{
 					SubStat substat = new SubStat();
-					Regex re = new Regex(@"^(.*?)(\d+)");
+					Regex re = new Regex(@"([\w]+\W*)(\d+.*\d+)");
 					var result = re.Match(line);
 					var stat = Regex.Replace(result.Groups[1].Value, @"[^\w]", string.Empty);
 					var value = result.Groups[2].Value;
@@ -465,6 +465,9 @@ namespace InventoryKamera
 						Logger.Debug("Failed to parse stat value from: {1}", line);
 						substat.value = -1;
 					}
+
+					// Need to retain the decimal place for percent boosts
+					if (substat.stat.Contains("_")) substat.value /= 10;
 
 					if (string.IsNullOrWhiteSpace(substat.stat))
 					{
