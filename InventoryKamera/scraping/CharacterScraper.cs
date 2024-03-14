@@ -450,11 +450,11 @@ namespace InventoryKamera
 
 			if (Navigation.GetAspectRatio() == new Size(8, 5)) yRef = 800.0;
 
-			Rectangle region =  new RECT(
-				Left:   (int)( 160 / xRef * Navigation.GetWidth() ),
-				Top:    (int)( 116 / yRef * Navigation.GetHeight() ),
-				Right:  (int)( 225 / xRef * Navigation.GetWidth() ),
-				Bottom: (int)( 141 / yRef * Navigation.GetHeight() ));
+			Rectangle region =  new Rectangle(
+				x:		(int)((Navigation.IsNormal ? 0.0003 : 0) * Navigation.GetWidth() ),
+				y:		(int)((Navigation.IsNormal ? 0.1278 : 0) * Navigation.GetHeight() ),
+				width:	(int)((Navigation.IsNormal ? 0.2913 : 0) * Navigation.GetWidth() ),
+				height:	(int)((Navigation.IsNormal ? 0.0711 : 0) * Navigation.GetHeight() ));
 
 			for (int i = 0; i < 3; i++)
 			{
@@ -489,15 +489,14 @@ namespace InventoryKamera
 					GenshinProcesor.SetContrast(60, ref n);
 					GenshinProcesor.SetInvert(ref n);
 
-					string text = GenshinProcesor.AnalyzeText(n).Trim();
-					text = Regex.Replace(text, @"\D", string.Empty);
+					var text = GenshinProcesor.AnalyzeText(n, Tesseract.PageSegMode.SingleBlock).Trim().Split('\n').ToList();
 
-					if (int.TryParse(text, out int level))
+					if (int.TryParse(Regex.Replace(text.Last(), @"\D", string.Empty), out int level))
 					{
 						if (level >= 1 && level <= 15)
 						{
 							talents[talent] = level;
-							UserInterface.SetCharacter_Talent(talentLevel, text, i);
+							UserInterface.SetCharacter_Talent(talentLevel, level.ToString(), i);
 						}
 					}
 
