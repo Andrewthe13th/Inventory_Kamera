@@ -261,7 +261,7 @@ namespace InventoryKamera
 					switch (imageCollection.Type)
 					{
 						case "weapon":
-							if (WeaponScraper.IsEnhancementMaterial(imageCollection.Bitmaps.First()))
+							if (weaponScraper.IsEnhancementMaterial(imageCollection.Bitmaps.First()))
 							{
 								Logger.Debug("Enhancement Material found for weapon #{weaponID}", imageCollection.Id);
 								weaponScraper.StopScanning = true;

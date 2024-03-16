@@ -95,8 +95,7 @@ namespace InventoryKamera
             Directory.CreateDirectory(outputDirectory);
 
             // Create file with timestamp in name
-            string fileName = "\\genshinData_GOOD_" + DateTime.Now.ToString("yyyy_MM_dd_HH_mm") + ".json";
-            fileName = fileName.Replace('/', '_');
+            string fileName = $"genshinData_GOOD_{DateTime.Now.ToString("yyyy_MM_dd_HH_mm")}.json";
             string outputFile = Path.Combine(outputDirectory, fileName);
 
             // Write file

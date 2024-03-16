@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -278,34 +279,28 @@ namespace InventoryKamera
 			return new Weapon(name, level, ascended, refinementLevel, locked, equippedCharacter, id, rarity);
 		}
 
-        public static bool IsEnhancementMaterial(Bitmap nameBitmap)
+        public bool IsEnhancementMaterial(Bitmap nameBitmap)
 		{
 			string material = ScanEnchancementOreName(nameBitmap);
 			return !string.IsNullOrWhiteSpace(material) && GenshinProcesor.enhancementMaterials.Contains(material.ToLower());
 		}
 
-		public static string ScanEnchancementOreName(Bitmap bm)
+		public string ScanEnchancementOreName(Bitmap bm)
 		{
-			GenshinProcesor.SetGamma(0.2, 0.2, 0.2, ref bm);
-			Bitmap n = GenshinProcesor.ConvertToGrayscale(bm);
-			GenshinProcesor.SetInvert(ref n);
-
 			// Analyze
-			string name = Regex.Replace(GenshinProcesor.AnalyzeText(n).ToLower(), @"[\W]", string.Empty);
-			name = GenshinProcesor.FindClosestMaterialName(name);
-			n.Dispose();
+			string name = GenshinProcesor.FindClosestMaterialName(ScanItemName(bm), minConfidence: 95);
 
 			return name;
 		}
 
         #region Task Methods
 
-		private static string ScanWeaponName(string name)
+		private string ScanWeaponName(string name)
         {
             return GenshinProcesor.FindClosestWeapon(name);
         }
 
-        public static int ScanLevel(Bitmap bm, ref bool ascended)
+        public int ScanLevel(Bitmap bm, ref bool ascended)
 		{
 			Bitmap n = GenshinProcesor.ConvertToGrayscale(bm);
 			GenshinProcesor.SetInvert(ref n);
@@ -331,7 +326,7 @@ namespace InventoryKamera
 			return -1;
 		}
 
-		public static int ScanRefinement(Bitmap image)
+		public int ScanRefinement(Bitmap image)
 		{
 			for (double factor = 1; factor <= 2; factor += 0.1)
 			{
@@ -354,7 +349,7 @@ namespace InventoryKamera
 			return -1;
 		}
 
-		public static string ScanEquippedCharacter(Bitmap bm)
+		public string ScanEquippedCharacter(Bitmap bm)
 		{
 			Bitmap n = GenshinProcesor.ConvertToGrayscale(bm);
 			GenshinProcesor.SetContrast(60.0, ref n);

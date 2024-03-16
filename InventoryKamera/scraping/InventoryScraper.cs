@@ -107,7 +107,7 @@ namespace InventoryKamera
             GenshinProcesor.SetInvert(ref n);
 
             // Analyze
-            string text = Regex.Replace(GenshinProcesor.AnalyzeText(n).ToLower(), @"[\W]", string.Empty);
+            string text = Regex.Replace(GenshinProcesor.AnalyzeText(n, Tesseract.PageSegMode.SingleBlock).ToLower(), @"[\W]", string.Empty);
 
             n.Dispose();
 
