@@ -446,6 +446,8 @@ namespace InventoryKamera
 
 				if (line.Any(char.IsDigit))
 				{
+					Logger.Debug("Parsing artifact substat: {0}", line);
+
 					SubStat substat = new SubStat();
 					Regex re = new Regex(@"^(.*?)(\d+.*)");
 					var result = re.Match(line);
@@ -462,17 +464,18 @@ namespace InventoryKamera
 					// Try to parse number
 					if (!decimal.TryParse(value, out substat.value))
 					{
-						Logger.Debug("Failed to parse stat value from: {1}", line);
+						Logger.Debug("Failed to parse stat value from: {0}", line);
 						substat.value = -1;
 					}
-					else if (substat.stat.Contains("_"))
+
+					if (substat.value != -1 && substat.stat.Contains("_"))
 					{
 						substat.value /= 10;
 					}
 
 					if (string.IsNullOrWhiteSpace(substat.stat) || substat.value == -1)
 					{
-						Logger.Debug("Failed to parse stat from: {1}", line);
+						Logger.Debug("Failed to parse stat from: {0}", line);
 					}
 
 					substats.Insert(i, substat);
