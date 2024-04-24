@@ -38,7 +38,7 @@ namespace InventoryKamera
         private readonly string NewVersion = "version.txt";
 
         private const string commitsAPIURL = "https://gitlab.com/api/v4/projects/53216109/repository/commits";
-        private const string repoBaseURL = "https://gitlab.com/Dimbreath/AnimeGameData/-/raw/main/";
+        private const string repoBaseURL = "https://gitlab.com/Dimbreath/AnimeGameData/-/raw/master/";
         private const string TextMapEnURL = repoBaseURL + "TextMap/TextMapEN.json";
         private const string CharactersURL = repoBaseURL + "ExcelBinOutput/AvatarExcelConfigData.json";
         private const string ConstellationsURL = repoBaseURL + "ExcelBinOutput/FetterInfoExcelConfigData.json";
@@ -267,11 +267,21 @@ namespace InventoryKamera
         private string LoadJsonFromURLAsync(string url)
         {
             string json = "";
-            using (WebClient client = new WebClient())
+
+            try
             {
-                client.Encoding = System.Text.Encoding.UTF8;
-                json = client.DownloadString(url);
+                using (WebClient client = new WebClient())
+                {
+                    client.Encoding = System.Text.Encoding.UTF8;
+                    json = client.DownloadString(url);
+                }
             }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            
             return json;
         }
 
