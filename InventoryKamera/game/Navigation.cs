@@ -11,7 +11,7 @@ using WindowsInput.Native;
 
 namespace InventoryKamera
 {
-    public static class Navigation
+	public static class Navigation
 	{
 		private static NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -21,7 +21,7 @@ namespace InventoryKamera
 		private static Size AspectRatio;
 		public static bool IsNormal { get; private set; }
 
-        private static double delay = 1;
+		private static double delay = 1;
 
 		public static VirtualKeyCode escapeKey = VirtualKeyCode.ESCAPE;
 		public static VirtualKeyCode characterKey = VirtualKeyCode.VK_C;
@@ -281,10 +281,26 @@ namespace InventoryKamera
 
 			if (WindowSize.Width == 0) throw new DivideByZeroException("Genshin's window width cannot be 0");
 			if (WindowSize.Height == 0) throw new DivideByZeroException("Genshin's window height cannot be 0");
-			int x = WindowSize.Width/GCD(WindowSize.Width, WindowSize.Height);
-			int y = WindowSize.Height/GCD(WindowSize.Width, WindowSize.Height);
-			var size = new Size(x, y);
-			
+
+			(int x, int y)[] IRREGULAR_RES_169 = new[] {
+				(854, 480),
+				(1366, 768),
+			};
+
+			int gcd = GCD(WindowSize.Width, WindowSize.Height);
+			int w = WindowSize.Width / gcd;
+			int h = WindowSize.Height / gcd;
+			Size size = new Size(w, h);
+
+			foreach (var (x, y) in IRREGULAR_RES_169)
+			{
+				if (WindowSize.Width == x && WindowSize.Height == y)
+				{
+					size = new Size(16, 9);
+					break;
+				}
+			}
+
 			IsNormal = size == new Size(16, 9);
 
 			return size;
@@ -386,7 +402,7 @@ namespace InventoryKamera
 		public static extern bool SetCursorPos(int X, int Y);
 
 		public static bool SetCursor(int X, int Y)
-        {
+		{
 			return SetCursorPos(GetPosition().Left + X, GetPosition().Top + Y);
 		}
 
@@ -415,45 +431,45 @@ namespace InventoryKamera
 		}
 
 		public static void Scroll(Direction direction, int scrolls, int delay = 1)
-        {
+		{
 			Action Scroll;
-            switch (direction)
-            {
-                case Direction.UP:
+			switch (direction)
+			{
+				case Direction.UP:
 					Scroll = () => sim.Mouse.VerticalScroll(1);
 					break;
-                case Direction.DOWN:
+				case Direction.DOWN:
 					Scroll = () => sim.Mouse.VerticalScroll(-1);
-                    break;
-                case Direction.LEFT:
+					break;
+				case Direction.LEFT:
 					Scroll = () => sim.Mouse.HorizontalScroll(-1);
-                    break;
-                case Direction.RIGHT:
+					break;
+				case Direction.RIGHT:
 					Scroll = () => sim.Mouse.HorizontalScroll(1);
-                    break;
-                default:
-                    return;
-            }
-            for (int i = 0; i < scrolls; i++)
-            {
+					break;
+				default:
+					return;
+			}
+			for (int i = 0; i < scrolls; i++)
+			{
 				Scroll();
 				Wait(delay);
-            }
-        }
+			}
+		}
 
 		public enum Direction
-        {
+		{
 			UP = 0,
 			DOWN = 1,
 			LEFT = 2,
 			RIGHT = 3,
-        }
+		}
 
-        #endregion Mouse
+		#endregion Mouse
 
-        #region Delays
+		#region Delays
 
-        public static void SystemWait(Speed speed = Speed.Normal)
+		public static void SystemWait(Speed speed = Speed.Normal)
 		{
 			double value;
 			switch (speed)
@@ -520,9 +536,9 @@ namespace InventoryKamera
 		}
 
 		public static void SystemWait(float ms)
-        {
+		{
 			Wait((int)(ms * delay));
-        }
+		}
 
 		public static void Wait(int ms = 1000)
 		{
@@ -539,9 +555,9 @@ namespace InventoryKamera
 			return delay;
 		}
 
-        internal static void ClearArtifactFilters()
-        {
-            var x = (IsNormal ? 0.0875 : 0.0868) * GetWidth();
+		internal static void ClearArtifactFilters()
+		{
+			var x = (IsNormal ? 0.0875 : 0.0868) * GetWidth();
 			var y = (IsNormal ? 0.9389 : 0.9444) * GetHeight();
 
 			for (var i = 0; i < 2; ++i)
@@ -551,9 +567,9 @@ namespace InventoryKamera
 			}
 			sim.Keyboard.KeyPress(escapeKey);
 			SystemWait(Speed.Fast);
-        }
+		}
 
-        public enum Speed
+		public enum Speed
 		{
 			Slowest,
 			Slower,
