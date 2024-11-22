@@ -133,7 +133,7 @@ namespace InventoryKamera
 						Navigation.Wait(1);
 					}
                     // Scroll back one to keep it from getting too crazy
-                    if (page % 7 == 0)
+                    if (page % 12 == 0)
                     {
 						Logger.Debug("Scrolled back one");
 						Navigation.sim.Mouse.VerticalScroll(1);
