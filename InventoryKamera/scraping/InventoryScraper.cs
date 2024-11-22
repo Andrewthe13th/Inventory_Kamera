@@ -386,7 +386,15 @@ namespace InventoryKamera
                 using (var brush = new SolidBrush(Color.Black))
                 {
                     // Fill Top region
-                    g.FillRectangle(brush, 0, 0, processedScreenshot.Width, (int)(processedScreenshot.Height * 0.09));
+                    switch (inventoryPage)
+                    {
+                        case InventoryPage.Artifacts:
+                            g.FillRectangle(brush, 0, 0, processedScreenshot.Width, (int)(processedScreenshot.Height * 0.143));
+                            break;
+                        default:
+                            g.FillRectangle(brush, 0, 0, processedScreenshot.Width, (int)(processedScreenshot.Height * 0.09));
+                            break;
+                    }
 
                     // Fill Left region
                     g.FillRectangle(brush, 0, 0, (int)(processedScreenshot.Width * 0.05), processedScreenshot.Height);
@@ -406,7 +414,7 @@ namespace InventoryKamera
                     {
                         (rectangles, cols, rows) = ProcessScreenshot(processedScreenshot, weight);
                         itemCount = rows * cols;
-                        if (itemCount != 40 && !acceptLess)
+                        if (itemCount != 32 && !acceptLess)
                         {
                             Logger.Warn("Unable to locate full page of weapons with weight {0}", weight);
                             Logger.Warn("Detected {0} rows and {1} columns of items", rows, cols);
@@ -425,14 +433,14 @@ namespace InventoryKamera
                         }
                         else break;
 
-                        if (itemCount <= 40)
+                        if (itemCount <= 32)
                             weight += 0.125;
                         else
                         { weight -= 0.095; ++counter; }
                         weight = Math.Min(weight, 1);
                         rectangles = null;
                     }
-                    while (itemCount != 40 && weight < 1 && counter < 25);
+                    while (itemCount != 32 && weight < 1 && counter < 25);
 
                     if (Properties.Settings.Default.LogScreenshots)
                     {
@@ -446,7 +454,7 @@ namespace InventoryKamera
 
                     if (rectangles == null)
                     {
-                        Logger.Warn("Could not find 40 items in inventory. Re-using previous item page.");
+                        Logger.Warn("Could not find 32 items in inventory. Re-using previous item page.");
 
                         return prevRect == null ?
                             throw new ArgumentNullException("Could not find first page of items!") 
@@ -516,7 +524,7 @@ namespace InventoryKamera
         {
             return GenshinProcesor.CopyBitmap(card,
                 new Rectangle(
-                    x: (int)(card.Width * 0.855),
+                    x: (int)(card.Width * 0.75),
                     y: (int)(card.Height * (Navigation.IsNormal ? 0.353 : 0.309)),
                     width: (int)(card.Width * 0.0955),
                     height: (int)(card.Height * (Navigation.IsNormal ? 0.055 : 0.0495))));
