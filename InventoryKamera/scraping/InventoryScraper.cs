@@ -410,11 +410,12 @@ namespace InventoryKamera
                     List<Rectangle> rectangles;
                     int cols, rows, itemCount, counter = 0;
                     double weight = 0;
+                    int itemPerPage = inventoryPage == InventoryPage.Artifacts ? 32 : 40;
                     do
                     {
                         (rectangles, cols, rows) = ProcessScreenshot(processedScreenshot, weight);
                         itemCount = rows * cols;
-                        if (itemCount != 32 && !acceptLess)
+                        if (itemCount != itemPerPage && !acceptLess)
                         {
                             Logger.Warn("Unable to locate full page of weapons with weight {0}", weight);
                             Logger.Warn("Detected {0} rows and {1} columns of items", rows, cols);
@@ -440,7 +441,7 @@ namespace InventoryKamera
                         weight = Math.Min(weight, 1);
                         rectangles = null;
                     }
-                    while (itemCount != 32 && weight < 1 && counter < 25);
+                    while (itemCount != itemPerPage && weight < 1 && counter < 25);
 
                     if (Properties.Settings.Default.LogScreenshots)
                     {
@@ -454,7 +455,7 @@ namespace InventoryKamera
 
                     if (rectangles == null)
                     {
-                        Logger.Warn("Could not find 32 items in inventory. Re-using previous item page.");
+                        Logger.Warn("Could not find {0} items in inventory. Re-using previous item page.", itemPerPage);
 
                         return prevRect == null ?
                             throw new ArgumentNullException("Could not find first page of items!") 
