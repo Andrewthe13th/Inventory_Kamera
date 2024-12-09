@@ -136,8 +136,9 @@ namespace InventoryKamera
 						Navigation.sim.Mouse.VerticalScroll(-1);
 						Navigation.Wait(1);
 					}
-                    // Scroll back one to keep it from getting too crazy
-                    if (page % 12 == 0)
+					// Scroll back one to keep it from getting too crazy
+					var rollbackPeriod = Navigation.IsNormal ? 12 : 3;
+                    if (page % rollbackPeriod == 0)
                     {
 						Logger.Debug("Scrolled back one");
 						Navigation.sim.Mouse.VerticalScroll(1);
