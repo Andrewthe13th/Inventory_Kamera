@@ -18,6 +18,7 @@ namespace InventoryKamera
 		{
 			inventoryPage = InventoryPage.Artifacts;
             SortByLevel = Properties.Settings.Default.MinimumArtifactLevel > 0;
+            SortByObtained = (int) Properties.Settings.Default.SortByObtained;
         }
 
         public void ScanArtifacts(int count = 0)
@@ -27,6 +28,8 @@ namespace InventoryKamera
 			int page = 1;
 			var (rectangles, cols, rows) = GetPageOfItems(page);
 			int fullPage = cols * rows;
+			// lowers the artifact count if user is scanning in recently obtained pages
+			artifactCount = (SortByObtained * fullPage <= artifactCount && SortByObtained > 0) ? SortByObtained * fullPage : artifactCount;
 			int totalRows = (int)Math.Ceiling(artifactCount / (decimal)cols);
 			int cardsQueued = 0;
 			int rowsQueued = 0;
@@ -36,7 +39,8 @@ namespace InventoryKamera
 
 			Logger.Info("Found {0} for artifact count.", artifactCount);
 
-			ClearFilters();
+            SetSort();
+            ClearFilters();
 
 			//if (SortByLevel)
 			//{
@@ -132,8 +136,9 @@ namespace InventoryKamera
 						Navigation.sim.Mouse.VerticalScroll(-1);
 						Navigation.Wait(1);
 					}
-                    // Scroll back one to keep it from getting too crazy
-                    if (page % 12 == 0)
+					// Scroll back one to keep it from getting too crazy
+					var rollbackPeriod = Navigation.IsNormal ? 12 : 3;
+                    if (page % rollbackPeriod == 0)
                     {
 						Logger.Debug("Scrolled back one");
 						Navigation.sim.Mouse.VerticalScroll(1);
@@ -162,6 +167,25 @@ namespace InventoryKamera
 					Navigation.ClearArtifactFilters();
 				}
             }
+        }
+
+		private void SetSort()
+		{
+			using (var x = Navigation.CaptureRegion(
+                x: (int)( 0.6250 * Navigation.GetWidth()),
+                y: (int)((Navigation.IsNormal ? 0.1111 : 0.1000) * Navigation.GetHeight()),
+                width: (int)( 0.0375 * Navigation.GetWidth()),
+                height: (int)(0.0347 * Navigation.GetHeight())))
+            {
+				//Navigation.DisplayBitmap(x);	
+                Color sortObtainedTrue = Color.FromArgb(255, 224, 198, 147);
+                Color sortObtainedStatus = x.GetPixel((int)x.Width / 2,(int) x.Height / 2);
+                var sortObtained = GenshinProcesor.CompareColors(sortObtainedTrue, sortObtainedStatus);
+				if( SortByObtained > 0 ^ sortObtained)
+				{
+					Navigation.ChangeArtifactSortObtained();
+				}	
+            }   
         }
 
         public async void QueueScan(int id)

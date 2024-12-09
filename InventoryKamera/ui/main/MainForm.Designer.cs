@@ -101,6 +101,8 @@
             this.EquipArtifactsCheckBox = new System.Windows.Forms.CheckBox();
             this.screenshotsToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.LogScreenshotsCheckBox = new System.Windows.Forms.CheckBox();
+            this.SortByObtained = new System.Windows.Forms.Label();
+            this.SortByObtainedControl = new System.Windows.Forms.NumericUpDown();
             this.wandererNameTextBox = new System.Windows.Forms.TextBox();
             this.travelerNameTextBox = new System.Windows.Forms.TextBox();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
@@ -123,6 +125,7 @@
             this.ScannerOutput_Panel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.GearPictureBox)).BeginInit();
             this.menuStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.SortByObtainedControl)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.MinimumWeaponLevelControl)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.ArtifactRarityControl)).BeginInit();
@@ -864,6 +867,31 @@
         "enshots will be cleared when a new scan is started.\r\n");
             this.LogScreenshotsCheckBox.UseVisualStyleBackColor = true;
             // 
+            // SortByObtained
+            // 
+            this.SortByObtained.AutoSize = true;
+            this.SortByObtained.Location = new System.Drawing.Point(7, 182);
+            this.SortByObtained.Name = "SortByObtained";
+            this.SortByObtained.Size = new System.Drawing.Size(111, 13);
+            this.SortByObtained.TabIndex = 107;
+            this.SortByObtained.Text = "Scan Recent Artifacts";
+            this.SortByObtained.Click += new System.EventHandler(this.label5_Click);
+            // 
+            // SortByObtainedControl
+            // 
+            this.SortByObtainedControl.DataBindings.Add(new System.Windows.Forms.Binding("Value", global::InventoryKamera.Properties.Settings.Default, "SortByObtained", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.SortByObtainedControl.Location = new System.Drawing.Point(10, 198);
+            this.SortByObtainedControl.Maximum = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.SortByObtainedControl.Name = "SortByObtainedControl";
+            this.SortByObtainedControl.Size = new System.Drawing.Size(45, 20);
+            this.SortByObtainedControl.TabIndex = 108;
+            this.SortByObtainedControl.Value = global::InventoryKamera.Properties.Settings.Default.SortByObtained;
+            this.SortByObtainedControl.ValueChanged += new System.EventHandler(this.SortByObtainedControl_ValueChanged);
+            // 
             // wandererNameTextBox
             // 
             this.wandererNameTextBox.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::InventoryKamera.Properties.Settings.Default, "WandererName", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
@@ -1062,6 +1090,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(234)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
             this.ClientSize = new System.Drawing.Size(595, 519);
+            this.Controls.Add(this.SortByObtainedControl);
+            this.Controls.Add(this.SortByObtained);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.wandererNameTextBox);
             this.Controls.Add(this.label1);
@@ -1135,6 +1165,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.GearPictureBox)).EndInit();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.SortByObtainedControl)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.MinimumWeaponLevelControl)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.ArtifactRarityControl)).EndInit();
@@ -1231,6 +1262,8 @@
         private System.Windows.Forms.ToolStripMenuItem updateExecutablesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem characterSlot1KeyToolStripMenuItem;
         private System.Windows.Forms.ToolStripTextBox slot1StripTextBox;
+        private System.Windows.Forms.Label SortByObtained;
+        private System.Windows.Forms.NumericUpDown SortByObtainedControl;
     }
 }
 

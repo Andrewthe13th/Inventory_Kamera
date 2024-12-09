@@ -553,6 +553,16 @@ namespace InventoryKamera
 			SystemWait(Speed.Fast);
         }
 
+		internal static void ChangeArtifactSortObtained()
+		{
+            var x = 0.6437 * GetWidth();
+            var y = (IsNormal ? 0.1278 : 0.1150) * GetHeight();
+
+            Click((int)x, (int)y);
+
+            SystemWait(Speed.Slow);
+        }
+
         public enum Speed
 		{
 			Slowest,

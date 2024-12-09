@@ -55,6 +55,8 @@ namespace InventoryKamera
 
         protected bool SortByLevel = false;
 
+        protected int SortByObtained = 0;
+
         protected readonly List<InventoryPage> materialPages;
 
         private List<Rectangle> prevRect;
@@ -386,15 +388,7 @@ namespace InventoryKamera
                 using (var brush = new SolidBrush(Color.Black))
                 {
                     // Fill Top region
-                    switch (inventoryPage)
-                    {
-                        case InventoryPage.Artifacts:
-                            g.FillRectangle(brush, 0, 0, processedScreenshot.Width, (int)(processedScreenshot.Height * 0.143));
-                            break;
-                        default:
-                            g.FillRectangle(brush, 0, 0, processedScreenshot.Width, (int)(processedScreenshot.Height * 0.09));
-                            break;
-                    }
+                    g.FillRectangle(brush, 0, 0, processedScreenshot.Width, (int)(processedScreenshot.Height * 0.09));
 
                     // Fill Left region
                     g.FillRectangle(brush, 0, 0, (int)(processedScreenshot.Width * 0.05), processedScreenshot.Height);
@@ -410,7 +404,7 @@ namespace InventoryKamera
                     List<Rectangle> rectangles;
                     int cols, rows, itemCount, counter = 0;
                     double weight = 0;
-                    int itemPerPage = inventoryPage == InventoryPage.Artifacts ? 32 : 40;
+                    int itemPerPage = (inventoryPage != InventoryPage.Artifacts || !Navigation.IsNormal) ? 40 : 32;
                     do
                     {
                         (rectangles, cols, rows) = ProcessScreenshot(processedScreenshot, weight);
